@@ -1,0 +1,15 @@
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\ApplicationIcon.png
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\Background.png
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\CrittercismWP7TestApplication.dll
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\CrittercismWP7TestApplication.pdb
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\AppManifest.xaml
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\CrittercismWP7TestApplication.xap
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\CrittercismWP7SDK.dll
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\CrittercismWP7SDK.pdb
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\ResolveAssemblyReference.cache
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\App.g.i.cs
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\MainPage.g.i.cs
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\CrittercismWP7TestApplication.g.resources
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\CrittercismWP7TestApplication.dll
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\CrittercismWP7TestApplication.pdb
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\XapCacheFile.xml

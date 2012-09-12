@@ -1,0 +1,5 @@
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7SDK\obj\Debug\ResolveAssemblyReference.cache
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7SDK\Bin\Debug\CrittercismWP7SDK.dll
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7SDK\Bin\Debug\CrittercismWP7SDK.pdb
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7SDK\obj\Debug\CrittercismWP7SDK.dll
+C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7SDK\obj\Debug\CrittercismWP7SDK.pdb
