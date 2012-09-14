@@ -61,6 +61,9 @@
     <Compile Include="..\CrittercismSDK\DataContracts\AppLoad.cs">
       <Link>DataContracts\AppLoad.cs</Link>
     </Compile>
+    <Compile Include="..\CrittercismSDK\DataContracts\AppLoadResponse.cs">
+      <Link>DataContracts\AppLoadResponse.cs</Link>
+    </Compile>
     <Compile Include="..\CrittercismSDK\DataContracts\AppState.cs">
       <Link>DataContracts\AppState.cs</Link>
     </Compile>

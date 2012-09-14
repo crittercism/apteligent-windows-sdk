@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Crittercism.cs" />
     <Compile Include="DataContracts\AppLoad.cs" />
+    <Compile Include="DataContracts\AppLoadResponse.cs" />
     <Compile Include="DataContracts\AppState.cs" />
     <Compile Include="DataContracts\Breadcrumbs.cs" />
     <Compile Include="DataContracts\Crash.cs" />

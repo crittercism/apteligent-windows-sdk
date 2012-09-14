@@ -1,4 +1,6 @@
-﻿namespace CrittercismSDK
+﻿// file:	CrittercismSDK\Crittercism.cs
+// summary:	Implements the crittercism class
+namespace CrittercismSDK
 {
     using System;
     using System.Collections.Generic;
@@ -11,8 +13,13 @@
     using System.Windows;
 #endif
 
+    /// <summary>
+    /// Crittercism.
+    /// </summary>
     public class Crittercism
     {
+        #region Properties
+
         /// <summary>
         /// Gets or sets a queue of messages.
         /// </summary>
@@ -90,6 +97,25 @@
         /// </summary>
         internal static string FolderName = "CrittercismMessages";
 
+        /// <summary> 
+        /// Message Counter
+        /// </summary>
+        internal static int messageCounter = 0;
+
+        /// <summary> 
+        /// The initial date
+        /// </summary>
+        internal static DateTime initialDate = DateTime.Now;
+
+        /// <summary>
+        /// The thread for the reader
+        /// </summary>
+        internal static Thread readerThread = null;
+
+        #endregion
+
+        #region Methods
+
         /// <summary>
         /// Initialises this object.
         /// </summary>
@@ -102,17 +128,14 @@
             Key = key;
             Secret = secret;
             CurrentBreadcrumbs = new Breadcrumbs();
-            DeviceId = string.Empty;
+            DeviceId = AppLoadResponse.GetDeviceId();
             OSPlatform = Environment.OSVersion.Platform.ToString();
             MessageQueue = new Queue<MessageReport>();
             LoadQueueFromDisk();
-
             QueueReader queueReader = new QueueReader();
             ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
-            Thread readerThread = new Thread(threadStart);
+            readerThread = new Thread(threadStart);
             readerThread.Name = "Crittercism Sender";
-            readerThread.Start();
-
             CreateAppLoadReport();
 #if WINDOWS_PHONE
             Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
@@ -182,35 +205,18 @@
             }
         }
 
-        public static void addVote()
+        /// <summary>
+        /// Creates the error report.
+        /// </summary>
+        public static void CreateErrorReport(Exception e)
         {
+            AppState appState = new AppState();
+            List<ExceptionObject> exceptions = new List<ExceptionObject>() { new ExceptionObject("1.0", e.GetType().Name, e.Message, appState, e.StackTrace) };
+            Error error = new Error(AppID, OSPlatform, DeviceId, "1.0", exceptions);
+            error.SaveToDisk();
+            AddMessageToQueue(error);
         }
-
-        public static void addVote(string eventName)
-        {
-        }
-
-        public static void SetDisplayer(object displayer)
-        {
-        }
-
-        public static int getVotes()
-        {
-            return 0;
-        }
-
-        public static void setVotes(int numberOfVotes)
-        {
-        }
-
-        public static void ConfigurePushNotification()
-        {
-        }
-
-        public static void ShowCrittercism()
-        {
-        }
-
+        
         /// <summary>
         /// Creates a crash report.
         /// </summary>
@@ -222,7 +228,7 @@
             breadcrumbs.previous_session = new List<string[]>(CurrentBreadcrumbs.previous_session);
             Crash crash = new Crash(AppID, OSPlatform, breadcrumbs, DeviceId, currentException.GetType().Name, currentException.Message, "1.0", currentException.StackTrace);
             crash.SaveToDisk();
-            MessageQueue.Enqueue(crash);
+            AddMessageToQueue(crash);
             CurrentBreadcrumbs.previous_session = new List<string[]>(CurrentBreadcrumbs.current_session);
             CurrentBreadcrumbs.current_session.Clear();
         }
@@ -234,21 +240,9 @@
         {
             AppLoad appLoad = new AppLoad(AppID, DeviceId, "1.0", OSPlatform);
             appLoad.SaveToDisk();
-            MessageQueue.Enqueue(appLoad);
+            AddMessageToQueue(appLoad);
         }
-
-        /// <summary>
-        /// Creates the error report.
-        /// </summary>
-        public static void CreateErrorReport(Exception e)
-        {
-            AppState appState = new AppState();
-            List<ExceptionObject> exceptions = new List<ExceptionObject>() { new ExceptionObject("1.0", e.GetType().Name, e.Message, appState, e.StackTrace) };
-            Error error = new Error(AppID, OSPlatform, DeviceId, "1.0", exceptions);
-            error.SaveToDisk();
-            MessageQueue.Enqueue(error);
-        }
-
+        
         /// <summary>
         /// Loads the messages from disk into the queue.
         /// </summary>
@@ -281,13 +275,52 @@
                     message.Name = file;
                     message.CreationDate = storage.GetCreationTime(FolderName + "\\" + file);
                     message.IsLoaded = false;
+                    messages.Add(message);
                 }
 
                 messages.Sort((m1, m2) => m1.CreationDate.CompareTo(m2.CreationDate));
                 foreach(MessageReport message in messages)
                 {
+                    // I'm wondering if we needed to restrict to 50 message of something similar?
                     MessageQueue.Enqueue(message);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Adds  message to queue
+        /// </summary>
+        private static void AddMessageToQueue(MessageReport message)
+        {
+            if (DateTime.Now.Subtract(initialDate) <= new TimeSpan(0, 0, 0, 1, 0))
+            {
+                messageCounter++;
+            }
+            else
+            {
+                messageCounter = 0;
+                initialDate = DateTime.Now;
+            }
+
+            if (messageCounter < 50)
+            {
+                MessageQueue.Enqueue(message);
+                if (readerThread.ThreadState == ThreadState.Unstarted)
+                {
+                    readerThread.Start();
+                }
+                else if (readerThread.ThreadState == ThreadState.Stopped || readerThread.ThreadState == ThreadState.Aborted)
+                {
+                    QueueReader queueReader = new QueueReader();
+                    ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
+                    readerThread = new Thread(threadStart);
+                    readerThread.Name = "Crittercism Sender";
+                    readerThread.Start();
+                }
+            }
+            else
+            {
+                message.DeleteFromDisk();
             }
         }
 
@@ -302,11 +335,18 @@
         }
 
 #if WINDOWS_PHONE
+        /// <summary>
+        /// Event handler. Called by Current for unhandled exception events.
+        /// </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Application unhandled exception event information. </param>
         static void Current_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
         {
             CreateCrashReport((Exception)e.ExceptionObject);
             e.Handled = true;
         }
 #endif
+
+        #endregion
     }
 }

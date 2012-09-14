@@ -1,9 +1,9 @@
-﻿<xapCache source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\CrittercismWP7TestApplication.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="9/11/2012 6:42:56 PM">
+﻿<xapCache source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\CrittercismWP7TestApplication.xap" wasSigned="False" certificateThumbprint="" TimeStampUrl="" lastWriteTime="9/13/2012 6:34:08 PM">
   <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\WMAppManifest.xml" archivePath="WMAppManifest.xml" lastWriteTime="8/30/2012 4:27:48 PM" />
   <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Background.png" archivePath="Background.png" lastWriteTime="8/30/2012 4:19:25 PM" />
   <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\ApplicationIcon.png" archivePath="ApplicationIcon.png" lastWriteTime="8/30/2012 4:19:25 PM" />
-  <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\CrittercismWP7TestApplication.dll" archivePath="CrittercismWP7TestApplication.dll" lastWriteTime="9/11/2012 6:42:55 PM" />
-  <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7SDK\Bin\Debug\CrittercismWP7SDK.dll" archivePath="CrittercismWP7SDK.dll" lastWriteTime="9/11/2012 6:42:54 PM" />
+  <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\obj\Debug\CrittercismWP7TestApplication.dll" archivePath="CrittercismWP7TestApplication.dll" lastWriteTime="9/13/2012 6:34:07 PM" />
+  <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7SDK\Bin\Debug\CrittercismWP7SDK.dll" archivePath="CrittercismWP7SDK.dll" lastWriteTime="9/13/2012 6:34:07 PM" />
   <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\SplashScreenImage.jpg" archivePath="SplashScreenImage.jpg" lastWriteTime="8/30/2012 4:19:25 PM" />
   <file source="C:\Mario\TFS\CrittercismSDK\CrittercismSDK\CrittercismWP7TestApplication\Bin\Debug\AppManifest.xaml" archivePath="AppManifest.xaml" lastWriteTime="9/10/2012 6:12:17 PM" />
 </xapCache>

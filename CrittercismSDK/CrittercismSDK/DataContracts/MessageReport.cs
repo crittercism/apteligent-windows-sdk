@@ -51,8 +51,8 @@ namespace CrittercismSDK.DataContracts
                     storage.CreateDirectory(folderName);
                 }
 
-                Name = folderName + "\\" + this.GetType().Name + "_" + Guid.NewGuid().ToString() + ".txt";
-                using (IsolatedStorageFileStream writeFile = new IsolatedStorageFileStream(this.Name, FileMode.CreateNew, FileAccess.Write, storage))
+                Name = this.GetType().Name + "_" + Guid.NewGuid().ToString() + ".txt";
+                using (IsolatedStorageFileStream writeFile = new IsolatedStorageFileStream(folderName + "\\" + this.Name, FileMode.CreateNew, FileAccess.Write, storage))
                 {
                     DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
                     serializer.WriteObject(writeFile, this);
@@ -111,7 +111,7 @@ namespace CrittercismSDK.DataContracts
                 {
                     if (storage.FileExists(folderName + "\\" + this.Name))
                     {
-                        using (IsolatedStorageFileStream readFile = new IsolatedStorageFileStream(this.Name, FileMode.Open, FileAccess.Read, storage))
+                        using (IsolatedStorageFileStream readFile = storage.OpenFile(folderName + "\\" + this.Name, FileMode.Open, FileAccess.Read))
                         {
                             DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
                             MessageReport message = (MessageReport)serializer.ReadObject(readFile);
@@ -131,7 +131,7 @@ namespace CrittercismSDK.DataContracts
 
                 return false;
              }
-            catch
+            catch (Exception ex)
             {
                 return false;
             }

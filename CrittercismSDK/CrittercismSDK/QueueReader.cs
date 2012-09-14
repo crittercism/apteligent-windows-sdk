@@ -12,11 +12,16 @@ namespace CrittercismSDK
 {
     class QueueReader
     {
+        int sleepTime = 500;
+
+        /// <summary>
+        /// Reads the queue.
+        /// </summary>
         public void ReadQueue()
         {
-            while (true)
+            while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0)
             {
-                if (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0)
+                if (NetworkInterface.GetIsNetworkAvailable())
                 {
                     MessageReport message = Crittercism.MessageQueue.Peek();
                     if (!message.IsLoaded)
@@ -28,15 +33,29 @@ namespace CrittercismSDK
                     {
                         Crittercism.MessageQueue.Dequeue();
                         message.DeleteFromDisk();
+                        sleepTime = 500;
                     }
                 }
                 else
                 {
-                    System.Threading.Thread.Sleep(500);
+                    if (sleepTime < 8000)
+                    {
+                        System.Threading.Thread.Sleep(sleepTime * 2);
+                        sleepTime = sleepTime * 2;
+                    }
+                    else
+                    {
+                        System.Threading.Thread.Sleep(sleepTime);
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// Send message to the endpoint.
+        /// </summary>
+        /// <param name="message">  The message. </param>
+        /// <returns>   true if it succeeds, false if it fails. </returns>
         private bool SendMessage(MessageReport message)
         {
             if (NetworkInterface.GetIsNetworkAvailable())
@@ -53,18 +72,23 @@ namespace CrittercismSDK
                     StreamReader reader = new StreamReader(messageStream);
                     string jsonMessage = reader.ReadToEnd();
 
-                    //// System.Diagnostics.Debug.WriteLine(jsonMessage);
-
-                    // send message
                     // HttpWebRequest request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v0/crashes", UriKind.Absolute));
+                    HttpWebRequest request = null;
+                    switch (message.GetType().Name)
+                    {
+                        case "AppLoad":
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://localhost:15438/v0/app_loads", UriKind.Absolute));
+                            break;
+                        case "Error":
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://localhost:15438/v0/errors", UriKind.Absolute));
+                            break;
+                        default:
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://localhost:15438/v0/crashes", UriKind.Absolute));
+                            break;
+                    }
 
-                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(new Uri("http://localhost:15438/v0/crashes", UriKind.Absolute));
                     request.Method = "POST";
                     request.ContentType = "application/json; charset=utf-8";
-                    
-                    //// request.ContentLength = messageStream.Length;
-
-                    //request.Credentials
                     //Stream requestStream = request.GetRequestStream(); // this is only for Windows 8
                     bool sendCompleted = false;
                     System.Threading.ManualResetEvent resetEvent = new System.Threading.ManualResetEvent(false);
@@ -77,33 +101,48 @@ namespace CrittercismSDK
                                 serializer.WriteObject(requestStream, message);
                                 requestStream.Flush();
                                 requestStream.Close();
-                                
+
                                 request.BeginGetResponse(
                                      (asyncResponse) =>
                                      {
                                          HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
                                          if (response.StatusCode == HttpStatusCode.OK)
                                          {
+                                             if (message.GetType().Name == "AppLoad" && string.IsNullOrEmpty(Crittercism.DeviceId))
+                                             {
+                                                 DataContractJsonSerializer serializerBody = new DataContractJsonSerializer(typeof(AppLoadResponse));
+                                                 Stream responseStream = response.GetResponseStream();
+
+                                                 /////*to check the response*/
+                                                 ////StreamReader responseReader = new StreamReader(responseStream);
+                                                 ////string jsonResponse = responseReader.ReadToEnd();
+                                                 ////responseStream.Seek(0, SeekOrigin.Begin);
+                                                 /////**/
+
+                                                 AppLoadResponse appLoadResponse = serializerBody.ReadObject(responseStream) as AppLoadResponse;
+                                                 if (appLoadResponse != null && !string.IsNullOrEmpty(appLoadResponse.did))
+                                                 {
+                                                     Crittercism.DeviceId = appLoadResponse.did;
+                                                     appLoadResponse.SaveToDisk();
+                                                 }
+                                             }
+
                                              sendCompleted = true;
                                          }
 
                                          resetEvent.Set();
                                      }, null);
-
                             }
                             catch
                             {
                                 // release the lock if something fail.
                                 resetEvent.Set();
                             }
-
                         }, null);
-                    resetEvent.WaitOne(30000); // time out of 30 seconds to send the message
+                    resetEvent.WaitOne(10000); // time out of 10 seconds to send the message
                     return sendCompleted;
-
-                    //// return true;
                 }
-                catch (Exception ex)
+                catch
                 {
                     // This is in case of have a exception in the middle of the send process
                     return false;
