@@ -28,10 +28,52 @@ namespace CrittercismSDK.DataContracts
         [DataMember]
         public List<string[]> previous_session { get; set; }
 
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public Breadcrumbs()
         {
             current_session = new List<string[]>();
             previous_session = new List<string[]>();
+        }
+
+        /// <summary>
+        /// Saves to disk.
+        /// </summary>
+        /// <returns>   true if it succeeds, false if it fails. </returns>
+        internal bool SaveToDisk()
+        {
+            try
+            {
+                return StorageHelper.SaveToDisk(this);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the breadcrumbs.
+        /// </summary>
+        /// <returns>   The breadcrumbs. </returns>
+        internal static Breadcrumbs GetBreadcrumbs()
+        {
+            Breadcrumbs actualBreadcrumbs = new Breadcrumbs();
+            try
+            {
+                Breadcrumbs breadcrumbs = StorageHelper.LoadFromDisk(typeof(Breadcrumbs)) as Breadcrumbs;
+                if (breadcrumbs != null)
+                {
+                    actualBreadcrumbs.previous_session = new List<string[]>(breadcrumbs.current_session);
+                }
+
+                return actualBreadcrumbs;
+            }
+            catch
+            {
+                return actualBreadcrumbs;
+            }
         }
     }
 }

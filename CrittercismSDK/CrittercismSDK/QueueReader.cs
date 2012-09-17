@@ -112,13 +112,6 @@ namespace CrittercismSDK
                                              {
                                                  DataContractJsonSerializer serializerBody = new DataContractJsonSerializer(typeof(AppLoadResponse));
                                                  Stream responseStream = response.GetResponseStream();
-
-                                                 /////*to check the response*/
-                                                 ////StreamReader responseReader = new StreamReader(responseStream);
-                                                 ////string jsonResponse = responseReader.ReadToEnd();
-                                                 ////responseStream.Seek(0, SeekOrigin.Begin);
-                                                 /////**/
-
                                                  AppLoadResponse appLoadResponse = serializerBody.ReadObject(responseStream) as AppLoadResponse;
                                                  if (appLoadResponse != null && !string.IsNullOrEmpty(appLoadResponse.did))
                                                  {
@@ -139,7 +132,7 @@ namespace CrittercismSDK
                                 resetEvent.Set();
                             }
                         }, null);
-                    resetEvent.WaitOne(10000); // time out of 10 seconds to send the message
+                    resetEvent.WaitOne(10000); // timeout of 10 seconds to send the message
                     return sendCompleted;
                 }
                 catch

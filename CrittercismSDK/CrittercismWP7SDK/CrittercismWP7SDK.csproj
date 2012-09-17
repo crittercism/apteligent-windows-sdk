@@ -45,6 +45,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Phone" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Servicemodel.Web" />
     <Reference Include="System.Windows" />
@@ -84,6 +85,9 @@
     </Compile>
     <Compile Include="..\CrittercismSDK\QueueReader.cs">
       <Link>QueueReader.cs</Link>
+    </Compile>
+    <Compile Include="..\CrittercismSDK\StorageHelper.cs">
+      <Link>StorageHelper.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

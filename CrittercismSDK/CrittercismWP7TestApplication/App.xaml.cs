@@ -29,10 +29,6 @@ namespace CrittercismWP7TestApplication
         /// </summary>
         public App()
         {
-            //// Call the Init of the unhandled managed class library "Crittercism"
-            Crittercism.Init("AppIdentifier", "key", "secret");
-            Crittercism.LeaveBreadcrum("Start the application");
-
             // Global handler for uncaught exceptions. 
             UnhandledException += Application_UnhandledException;
 
@@ -67,6 +63,9 @@ namespace CrittercismWP7TestApplication
         // This code will not execute when the application is reactivated
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
+            //// Call the Init of the unhandled managed class library "Crittercism"
+            Crittercism.Init("AppIdentifier", "key", "secret");
+            Crittercism.LeaveBreadcrum("Start the application");
         }
 
         // Code to execute when the application is activated (brought to foreground)

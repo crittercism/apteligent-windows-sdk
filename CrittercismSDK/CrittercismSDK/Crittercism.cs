@@ -11,6 +11,8 @@ namespace CrittercismSDK
     using System.IO.IsolatedStorage;
 #if WINDOWS_PHONE
     using System.Windows;
+    using Microsoft.Phone.Shell;
+    using System.ComponentModel;
 #endif
 
     /// <summary>
@@ -124,21 +126,21 @@ namespace CrittercismSDK
         /// <param name="secret"> The secret. </param>
         public static void Init(string appID, string key, string secret)
         {
-            AppID = appID;
-            Key = key;
-            Secret = secret;
-            CurrentBreadcrumbs = new Breadcrumbs();
-            DeviceId = AppLoadResponse.GetDeviceId();
-            OSPlatform = Environment.OSVersion.Platform.ToString();
-            MessageQueue = new Queue<MessageReport>();
-            LoadQueueFromDisk();
-            QueueReader queueReader = new QueueReader();
-            ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
-            readerThread = new Thread(threadStart);
-            readerThread.Name = "Crittercism Sender";
-            CreateAppLoadReport();
+            StartApplication(appID, key, secret);
+
 #if WINDOWS_PHONE
             Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
+            try
+            {
+                if (PhoneApplicationService.Current != null)
+                {
+                    PhoneApplicationService.Current.Activated += new EventHandler<ActivatedEventArgs>(Current_Activated);
+                    PhoneApplicationService.Current.Deactivated += new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
+                }
+            }
+            catch
+            {
+            }
 #else
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 #endif
@@ -202,6 +204,7 @@ namespace CrittercismSDK
             lock (CurrentBreadcrumbs)
             {
                 CurrentBreadcrumbs.current_session.Add(new string[] { breadcrumb, DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", System.Globalization.CultureInfo.InvariantCulture) });
+                CurrentBreadcrumbs.SaveToDisk();
             }
         }
 
@@ -325,6 +328,29 @@ namespace CrittercismSDK
         }
 
         /// <summary>
+        /// This method is invoked when the application starts or resume
+        /// </summary>
+        /// <param name="appID">    Identifier for the application. </param>
+        /// <param name="key">      The key. </param>
+        /// <param name="secret">   The secret. </param>
+        private static void StartApplication(string appID, string key, string secret)
+        {
+            AppID = appID;
+            Key = key;
+            Secret = secret;
+            CurrentBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
+            DeviceId = AppLoadResponse.GetDeviceId();
+            OSPlatform = Environment.OSVersion.Platform.ToString();
+            MessageQueue = new Queue<MessageReport>();
+            LoadQueueFromDisk();
+            QueueReader queueReader = new QueueReader();
+            ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
+            readerThread = new Thread(threadStart);
+            readerThread.Name = "Crittercism Sender";
+            CreateAppLoadReport();
+        }
+
+        /// <summary>
         /// Event handler. Called by CurrentDomain for unhandled exception events.
         /// </summary>
         /// <param name="sender"> Source of the event. </param>
@@ -344,6 +370,25 @@ namespace CrittercismSDK
         {
             CreateCrashReport((Exception)e.ExceptionObject);
             e.Handled = true;
+        }
+
+        static void Current_Activated(object sender, ActivatedEventArgs e)
+        {
+            BackgroundWorker backgroundWorker = new BackgroundWorker();
+            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
+            backgroundWorker.RunWorkerAsync();
+        }
+
+        static void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"], (string)PhoneApplicationService.Current.State["Crittercism.Key"], (string)PhoneApplicationService.Current.State["Crittercism.Secret"]);
+        }
+
+        static void Current_Deactivated(object sender, DeactivatedEventArgs e)
+        {
+            PhoneApplicationService.Current.State.Add("Crittercism.AppID", AppID);
+            PhoneApplicationService.Current.State.Add("Crittercism.Key", Key);
+            PhoneApplicationService.Current.State.Add("Crittercism.Secret", Secret);
         }
 #endif
 

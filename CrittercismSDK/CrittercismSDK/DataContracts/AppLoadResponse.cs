@@ -40,17 +40,7 @@ namespace CrittercismSDK.DataContracts
         {
             try
             {
-                string name = "CrittercismDevice.txt";
-                IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                using (IsolatedStorageFileStream writeFile = new IsolatedStorageFileStream(name, FileMode.CreateNew, FileAccess.Write, storage))
-                {
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
-                    serializer.WriteObject(writeFile, this);
-                    writeFile.Flush();
-                    writeFile.Close();
-                }
-
-                return true;
+                return StorageHelper.SaveToDisk(this);
             }
             catch
             {
@@ -66,19 +56,15 @@ namespace CrittercismSDK.DataContracts
         {
             try
             {
-                string name = "CrittercismDevice.txt";
-                IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                if (storage.FileExists(name))
+                AppLoadResponse appLoadResponse = StorageHelper.LoadFromDisk(typeof(AppLoadResponse)) as AppLoadResponse;
+                if (appLoadResponse != null)
                 {
-                    using (IsolatedStorageFileStream readFile = new IsolatedStorageFileStream(name, FileMode.Open, FileAccess.Read, storage))
-                    {
-                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(AppLoadResponse));
-                        AppLoadResponse appLoadResponse = (AppLoadResponse)serializer.ReadObject(readFile);
-                        return appLoadResponse.did;
-                    }
+                    return appLoadResponse.did;
                 }
-                
-                return string.Empty;
+                else
+                {
+                    return string.Empty;
+                }
             }
             catch
             {
