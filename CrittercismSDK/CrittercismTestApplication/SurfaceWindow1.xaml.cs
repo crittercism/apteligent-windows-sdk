@@ -32,7 +32,8 @@ namespace CrittercismSurfaceTestApplication
             InitializeComponent();
 
             //// Call the Init of the unhandled managed class library "Crittercism"
-            Crittercism.Init("", "", "");
+            Crittercism.Init("AppIdentifier", "key", "secret");
+            Crittercism.LeaveBreadcrum("Start the application");
 
             // Add handlers for window availability events
             AddWindowAvailabilityHandlers();

@@ -4,15 +4,15 @@ namespace CrittercismSDK
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.IO.IsolatedStorage;
     using System.Linq;
     using System.Text;
     using System.Threading;
     using CrittercismSDK.DataContracts;
-    using System.IO.IsolatedStorage;
 #if WINDOWS_PHONE
     using System.Windows;
     using Microsoft.Phone.Shell;
-    using System.ComponentModel;
 #endif
 
     /// <summary>
@@ -126,6 +126,10 @@ namespace CrittercismSDK
         /// <param name="secret"> The secret. </param>
         public static void Init(string appID, string key, string secret)
         {
+            QueueReader queueReader = new QueueReader();
+            ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
+            readerThread = new Thread(threadStart);
+            readerThread.Name = "Crittercism Sender";
             StartApplication(appID, key, secret);
 
 #if WINDOWS_PHONE
@@ -143,9 +147,10 @@ namespace CrittercismSDK
             }
 #else
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            System.Windows.Application.Current.Activated += new EventHandler(Current_Activated);
 #endif
         }
-
+        
         /// <summary>
         /// Sets a username.
         /// </summary>
@@ -343,21 +348,15 @@ namespace CrittercismSDK
             OSPlatform = Environment.OSVersion.Platform.ToString();
             MessageQueue = new Queue<MessageReport>();
             LoadQueueFromDisk();
-            QueueReader queueReader = new QueueReader();
-            ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
-            readerThread = new Thread(threadStart);
-            readerThread.Name = "Crittercism Sender";
             CreateAppLoadReport();
         }
 
         /// <summary>
-        /// Event handler. Called by CurrentDomain for unhandled exception events.
+        /// This method is invoked when the application resume
         /// </summary>
-        /// <param name="sender"> Source of the event. </param>
-        /// <param name="e">      Unhandled exception event information. </param>
-        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static void StartApplication()
         {
-            CreateCrashReport((Exception)e.ExceptionObject);
+            StartApplication(AppID, Key, Secret);
         }
 
 #if WINDOWS_PHONE
@@ -389,6 +388,33 @@ namespace CrittercismSDK
             PhoneApplicationService.Current.State.Add("Crittercism.AppID", AppID);
             PhoneApplicationService.Current.State.Add("Crittercism.Key", Key);
             PhoneApplicationService.Current.State.Add("Crittercism.Secret", Secret);
+        }
+#else
+        /// <summary>
+        /// Event handler. Called by CurrentDomain for unhandled exception events.
+        /// </summary>
+        /// <param name="sender"> Source of the event. </param>
+        /// <param name="e">      Unhandled exception event information. </param>
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            CreateCrashReport((Exception)e.ExceptionObject);
+        }
+
+        /// <summary>
+        /// Event handler. Called by Current for activated events.
+        /// </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information. </param>
+        static void Current_Activated(object sender, EventArgs e)
+        {
+            BackgroundWorker backgroundWorker = new BackgroundWorker();
+            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
+            backgroundWorker.RunWorkerAsync();
+        }
+
+        static void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            StartApplication();
         }
 #endif
 
