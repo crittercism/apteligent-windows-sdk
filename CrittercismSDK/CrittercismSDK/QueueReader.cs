@@ -77,13 +77,13 @@ namespace CrittercismSDK
                     switch (message.GetType().Name)
                     {
                         case "AppLoad":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://localhost:15438/v0/app_loads", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://192.168.15.139/tce/v0/app_loads", UriKind.Absolute));
                             break;
                         case "Error":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://localhost:15438/v0/errors", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://192.168.15.139/tce/v0/errors", UriKind.Absolute));
                             break;
                         default:
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://localhost:15438/v0/crashes", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://192.168.15.139/tce/v0/crashes", UriKind.Absolute));
                             break;
                     }
 

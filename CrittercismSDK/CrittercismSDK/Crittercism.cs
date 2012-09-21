@@ -220,7 +220,7 @@ namespace CrittercismSDK
         {
             AppState appState = new AppState();
             List<ExceptionObject> exceptions = new List<ExceptionObject>() { new ExceptionObject("1.0", e.GetType().Name, e.Message, appState, e.StackTrace) };
-            Error error = new Error(AppID, OSPlatform, DeviceId, "1.0", exceptions);
+            Error error = new Error(AppID, OSPlatform, DeviceId, System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString(), exceptions);
             error.SaveToDisk();
             AddMessageToQueue(error);
         }
@@ -234,7 +234,7 @@ namespace CrittercismSDK
             Breadcrumbs breadcrumbs = new Breadcrumbs();
             breadcrumbs.current_session = new List<string[]>(CurrentBreadcrumbs.current_session);
             breadcrumbs.previous_session = new List<string[]>(CurrentBreadcrumbs.previous_session);
-            Crash crash = new Crash(AppID, OSPlatform, breadcrumbs, DeviceId, currentException.GetType().Name, currentException.Message, "1.0", currentException.StackTrace);
+            Crash crash = new Crash(AppID, OSPlatform, breadcrumbs, DeviceId, currentException.GetType().Name, currentException.Message, System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString(), currentException.StackTrace);
             crash.SaveToDisk();
             AddMessageToQueue(crash);
             CurrentBreadcrumbs.previous_session = new List<string[]>(CurrentBreadcrumbs.current_session);
@@ -246,7 +246,7 @@ namespace CrittercismSDK
         /// </summary>
         private static void CreateAppLoadReport()
         {
-            AppLoad appLoad = new AppLoad(AppID, DeviceId, "1.0", OSPlatform);
+            AppLoad appLoad = new AppLoad(AppID, DeviceId, System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString(), OSPlatform);
             appLoad.SaveToDisk();
             AddMessageToQueue(appLoad);
         }
