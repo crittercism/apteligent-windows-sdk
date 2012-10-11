@@ -12,41 +12,23 @@ namespace CrittercismSDK
 {
     class QueueReader
     {
-        int sleepTime = 500;
-
         /// <summary>
         /// Reads the queue.
         /// </summary>
         public void ReadQueue()
         {
-            while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0)
+            while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0 && NetworkInterface.GetIsNetworkAvailable())
             {
-                if (NetworkInterface.GetIsNetworkAvailable())
+                MessageReport message = Crittercism.MessageQueue.Peek();
+                if (!message.IsLoaded)
                 {
-                    MessageReport message = Crittercism.MessageQueue.Peek();
-                    if (!message.IsLoaded)
-                    {
-                        message.LoadFromDisk();
-                    }
-
-                    if (SendMessage(message))
-                    {
-                        Crittercism.MessageQueue.Dequeue();
-                        message.DeleteFromDisk();
-                        sleepTime = 500;
-                    }
+                    message.LoadFromDisk();
                 }
-                else
+
+                if (SendMessage(message))
                 {
-                    if (sleepTime < 8000)
-                    {
-                        System.Threading.Thread.Sleep(sleepTime * 2);
-                        sleepTime = sleepTime * 2;
-                    }
-                    else
-                    {
-                        System.Threading.Thread.Sleep(sleepTime);
-                    }
+                    Crittercism.MessageQueue.Dequeue();
+                    message.DeleteFromDisk();
                 }
             }
         }

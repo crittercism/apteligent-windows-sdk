@@ -1,0 +1,2 @@
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\CrittercismWinRTSDK.csproj;neutral
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\CrittercismWinRTTestApplication.csproj;neutral

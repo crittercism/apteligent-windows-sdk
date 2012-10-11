@@ -13,6 +13,7 @@ namespace CrittercismSDK
 #if WINDOWS_PHONE
     using System.Windows;
     using Microsoft.Phone.Shell;
+    using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
     /// <summary>
@@ -134,6 +135,7 @@ namespace CrittercismSDK
 
 #if WINDOWS_PHONE
             Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
+            DeviceNetworkInformation.NetworkAvailabilityChanged += DeviceNetworkInformation_NetworkAvailabilityChanged;
             try
             {
                 if (PhoneApplicationService.Current != null)
@@ -150,7 +152,7 @@ namespace CrittercismSDK
             System.Windows.Application.Current.Activated += new EventHandler(Current_Activated);
 #endif
         }
-        
+
         /// <summary>
         /// Sets a username.
         /// </summary>
@@ -388,6 +390,34 @@ namespace CrittercismSDK
             PhoneApplicationService.Current.State.Add("Crittercism.AppID", AppID);
             PhoneApplicationService.Current.State.Add("Crittercism.Key", Key);
             PhoneApplicationService.Current.State.Add("Crittercism.Secret", Secret);
+        }
+
+        static void DeviceNetworkInformation_NetworkAvailabilityChanged(object sender, NetworkNotificationEventArgs e)
+        {
+            switch (e.NotificationType)
+            {
+                case NetworkNotificationType.InterfaceConnected:
+                    if (NetworkInterface.GetIsNetworkAvailable())
+                    {
+                        if (MessageQueue != null && MessageQueue.Count > 0)
+                        {
+                            if (readerThread.ThreadState == ThreadState.Unstarted)
+                            {
+                                readerThread.Start();
+                            }
+                            else if (readerThread.ThreadState == ThreadState.Stopped || readerThread.ThreadState == ThreadState.Aborted)
+                            {
+                                QueueReader queueReader = new QueueReader();
+                                ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
+                                readerThread = new Thread(threadStart);
+                                readerThread.Name = "Crittercism Sender";
+                                readerThread.Start();
+                            }
+                        }
+                    }
+
+                    break;
+            }
         }
 #else
         /// <summary>

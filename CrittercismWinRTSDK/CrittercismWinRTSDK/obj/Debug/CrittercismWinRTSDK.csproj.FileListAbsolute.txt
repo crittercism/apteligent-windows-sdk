@@ -1,0 +1,10 @@
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\bin\Debug\CrittercismWinRTSDK.dll
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\bin\Debug\CrittercismWinRTSDK.pdb
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\bin\Debug\CrittercismWinRTSDK.pri
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\obj\Debug\CrittercismWinRTSDK.dll
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\obj\Debug\CrittercismWinRTSDK.pdb
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\obj\Debug\priconfig.xml
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\obj\Debug\layout.resfiles
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\obj\Debug\resources.resfiles
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\obj\Debug\pri.resfiles
+C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\obj\Debug\LanguageQualifiers.txt

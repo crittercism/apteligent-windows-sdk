@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>LEGARPC</Machine>
+    <WindowsUser>legar</WindowsUser>
+    <SolutionConfiguration>Debug|AnyCPU</SolutionConfiguration>
+    <PackageArchitecture>neutral</PackageArchitecture>
+    <RegisteredManifestChecksum>5813C81BD4A73D8303F88054B7C8A405E08C41AEFCD18B16291D828F0ADEB5BD</RegisteredManifestChecksum>
+    <RegisteredPackageMoniker>9d28ea4e-63d2-4dc9-8e97-ee923f6d884e_1.0.0.0_neutral__7mznwyek9y4tr</RegisteredPackageMoniker>
+    <RegisteredUserModeAppID>9d28ea4e-63d2-4dc9-8e97-ee923f6d884e_7mznwyek9y4tr!App</RegisteredUserModeAppID>
+    <RegisteredPackageID>9d28ea4e-63d2-4dc9-8e97-ee923f6d884e</RegisteredPackageID>
+    <RegisteredPackagePublisher>CN=legar</RegisteredPackagePublisher>
+    <RegisteredVersion>1.0.0.0</RegisteredVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\bin\Debug\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-09-25T20:57:03.411</Modified>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\bin\Debug\CrittercismWinRTTestApplication.exe">
+      <PackagePath>CrittercismWinRTTestApplication.exe</PackagePath>
+      <Modified>2012-10-04T22:51:40.097</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\bin\Debug\CrittercismWinRTTestApplication.pdb">
+      <PackagePath>CrittercismWinRTTestApplication.pdb</PackagePath>
+      <Modified>2012-10-04T22:51:40.073</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\bin\Debug\CrittercismWinRTSDK.pdb">
+      <PackagePath>CrittercismWinRTSDK.pdb</PackagePath>
+      <Modified>2012-10-04T22:51:38.647</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTSDK\bin\Debug\CrittercismWinRTSDK.dll">
+      <PackagePath>CrittercismWinRTSDK.dll</PackagePath>
+      <Modified>2012-10-04T22:51:38.712</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\Assets\Logo.png">
+      <PackagePath>Assets\Logo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-03-16T02:42:52.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\Assets\SmallLogo.png">
+      <PackagePath>Assets\SmallLogo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-03-16T02:42:52.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\Assets\SplashScreen.png">
+      <PackagePath>Assets\SplashScreen.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-03-16T02:42:52.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\Assets\StoreLogo.png">
+      <PackagePath>Assets\StoreLogo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2012-03-16T02:42:52.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\bin\Debug\App.xaml">
+      <PackagePath>App.xaml</PackagePath>
+      <Modified>2012-09-25T19:16:24.624</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\bin\Debug\Common\StandardStyles.xaml">
+      <PackagePath>Common\StandardStyles.xaml</PackagePath>
+      <Modified>2012-06-26T22:19:20.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\bin\Debug\MainPage.xaml">
+      <PackagePath>MainPage.xaml</PackagePath>
+      <Modified>2012-09-25T21:01:46.898</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Mario\TFS\VS2012\CrittercismWinRTSDK\CrittercismWinRTTestApplication\bin\Debug\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+      <Modified>2012-09-25T20:57:02.835</Modified>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>
