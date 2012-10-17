@@ -1,4 +1,0 @@
-C:\Mario\TFS\VS2012\CrittercismWP8SDK\CrittercismWP8SDK\Bin\Debug\CrittercismWP8SDK.dll
-C:\Mario\TFS\VS2012\CrittercismWP8SDK\CrittercismWP8SDK\Bin\Debug\CrittercismWP8SDK.pdb
-C:\Mario\TFS\VS2012\CrittercismWP8SDK\CrittercismWP8SDK\obj\Debug\CrittercismWP8SDK.dll
-C:\Mario\TFS\VS2012\CrittercismWP8SDK\CrittercismWP8SDK\obj\Debug\CrittercismWP8SDK.pdb
