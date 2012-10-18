@@ -6,7 +6,7 @@ namespace CrittercismSDK.DataContracts
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.Serialization;
-
+    
     /// <summary> 
     /// Application state.
     /// </summary>
@@ -32,8 +32,8 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         public AppState()
         {
-            battery_level = Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString();
-            app_version = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
+            ////battery_level = ();
+            ////app_version = ();
         }
     }
 }
