@@ -103,6 +103,7 @@ namespace CrittercismSDK.DataContracts
         /// <returns>  true if it succeeds, false if it fails. </returns>
         internal bool LoadFromDisk()
         {
+            return true;
             string folderName = Crittercism.FolderName;
             try
             {

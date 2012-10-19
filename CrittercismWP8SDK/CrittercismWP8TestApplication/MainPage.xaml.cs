@@ -31,7 +31,7 @@ namespace CrittercismWP8TestApplication
             }
             catch (Exception ex)
             {
-                Crittercism.CreateErrorReport(ex);
+                //Crittercism.CreateErrorReport(ex);
                 Crittercism.LeaveBreadcrum("Before crash");
                 throw new Exception("This is my unhandled exception");
             }

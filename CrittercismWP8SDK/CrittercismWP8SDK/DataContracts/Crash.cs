@@ -26,7 +26,7 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The application state. </value>
         [DataMember]
-        public AppState app_state { get; set; }
+        public Dictionary<string, object> app_state { get; set; }
 
         /// <summary>
         /// Gets or sets the platform.
@@ -98,7 +98,7 @@ namespace CrittercismSDK.DataContracts
         public Crash(string appId, string devicePlatform, Breadcrumbs currentBreadcrumbs, string deviceId, string exceptionName, string exceptionReason, string libraryVersion, string stacktrace)
         {
             app_id = appId;
-            app_state = new AppState();
+            app_state = new Dictionary<string, object>();
             platform = devicePlatform;
             breadcrumbs = currentBreadcrumbs;
             did = deviceId;

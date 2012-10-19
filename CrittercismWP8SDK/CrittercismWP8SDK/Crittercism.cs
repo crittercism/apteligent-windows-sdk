@@ -218,6 +218,7 @@ namespace CrittercismSDK
         /// <summary>
         /// Creates the error report.
         /// </summary>
+        /*
         public static void CreateErrorReport(Exception e)
         {
             AppState appState = new AppState();
@@ -226,6 +227,7 @@ namespace CrittercismSDK
             error.SaveToDisk();
             AddMessageToQueue(error);
         }
+        */
         
         /// <summary>
         /// Creates a crash report.
@@ -246,9 +248,10 @@ namespace CrittercismSDK
         /// <summary>
         /// Creates the application load report.
         /// </summary>
-        private static void CreateAppLoadReport()
-        {
-            AppLoad appLoad = new AppLoad(AppID, DeviceId, System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString(), OSPlatform);
+        private static void CreateAppLoadReport() {
+            var appVersion = System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString();
+            var appLoad = new AppLoad(AppID, appVersion);
+
             appLoad.SaveToDisk();
             AddMessageToQueue(appLoad);
         }
@@ -346,10 +349,9 @@ namespace CrittercismSDK
             Key = key;
             Secret = secret;
             CurrentBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
-            DeviceId = AppLoadResponse.GetDeviceId();
             OSPlatform = Environment.OSVersion.Platform.ToString();
             MessageQueue = new Queue<MessageReport>();
-            LoadQueueFromDisk();
+            //LoadQueueFromDisk();
             CreateAppLoadReport();
         }
 

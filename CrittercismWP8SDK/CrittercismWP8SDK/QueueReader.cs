@@ -38,12 +38,9 @@ namespace CrittercismSDK
         /// </summary>
         /// <param name="message">  The message. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
-        private bool SendMessage(MessageReport message)
-        {
-            if (NetworkInterface.GetIsNetworkAvailable())
-            {
-                try
-                {
+        private bool SendMessage(MessageReport message) {
+            if (NetworkInterface.GetIsNetworkAvailable()) {
+                try {
                     MemoryStream messageStream = new MemoryStream();
                     DataContractJsonSerializer serializer = new DataContractJsonSerializer(message.GetType());
                     serializer.WriteObject(messageStream, message);
@@ -87,20 +84,7 @@ namespace CrittercismSDK
                                      (asyncResponse) =>
                                      {
                                          HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
-                                         if (response.StatusCode == HttpStatusCode.OK)
-                                         {
-                                             if (message.GetType().Name == "AppLoad" && string.IsNullOrEmpty(Crittercism.DeviceId))
-                                             {
-                                                 DataContractJsonSerializer serializerBody = new DataContractJsonSerializer(typeof(AppLoadResponse));
-                                                 Stream responseStream = response.GetResponseStream();
-                                                 AppLoadResponse appLoadResponse = serializerBody.ReadObject(responseStream) as AppLoadResponse;
-                                                 if (appLoadResponse != null && !string.IsNullOrEmpty(appLoadResponse.did))
-                                                 {
-                                                     Crittercism.DeviceId = appLoadResponse.did;
-                                                     appLoadResponse.SaveToDisk();
-                                                 }
-                                             }
-
+                                         if (response.StatusCode == HttpStatusCode.OK) {
                                              sendCompleted = true;
                                          }
 

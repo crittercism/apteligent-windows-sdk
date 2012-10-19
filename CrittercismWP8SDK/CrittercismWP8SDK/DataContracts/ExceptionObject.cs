@@ -40,7 +40,7 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The state. </value>
         [DataMember]
-        public AppState state { get; set; }
+        public Dictionary<string, object> state { get; set; }
 
         /// <summary>
         /// Gets or sets the unsymbolized stacktrace.
@@ -64,7 +64,7 @@ namespace CrittercismSDK.DataContracts
         /// <param name="exceptionReason">  The exception reason. </param>
         /// <param name="currentState">     State of the current. </param>
         /// <param name="stacktrace">       The stacktrace. </param>
-        public ExceptionObject(string libraryVersion, string exceptionName, string exceptionReason, AppState currentState, string stacktrace)
+        public ExceptionObject(string libraryVersion, string exceptionName, string exceptionReason, Dictionary<string, object> currentState, string stacktrace)
         {
             library_version = libraryVersion;
             exception_name = exceptionName;

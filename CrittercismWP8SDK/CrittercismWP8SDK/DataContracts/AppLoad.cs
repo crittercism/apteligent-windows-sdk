@@ -1,7 +1,6 @@
 ﻿// file:	DataContracts\AppLoad.cs
 // summary:	Implements the application load class
-namespace CrittercismSDK.DataContracts
-{
+namespace CrittercismSDK.DataContracts {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -12,64 +11,47 @@ namespace CrittercismSDK.DataContracts
     /// Application load.
     /// </summary>
     [DataContract]
-    public class AppLoad : MessageReport
-    {
+    public class AppLoad : MessageReport {
         /// <summary>
-        /// Gets or sets the identifier of the application.
+        /// Crittercism-issued Application identification string
         /// </summary>
-        /// <value> The identifier of the application. </value>
         [DataMember]
-        public string app_id { get; set; }
+        public readonly string app_id;
 
         /// <summary>
-        /// Gets or sets the identifier of the device.
+        /// User-specified state of the application as it's executing
         /// </summary>
-        /// <value> The identifier of the device. </value>
         [DataMember]
-        public string did { get; set; }
+        public Dictionary<string, Object> app_state;
 
         /// <summary>
-        /// Gets or sets the library version.
+        /// Execution platform on which the app runs
         /// </summary>
-        /// <value> The library version. </value>
         [DataMember]
-        public string library_version { get; set; }
-
-        /// <summary>
-        /// Gets or sets the platform of the device.
-        /// </summary>
-        /// <value> The platform of the device. </value>
-        [DataMember]
-        public string platform { get; set; }
-
-        /// <summary>
-        /// Gets or sets the state of the application.
-        /// </summary>
-        /// <value> The application state. </value>
-        [DataMember]
-        public AppState app_state { get; set; }
+        public readonly Platform platform;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public AppLoad()
-        {
-        }
+        public AppLoad() { }
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="appId">            Identifier for the application. </param>
-        /// <param name="deviceId">         Identifier for the device. </param>
-        /// <param name="libraryVersion">   The library version. </param>
-        /// <param name="devicePlatform">   The device platform. </param>
-        public AppLoad(string appId, string deviceId, string libraryVersion, string devicePlatform)
-        {
-            app_id = appId;
-            did = deviceId;
-            library_version = libraryVersion;
-            platform = devicePlatform;
-            app_state = new AppState();
+        public AppLoad(string _appId, string _appVersion) {
+            if (!String.IsNullOrEmpty(_appId)) {
+                app_id = _appId;
+
+                // Initialize app state dictionary with base battery level and app version keys
+                app_state = new Dictionary<string, Object> { 
+                    { "battery_level", null },
+                    { "app_version", String.IsNullOrEmpty(_appVersion) ? "Unspecified" : _appVersion }
+                };
+
+                platform = new Platform();
+            } else {
+                throw new Exception("Crittercism requires an application_id to properly initialize itself.");
+            }
         }
     }
 }
