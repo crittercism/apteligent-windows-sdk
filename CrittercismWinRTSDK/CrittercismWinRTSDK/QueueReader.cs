@@ -90,22 +90,49 @@ namespace CrittercismSDK
                                 request.BeginGetResponse(
                                      (asyncResponse) =>
                                      {
-                                         HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
-                                         if (response.StatusCode == HttpStatusCode.OK)
+                                         try
                                          {
-                                             if (message.GetType().Name == "AppLoad" && string.IsNullOrEmpty(Crittercism.DeviceId))
+                                             HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
+                                             if (response.StatusCode == HttpStatusCode.OK)
                                              {
-                                                 DataContractJsonSerializer serializerBody = new DataContractJsonSerializer(typeof(AppLoadResponse));
-                                                 Stream responseStream = response.GetResponseStream();
-                                                 AppLoadResponse appLoadResponse = serializerBody.ReadObject(responseStream) as AppLoadResponse;
-                                                 if (appLoadResponse != null && !string.IsNullOrEmpty(appLoadResponse.did))
+                                                 if (message.GetType().Name == "AppLoad" && string.IsNullOrEmpty(Crittercism.DeviceId))
                                                  {
-                                                     Crittercism.DeviceId = appLoadResponse.did;
-                                                     appLoadResponse.SaveToDisk();
+                                                     DataContractJsonSerializer serializerBody = new DataContractJsonSerializer(typeof(AppLoadResponse));
+                                                     Stream responseStream = response.GetResponseStream();
+                                                     AppLoadResponse appLoadResponse = serializerBody.ReadObject(responseStream) as AppLoadResponse;
+                                                     if (appLoadResponse != null && !string.IsNullOrEmpty(appLoadResponse.did))
+                                                     {
+                                                         Crittercism.DeviceId = appLoadResponse.did;
+                                                         appLoadResponse.SaveToDisk();
+                                                     }
+                                                 }
+
+                                                 sendCompleted = true;
+                                             }
+                                         }
+                                         catch (WebException webEx)
+                                         {
+                                             if (webEx.Response != null)
+                                             {
+                                                 HttpWebResponse response = (HttpWebResponse)webEx.Response;
+                                                 if (response.StatusCode == HttpStatusCode.BadRequest)
+                                                 {
+                                                     try
+                                                     {
+                                                         StreamReader errorReader = (new StreamReader(webEx.Response.GetResponseStream()));
+                                                         string errorMessage = errorReader.ReadToEnd();
+                                                         System.Diagnostics.Debug.WriteLine(errorMessage);
+                                                     }
+                                                     catch
+                                                     {
+                                                         // if is another error we just ignore for now
+                                                     }
                                                  }
                                              }
-
-                                             sendCompleted = true;
+                                         }
+                                         catch
+                                         {
+                                             // if is another error we just ignore for now
                                          }
 
                                          resetEvent.Set();
