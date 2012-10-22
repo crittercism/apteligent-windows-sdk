@@ -59,19 +59,17 @@ namespace CrittercismSDK
                     messageStream.Seek(0, SeekOrigin.Begin);
                     StreamReader reader = new StreamReader(messageStream);
                     string jsonMessage = reader.ReadToEnd();
-
-                    // HttpWebRequest request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v0/crashes", UriKind.Absolute));
                     HttpWebRequest request = null;
                     switch (message.GetType().Name)
                     {
                         case "AppLoad":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://192.168.15.139/tce/v0/app_loads", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/loads", UriKind.Absolute));
                             break;
                         case "Error":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://192.168.15.139/tce/v0/errors", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/errors", UriKind.Absolute));
                             break;
                         default:
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://192.168.15.139/tce/v0/crashes", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/crashes", UriKind.Absolute));
                             break;
                     }
 

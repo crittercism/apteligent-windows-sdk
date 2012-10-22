@@ -215,7 +215,7 @@ namespace CrittercismSDK
         {
             lock (CurrentBreadcrumbs)
             {
-                CurrentBreadcrumbs.current_session.Add(new string[] { breadcrumb, DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", System.Globalization.CultureInfo.InvariantCulture) });
+                CurrentBreadcrumbs.current_session.Add(new BreadcrumbMessage(breadcrumb));
                 CurrentBreadcrumbs.SaveToDisk();
             }
         }
@@ -225,9 +225,8 @@ namespace CrittercismSDK
         /// </summary>
         public static void CreateErrorReport(Exception e)
         {
-            AppState appState = new AppState();
-            List<ExceptionObject> exceptions = new List<ExceptionObject>() { new ExceptionObject("1.0", e.GetType().Name, e.Message, appState, e.StackTrace) };
-            Error error = new Error(AppID, OSPlatform, DeviceId, "1.0", exceptions);
+            ExceptionObject exception = new ExceptionObject(e.GetType().FullName, e.Message, e.StackTrace);
+            Error error = new Error(AppID, exception);
             error.SaveToDisk();
             AddMessageToQueue(error);
         }
@@ -239,12 +238,13 @@ namespace CrittercismSDK
         private static void CreateCrashReport(UnhandledExceptionEventArgs currentException)
         {
             Breadcrumbs breadcrumbs = new Breadcrumbs();
-            breadcrumbs.current_session = new List<string[]>(CurrentBreadcrumbs.current_session);
-            breadcrumbs.previous_session = new List<string[]>(CurrentBreadcrumbs.previous_session);
-            Crash crash = new Crash(AppID, OSPlatform, breadcrumbs, DeviceId, currentException.Exception.GetType().Name, currentException.Exception.Message, "1.0", currentException.Message);
+            breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
+            breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
+            ExceptionObject exception = new ExceptionObject(currentException.Exception.GetType().FullName, currentException.Exception.Message, currentException.Message);
+            Crash crash = new Crash(AppID, breadcrumbs, exception);
             crash.SaveToDisk();
             AddMessageToQueue(crash);
-            CurrentBreadcrumbs.previous_session = new List<string[]>(CurrentBreadcrumbs.current_session);
+            CurrentBreadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
             CurrentBreadcrumbs.current_session.Clear();
         }
 
@@ -253,7 +253,7 @@ namespace CrittercismSDK
         /// </summary>
         private static void CreateAppLoadReport()
         {
-            AppLoad appLoad = new AppLoad(AppID, DeviceId, "1.0", OSPlatform);
+            AppLoad appLoad = new AppLoad(AppID);
             appLoad.SaveToDisk();
             AddMessageToQueue(appLoad);
         }

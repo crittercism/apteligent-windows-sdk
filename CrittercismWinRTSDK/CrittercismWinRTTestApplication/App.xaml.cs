@@ -42,7 +42,7 @@ namespace CrittercismWinRTTestApplication
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            Crittercism.Init("AppIdentifier", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
             Crittercism.LeaveBreadcrum("Start the application");
             Frame rootFrame = Window.Current.Content as Frame;
 

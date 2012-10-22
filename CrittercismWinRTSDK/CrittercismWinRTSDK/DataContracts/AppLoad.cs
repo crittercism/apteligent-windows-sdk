@@ -22,32 +22,18 @@ namespace CrittercismSDK.DataContracts
         public string app_id { get; set; }
 
         /// <summary>
-        /// Gets or sets the identifier of the device.
+        /// Gets or sets the state of the application.
         /// </summary>
-        /// <value> The identifier of the device. </value>
+        /// <value> The application state. </value>
         [DataMember]
-        public string did { get; set; }
-
-        /// <summary>
-        /// Gets or sets the library version.
-        /// </summary>
-        /// <value> The library version. </value>
-        [DataMember]
-        public string library_version { get; set; }
+        public AppState app_state { get; set; }
 
         /// <summary>
         /// Gets or sets the platform of the device.
         /// </summary>
         /// <value> The platform of the device. </value>
         [DataMember]
-        public string platform { get; set; }
-
-        /// <summary>
-        /// Gets or sets the state of the application.
-        /// </summary>
-        /// <value> The application state. </value>
-        [DataMember]
-        public AppState app_state { get; set; }
+        public Platform platform { get; set; }
 
         /// <summary>
         /// Default constructor.
@@ -63,13 +49,11 @@ namespace CrittercismSDK.DataContracts
         /// <param name="deviceId">         Identifier for the device. </param>
         /// <param name="libraryVersion">   The library version. </param>
         /// <param name="devicePlatform">   The device platform. </param>
-        public AppLoad(string appId, string deviceId, string libraryVersion, string devicePlatform)
+        public AppLoad(string appId)
         {
             app_id = appId;
-            did = deviceId;
-            library_version = libraryVersion;
-            platform = devicePlatform;
             app_state = new AppState();
+            platform = new Platform();
         }
     }
 }

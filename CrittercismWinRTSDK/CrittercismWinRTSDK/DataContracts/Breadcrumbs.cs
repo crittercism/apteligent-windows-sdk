@@ -19,22 +19,22 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The breadcrumbs of the current session. </value>
         [DataMember]
-        public List<string[]> current_session { get; set; }
+        public List<BreadcrumbMessage> current_session { get; set; }
 
         /// <summary>
         /// Gets or sets the breadcrumbs of the previous session.
         /// </summary>
         /// <value> The breadcrumbs of the previous session. </value>
         [DataMember]
-        public List<string[]> previous_session { get; set; }
+        public List<BreadcrumbMessage> previous_session { get; set; }
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public Breadcrumbs()
         {
-            current_session = new List<string[]>();
-            previous_session = new List<string[]>();
+            current_session = new List<BreadcrumbMessage>();
+            previous_session = new List<BreadcrumbMessage>();
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace CrittercismSDK.DataContracts
                 Breadcrumbs breadcrumbs = StorageHelper.LoadFromDisk(typeof(Breadcrumbs), Crittercism.dataFolder, typeof(Breadcrumbs).Name + ".txt") as Breadcrumbs;
                 if (breadcrumbs != null)
                 {
-                    actualBreadcrumbs.previous_session = new List<string[]>(breadcrumbs.current_session);
+                    actualBreadcrumbs.previous_session = new List<BreadcrumbMessage>(breadcrumbs.current_session);
                 }
 
                 return actualBreadcrumbs;

@@ -33,7 +33,7 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         public AppState()
         {
-            battery_level = "50";
+            battery_level = "50"; // Because in WinRT is impossible to obtain that information
             app_version = Application.Current.GetType().AssemblyQualifiedName.Split('=')[1].Split(',')[0];
         }
     }

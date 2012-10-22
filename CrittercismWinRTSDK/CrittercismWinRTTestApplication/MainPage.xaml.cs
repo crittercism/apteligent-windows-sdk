@@ -38,15 +38,18 @@ namespace CrittercismWinRTTestApplication
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            int i = 0;
+            int j = 5;
             try
             {
-                throw new Exception("This is my handled exception");
+                int k = j / i;
             }
             catch (Exception ex)
             {
                 Crittercism.CreateErrorReport(ex);
                 Crittercism.LeaveBreadcrum("Before crash");
-                throw new Exception("This is my unhandled exception");
+                int k = j / i;
+                // throw new Exception("This is my unhandled exception");
             }
         }
     }

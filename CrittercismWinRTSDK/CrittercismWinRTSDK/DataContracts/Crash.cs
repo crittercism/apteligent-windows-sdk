@@ -29,13 +29,6 @@ namespace CrittercismSDK.DataContracts
         public AppState app_state { get; set; }
 
         /// <summary>
-        /// Gets or sets the platform.
-        /// </summary>
-        /// <value> The platform. </value>
-        [DataMember]
-        public string platform { get; set; }
-
-        /// <summary>
         /// Gets or sets the breadcrumbs.
         /// </summary>
         /// <value> The breadcrumbs. </value>
@@ -43,40 +36,18 @@ namespace CrittercismSDK.DataContracts
         public Breadcrumbs breadcrumbs { get; set; }
 
         /// <summary>
-        /// Gets or sets the identifier of device.
+        /// Gets or sets the crash
         /// </summary>
-        /// <value> The identifier of device. </value>
         [DataMember]
-        public string did { get; set; }
+        public ExceptionObject crash { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the exception.
+        /// Gets or sets the platform.
         /// </summary>
-        /// <value> The name of the exception. </value>
+        /// <value> The platform. </value>
         [DataMember]
-        public string exception_name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the exception reason.
-        /// </summary>
-        /// <value> The exception reason. </value>
-        [DataMember]
-        public string exception_reason { get; set; }
-
-        /// <summary>
-        /// Gets or sets the library version.
-        /// </summary>
-        /// <value> The library version. </value>
-        [DataMember]
-        public string library_version { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unsymbolized stacktrace.
-        /// </summary>
-        /// <value> The unsymbolized stacktrace. </value>
-        [DataMember]
-        public string unsymbolized_stacktrace { get; set; }
-
+        public Platform platform { get; set; }
+        
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -95,17 +66,13 @@ namespace CrittercismSDK.DataContracts
         /// <param name="exceptionReason">      The exception reason. </param>
         /// <param name="libraryVersion">       The library version. </param>
         /// <param name="stacktrace">           The stacktrace. </param>
-        public Crash(string appId, string devicePlatform, Breadcrumbs currentBreadcrumbs, string deviceId, string exceptionName, string exceptionReason, string libraryVersion, string stacktrace)
+        public Crash(string appId, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
         {
             app_id = appId;
             app_state = new AppState();
-            platform = devicePlatform;
             breadcrumbs = currentBreadcrumbs;
-            did = deviceId;
-            exception_name = exceptionName;
-            exception_reason = exceptionReason;
-            library_version = libraryVersion;
-            unsymbolized_stacktrace = stacktrace;
+            crash = exception;
+            platform = new Platform();
         }
     }
 }
