@@ -33,7 +33,7 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The unsymbolized stacktrace. </value>
         [DataMember]
-        public string stack_trace { get; set; }
+        public List<string> stack_trace { get; set; }
 
         /// <summary>
         /// Default constructor.
@@ -52,7 +52,7 @@ namespace CrittercismSDK.DataContracts
         {
             name = exceptionName;
             reason = exceptionReason;
-            stack_trace = stacktrace;
+            stack_trace = stacktrace.Split(new string[] {"\r\n"},  StringSplitOptions.RemoveEmptyEntries).ToList();
         }
     }
 }
