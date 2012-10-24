@@ -28,7 +28,7 @@ namespace CrittercismSDK.DataContracts {
         /// What kind of device is this? e.g. "Nokia Lumia 820"
         /// </summary>
         [DataMember]
-        public readonly string device_model;
+        public readonly string device_model = "Nokia Lumia 800";
 
         [DataMember]
         public readonly string os_name = "Windows Phone";

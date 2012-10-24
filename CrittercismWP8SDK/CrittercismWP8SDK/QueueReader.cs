@@ -41,24 +41,28 @@ namespace CrittercismSDK
         private bool SendMessage(MessageReport message) {
             if (NetworkInterface.GetIsNetworkAvailable()) {
                 try {
-                    MemoryStream messageStream = new MemoryStream();
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(message.GetType());
-                    serializer.WriteObject(messageStream, message);
-                    messageStream.Flush();
+                    string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
 
-                    // Debug code, not need to copy the stream to the httpwebrequest
-                    messageStream.Seek(0, SeekOrigin.Begin);
-                    StreamReader reader = new StreamReader(messageStream);
-                    string jsonMessage = reader.ReadToEnd();
+                    ////MemoryStream messageStream = new MemoryStream();
+                    ////DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
+                    ////settings.UseSimpleDictionaryFormat = true;
+                    ////DataContractJsonSerializer serializer = new DataContractJsonSerializer(message.GetType(), settings);
+                    ////serializer.WriteObject(messageStream, message);
+                    ////messageStream.Flush();
+
+                    ////// Debug code, not need to copy the stream to the httpwebrequest
+                    ////messageStream.Seek(0, SeekOrigin.Begin);
+                    ////StreamReader reader = new StreamReader(messageStream);
+                    ////string jsonMessage = reader.ReadToEnd();
 
                     HttpWebRequest request = null;
                     switch (message.GetType().Name)
                     {
                         case "AppLoad":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.crittercism.com/v1/loads", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/loads", UriKind.Absolute));
                             break;
                         case "Error":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("http://api.crittercism.com/v1/errors", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/errors", UriKind.Absolute));
                             break;
                         default:
                             request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/crashes", UriKind.Absolute));
@@ -76,16 +80,48 @@ namespace CrittercismSDK
                             try
                             {
                                 Stream requestStream = request.EndGetRequestStream(result);
-                                serializer.WriteObject(requestStream, message);
-                                requestStream.Flush();
-                                requestStream.Close();
+                                StreamWriter writer = new StreamWriter(requestStream);
+                                writer.Write(jsonMessage);
+                                //serializer.WriteObject(requestStream, message);
+                                writer.Flush();
+                                writer.Close();
 
                                 request.BeginGetResponse(
                                      (asyncResponse) =>
                                      {
-                                         HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
-                                         if (response.StatusCode == HttpStatusCode.OK) {
-                                             sendCompleted = true;
+                                         try
+                                         {
+
+                                             HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
+                                             if (response.StatusCode == HttpStatusCode.OK)
+                                             {
+                                                 sendCompleted = true;
+                                             }
+                                         }
+                                         catch (WebException webEx)
+                                         {
+                                             if (webEx.Response != null)
+                                             {
+                                                 HttpWebResponse response = (HttpWebResponse)webEx.Response;
+                                                 if (response.StatusCode == HttpStatusCode.BadRequest)
+                                                 {
+                                                     try
+                                                     {
+                                                         StreamReader errorReader = (new StreamReader(webEx.Response.GetResponseStream()));
+                                                         string errorMessage = errorReader.ReadToEnd();
+                                                         System.Diagnostics.Debug.WriteLine(errorMessage);
+                                                     }
+                                                     catch
+                                                     {
+                                                         // if is another error we just ignore for now
+                                                     }
+                                                 }
+                                             }
+
+                                         }
+                                         catch
+                                         {
+                                             // if is another error we just ignore for now
                                          }
 
                                          resetEvent.Set();

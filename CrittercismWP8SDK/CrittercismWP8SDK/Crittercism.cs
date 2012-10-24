@@ -81,7 +81,50 @@ namespace CrittercismSDK
         /// Gets or sets the identifier of the device.
         /// </summary>
         /// <value> The identifier of the device. </value>
-        internal static string DeviceId { get; set; }
+        internal static string DeviceId
+        {
+            get
+            {
+                try
+                {
+                    // get application settings for isolate storage
+                    var appSettings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
+                    Dictionary<string, string> crittercismSettings = null;
+
+                    // if there not exist a dictionary for crittercism settings then create one with the device id as unique guid
+                    if (!appSettings.Contains("CrittercismSettings"))
+                    {
+                        crittercismSettings = new Dictionary<string, string>();
+                        crittercismSettings.Add("DeviceId", System.Guid.NewGuid().ToString());
+                        appSettings.Add("CrittercismSettings", crittercismSettings);
+                    }
+                    else
+                    {
+                        // if the settings already exist just get them.
+                        crittercismSettings = appSettings["CrittercismSettings"] as Dictionary<string, string>;
+                    }
+
+                    // if I have settings and there is a value for the device id return it, it should be because when the settings are created it is automatically set
+                    // else add a new device id and return it. The end user can modify this settings because it is store on the application settings that is accessible for him
+                    if (crittercismSettings != null)
+                    {
+                        if (!crittercismSettings.ContainsKey("DeviceId"))
+                        {
+                            crittercismSettings.Add("DeviceId", System.Guid.NewGuid().ToString());
+                        }
+
+                        return crittercismSettings["DeviceId"] as string;
+                    }
+                }
+                catch
+                {
+                    // eat any possible crash, to avoid the dll to stack overflow
+                }
+
+                // return a empty string in case of error.
+                return string.Empty;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the operating system platform.
@@ -210,7 +253,7 @@ namespace CrittercismSDK
         {
             lock (CurrentBreadcrumbs)
             {
-                CurrentBreadcrumbs.current_session.Add(new string[] { breadcrumb, DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", System.Globalization.CultureInfo.InvariantCulture) });
+                CurrentBreadcrumbs.current_session.Add(new BreadcrumbMessage(breadcrumb));
                 CurrentBreadcrumbs.SaveToDisk();
             }
         }
@@ -218,16 +261,14 @@ namespace CrittercismSDK
         /// <summary>
         /// Creates the error report.
         /// </summary>
-        /*
         public static void CreateErrorReport(Exception e)
         {
-            AppState appState = new AppState();
-            List<ExceptionObject> exceptions = new List<ExceptionObject>() { new ExceptionObject("1.0", e.GetType().Name, e.Message, appState, e.StackTrace) };
-            Error error = new Error(AppID, OSPlatform, DeviceId, System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString(), exceptions);
+            var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
+            ExceptionObject exception = new ExceptionObject(e.GetType().FullName, e.Message, e.StackTrace);
+            Error error = new Error(AppID, appVersion, exception);
             error.SaveToDisk();
             AddMessageToQueue(error);
         }
-        */
         
         /// <summary>
         /// Creates a crash report.
@@ -235,27 +276,33 @@ namespace CrittercismSDK
         /// <param name="currentException"> The current exception. </param>
         private static void CreateCrashReport(Exception currentException)
         {
+            var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
             Breadcrumbs breadcrumbs = new Breadcrumbs();
-            breadcrumbs.current_session = new List<string[]>(CurrentBreadcrumbs.current_session);
-            breadcrumbs.previous_session = new List<string[]>(CurrentBreadcrumbs.previous_session);
-            Crash crash = new Crash(AppID, OSPlatform, breadcrumbs, DeviceId, currentException.GetType().Name, currentException.Message, System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString(), currentException.StackTrace);
+            breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
+            breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
+            ExceptionObject exception = new ExceptionObject(currentException.GetType().FullName, currentException.Message, currentException.StackTrace);
+            Crash crash = new Crash(AppID, appVersion, breadcrumbs, exception);
             crash.SaveToDisk();
             AddMessageToQueue(crash);
-            CurrentBreadcrumbs.previous_session = new List<string[]>(CurrentBreadcrumbs.current_session);
+            CurrentBreadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
             CurrentBreadcrumbs.current_session.Clear();
         }
 
         /// <summary>
         /// Creates the application load report.
         /// </summary>
-        private static void CreateAppLoadReport() {
-            var appVersion = System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString();
+        private static void CreateAppLoadReport()
+        {
+            var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
+            // the following code doesn't work because the executing assembly is the same crittercimswp8sdk in WP8 ... 
+            // var appVersion = System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString();
+
             var appLoad = new AppLoad(AppID, appVersion);
 
             appLoad.SaveToDisk();
             AddMessageToQueue(appLoad);
         }
-        
+
         /// <summary>
         /// Loads the messages from disk into the queue.
         /// </summary>
@@ -292,7 +339,7 @@ namespace CrittercismSDK
                 }
 
                 messages.Sort((m1, m2) => m1.CreationDate.CompareTo(m2.CreationDate));
-                foreach(MessageReport message in messages)
+                foreach (MessageReport message in messages)
                 {
                     // I'm wondering if we needed to restrict to 50 message of something similar?
                     MessageQueue.Enqueue(message);
@@ -351,7 +398,7 @@ namespace CrittercismSDK
             CurrentBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
             OSPlatform = Environment.OSVersion.Platform.ToString();
             MessageQueue = new Queue<MessageReport>();
-            //LoadQueueFromDisk();
+            LoadQueueFromDisk();
             CreateAppLoadReport();
         }
 

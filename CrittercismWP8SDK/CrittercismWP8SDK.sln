@@ -1,11 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Phone
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrittercismWP8TestApplication", "CrittercismWP8TestApplication\CrittercismWP8TestApplication.csproj", "{28A67CFA-DAAF-4040-AB29-2C55B91989BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrittercismWP8SDK", "CrittercismWP8SDK\CrittercismWP8SDK.csproj", "{B880017A-2B87-41DA-B834-BC3D188231E2}"
 EndProject
 Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://fenix.mobise.com:8080/tfs/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = CrittercismWP8TestApplication\\CrittercismWP8TestApplication.csproj
+		SccProjectName1 = CrittercismWP8TestApplication
+		SccLocalPath1 = CrittercismWP8TestApplication
+		SccProjectUniqueName2 = CrittercismWP8SDK\\CrittercismWP8SDK.csproj
+		SccProjectName2 = CrittercismWP8SDK
+		SccLocalPath2 = CrittercismWP8SDK
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM

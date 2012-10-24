@@ -29,13 +29,6 @@ namespace CrittercismSDK.DataContracts
         public Dictionary<string, object> app_state { get; set; }
 
         /// <summary>
-        /// Gets or sets the platform.
-        /// </summary>
-        /// <value> The platform. </value>
-        [DataMember]
-        public string platform { get; set; }
-
-        /// <summary>
         /// Gets or sets the breadcrumbs.
         /// </summary>
         /// <value> The breadcrumbs. </value>
@@ -43,40 +36,18 @@ namespace CrittercismSDK.DataContracts
         public Breadcrumbs breadcrumbs { get; set; }
 
         /// <summary>
-        /// Gets or sets the identifier of device.
+        /// Gets or sets the crash
         /// </summary>
-        /// <value> The identifier of device. </value>
         [DataMember]
-        public string did { get; set; }
+        public ExceptionObject crash { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the exception.
+        /// Gets or sets the platform.
         /// </summary>
-        /// <value> The name of the exception. </value>
+        /// <value> The platform. </value>
         [DataMember]
-        public string exception_name { get; set; }
-
-        /// <summary>
-        /// Gets or sets the exception reason.
-        /// </summary>
-        /// <value> The exception reason. </value>
-        [DataMember]
-        public string exception_reason { get; set; }
-
-        /// <summary>
-        /// Gets or sets the library version.
-        /// </summary>
-        /// <value> The library version. </value>
-        [DataMember]
-        public string library_version { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unsymbolized stacktrace.
-        /// </summary>
-        /// <value> The unsymbolized stacktrace. </value>
-        [DataMember]
-        public string unsymbolized_stacktrace { get; set; }
-
+        public Platform platform { get; set; }
+        
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -87,25 +58,22 @@ namespace CrittercismSDK.DataContracts
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="appId">                Identifier for the application. </param>
-        /// <param name="devicePlatform">       The device platform. </param>
-        /// <param name="currentBreadcrumbs">   The current breadcrumbs. </param>
-        /// <param name="deviceId">             Identifier for the device. </param>
-        /// <param name="exceptionName">        Name of the exception. </param>
-        /// <param name="exceptionReason">      The exception reason. </param>
-        /// <param name="libraryVersion">       The library version. </param>
-        /// <param name="stacktrace">           The stacktrace. </param>
-        public Crash(string appId, string devicePlatform, Breadcrumbs currentBreadcrumbs, string deviceId, string exceptionName, string exceptionReason, string libraryVersion, string stacktrace)
+        /// <param name="appId">Identifier for the application.</param>
+        /// <param name="appVersion">The app version.</param>
+        /// <param name="currentBreadcrumbs">The current breadcrumbs.</param>
+        /// <param name="exception">The exception.</param>
+        public Crash(string appId, string appVersion, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
         {
             app_id = appId;
-            app_state = new Dictionary<string, object>();
-            platform = devicePlatform;
+            // Initialize app state dictionary with base battery level and app version keys
+            app_state = new Dictionary<string, object> { 
+                    { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString() },
+                    { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion }
+                };
+
             breadcrumbs = currentBreadcrumbs;
-            did = deviceId;
-            exception_name = exceptionName;
-            exception_reason = exceptionReason;
-            library_version = libraryVersion;
-            unsymbolized_stacktrace = stacktrace;
+            crash = exception;
+            platform = new Platform();
         }
     }
 }

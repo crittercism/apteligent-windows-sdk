@@ -34,10 +34,13 @@ namespace CrittercismSDK
 
                 using (IsolatedStorageFileStream writeFile = new IsolatedStorageFileStream(dataFolder + "\\" + data.GetType().Name + ".txt", FileMode.Create, FileAccess.Write, storage))
                 {
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(data.GetType());
-                    serializer.WriteObject(writeFile, data);
-                    writeFile.Flush();
-                    writeFile.Close();
+                    ////DataContractJsonSerializer serializer = new DataContractJsonSerializer(data.GetType());
+                    ////serializer.WriteObject(writeFile, data);
+                    string json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
+                    StreamWriter writer = new StreamWriter(writeFile);
+                    writer.Write(json);
+                    writer.Flush();
+                    writer.Close();
                 }
 
                 return true;
@@ -65,8 +68,11 @@ namespace CrittercismSDK
                     {
                         using (IsolatedStorageFileStream readFile = storage.OpenFile(dataFolder + "\\" + dataType.Name + ".txt", FileMode.Open, FileAccess.Read))
                         {
-                            DataContractJsonSerializer serializer = new DataContractJsonSerializer(dataType);
-                            data = serializer.ReadObject(readFile);
+                            //DataContractJsonSerializer serializer = new DataContractJsonSerializer(dataType);
+                            StreamReader reader = new StreamReader(readFile);
+                            string json = reader.ReadToEnd();
+                            data = Newtonsoft.Json.JsonConvert.DeserializeObject(json, dataType);
+                            // data = serializer.ReadObject(readFile);
                         }
                     }
                 }

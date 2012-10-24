@@ -16,19 +16,19 @@ namespace CrittercismSDK.DataContracts {
         /// Crittercism-issued Application identification string
         /// </summary>
         [DataMember]
-        public readonly string app_id;
+        public string app_id { get; set; }
 
         /// <summary>
         /// User-specified state of the application as it's executing
         /// </summary>
         [DataMember]
-        public Dictionary<string, Object> app_state;
+        public Dictionary<string, object> app_state { get; set; }
 
         /// <summary>
         /// Execution platform on which the app runs
         /// </summary>
         [DataMember]
-        public readonly Platform platform;
+        public Platform platform { get; set; }
 
         /// <summary>
         /// Default constructor.
@@ -43,8 +43,8 @@ namespace CrittercismSDK.DataContracts {
                 app_id = _appId;
 
                 // Initialize app state dictionary with base battery level and app version keys
-                app_state = new Dictionary<string, Object> { 
-                    { "battery_level", null },
+                app_state = new Dictionary<string, object> { 
+                    { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString() },
                     { "app_version", String.IsNullOrEmpty(_appVersion) ? "Unspecified" : _appVersion }
                 };
 

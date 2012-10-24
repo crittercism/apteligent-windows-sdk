@@ -54,10 +54,12 @@ namespace CrittercismSDK.DataContracts
                 Name = this.GetType().Name + "_" + Guid.NewGuid().ToString() + ".txt";
                 using (IsolatedStorageFileStream writeFile = new IsolatedStorageFileStream(folderName + "\\" + this.Name, FileMode.CreateNew, FileAccess.Write, storage))
                 {
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
-                    serializer.WriteObject(writeFile, this);
-                    writeFile.Flush();
-                    writeFile.Close();
+                    // DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
+                    // serializer.WriteObject(writeFile, this);
+                    StreamWriter writer = new StreamWriter(writeFile);
+                    writer.Write(Newtonsoft.Json.JsonConvert.SerializeObject(this));
+                    writer.Flush();
+                    writer.Close();
                     this.IsLoaded = true;
                 }
 
@@ -103,7 +105,6 @@ namespace CrittercismSDK.DataContracts
         /// <returns>  true if it succeeds, false if it fails. </returns>
         internal bool LoadFromDisk()
         {
-            return true;
             string folderName = Crittercism.FolderName;
             try
             {
@@ -114,8 +115,11 @@ namespace CrittercismSDK.DataContracts
                     {
                         using (IsolatedStorageFileStream readFile = storage.OpenFile(folderName + "\\" + this.Name, FileMode.Open, FileAccess.Read))
                         {
-                            DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
-                            MessageReport message = (MessageReport)serializer.ReadObject(readFile);
+                            //DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
+                            //MessageReport message = (MessageReport)serializer.ReadObject(readFile);
+                            StreamReader reader = new StreamReader(readFile);
+                            string json = reader.ReadToEnd();
+                            MessageReport message = (MessageReport)Newtonsoft.Json.JsonConvert.DeserializeObject(json, this.GetType());
                             PropertyInfo[] properties = this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
                             foreach (PropertyInfo property in properties)
                             {

@@ -22,32 +22,23 @@ namespace CrittercismSDK.DataContracts
         public string app_id { get; set; }
 
         /// <summary>
-        /// Gets or sets the platform of the device.
+        /// Gets or sets the application state.
         /// </summary>
-        /// <value> The platform of the device. </value>
         [DataMember]
-        public string platform { get; set; }
+        public Dictionary<string, object> app_state { get; set; }
 
         /// <summary>
-        /// Gets or sets the hashed device identifier.
+        /// Gets or sets the error.
         /// </summary>
-        /// <value> The hashed device identifier. </value>
+        /// <value> The error. </value>
         [DataMember]
-        public string hashed_device_id { get; set; }
+        public ExceptionObject error { get; set; }
 
         /// <summary>
-        /// Gets or sets the library version.
+        /// Gets or sets the platform
         /// </summary>
-        /// <value> The library version. </value>
         [DataMember]
-        public string library_version { get; set; }
-
-        /// <summary>
-        /// Gets or sets the exceptions.
-        /// </summary>
-        /// <value> The exceptions. </value>
-        [DataMember]
-        public List<ExceptionObject> exceptions { get; set; }
+        public Platform platform { get; set; }
 
         /// <summary>
         /// Default constructor.
@@ -59,18 +50,19 @@ namespace CrittercismSDK.DataContracts
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="appId">            Identifier for the application. </param>
-        /// <param name="devicePlatform">   The device platform. </param>
-        /// <param name="hashedDeviceId">   Identifier for the hashed device. </param>
-        /// <param name="libraryVersion">   The library version. </param>
-        /// <param name="exceptionList">    List of exceptions. </param>
-        public Error(string appId, string devicePlatform, string hashedDeviceId, string libraryVersion, List<ExceptionObject> exceptionList)
+        /// <param name="appId">     Identifier for the application. </param>
+        /// <param name="exception"> The exception. </param>
+        public Error(string appId, string appVersion, ExceptionObject exception)
         {
             app_id = appId;
-            platform = devicePlatform;
-            hashed_device_id = hashedDeviceId;
-            library_version = libraryVersion;
-            exceptions = exceptionList;
+            // Initialize app state dictionary with base battery level and app version keys
+            app_state = new Dictionary<string, object> { 
+                    { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString() },
+                    { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion }
+                };
+
+            error = exception;
+            platform = new Platform();
         }
     }
 }
