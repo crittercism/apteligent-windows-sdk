@@ -20,35 +20,35 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The client version. </value>
         [DataMember]
-        public string client { get; set; }
+        public string client { get; internal set; }
 
         /// <summary>
         /// Gets or sets the device id.
         /// </summary>
         /// <value> The device id. </value>
         [DataMember]
-        public string device_id { get; set; }
+        public string device_id { get; internal set; }
 
         /// <summary>
         /// Gets or sets the model.
         /// </summary>
         /// <value> The model. </value>
         [DataMember]
-        public string model { get; set; }
+        public string device_model { get; internal set; }
 
         /// <summary>
         /// Gets or sets the OS name.
         /// </summary>
         /// <value> The OS name. </value>
         [DataMember]
-        public string os_name { get; set; }
+        public string os_name { get; internal set; }
 
         /// <summary>
         /// Gets or sets the OS version.
         /// </summary>
         /// <value> The OS version. </value>
         [DataMember]
-        public string os_version { get; set; }
+        public string os_version { get; internal set; }
 
         /// <summary>
         /// Default constructor
@@ -57,9 +57,9 @@ namespace CrittercismSDK.DataContracts
         {
             client = "winRTv1.0";
             device_id = Crittercism.DeviceId;
-            model = string.Empty;
-            os_name = string.Empty;
-            os_version = string.Empty;
+            device_model = "Nokia Lumia 800";
+            os_name = "Windows Phone";
+            os_version = "8.0";
         }
     }
 }

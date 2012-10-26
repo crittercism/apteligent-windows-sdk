@@ -7,6 +7,7 @@ namespace CrittercismSDK.DataContracts
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
+    using Windows.UI.Xaml;
 
     /// <summary>
     /// Application load.
@@ -19,21 +20,21 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The identifier of the application. </value>
         [DataMember]
-        public string app_id { get; set; }
+        public string app_id { get; internal set; }
 
         /// <summary>
         /// Gets or sets the state of the application.
         /// </summary>
         /// <value> The application state. </value>
         [DataMember]
-        public AppState app_state { get; set; }
+        public Dictionary<string, object> app_state { get; internal set; }
 
         /// <summary>
         /// Gets or sets the platform of the device.
         /// </summary>
         /// <value> The platform of the device. </value>
         [DataMember]
-        public Platform platform { get; set; }
+        public Platform platform { get; internal set; }
 
         /// <summary>
         /// Default constructor.
@@ -52,7 +53,9 @@ namespace CrittercismSDK.DataContracts
         public AppLoad(string appId)
         {
             app_id = appId;
-            app_state = new AppState();
+            app_state = new Dictionary<string, object>();
+            app_state.Add("app_version", Application.Current.GetType().AssemblyQualifiedName.Split('=')[1].Split(',')[0]);
+            app_state.Add("battery_level", "50"); // Because in WinRT is impossible to obtain that information
             platform = new Platform();
         }
     }

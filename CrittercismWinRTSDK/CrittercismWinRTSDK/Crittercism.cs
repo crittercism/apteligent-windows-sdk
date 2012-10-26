@@ -14,10 +14,6 @@ namespace CrittercismSDK
     using Windows.Networking.Connectivity;
     using Windows.Storage;
     using Windows.UI.Xaml;
-#if WINDOWS_PHONE
-    using System.Windows;
-    using Microsoft.Phone.Shell;
-#endif
 
     /// <summary>
     /// Crittercism.
@@ -25,6 +21,21 @@ namespace CrittercismSDK
     public class Crittercism
     {
         #region Properties
+
+        /// <summary>
+        /// The auto run queue reader
+        /// </summary>
+        internal static bool _autoRunQueueReader = true;
+
+        /// <summary>
+        /// The enable communication layer
+        /// </summary>
+        internal static bool _enableCommunicationLayer = true;
+
+        /// <summary>
+        /// The enable raise exception in communication layer
+        /// </summary>
+        internal static bool _enableRaiseExceptionInCommunicationLayer = false;
 
         /// <summary>
         /// Gets or sets a queue of messages.
@@ -81,17 +92,33 @@ namespace CrittercismSDK
         internal static int Age { get; set; }
 
         /// <summary>
-        /// Gets or sets the identifier of the device.
+        /// Gets the identifier of the device.
         /// </summary>
         /// <value> The identifier of the device. </value>
-        internal static string DeviceId { get; set; }
+        internal static string DeviceId
+        {
+            get
+            {
+                var localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+                Windows.Storage.ApplicationDataContainer container = null;
+                if (!localSettings.Containers.ContainsKey("CrittercismSettings"))
+                {
+                    container = localSettings.CreateContainer("CrittercismSettings", Windows.Storage.ApplicationDataCreateDisposition.Always);
+                }
+                else
+                {
+                    container = localSettings.Containers["CrittercismSettings"];
+                }
 
-        /// <summary>
-        /// Gets or sets the operating system platform.
-        /// </summary>
-        /// <value> The operating system platform. </value>
-        internal static string OSPlatform { get; set; }
+                if (!container.Values.ContainsKey("DeviceId"))
+                {
+                    container.Values.Add("DeviceId", System.Guid.NewGuid().ToString());
+                }
 
+                return container.Values["DeviceId"].ToString();
+            }
+        }
+        
         /// <summary>
         /// Gets or sets the arbitrary user metadata.
         /// </summary>
@@ -138,24 +165,9 @@ namespace CrittercismSDK
             QueueReader queueReader = new QueueReader();
             readerTask = new Task(queueReader.ReadQueue);
             StartApplication(appID, key, secret);
-#if WINDOWS_PHONE
-            Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
-            try
-            {
-                if (PhoneApplicationService.Current != null)
-                {
-                    PhoneApplicationService.Current.Activated += new EventHandler<ActivatedEventArgs>(Current_Activated);
-                    PhoneApplicationService.Current.Deactivated += new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
-                }
-            }
-            catch
-            {
-            }
-#else
             Application.Current.UnhandledException += Current_UnhandledException;
             Application.Current.Resuming += Current_Resuming;
             NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
-#endif
         }
 
         /// <summary>
@@ -235,12 +247,12 @@ namespace CrittercismSDK
         /// Creates a crash report.
         /// </summary>
         /// <param name="currentException"> The current exception. </param>
-        private static void CreateCrashReport(UnhandledExceptionEventArgs currentException)
+        internal static void CreateCrashReport(Exception currentException, string exceptionStackTrace)
         {
             Breadcrumbs breadcrumbs = new Breadcrumbs();
             breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
             breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
-            ExceptionObject exception = new ExceptionObject(currentException.Exception.GetType().FullName, currentException.Exception.Message, currentException.Message);
+            ExceptionObject exception = new ExceptionObject(currentException.GetType().FullName, currentException.Message, exceptionStackTrace);
             Crash crash = new Crash(AppID, breadcrumbs, exception);
             crash.SaveToDisk();
             AddMessageToQueue(crash);
@@ -317,15 +329,18 @@ namespace CrittercismSDK
             if (messageCounter < 50)
             {
                 MessageQueue.Enqueue(message);
-                if (readerTask.Status == TaskStatus.Created)
+                if (_autoRunQueueReader)  // This flag is for unit test
                 {
-                    readerTask.Start();
-                }
-                else if (readerTask.Status == TaskStatus.RanToCompletion || readerTask.Status == TaskStatus.Faulted)
-                {
-                    QueueReader queueReader = new QueueReader();
-                    readerTask = new Task(queueReader.ReadQueue);
-                    readerTask.Start();
+                    if (readerTask.Status == TaskStatus.Created)
+                    {
+                        readerTask.Start();
+                    }
+                    else if (readerTask.Status == TaskStatus.RanToCompletion || readerTask.Status == TaskStatus.Faulted)
+                    {
+                        QueueReader queueReader = new QueueReader();
+                        readerTask = new Task(queueReader.ReadQueue);
+                        readerTask.Start();
+                    }
                 }
             }
             else
@@ -346,8 +361,6 @@ namespace CrittercismSDK
             Key = key;
             Secret = secret;
             CurrentBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
-            DeviceId = AppLoadResponse.GetDeviceId();
-            OSPlatform = "WinRT";
             MessageQueue = new Queue<MessageReport>();
             LoadQueueFromDisk();
             CreateAppLoadReport();
@@ -361,66 +374,41 @@ namespace CrittercismSDK
             StartApplication(AppID, Key, Secret);
         }
 
+        /// <summary>
+        /// Event handler. Called by CurrentDomain for network status changed events.
+        /// </summary>
+        /// <param name="sender"> Source of the event. </param>
         static void NetworkInformation_NetworkStatusChanged(object sender)
         {
-            ConnectionProfile connectionProfile = NetworkInformation.GetInternetConnectionProfile();
-            switch (connectionProfile.GetNetworkConnectivityLevel())
+            if (_autoRunQueueReader)  // This flag is for unit test
             {
-                case NetworkConnectivityLevel.InternetAccess:
-                    if (NetworkInterface.GetIsNetworkAvailable())
-                    {
-                        lock (readerTask)
+                ConnectionProfile connectionProfile = NetworkInformation.GetInternetConnectionProfile();
+                switch (connectionProfile.GetNetworkConnectivityLevel())
+                {
+                    case NetworkConnectivityLevel.InternetAccess:
+                        if (NetworkInterface.GetIsNetworkAvailable())
                         {
-                            if (MessageQueue != null && MessageQueue.Count > 0)
+                            lock (readerTask)
                             {
-                                if (readerTask.Status == TaskStatus.Created)
+                                if (MessageQueue != null && MessageQueue.Count > 0)
                                 {
-                                    readerTask.Start();
-                                }
-                                else if (readerTask.Status == TaskStatus.RanToCompletion || readerTask.Status == TaskStatus.Faulted)
-                                {
-                                    QueueReader queueReader = new QueueReader();
-                                    readerTask = new Task(queueReader.ReadQueue);
-                                    readerTask.Start();
+                                    if (readerTask.Status == TaskStatus.Created)
+                                    {
+                                        readerTask.Start();
+                                    }
+                                    else if (readerTask.Status == TaskStatus.RanToCompletion || readerTask.Status == TaskStatus.Faulted)
+                                    {
+                                        QueueReader queueReader = new QueueReader();
+                                        readerTask = new Task(queueReader.ReadQueue);
+                                        readerTask.Start();
+                                    }
                                 }
                             }
                         }
-                    }
-                    break;
+                        break;
+                }
             }
         }
-
-#if WINDOWS_PHONE
-        /// <summary>
-        /// Event handler. Called by Current for unhandled exception events.
-        /// </summary>
-        /// <param name="sender">   Source of the event. </param>
-        /// <param name="e">        Application unhandled exception event information. </param>
-        static void Current_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
-        {
-            CreateCrashReport((Exception)e.ExceptionObject);
-            e.Handled = true;
-        }
-
-        static void Current_Activated(object sender, ActivatedEventArgs e)
-        {
-            BackgroundWorker backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
-            backgroundWorker.RunWorkerAsync();
-        }
-
-        static void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"], (string)PhoneApplicationService.Current.State["Crittercism.Key"], (string)PhoneApplicationService.Current.State["Crittercism.Secret"]);
-        }
-
-        static void Current_Deactivated(object sender, DeactivatedEventArgs e)
-        {
-            PhoneApplicationService.Current.State.Add("Crittercism.AppID", AppID);
-            PhoneApplicationService.Current.State.Add("Crittercism.Key", Key);
-            PhoneApplicationService.Current.State.Add("Crittercism.Secret", Secret);
-        }
-#else
 
         /// <summary>
         /// Event handler. Called by CurrentDomain for unhandled exception events.
@@ -429,7 +417,7 @@ namespace CrittercismSDK
         /// <param name="e">      Unhandled exception event information. </param>
         static void Current_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            CreateCrashReport(e);
+            CreateCrashReport(e.Exception, e.Message);
             e.Handled = true;
         }
 
@@ -442,7 +430,6 @@ namespace CrittercismSDK
         {
             CreateAppLoadReport();
         }
-#endif
 
         #endregion
     }

@@ -19,14 +19,14 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The message. </value>
         [DataMember]
-        public string message { get; set; }
+        public string message { get; internal set; }
 
         /// <summary>
         /// Gets or sets the timestamp.
         /// </summary>
         /// <value> The timestamp. </value>
         [DataMember]
-        public string timestamp { get; set; }
+        public string timestamp { get; internal set; }
 
         /// <summary>
         /// Default constructor

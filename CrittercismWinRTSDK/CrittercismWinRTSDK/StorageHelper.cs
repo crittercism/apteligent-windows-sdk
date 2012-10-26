@@ -30,9 +30,11 @@ namespace CrittercismSDK
                 using (IRandomAccessStream writeStream = Task.Run(async () => await file.OpenAsync(FileAccessMode.ReadWrite)).Result)
                 {
                     Stream outStream = writeStream.AsStreamForWrite();
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(data.GetType());
-                    serializer.WriteObject(outStream, data);
-                    outStream.Flush();
+                    using (StreamWriter writer = new StreamWriter(outStream))
+                    {
+                        writer.Write(Newtonsoft.Json.JsonConvert.SerializeObject(data));
+                        writer.Flush();
+                    }
                 }
 
                 return true;
@@ -60,8 +62,10 @@ namespace CrittercismSDK
                 using (IRandomAccessStream readStream = Task.Run(async () => await file.OpenAsync(FileAccessMode.Read)).Result)
                 {
                     Stream inStream = readStream.AsStreamForRead();
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(dataType);
-                    data = serializer.ReadObject(inStream);
+                    using (StreamReader reader = new StreamReader(inStream))
+                    {
+                        data = Newtonsoft.Json.JsonConvert.DeserializeObject(reader.ReadToEnd(), dataType);
+                    }
                 }
 
                 return data;

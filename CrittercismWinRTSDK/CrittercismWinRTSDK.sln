@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrittercismWinRTSDK", "Crit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrittercismWinRTTestApplication", "CrittercismWinRTTestApplication\CrittercismWinRTTestApplication.csproj", "{24EAEE91-735A-4042-BEAD-1B5EBC422D91}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinRTUnitTestApp", "WinRTUnitTestApp\WinRTUnitTestApp.csproj", "{09CE40A1-A7A9-4C62-8D12-1526323873C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,30 @@ Global
 		{24EAEE91-735A-4042-BEAD-1B5EBC422D91}.Release|x86.ActiveCfg = Release|x86
 		{24EAEE91-735A-4042-BEAD-1B5EBC422D91}.Release|x86.Build.0 = Release|x86
 		{24EAEE91-735A-4042-BEAD-1B5EBC422D91}.Release|x86.Deploy.0 = Release|x86
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|ARM.ActiveCfg = Debug|ARM
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|ARM.Build.0 = Debug|ARM
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|ARM.Deploy.0 = Debug|ARM
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|x64.ActiveCfg = Debug|x64
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|x64.Build.0 = Debug|x64
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|x64.Deploy.0 = Debug|x64
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|x86.ActiveCfg = Debug|x86
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|x86.Build.0 = Debug|x86
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Debug|x86.Deploy.0 = Debug|x86
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|ARM.ActiveCfg = Release|ARM
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|ARM.Build.0 = Release|ARM
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|ARM.Deploy.0 = Release|ARM
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|x64.ActiveCfg = Release|x64
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|x64.Build.0 = Release|x64
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|x64.Deploy.0 = Release|x64
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|x86.ActiveCfg = Release|x86
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|x86.Build.0 = Release|x86
+		{09CE40A1-A7A9-4C62-8D12-1526323873C0}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

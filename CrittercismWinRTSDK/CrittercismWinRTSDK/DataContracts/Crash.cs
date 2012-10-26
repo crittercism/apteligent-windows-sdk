@@ -7,6 +7,7 @@ namespace CrittercismSDK.DataContracts
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
+    using Windows.UI.Xaml;
 
     /// <summary>
     /// Crash (Unhandled Exception).
@@ -19,34 +20,34 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The identifier of the application. </value>
         [DataMember]
-        public string app_id { get; set; }
+        public string app_id { get; internal set; }
 
         /// <summary>
         /// Gets or sets the state of the application.
         /// </summary>
         /// <value> The application state. </value>
         [DataMember]
-        public AppState app_state { get; set; }
+        public Dictionary<string, object> app_state { get; internal set; }
 
         /// <summary>
         /// Gets or sets the breadcrumbs.
         /// </summary>
         /// <value> The breadcrumbs. </value>
         [DataMember]
-        public Breadcrumbs breadcrumbs { get; set; }
+        public Breadcrumbs breadcrumbs { get; internal set; }
 
         /// <summary>
         /// Gets or sets the crash
         /// </summary>
         [DataMember]
-        public ExceptionObject crash { get; set; }
+        public ExceptionObject crash { get; internal set; }
 
         /// <summary>
         /// Gets or sets the platform.
         /// </summary>
         /// <value> The platform. </value>
         [DataMember]
-        public Platform platform { get; set; }
+        public Platform platform { get; internal set; }
         
         /// <summary>
         /// Default constructor.
@@ -69,7 +70,9 @@ namespace CrittercismSDK.DataContracts
         public Crash(string appId, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
         {
             app_id = appId;
-            app_state = new AppState();
+            app_state = new Dictionary<string, object>();
+            app_state.Add("app_version", Application.Current.GetType().AssemblyQualifiedName.Split('=')[1].Split(',')[0]);
+            app_state.Add("battery_level", "50"); // Because in WinRT is impossible to obtain that information
             breadcrumbs = currentBreadcrumbs;
             crash = exception;
             platform = new Platform();

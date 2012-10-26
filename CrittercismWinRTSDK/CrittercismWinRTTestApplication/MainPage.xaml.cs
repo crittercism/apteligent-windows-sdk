@@ -49,7 +49,6 @@ namespace CrittercismWinRTTestApplication
                 Crittercism.CreateErrorReport(ex);
                 Crittercism.LeaveBreadcrum("Before crash");
                 int k = j / i;
-                // throw new Exception("This is my unhandled exception");
             }
         }
     }

@@ -46,19 +46,17 @@ namespace CrittercismSDK
         /// <returns>   true if it succeeds, false if it fails. </returns>
         private bool SendMessage(MessageReport message)
         {
+            // check if the communication layer is enable and if not return true. This is used for unit testing.
+            if (!Crittercism._enableCommunicationLayer)
+            {
+                return true;
+            }
+
             if (NetworkInterface.GetIsNetworkAvailable())
             {
                 try
                 {
-                    MemoryStream messageStream = new MemoryStream();
-                    DataContractJsonSerializer serializer = new DataContractJsonSerializer(message.GetType());
-                    serializer.WriteObject(messageStream, message);
-                    messageStream.Flush();
-
-                    // Debug code, not need to copy the stream to the httpwebrequest
-                    messageStream.Seek(0, SeekOrigin.Begin);
-                    StreamReader reader = new StreamReader(messageStream);
-                    string jsonMessage = reader.ReadToEnd();
+                    string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
                     HttpWebRequest request = null;
                     switch (message.GetType().Name)
                     {
@@ -76,6 +74,7 @@ namespace CrittercismSDK
                     request.Method = "POST";
                     request.ContentType = "application/json; charset=utf-8";
                     bool sendCompleted = false;
+                    Exception lastException = null;
                     System.Threading.ManualResetEvent resetEvent = new System.Threading.ManualResetEvent(false);
                     request.BeginGetRequestStream(
                         (result) =>
@@ -83,8 +82,9 @@ namespace CrittercismSDK
                             try
                             {
                                 Stream requestStream = request.EndGetRequestStream(result);
-                                serializer.WriteObject(requestStream, message);
-                                requestStream.Flush();
+                                StreamWriter writer = new StreamWriter(requestStream);
+                                writer.Write(jsonMessage);
+                                writer.Flush();
                                 request.BeginGetResponse(
                                      (asyncResponse) =>
                                      {
@@ -93,18 +93,6 @@ namespace CrittercismSDK
                                              HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
                                              if (response.StatusCode == HttpStatusCode.OK)
                                              {
-                                                 if (message.GetType().Name == "AppLoad" && string.IsNullOrEmpty(Crittercism.DeviceId))
-                                                 {
-                                                     DataContractJsonSerializer serializerBody = new DataContractJsonSerializer(typeof(AppLoadResponse));
-                                                     Stream responseStream = response.GetResponseStream();
-                                                     AppLoadResponse appLoadResponse = serializerBody.ReadObject(responseStream) as AppLoadResponse;
-                                                     if (appLoadResponse != null && !string.IsNullOrEmpty(appLoadResponse.did))
-                                                     {
-                                                         Crittercism.DeviceId = appLoadResponse.did;
-                                                         appLoadResponse.SaveToDisk();
-                                                     }
-                                                 }
-
                                                  sendCompleted = true;
                                              }
                                          }
@@ -120,34 +108,47 @@ namespace CrittercismSDK
                                                          StreamReader errorReader = (new StreamReader(webEx.Response.GetResponseStream()));
                                                          string errorMessage = errorReader.ReadToEnd();
                                                          System.Diagnostics.Debug.WriteLine(errorMessage);
+                                                         lastException = new Exception(errorMessage, webEx);
                                                      }
-                                                     catch
+                                                     catch (Exception ex)
                                                      {
-                                                         // if is another error we just ignore for now
+                                                         lastException = ex;
                                                      }
                                                  }
                                              }
                                          }
-                                         catch
+                                         catch (Exception ex)
                                          {
-                                             // if is another error we just ignore for now
+                                             lastException = ex;
                                          }
 
                                          resetEvent.Set();
                                      }, null);
                             }
-                            catch
+                            catch (Exception ex)
                             {
+                                lastException = ex;
+
                                 // release the lock if something fail.
                                 resetEvent.Set();
                             }
                         }, null);
                     resetEvent.WaitOne(10000); // timeout of 10 seconds to send the message
+                    if (Crittercism._enableRaiseExceptionInCommunicationLayer && lastException != null)
+                    {
+                        throw lastException;
+                    }
+
                     return sendCompleted;
                 }
                 catch
                 {
-                    // This is in case of have a exception in the middle of the send process
+                    if (Crittercism._enableRaiseExceptionInCommunicationLayer)
+                    {
+                        throw;
+                    }
+
+                    // This is in case of have an exception in the middle of the send process
                     return false;
                 }
             }
