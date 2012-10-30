@@ -179,11 +179,19 @@
     <Content Include="Assets\Tiles\IconicTileSmall.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="att_124x124.png" />
+    <Content Include="betfair_124x124.png" />
     <Content Include="crashes.png" />
+    <Content Include="eventbrite_124x124.png" />
     <Content Include="fancy-critter.png" />
     <Content Include="loads.png" />
+    <Content Include="netflix_124x124.png" />
     <Content Include="ninja-critter-times-square2.jpg" />
     <Content Include="ninja_critter.jpg" />
+    <Content Include="npr_124x124.png" />
+    <Content Include="Pinterest_Logo.png" />
+    <Content Include="pulse_124x124.png" />
+    <Content Include="Shazam.jpg" />
     <Content Include="stacktrace.png" />
   </ItemGroup>
   <ItemGroup>
