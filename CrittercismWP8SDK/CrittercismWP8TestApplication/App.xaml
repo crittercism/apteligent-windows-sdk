@@ -8,6 +8,7 @@
     <!--Application Resources-->
     <Application.Resources>
         <local:LocalizedStrings xmlns:local="clr-namespace:CrittercismWP8TestApplication" x:Key="LocalizedStrings"/>
+        
     </Application.Resources>
 
     <Application.ApplicationLifetimeObjects>

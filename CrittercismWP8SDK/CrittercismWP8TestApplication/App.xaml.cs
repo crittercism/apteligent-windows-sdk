@@ -24,9 +24,6 @@ namespace CrittercismWP8TestApplication
         /// </summary>
         public App()
         {
-            // Global handler for uncaught exceptions.
-            UnhandledException += Application_UnhandledException;
-
             // Standard XAML initialization
             InitializeComponent();
 
@@ -65,6 +62,7 @@ namespace CrittercismWP8TestApplication
             //// Call the Init of the unhandled managed class library "Crittercism"
             Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
             Crittercism.LeaveBreadcrum("Start the application");
+            
         }
 
         // Code to execute when the application is activated (brought to foreground)
@@ -91,16 +89,6 @@ namespace CrittercismWP8TestApplication
             if (Debugger.IsAttached)
             {
                 // A navigation has failed; break into the debugger
-                Debugger.Break();
-            }
-        }
-
-        // Code to execute on Unhandled Exceptions
-        private void Application_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
-        {
-            if (Debugger.IsAttached)
-            {
-                // An unhandled exception has occurred; break into the debugger
                 Debugger.Break();
             }
         }
