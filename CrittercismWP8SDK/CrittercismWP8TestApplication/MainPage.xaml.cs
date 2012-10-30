@@ -23,18 +23,8 @@ namespace CrittercismWP8TestApplication
             //BuildLocalizedApplicationBar();
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                throw new Exception("This is my handled exception");
-            }
-            catch (Exception ex)
-            {
-                //Crittercism.CreateErrorReport(ex);
-                Crittercism.LeaveBreadcrum("Before crash");
-                throw new Exception("This is my unhandled exception");
-            }
+        private void nextButtonClicked(object sender, RoutedEventArgs e) {
+            NavigationService.Navigate(new Uri("/Customers.xaml", UriKind.Relative));
         }
 
         // Sample code for building a localized ApplicationBar
