@@ -25,13 +25,14 @@
             <TextBlock Text="CRITTERCISM" Style="{StaticResource PhoneTextNormalStyle}"/>
             <TextBlock Text="our customers" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
+        <Image Source="/netflix_124x124.png" Stretch="Fill" Margin="178,268,178,215" Grid.Row="1"/>
+        <Image Source="/Pinterest_Logo.png" Stretch="Fill" Margin="115,27,115,516" Grid.Row="1"/>
+        <Image Source="/Shazam.jpg" Stretch="Fill" Margin="115,114,115,360" Grid.Row="1"/>
 
         <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-
-        </Grid>
         <Button Content="Back" HorizontalAlignment="Left" Margin="12,525,0,0" VerticalAlignment="Top" Height="72" Width="120" Click="backButtonClicked" Grid.Row="1" />
         <Button Content="Next" HorizontalAlignment="Left" Margin="348,525,0,0" VerticalAlignment="Top" Height="72" Width="120" Click="nextButtonClicked" Grid.Row="1" />
+        <Image Margin="178,392,178,91" Grid.Row="1" Source="/eventbrite_124x124.png" Stretch="Fill"/>
     </Grid>
 
 </phone:PhoneApplicationPage>
