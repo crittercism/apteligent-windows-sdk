@@ -3,19 +3,13 @@
 namespace CrittercismSDK.DataContracts
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Text;
     using System.IO;
     using System.IO.IsolatedStorage;
-    using System.Runtime.Serialization.Json;
     using System.Reflection;
 
     /// <summary>
     /// Message report.
     /// </summary>
-    [DataContract]
     public abstract class MessageReport
     {
         /// <summary>

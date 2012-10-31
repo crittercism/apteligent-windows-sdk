@@ -19,26 +19,26 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The identifier of the application. </value>
         [DataMember]
-        public string app_id { get; set; }
+        public string app_id { get; internal set; }
 
         /// <summary>
         /// Gets or sets the application state.
         /// </summary>
         [DataMember]
-        public Dictionary<string, object> app_state { get; set; }
+        public Dictionary<string, object> app_state { get; internal set; }
 
         /// <summary>
         /// Gets or sets the error.
         /// </summary>
         /// <value> The error. </value>
         [DataMember]
-        public ExceptionObject error { get; set; }
+        public ExceptionObject error { get; internal set; }
 
         /// <summary>
         /// Gets or sets the platform
         /// </summary>
         [DataMember]
-        public Platform platform { get; set; }
+        public Platform platform { get; internal set; }
 
         /// <summary>
         /// Default constructor.
@@ -57,8 +57,8 @@ namespace CrittercismSDK.DataContracts
             app_id = appId;
             // Initialize app state dictionary with base battery level and app version keys
             app_state = new Dictionary<string, object> { 
-                    { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString() },
-                    { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion }
+                    { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion },
+                    { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString() }
                 };
 
             error = exception;

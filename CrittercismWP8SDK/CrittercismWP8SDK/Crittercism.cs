@@ -23,6 +23,22 @@ namespace CrittercismSDK
     {
         #region Properties
 
+
+        /// <summary>
+        /// The auto run queue reader
+        /// </summary>
+        internal static bool _autoRunQueueReader = true;
+
+        /// <summary>
+        /// The enable communication layer
+        /// </summary>
+        internal static bool _enableCommunicationLayer = true;
+
+        /// <summary>
+        /// The enable raise exception in communication layer
+        /// </summary>
+        internal static bool _enableRaiseExceptionInCommunicationLayer = false;
+
         /// <summary>
         /// Gets or sets a queue of messages.
         /// </summary>
@@ -81,50 +97,50 @@ namespace CrittercismSDK
         /// Gets or sets the identifier of the device.
         /// </summary>
         /// <value> The identifier of the device. </value>
-        internal static string DeviceId
-        {
-            get
-            {
-                try
-                {
-                    // get application settings for isolate storage
-                    var appSettings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
-                    Dictionary<string, string> crittercismSettings = null;
+        ////internal static string DeviceId
+        ////{
+        ////    get
+        ////    {
+        ////        try
+        ////        {
+        ////            // get application settings for isolate storage
+        ////            var appSettings = System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings;
+        ////            Dictionary<string, string> crittercismSettings = null;
 
-                    // if there not exist a dictionary for crittercism settings then create one with the device id as unique guid
-                    if (!appSettings.Contains("CrittercismSettings"))
-                    {
-                        crittercismSettings = new Dictionary<string, string>();
-                        crittercismSettings.Add("DeviceId", System.Guid.NewGuid().ToString());
-                        appSettings.Add("CrittercismSettings", crittercismSettings);
-                    }
-                    else
-                    {
-                        // if the settings already exist just get them.
-                        crittercismSettings = appSettings["CrittercismSettings"] as Dictionary<string, string>;
-                    }
+        ////            // if there not exist a dictionary for crittercism settings then create one with the device id as unique guid
+        ////            if (!appSettings.Contains("CrittercismSettings"))
+        ////            {
+        ////                crittercismSettings = new Dictionary<string, string>();
+        ////                crittercismSettings.Add("DeviceId", System.Guid.NewGuid().ToString());
+        ////                appSettings.Add("CrittercismSettings", crittercismSettings);
+        ////            }
+        ////            else
+        ////            {
+        ////                // if the settings already exist just get them.
+        ////                crittercismSettings = appSettings["CrittercismSettings"] as Dictionary<string, string>;
+        ////            }
 
-                    // if I have settings and there is a value for the device id return it, it should be because when the settings are created it is automatically set
-                    // else add a new device id and return it. The end user can modify this settings because it is store on the application settings that is accessible for him
-                    if (crittercismSettings != null)
-                    {
-                        if (!crittercismSettings.ContainsKey("DeviceId"))
-                        {
-                            crittercismSettings.Add("DeviceId", System.Guid.NewGuid().ToString());
-                        }
+        ////            // if I have settings and there is a value for the device id return it, it should be because when the settings are created it is automatically set
+        ////            // else add a new device id and return it. The end user can modify this settings because it is store on the application settings that is accessible for him
+        ////            if (crittercismSettings != null)
+        ////            {
+        ////                if (!crittercismSettings.ContainsKey("DeviceId"))
+        ////                {
+        ////                    crittercismSettings.Add("DeviceId", System.Guid.NewGuid().ToString());
+        ////                }
 
-                        return crittercismSettings["DeviceId"] as string;
-                    }
-                }
-                catch
-                {
-                    // eat any possible crash, to avoid the dll to stack overflow
-                }
+        ////                return crittercismSettings["DeviceId"] as string;
+        ////            }
+        ////        }
+        ////        catch
+        ////        {
+        ////            // eat any possible crash, to avoid the dll to stack overflow
+        ////        }
 
-                // return a empty string in case of error.
-                return string.Empty;
-            }
-        }
+        ////        // return a empty string in case of error.
+        ////        return string.Empty;
+        ////    }
+        ////}
 
         /// <summary>
         /// Gets or sets the operating system platform.
@@ -177,18 +193,21 @@ namespace CrittercismSDK
             StartApplication(appID, key, secret);
 
 #if WINDOWS_PHONE
-            Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
-            DeviceNetworkInformation.NetworkAvailabilityChanged += DeviceNetworkInformation_NetworkAvailabilityChanged;
-            try
+            if (_autoRunQueueReader && _enableCommunicationLayer && !(_enableRaiseExceptionInCommunicationLayer))  // for unit test purposes
             {
-                if (PhoneApplicationService.Current != null)
+                Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
+                DeviceNetworkInformation.NetworkAvailabilityChanged += DeviceNetworkInformation_NetworkAvailabilityChanged;
+                try
                 {
-                    PhoneApplicationService.Current.Activated += new EventHandler<ActivatedEventArgs>(Current_Activated);
-                    PhoneApplicationService.Current.Deactivated += new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
+                    if (PhoneApplicationService.Current != null)
+                    {
+                        PhoneApplicationService.Current.Activated += new EventHandler<ActivatedEventArgs>(Current_Activated);
+                        PhoneApplicationService.Current.Deactivated += new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
+                    }
                 }
-            }
-            catch
-            {
+                catch
+                {
+                }
             }
 #else
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
@@ -274,7 +293,7 @@ namespace CrittercismSDK
         /// Creates a crash report.
         /// </summary>
         /// <param name="currentException"> The current exception. </param>
-        private static void CreateCrashReport(Exception currentException)
+        internal static void CreateCrashReport(Exception currentException)
         {
             var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
             Breadcrumbs breadcrumbs = new Breadcrumbs();
@@ -365,17 +384,20 @@ namespace CrittercismSDK
             if (messageCounter < 50)
             {
                 MessageQueue.Enqueue(message);
-                if (readerThread.ThreadState == ThreadState.Unstarted)
+                if (_autoRunQueueReader)  // This flag is for unit test
                 {
-                    readerThread.Start();
-                }
-                else if (readerThread.ThreadState == ThreadState.Stopped || readerThread.ThreadState == ThreadState.Aborted)
-                {
-                    QueueReader queueReader = new QueueReader();
-                    ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
-                    readerThread = new Thread(threadStart);
-                    readerThread.Name = "Crittercism Sender";
-                    readerThread.Start();
+                    if (readerThread.ThreadState == ThreadState.Unstarted)
+                    {
+                        readerThread.Start();
+                    }
+                    else if (readerThread.ThreadState == ThreadState.Stopped || readerThread.ThreadState == ThreadState.Aborted)
+                    {
+                        QueueReader queueReader = new QueueReader();
+                        ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
+                        readerThread = new Thread(threadStart);
+                        readerThread.Name = "Crittercism Sender";
+                        readerThread.Start();
+                    }
                 }
             }
             else
@@ -443,29 +465,32 @@ namespace CrittercismSDK
 
         static void DeviceNetworkInformation_NetworkAvailabilityChanged(object sender, NetworkNotificationEventArgs e)
         {
-            switch (e.NotificationType)
+            if (_autoRunQueueReader)  // This flag is for unit test
             {
-                case NetworkNotificationType.InterfaceConnected:
-                    if (NetworkInterface.GetIsNetworkAvailable())
-                    {
-                        if (MessageQueue != null && MessageQueue.Count > 0)
+                switch (e.NotificationType)
+                {
+                    case NetworkNotificationType.InterfaceConnected:
+                        if (NetworkInterface.GetIsNetworkAvailable())
                         {
-                            if (readerThread.ThreadState == ThreadState.Unstarted)
+                            if (MessageQueue != null && MessageQueue.Count > 0)
                             {
-                                readerThread.Start();
-                            }
-                            else if (readerThread.ThreadState == ThreadState.Stopped || readerThread.ThreadState == ThreadState.Aborted)
-                            {
-                                QueueReader queueReader = new QueueReader();
-                                ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
-                                readerThread = new Thread(threadStart);
-                                readerThread.Name = "Crittercism Sender";
-                                readerThread.Start();
+                                if (readerThread.ThreadState == ThreadState.Unstarted)
+                                {
+                                    readerThread.Start();
+                                }
+                                else if (readerThread.ThreadState == ThreadState.Stopped || readerThread.ThreadState == ThreadState.Aborted)
+                                {
+                                    QueueReader queueReader = new QueueReader();
+                                    ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
+                                    readerThread = new Thread(threadStart);
+                                    readerThread.Name = "Crittercism Sender";
+                                    readerThread.Start();
+                                }
                             }
                         }
-                    }
 
-                    break;
+                        break;
+                }
             }
         }
 #else

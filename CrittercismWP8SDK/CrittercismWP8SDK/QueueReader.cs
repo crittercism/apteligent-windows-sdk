@@ -17,7 +17,8 @@ namespace CrittercismSDK
         /// </summary>
         public void ReadQueue()
         {
-            while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0 && NetworkInterface.GetIsNetworkAvailable())
+            int retry = 0;
+            while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0 && NetworkInterface.GetIsNetworkAvailable() && retry < 3)
             {
                 MessageReport message = Crittercism.MessageQueue.Peek();
                 if (!message.IsLoaded)
@@ -29,6 +30,11 @@ namespace CrittercismSDK
                 {
                     Crittercism.MessageQueue.Dequeue();
                     message.DeleteFromDisk();
+                    retry = 0;
+                }
+                else
+                {
+                    retry++;
                 }
             }
         }
@@ -38,23 +44,19 @@ namespace CrittercismSDK
         /// </summary>
         /// <param name="message">  The message. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
-        private bool SendMessage(MessageReport message) {
-            if (NetworkInterface.GetIsNetworkAvailable()) {
-                try {
+        private bool SendMessage(MessageReport message)
+        {
+            // check if the communication layer is enable and if not return true.. this is used for unit testing.
+            if (!Crittercism._enableCommunicationLayer)
+            {
+                return true;
+            }
+
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+                try
+                {
                     string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
-
-                    ////MemoryStream messageStream = new MemoryStream();
-                    ////DataContractJsonSerializerSettings settings = new DataContractJsonSerializerSettings();
-                    ////settings.UseSimpleDictionaryFormat = true;
-                    ////DataContractJsonSerializer serializer = new DataContractJsonSerializer(message.GetType(), settings);
-                    ////serializer.WriteObject(messageStream, message);
-                    ////messageStream.Flush();
-
-                    ////// Debug code, not need to copy the stream to the httpwebrequest
-                    ////messageStream.Seek(0, SeekOrigin.Begin);
-                    ////StreamReader reader = new StreamReader(messageStream);
-                    ////string jsonMessage = reader.ReadToEnd();
-
                     HttpWebRequest request = null;
                     switch (message.GetType().Name)
                     {
@@ -71,8 +73,8 @@ namespace CrittercismSDK
 
                     request.Method = "POST";
                     request.ContentType = "application/json; charset=utf-8";
-                    //Stream requestStream = request.GetRequestStream(); // this is only for Windows 8
                     bool sendCompleted = false;
+                    Exception lastException = null;
                     System.Threading.ManualResetEvent resetEvent = new System.Threading.ManualResetEvent(false);
                     request.BeginGetRequestStream(
                         (result) =>
@@ -82,16 +84,13 @@ namespace CrittercismSDK
                                 Stream requestStream = request.EndGetRequestStream(result);
                                 StreamWriter writer = new StreamWriter(requestStream);
                                 writer.Write(jsonMessage);
-                                //serializer.WriteObject(requestStream, message);
                                 writer.Flush();
                                 writer.Close();
-
                                 request.BeginGetResponse(
                                      (asyncResponse) =>
                                      {
                                          try
                                          {
-
                                              HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
                                              if (response.StatusCode == HttpStatusCode.OK)
                                              {
@@ -110,34 +109,46 @@ namespace CrittercismSDK
                                                          StreamReader errorReader = (new StreamReader(webEx.Response.GetResponseStream()));
                                                          string errorMessage = errorReader.ReadToEnd();
                                                          System.Diagnostics.Debug.WriteLine(errorMessage);
+                                                         lastException = new Exception(errorMessage, webEx);
                                                      }
-                                                     catch
+                                                     catch (Exception ex)
                                                      {
-                                                         // if is another error we just ignore for now
+                                                         lastException = ex;
                                                      }
                                                  }
                                              }
-
                                          }
-                                         catch
+                                         catch (Exception ex)
                                          {
-                                             // if is another error we just ignore for now
+                                             lastException = ex;
                                          }
 
                                          resetEvent.Set();
                                      }, null);
                             }
-                            catch
+                            catch (Exception ex)
                             {
+                                lastException = ex;
+
                                 // release the lock if something fail.
                                 resetEvent.Set();
                             }
                         }, null);
-                    resetEvent.WaitOne(10000); // timeout of 10 seconds to send the message
+                    resetEvent.WaitOne(30000); // timeout of 30 seconds to send the message
+                    if (Crittercism._enableRaiseExceptionInCommunicationLayer && lastException != null)
+                    {
+                        throw lastException;
+                    }
+
                     return sendCompleted;
                 }
                 catch
                 {
+                    if (Crittercism._enableRaiseExceptionInCommunicationLayer)
+                    {
+                        throw;
+                    }
+
                     // This is in case of have a exception in the middle of the send process
                     return false;
                 }

@@ -19,21 +19,21 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The name of the exception. </value>
         [DataMember]
-        public string name { get; set; }
+        public string name { get; internal set; }
 
         /// <summary>
         /// Gets or sets the exception reason.
         /// </summary>
         /// <value> The exception reason. </value>
         [DataMember]
-        public string reason { get; set; }
+        public string reason { get; internal set; }
 
         /// <summary>
         /// Gets or sets the unsymbolized stacktrace.
         /// </summary>
         /// <value> The unsymbolized stacktrace. </value>
         [DataMember]
-        public List<string> stack_trace { get; set; }
+        public List<string> stack_trace { get; internal set; }
 
         /// <summary>
         /// Default constructor.

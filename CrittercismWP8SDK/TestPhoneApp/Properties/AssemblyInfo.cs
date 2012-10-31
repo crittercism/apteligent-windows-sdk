@@ -6,11 +6,11 @@ using System.Resources;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CrittercismWP8SDK")]
+[assembly: AssemblyTitle("TestPhoneApp")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CrittercismWP8SDK")]
+[assembly: AssemblyProduct("TestPhoneApp")]
 [assembly: AssemblyCopyright("Copyright ©  2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -21,7 +21,7 @@ using System.Resources;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b880017a-2b87-41da-b834-bc3d188231e2")]
+[assembly: Guid("d1a0c560-c994-4a95-b5f5-b7bfc48be184")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -35,6 +35,3 @@ using System.Resources;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
-
-[assembly: InternalsVisibleTo("WP8UnitTest")]
-[assembly: InternalsVisibleTo("TestPhoneApp")]

@@ -5,11 +5,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrittercismWP8TestApplicati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrittercismWP8SDK", "CrittercismWP8SDK\CrittercismWP8SDK.csproj", "{B880017A-2B87-41DA-B834-BC3D188231E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPhoneApp", "TestPhoneApp\TestPhoneApp.csproj", "{F704E879-6E9D-47BB-BCF0-15C655E03CEC}"
+EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 4
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://fenix.mobise.com:8080/tfs/defaultcollection
+		SccTeamFoundationServer = http://190.241.191.74:8080/tfs/defaultcollection
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = CrittercismWP8TestApplication\\CrittercismWP8TestApplication.csproj
 		SccProjectName1 = CrittercismWP8TestApplication
@@ -17,6 +19,9 @@ Global
 		SccProjectUniqueName2 = CrittercismWP8SDK\\CrittercismWP8SDK.csproj
 		SccProjectName2 = CrittercismWP8SDK
 		SccLocalPath2 = CrittercismWP8SDK
+		SccProjectUniqueName3 = TestPhoneApp\\TestPhoneApp.csproj
+		SccProjectName3 = TestPhoneApp
+		SccLocalPath3 = TestPhoneApp
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +62,24 @@ Global
 		{B880017A-2B87-41DA-B834-BC3D188231E2}.Release|ARM.Build.0 = Release|ARM
 		{B880017A-2B87-41DA-B834-BC3D188231E2}.Release|x86.ActiveCfg = Release|x86
 		{B880017A-2B87-41DA-B834-BC3D188231E2}.Release|x86.Build.0 = Release|x86
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|ARM.ActiveCfg = Debug|ARM
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|ARM.Build.0 = Debug|ARM
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|ARM.Deploy.0 = Debug|ARM
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|x86.ActiveCfg = Debug|x86
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|x86.Build.0 = Debug|x86
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Debug|x86.Deploy.0 = Debug|x86
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|ARM.ActiveCfg = Release|ARM
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|ARM.Build.0 = Release|ARM
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|ARM.Deploy.0 = Release|ARM
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|x86.ActiveCfg = Release|x86
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|x86.Build.0 = Release|x86
+		{F704E879-6E9D-47BB-BCF0-15C655E03CEC}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
