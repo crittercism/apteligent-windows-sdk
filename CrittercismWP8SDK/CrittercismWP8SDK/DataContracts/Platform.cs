@@ -2,6 +2,7 @@
 // David R. Albrecht for Crittercism, Inc.
 
 namespace CrittercismSDK.DataContracts {
+    using Microsoft.Phone.Info;
     using System;
     using System.Runtime.Serialization;
 
@@ -28,13 +29,13 @@ namespace CrittercismSDK.DataContracts {
         /// What kind of device is this? e.g. "Nokia Lumia 820"
         /// </summary>
         [DataMember]
-        public readonly string device_model = "Nokia Lumia 800";
+        public readonly string device_model = DeviceStatus.DeviceName;
 
         [DataMember]
-        public readonly string os_name = "Windows Phone";
+        public readonly string os_name = "wp";
 
         [DataMember]
-        public readonly string os_version = "8.0";
+        public readonly string os_version = Environment.OSVersion.Version.ToString();
 
         public Platform() {
             var storedAppId = GetAppId();

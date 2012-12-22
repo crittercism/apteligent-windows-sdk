@@ -24,6 +24,7 @@ namespace CrittercismWP8TestApplication
         }
 
         private void nextButtonClicked(object sender, RoutedEventArgs e) {
+            Crittercism.LeaveBreadcrumb("Navigating from MainPage to Customers");
             NavigationService.Navigate(new Uri("/Customers.xaml", UriKind.Relative));
         }
 

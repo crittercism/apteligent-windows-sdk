@@ -2,11 +2,14 @@
 // summary:	Implements the error class
 namespace CrittercismSDK.DataContracts
 {
+    using Microsoft.Phone.Net.NetworkInformation;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
+    using Windows.Devices.Sensors;
+    using Windows.Graphics.Display;
 
     /// <summary>
     /// Error.
@@ -56,10 +59,22 @@ namespace CrittercismSDK.DataContracts
         {
             app_id = appId;
             // Initialize app state dictionary with base battery level and app version keys
-            app_state = new Dictionary<string, object> { 
-                    { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion },
-                    { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString() }
-                };
+            app_state = new Dictionary<string, object> {
+                { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion },
+                // RemainingChargePercent returns an integer in [0,100]
+                { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent / 100.0 },
+                { "carrier", DeviceNetworkInformation.CellularMobileOperator },
+                { "disk_space_free", System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().AvailableFreeSpace },
+                { "device_total_ram_bytes", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("DeviceTotalMemory") },
+                // skipping "name" for device name as it requires manifest approval
+                // all counters below in bytes
+                { "memory_usage", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("ApplicationCurrentMemoryUsage") },
+                { "memory_usage_peak", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("ApplicationPeakMemoryUsage") },
+                { "on_cellular_data", DeviceNetworkInformation.IsCellularDataEnabled },
+                { "on_wifi", DeviceNetworkInformation.IsWiFiEnabled },
+                { "orientation", DisplayProperties.NativeOrientation.ToString() },
+                { "reported_at", DateTime.Now }
+            };
 
             error = exception;
             platform = new Platform();

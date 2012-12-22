@@ -60,9 +60,8 @@ namespace CrittercismWP8TestApplication
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
             //// Call the Init of the unhandled managed class library "Crittercism"
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
-            Crittercism.LeaveBreadcrum("Start the application");
-            
+            Crittercism.Init("50807ba33a47481dd5000002");
+            Crittercism.LeaveBreadcrumb("Start the application");
         }
 
         // Code to execute when the application is activated (brought to foreground)

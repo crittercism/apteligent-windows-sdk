@@ -184,13 +184,12 @@ namespace CrittercismSDK
         /// <param name="appID">  Identifier for the application. </param>
         /// <param name="key">    The key. </param>
         /// <param name="secret"> The secret. </param>
-        public static void Init(string appID, string key, string secret)
-        {
+        public static void Init(string appID) {
             QueueReader queueReader = new QueueReader();
             ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
             readerThread = new Thread(threadStart);
             readerThread.Name = "Crittercism Sender";
-            StartApplication(appID, key, secret);
+            StartApplication(appID, "key", "secret");
 
 #if WINDOWS_PHONE
             if (_autoRunQueueReader && _enableCommunicationLayer && !(_enableRaiseExceptionInCommunicationLayer))  // for unit test purposes
@@ -268,7 +267,7 @@ namespace CrittercismSDK
         /// Leave breadcrum.
         /// </summary>
         /// <param name="breadcrumb">   The breadcrumb. </param>
-        public static void LeaveBreadcrum(string breadcrumb)
+        public static void LeaveBreadcrumb(string breadcrumb)
         {
             lock (CurrentBreadcrumbs)
             {
@@ -283,6 +282,9 @@ namespace CrittercismSDK
         public static void CreateErrorReport(Exception e)
         {
             var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
+            Breadcrumbs breadcrumbs = new Breadcrumbs();
+            breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
+            breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
             ExceptionObject exception = new ExceptionObject(e.GetType().FullName, e.Message, e.StackTrace);
             Error error = new Error(AppID, appVersion, exception);
             error.SaveToDisk();

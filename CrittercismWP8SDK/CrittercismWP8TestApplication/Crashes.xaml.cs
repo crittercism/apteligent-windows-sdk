@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CrittercismSDK;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -15,10 +16,12 @@ namespace CrittercismWP8TestApplication {
         }
 
         private void backButtonClicked(object sender, RoutedEventArgs e) {
+            Crittercism.LeaveBreadcrumb("Navigating back to customers from Crashes");
             NavigationService.Navigate(new Uri("/Customers.xaml", UriKind.Relative));
         }
 
         private void nextButtonClicked(object sender, RoutedEventArgs e) {
+            Crittercism.LeaveBreadcrumb("Navigating forward to CrashSim from Crashes");
             NavigationService.Navigate(new Uri("/CrashSim.xaml", UriKind.Relative));
         }
     }

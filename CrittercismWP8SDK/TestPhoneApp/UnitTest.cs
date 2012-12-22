@@ -244,7 +244,7 @@ namespace TestPhoneApp
             catch (Exception ex)
             {
                 // Create a Breadcrumb to verify this in the message
-                Crittercism.LeaveBreadcrum("Breadcrumb test");
+                Crittercism.LeaveBreadcrumb("Breadcrumb test");
 
                 // Create the crash message
                 Crittercism.CreateCrashReport(ex);
@@ -288,7 +288,7 @@ namespace TestPhoneApp
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableCommunicationLayer = false;
             Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
-            Crittercism.LeaveBreadcrum("Breadcrumb test");
+            Crittercism.LeaveBreadcrumb("Breadcrumb test");
 
             int i = 0;
             int j = 5;
@@ -387,7 +387,7 @@ namespace TestPhoneApp
             catch (Exception ex)
             {
                 // Create a Breadcrum
-                Crittercism.LeaveBreadcrum("Breadcrum test");
+                Crittercism.LeaveBreadcrumb("Breadcrum test");
 
                 // Create the error message
                 Crittercism.CreateCrashReport(ex);
@@ -474,7 +474,7 @@ namespace TestPhoneApp
             catch (Exception ex)
             {
                 // Create a Breadcrum
-                Crittercism.LeaveBreadcrum("Breadcrum test");
+                Crittercism.LeaveBreadcrumb("Breadcrum test");
 
                 // Create the crash message
                 Crittercism.CreateCrashReport(ex);

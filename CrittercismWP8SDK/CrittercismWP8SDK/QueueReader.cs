@@ -46,6 +46,8 @@ namespace CrittercismSDK
         /// <returns>   true if it succeeds, false if it fails. </returns>
         private bool SendMessage(MessageReport message)
         {
+
+            const string CRITTERCISM_API_HOST = "https://api.crittercism.com";
             // check if the communication layer is enable and if not return true.. this is used for unit testing.
             if (!Crittercism._enableCommunicationLayer)
             {
@@ -61,13 +63,13 @@ namespace CrittercismSDK
                     switch (message.GetType().Name)
                     {
                         case "AppLoad":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/loads", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(CRITTERCISM_API_HOST + "/v1/loads", UriKind.Absolute));
                             break;
                         case "Error":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/errors", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(CRITTERCISM_API_HOST + "/v1/errors", UriKind.Absolute));
                             break;
                         default:
-                            request = (HttpWebRequest)WebRequest.Create(new Uri("https://api.crittercism.com/v1/crashes", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(CRITTERCISM_API_HOST + "/v1/crashes", UriKind.Absolute));
                             break;
                     }
 
