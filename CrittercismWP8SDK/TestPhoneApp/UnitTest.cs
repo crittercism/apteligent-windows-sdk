@@ -146,7 +146,7 @@ namespace TestPhoneApp
         {
             // Disable the auto run functionality for the queue message, to verify that the appload message is enqueue correctly
             Crittercism._autoRunQueueReader = false;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002")
             // The init method creates an appLoad message
             if (Crittercism.MessageQueue.Count == 1)
             {
