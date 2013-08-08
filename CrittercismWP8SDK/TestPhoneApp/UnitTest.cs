@@ -146,7 +146,7 @@ namespace TestPhoneApp
         {
             // Disable the auto run functionality for the queue message, to verify that the appload message is enqueue correctly
             Crittercism._autoRunQueueReader = false;
-            Crittercism.Init("50807ba33a47481dd5000002")
+            Crittercism.Init("50807ba33a47481dd5000002");
             // The init method creates an appLoad message
             if (Crittercism.MessageQueue.Count == 1)
             {
@@ -177,7 +177,7 @@ namespace TestPhoneApp
         {
             // Disable the auto run functionality for the queue message, to verify that the error message is enqueue correctly
             Crittercism._autoRunQueueReader = false;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002");
             // Eliminating the appLoad message enqueued because isn't necessary the verification of that
             MessageReport message = Crittercism.MessageQueue.Dequeue();
             message.DeleteFromDisk();
@@ -230,7 +230,7 @@ namespace TestPhoneApp
         {
             // Disable the auto run functionality for the queue message, to verify that the crash message is enqueue correctly
             Crittercism._autoRunQueueReader = false;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002");
             // Eliminating the appLoad message enqueued because isn't necessary the verification of that
             MessageReport message = Crittercism.MessageQueue.Dequeue();
             message.DeleteFromDisk();
@@ -287,7 +287,7 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableCommunicationLayer = false;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002");
             Crittercism.LeaveBreadcrumb("Breadcrumb test");
 
             int i = 0;
@@ -338,7 +338,7 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002");
 
             // Create a queuereader
             QueueReader queueReader = new QueueReader();
@@ -352,7 +352,7 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002");
             int i = 0;
             int j = 5;
             try
@@ -377,7 +377,7 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002");
             int i = 0;
             int j = 5;
             try
@@ -405,7 +405,7 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("WrongAppID", "key", "secret");
+            Crittercism.Init("WrongAppID");
 
             // Create a queuereader
             QueueReader queueReader = new QueueReader();
@@ -428,7 +428,7 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002");
             int i = 0;
             int j = 5;
             try
@@ -464,7 +464,7 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("50807ba33a47481dd5000002", "key", "secret");
+            Crittercism.Init("50807ba33a47481dd5000002");
             int i = 0;
             int j = 5;
             try
