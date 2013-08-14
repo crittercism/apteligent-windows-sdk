@@ -4,6 +4,7 @@ using Microsoft.Silverlight.Testing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,12 @@ namespace TestPhoneApp
     [TestClass]
     public class UnitTests : SilverlightTest
     {
+        [TestInitialize]
+        public void SetUp()
+        {
+            CleanUp();
+        }
+
         [TestMethod]
         public void AppLoadDataContractTest()
         {
@@ -164,6 +171,38 @@ namespace TestPhoneApp
             {
                 Assert.IsTrue(loadedJsonMessage.Contains(jsonFragment));
             }
+
+        }
+        [TestMethod]
+        public void CreateCrashReportTest()
+        {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            CleanUp(); // drop all previous messages
+            Crittercism.LeaveBreadcrumb("CrashReportBreadcrumb");
+            int i = 0;
+            int j = 5;
+            try
+            {
+                int k = j / i;
+            }
+            catch (Exception ex)
+            {
+                Crittercism.CreateCrashReport(ex);
+            }
+            Crash crash = Crittercism.MessageQueue.Dequeue() as Crash;
+            Assert.IsNotNull(crash, "Expected a Crash message");
+            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
+            checkCommonJsonFragments(asJson);
+            string[] jsonStrings = new string[] {
+                "\"breadcrumbs\":",
+                "\"current_session\":[{\"message\":\"CrashReportBreadcrumb\"",
+            };
+            foreach (String jsonFragment in jsonStrings)
+            {
+                Assert.IsTrue(asJson.Contains(jsonFragment));
+            }
+
 
         }
 
@@ -537,6 +576,24 @@ namespace TestPhoneApp
             {
                 MessageReport message = Crittercism.MessageQueue.Dequeue();
                 message.DeleteFromDisk();
+            }
+            // Some unit tests might pollute the message folder.  clean those up
+            string folderName = Crittercism.FolderName;
+            try
+            {
+                IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
+                if (storage.DirectoryExists(folderName))
+                {
+                    foreach (string file in storage.GetFileNames(folderName))
+                    {
+                        storage.DeleteFile(file);
+                    }
+                    storage.DeleteDirectory(folderName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("cleanUp exception: " + ex);
             }
         }
     }
