@@ -15,12 +15,6 @@ namespace TestPhoneApp
     [TestClass]
     public class UnitTests : SilverlightTest
     {
-        [TestInitialize]
-        public void SetUp()
-        {
-            CleanUp();
-        }
-
         [TestMethod]
         public void AppLoadDataContractTest()
         {
@@ -69,7 +63,7 @@ namespace TestPhoneApp
                 errorMessage = ex.Message;
                 errorStackTrace = ex.StackTrace;
                 ExceptionObject exception = new ExceptionObject(errorName, errorMessage, errorStackTrace);
-                newMessageReport = new Error("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), exception);
+                newMessageReport = new Error("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), new Breadcrumbs(), exception);
                 newMessageReport.SaveToDisk();
             }
 
@@ -173,6 +167,7 @@ namespace TestPhoneApp
             }
 
         }
+
         [TestMethod]
         public void CreateCrashReportTest()
         {
@@ -191,6 +186,7 @@ namespace TestPhoneApp
                 Crittercism.CreateCrashReport(ex);
             }
             Crash crash = Crittercism.MessageQueue.Dequeue() as Crash;
+            crash.DeleteFromDisk();
             Assert.IsNotNull(crash, "Expected a Crash message");
             String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
             checkCommonJsonFragments(asJson);
@@ -202,9 +198,42 @@ namespace TestPhoneApp
             {
                 Assert.IsTrue(asJson.Contains(jsonFragment));
             }
+        }
+
+        [TestMethod]
+        public void CreateErrorReportTest()
+        {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            CleanUp(); // drop all previous messages
+            Crittercism.LeaveBreadcrumb("ErrorReportBreadcrumb");
+            int i = 0;
+            int j = 5;
+            try
+            {
+                int k = j / i;
+            }
+            catch (Exception ex)
+            {
+                Crittercism.CreateErrorReport(ex);
+            }
+            Error error = Crittercism.MessageQueue.Dequeue() as Error;
+            error.DeleteFromDisk();
+            Assert.IsNotNull(error, "Expected an Error message");
+            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(error);
+            checkCommonJsonFragments(asJson);
+            string[] jsonStrings = new string[] {
+                "\"breadcrumbs\":",
+                "\"current_session\":[{\"message\":\"ErrorReportBreadcrumb\"",
+            };
+            foreach (String jsonFragment in jsonStrings)
+            {
+                Assert.IsTrue(asJson.Contains(jsonFragment));
+            }
 
 
         }
+
 
         [TestMethod]
         public void AppLoadQueueManagementTest()

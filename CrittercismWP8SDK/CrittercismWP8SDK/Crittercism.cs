@@ -286,7 +286,7 @@ namespace CrittercismSDK
             breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
             breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
             ExceptionObject exception = new ExceptionObject(e.GetType().FullName, e.Message, e.StackTrace);
-            Error error = new Error(AppID, appVersion, exception);
+            Error error = new Error(AppID, appVersion, breadcrumbs, exception);
             error.SaveToDisk();
             AddMessageToQueue(error);
         }
