@@ -175,6 +175,7 @@ namespace TestPhoneApp
             Crittercism.Init("50807ba33a47481dd5000002");
             CleanUp(); // drop all previous messages
             Crittercism.LeaveBreadcrumb("CrashReportBreadcrumb");
+            Crittercism.SetValue("username", "Mr. McUnitTest");
             int i = 0;
             int j = 5;
             try
@@ -193,6 +194,7 @@ namespace TestPhoneApp
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
                 "\"current_session\":[{\"message\":\"CrashReportBreadcrumb\"",
+                // FIXME user metadata should show up here
             };
             foreach (String jsonFragment in jsonStrings)
             {

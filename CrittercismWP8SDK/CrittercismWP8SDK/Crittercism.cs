@@ -76,24 +76,6 @@ namespace CrittercismSDK
         internal static string Username { get; set; }
 
         /// <summary>
-        /// Gets or sets the email.
-        /// </summary>
-        /// <value> The email. </value>
-        internal static string Email { get; set; }
-
-        /// <summary>
-        /// Gets or sets the gender.
-        /// </summary>
-        /// <value> The gender. </value>
-        internal static string Gender { get; set; }
-
-        /// <summary>
-        /// Gets or sets the age.
-        /// </summary>
-        /// <value> The age. </value>
-        internal static int Age { get; set; }
-
-        /// <summary>
         /// Gets or sets the identifier of the device.
         /// </summary>
         /// <value> The identifier of the device. </value>
@@ -178,6 +160,11 @@ namespace CrittercismSDK
 
         #region Methods
 
+        static Crittercism()
+        {
+            ArbitraryUserMetadata = new Dictionary<string, string>();
+        }
+
         /// <summary>
         /// Initialises this object.
         /// </summary>
@@ -221,33 +208,6 @@ namespace CrittercismSDK
         public static void SetUsername(string username)
         {
             Username = username;
-        }
-
-        /// <summary>
-        /// Sets an email.
-        /// </summary>
-        /// <param name="email">    The email. </param>
-        public static void SetEmail(string email)
-        {
-            Email = email;
-        }
-
-        /// <summary>
-        /// Sets a gender.
-        /// </summary>
-        /// <param name="gender">   The gender. </param>
-        public static void SetGender(string gender)
-        {
-            Gender = gender;
-        }
-
-        /// <summary>
-        /// Sets an age.
-        /// </summary>
-        /// <param name="age">  The age. </param>
-        public static void SetAge(int age)
-        {
-            Age = age;
         }
 
         /// <summary>
