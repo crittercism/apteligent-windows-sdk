@@ -63,7 +63,7 @@ namespace TestPhoneApp
                 errorMessage = ex.Message;
                 errorStackTrace = ex.StackTrace;
                 ExceptionObject exception = new ExceptionObject(errorName, errorMessage, errorStackTrace);
-                newMessageReport = new Error("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), new Breadcrumbs(), exception);
+                newMessageReport = new Error("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), new Dictionary<string,string>(), new Breadcrumbs(), exception);
                 newMessageReport.SaveToDisk();
             }
 
@@ -116,7 +116,7 @@ namespace TestPhoneApp
                 errorMessage = ex.Message;
                 errorStackTrace = ex.StackTrace;
                 ExceptionObject exception = new ExceptionObject(errorName, errorMessage, errorStackTrace);
-                newMessageReport = new Crash("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), new Breadcrumbs(), exception);
+                newMessageReport = new Crash("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), new Dictionary<string,string>(), new Breadcrumbs(), exception);
                 newMessageReport.SaveToDisk();
             }
 
@@ -175,7 +175,7 @@ namespace TestPhoneApp
             Crittercism.Init("50807ba33a47481dd5000002");
             CleanUp(); // drop all previous messages
             Crittercism.LeaveBreadcrumb("CrashReportBreadcrumb");
-            Crittercism.SetValue("username", "Mr. McUnitTest");
+            Crittercism.SetUsername("Mr. McUnitTest");
             int i = 0;
             int j = 5;
             try
@@ -194,7 +194,8 @@ namespace TestPhoneApp
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
                 "\"current_session\":[{\"message\":\"CrashReportBreadcrumb\"",
-                // FIXME user metadata should show up here
+                "\"metadata\":{",
+                "\"username\":\"Mr. McUnitTest\"}",
             };
             foreach (String jsonFragment in jsonStrings)
             {
@@ -209,6 +210,7 @@ namespace TestPhoneApp
             Crittercism.Init("50807ba33a47481dd5000002");
             CleanUp(); // drop all previous messages
             Crittercism.LeaveBreadcrumb("ErrorReportBreadcrumb");
+            Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");
             int i = 0;
             int j = 5;
             try
@@ -227,6 +229,8 @@ namespace TestPhoneApp
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
                 "\"current_session\":[{\"message\":\"ErrorReportBreadcrumb\"",
+                "\"metadata\":{",
+                "\"favoriteFood\":\"Texas Sheet Cake\"}",
             };
             foreach (String jsonFragment in jsonStrings)
             {

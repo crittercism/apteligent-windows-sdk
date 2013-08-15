@@ -40,6 +40,9 @@ namespace CrittercismSDK.DataContracts
         [DataMember]
         public Breadcrumbs breadcrumbs { get; internal set; }
 
+        [DataMember]
+        public Dictionary<string, string> metadata { get; internal set; }
+
         /// <summary>
         /// Gets or sets the crash
         /// </summary>
@@ -67,7 +70,7 @@ namespace CrittercismSDK.DataContracts
         /// <param name="appVersion">The app version.</param>
         /// <param name="currentBreadcrumbs">The current breadcrumbs.</param>
         /// <param name="exception">The exception.</param>
-        public Crash(string appId, string appVersion, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
+        public Crash(string appId, string appVersion, Dictionary<string,string> currentMetadata, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
         {
             app_id = appId;
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
@@ -89,7 +92,7 @@ namespace CrittercismSDK.DataContracts
                     { "orientation", DisplayProperties.NativeOrientation.ToString() },
                     { "reported_at", DateTime.Now }
                 };
-
+            metadata = currentMetadata;
             breadcrumbs = currentBreadcrumbs;
             crash = exception;
             platform = new Platform();

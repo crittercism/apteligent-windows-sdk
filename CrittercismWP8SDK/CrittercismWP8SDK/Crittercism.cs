@@ -70,12 +70,6 @@ namespace CrittercismSDK
         internal static string Secret { get; set; }
 
         /// <summary>
-        /// Gets or sets the username.
-        /// </summary>
-        /// <value> The username. </value>
-        internal static string Username { get; set; }
-
-        /// <summary>
         /// Gets or sets the identifier of the device.
         /// </summary>
         /// <value> The identifier of the device. </value>
@@ -207,15 +201,15 @@ namespace CrittercismSDK
         /// <param name="username"> The username. </param>
         public static void SetUsername(string username)
         {
-            Username = username;
+            SetValue("username", username);
         }
 
         /// <summary>
         /// Sets an arbitrary user metadata value.
         /// </summary>
-        /// <param name="value">    The value. </param>
         /// <param name="key">      The key. </param>
-        public static void SetValue(string value, string key)
+        /// <param name="value">    The value. </param>
+        public static void SetValue(string key, string value)
         {
             lock (ArbitraryUserMetadata)
             {
@@ -246,7 +240,7 @@ namespace CrittercismSDK
             breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
             breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
             ExceptionObject exception = new ExceptionObject(e.GetType().FullName, e.Message, e.StackTrace);
-            Error error = new Error(AppID, appVersion, breadcrumbs, exception);
+            Error error = new Error(AppID, appVersion, new Dictionary<string,string>(ArbitraryUserMetadata), breadcrumbs, exception);
             error.SaveToDisk();
             AddMessageToQueue(error);
         }
@@ -262,7 +256,7 @@ namespace CrittercismSDK
             breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
             breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
             ExceptionObject exception = new ExceptionObject(currentException.GetType().FullName, currentException.Message, currentException.StackTrace);
-            Crash crash = new Crash(AppID, appVersion, breadcrumbs, exception);
+            Crash crash = new Crash(AppID, appVersion, new Dictionary<string,string>(ArbitraryUserMetadata), breadcrumbs, exception);
             crash.SaveToDisk();
             AddMessageToQueue(crash);
             CurrentBreadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);

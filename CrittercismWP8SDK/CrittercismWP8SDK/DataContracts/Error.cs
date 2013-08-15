@@ -46,6 +46,9 @@ namespace CrittercismSDK.DataContracts
         [DataMember]
         public Breadcrumbs breadcrumbs { get; internal set; }
 
+        [DataMember]
+        public Dictionary<string,string> metadata { get; internal set; }
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -58,7 +61,7 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <param name="appId">     Identifier for the application. </param>
         /// <param name="exception"> The exception. </param>
-        public Error(string appId, string appVersion, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
+        public Error(string appId, string appVersion, Dictionary<string,string> currentMetadata, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
         {
             app_id = appId;
             // Initialize app state dictionary with base battery level and app version keys
@@ -80,6 +83,7 @@ namespace CrittercismSDK.DataContracts
             };
 
             error = exception;
+            metadata = currentMetadata;
             breadcrumbs = currentBreadcrumbs;
             platform = new Platform();
         }
