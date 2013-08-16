@@ -44,7 +44,7 @@ namespace TestPhoneApp
         }
 
         [TestMethod]
-        public void ErrorDataContractTest()
+        public void HandledExceptionDataContractTest()
         {
             int i = 0;
             int j = 5;
@@ -204,12 +204,12 @@ namespace TestPhoneApp
         }
 
         [TestMethod]
-        public void CreateErrorReportTest()
+        public void LogHandledExceptionTest()
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism.Init("50807ba33a47481dd5000002");
             CleanUp(); // drop all previous messages
-            Crittercism.LeaveBreadcrumb("ErrorReportBreadcrumb");
+            Crittercism.LeaveBreadcrumb("HandledExceptionBreadcrumb");
             Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");
             int i = 0;
             int j = 5;
@@ -219,7 +219,7 @@ namespace TestPhoneApp
             }
             catch (Exception ex)
             {
-                Crittercism.CreateErrorReport(ex);
+                Crittercism.LogHandledException(ex);
             }
             Error error = Crittercism.MessageQueue.Dequeue() as Error;
             error.DeleteFromDisk();
@@ -228,7 +228,7 @@ namespace TestPhoneApp
             checkCommonJsonFragments(asJson);
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
-                "\"current_session\":[{\"message\":\"ErrorReportBreadcrumb\"",
+                "\"current_session\":[{\"message\":\"HandledExceptionBreadcrumb\"",
                 "\"metadata\":{",
                 "\"favoriteFood\":\"Texas Sheet Cake\"}",
             };
@@ -273,7 +273,7 @@ namespace TestPhoneApp
         }
 
         [TestMethod]
-        public void ErrorQueueManagementTest()
+        public void HandledExceptionQueueManagementTest()
         {
             // Disable the auto run functionality for the queue message, to verify that the error message is enqueue correctly
             Crittercism._autoRunQueueReader = false;
@@ -291,7 +291,7 @@ namespace TestPhoneApp
             catch (Exception ex)
             {
                 // Create the error message
-                Crittercism.CreateErrorReport(ex);
+                Crittercism.LogHandledException(ex);
                 if (Crittercism.MessageQueue.Count == 1)
                 {
                     Error error = Crittercism.MessageQueue.Dequeue() as Error;
@@ -400,7 +400,7 @@ namespace TestPhoneApp
             }
             catch (Exception ex)
             {
-                Crittercism.CreateErrorReport(ex);
+                Crittercism.LogHandledException(ex);
                 Crittercism.CreateCrashReport(ex);
                 if (Crittercism.MessageQueue.Count == 3)
                 {
@@ -450,7 +450,7 @@ namespace TestPhoneApp
         }
 
         [TestMethod]
-        public void ErrorCommunicationTest()
+        public void HandledExceptionCommunicationTest()
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
@@ -464,7 +464,7 @@ namespace TestPhoneApp
             catch (Exception ex)
             {
                 // Create the error message
-                Crittercism.CreateErrorReport(ex);
+                Crittercism.LogHandledException(ex);
 
                 // Create a queuereader
                 QueueReader queueReader = new QueueReader();
@@ -526,7 +526,7 @@ namespace TestPhoneApp
         }
 
         [TestMethod]
-        public void ErrorCommunicationFailTest()
+        public void HandledExceptionCommunicationFailTest()
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
@@ -540,7 +540,7 @@ namespace TestPhoneApp
             catch (Exception ex)
             {
                 // Create the error message
-                Crittercism.CreateErrorReport(ex);
+                Crittercism.LogHandledException(ex);
                 Error message = Crittercism.MessageQueue.Last() as Error;
                 message.app_id = "WrongAppID";
 

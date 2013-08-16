@@ -13,6 +13,7 @@ namespace CrittercismSDK.DataContracts
 
     /// <summary>
     /// Error.
+    /// FIXME johnbley - rename to HandledException at some point.
     /// </summary>
     [DataContract]
     public class Error : MessageReport

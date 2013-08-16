@@ -233,7 +233,7 @@ namespace CrittercismSDK
         /// <summary>
         /// Creates the error report.
         /// </summary>
-        public static void CreateErrorReport(Exception e)
+        public static void LogHandledException(Exception e)
         {
             var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
             Breadcrumbs breadcrumbs = new Breadcrumbs();
