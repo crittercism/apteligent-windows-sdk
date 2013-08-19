@@ -58,18 +58,6 @@ namespace CrittercismSDK
         internal static string AppID { get; set; }
 
         /// <summary>
-        /// Gets or sets the key.
-        /// </summary>
-        /// <value> The key. </value>
-        internal static string Key { get; set; }
-
-        /// <summary>
-        /// Gets or sets the secret.
-        /// </summary>
-        /// <value> The secret. </value>
-        internal static string Secret { get; set; }
-
-        /// <summary>
         /// Gets or sets the identifier of the device.
         /// </summary>
         /// <value> The identifier of the device. </value>
@@ -170,7 +158,7 @@ namespace CrittercismSDK
             ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
             readerThread = new Thread(threadStart);
             readerThread.Name = "Crittercism Sender";
-            StartApplication(appID, "key", "secret");
+            StartApplication(appID);
 
 #if WINDOWS_PHONE
             if (_autoRunQueueReader && _enableCommunicationLayer && !(_enableRaiseExceptionInCommunicationLayer))  // for unit test purposes
@@ -368,11 +356,9 @@ namespace CrittercismSDK
         /// <param name="appID">    Identifier for the application. </param>
         /// <param name="key">      The key. </param>
         /// <param name="secret">   The secret. </param>
-        private static void StartApplication(string appID, string key, string secret)
+        private static void StartApplication(string appID)
         {
             AppID = appID;
-            Key = key;
-            Secret = secret;
             CurrentBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
             OSPlatform = Environment.OSVersion.Platform.ToString();
             MessageQueue = new Queue<MessageReport>();
@@ -385,7 +371,7 @@ namespace CrittercismSDK
         /// </summary>
         private static void StartApplication()
         {
-            StartApplication(AppID, Key, Secret);
+            StartApplication(AppID);
         }
 
 #if WINDOWS_PHONE
@@ -409,14 +395,12 @@ namespace CrittercismSDK
 
         static void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"], (string)PhoneApplicationService.Current.State["Crittercism.Key"], (string)PhoneApplicationService.Current.State["Crittercism.Secret"]);
+            StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
         }
 
         static void Current_Deactivated(object sender, DeactivatedEventArgs e)
         {
             PhoneApplicationService.Current.State.Add("Crittercism.AppID", AppID);
-            PhoneApplicationService.Current.State.Add("Crittercism.Key", Key);
-            PhoneApplicationService.Current.State.Add("Crittercism.Secret", Secret);
         }
 
         static void DeviceNetworkInformation_NetworkAvailabilityChanged(object sender, NetworkNotificationEventArgs e)
