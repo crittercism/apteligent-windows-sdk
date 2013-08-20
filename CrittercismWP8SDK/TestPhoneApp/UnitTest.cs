@@ -457,9 +457,9 @@ namespace TestPhoneApp
             Crittercism.Init("50807ba33a47481dd5000002");
             CleanUp();
             Assert.IsTrue(Crittercism.MessageQueue == null || Crittercism.MessageQueue.Count == 0);
-            Crittercism.SetOptOutValue(true);
+            Crittercism.SetOptOutStatus(true);
             Assert.IsTrue(Crittercism.CheckOptOutFromDisk());
-            Assert.IsTrue(Crittercism.GetOptOutValue());
+            Assert.IsTrue(Crittercism.GetOptOutStatus());
             int i = 0;
             int j = 5;
             try
@@ -472,9 +472,9 @@ namespace TestPhoneApp
             }
             Assert.IsTrue(Crittercism.MessageQueue == null || Crittercism.MessageQueue.Count == 0);
             // Now turn it back on
-            Crittercism.SetOptOutValue(false);
+            Crittercism.SetOptOutStatus(false);
             Assert.IsFalse(Crittercism.CheckOptOutFromDisk());
-            Assert.IsFalse(Crittercism.GetOptOutValue());
+            Assert.IsFalse(Crittercism.GetOptOutStatus());
             try
             {
                 int k = j / i;

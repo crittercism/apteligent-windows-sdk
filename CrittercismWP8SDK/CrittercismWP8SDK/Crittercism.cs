@@ -208,12 +208,12 @@ namespace CrittercismSDK
             }
         }
 
-        public static bool GetOptOutValue()
+        public static bool GetOptOutStatus()
         {
             return OptOut;
         }
 
-        public static void SetOptOutValue(bool optOut)
+        public static void SetOptOutStatus(bool optOut)
         {
             if (optOut == OptOut)
             {
