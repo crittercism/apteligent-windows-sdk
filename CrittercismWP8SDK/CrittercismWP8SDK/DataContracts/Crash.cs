@@ -76,6 +76,7 @@ namespace CrittercismSDK.DataContracts
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
             // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
 
+            // FIXME jbley pull a good chunk of this stuff up to a base class
             app_state = new Dictionary<string, object> { 
                     { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion },
                     // RemainingChargePercent returns an integer in [0,100]

@@ -450,6 +450,44 @@ namespace TestPhoneApp
         }
 
         [TestMethod]
+        public void OptOutTest()
+        {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism._enableRaiseExceptionInCommunicationLayer = true;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            CleanUp();
+            Assert.IsTrue(Crittercism.MessageQueue == null || Crittercism.MessageQueue.Count == 0);
+            Crittercism.SetOptOutValue(true);
+            Assert.IsTrue(Crittercism.CheckOptOutFromDisk());
+            Assert.IsTrue(Crittercism.GetOptOutValue());
+            int i = 0;
+            int j = 5;
+            try
+            {
+                int k = j / i;
+            }
+            catch (Exception ex)
+            {
+                Crittercism.LogHandledException(ex);
+            }
+            Assert.IsTrue(Crittercism.MessageQueue == null || Crittercism.MessageQueue.Count == 0);
+            // Now turn it back on
+            Crittercism.SetOptOutValue(false);
+            Assert.IsFalse(Crittercism.CheckOptOutFromDisk());
+            Assert.IsFalse(Crittercism.GetOptOutValue());
+            try
+            {
+                int k = j / i;
+            }
+            catch (Exception ex)
+            {
+                Crittercism.LogHandledException(ex);
+            }
+            Assert.IsTrue(Crittercism.MessageQueue.Count == 1);
+
+        }
+
+        [TestMethod]
         public void HandledExceptionCommunicationTest()
         {
             Crittercism._autoRunQueueReader = false;
@@ -607,6 +645,7 @@ namespace TestPhoneApp
             Crittercism._autoRunQueueReader = true;
             Crittercism._enableCommunicationLayer = true;
             Crittercism._enableRaiseExceptionInCommunicationLayer = false;
+            Crittercism.OptOut = false;
             while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0)
             {
                 MessageReport message = Crittercism.MessageQueue.Dequeue();

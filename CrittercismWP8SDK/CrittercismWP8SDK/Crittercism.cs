@@ -5,6 +5,7 @@ namespace CrittercismSDK
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.IO;
     using System.IO.IsolatedStorage;
     using System.Linq;
     using System.Text;
@@ -56,6 +57,9 @@ namespace CrittercismSDK
         /// </summary>
         /// <value> The identifier of the application. </value>
         internal static string AppID { get; set; }
+
+
+        internal static bool OptOut {get; set; }
 
         /// <summary>
         /// Gets or sets the identifier of the device.
@@ -151,9 +155,8 @@ namespace CrittercismSDK
         /// Initialises this object.
         /// </summary>
         /// <param name="appID">  Identifier for the application. </param>
-        /// <param name="key">    The key. </param>
-        /// <param name="secret"> The secret. </param>
         public static void Init(string appID) {
+            OptOut = CheckOptOutFromDisk();
             QueueReader queueReader = new QueueReader();
             ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
             readerThread = new Thread(threadStart);
@@ -205,6 +208,64 @@ namespace CrittercismSDK
             }
         }
 
+        public static bool GetOptOutValue()
+        {
+            return OptOut;
+        }
+
+        public static void SetOptOutValue(bool optOut)
+        {
+            if (optOut == OptOut)
+            {
+                return; // mission accomplished
+            }
+            OptOut = optOut;
+            SetOptOutOnDisk(optOut);
+        }
+
+        private static readonly string CrittercismConfigFolder = "CrittercismConfig";
+        private static readonly string CrittercismOptOutFile = CrittercismConfigFolder + "\\" + "OptOut.txt";
+        private static void SetOptOutOnDisk(bool optOut)
+        {
+            IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
+            if (optOut)
+            {
+                if (!storage.DirectoryExists(CrittercismConfigFolder))
+                {
+                    storage.CreateDirectory(CrittercismConfigFolder);
+                }
+                if (!storage.FileExists(CrittercismOptOutFile))
+                {
+                    using (IsolatedStorageFileStream optOutFile = new IsolatedStorageFileStream(CrittercismOptOutFile, FileMode.Create, FileAccess.Write, storage))
+                    {
+                        optOutFile.Close();
+                    }
+                }
+            }
+            else
+            {
+                if (storage.FileExists(CrittercismOptOutFile))
+                {
+                    storage.DeleteFile(CrittercismOptOutFile);
+                }
+            }
+
+        }
+
+        internal static bool CheckOptOutFromDisk()
+        {
+            try
+            {
+                IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
+                return storage.FileExists(CrittercismOptOutFile);
+            }
+            catch (Exception ex)
+            {
+                // swallow, best effort
+                return false;
+            }
+        }
+
         /// <summary>
         /// Leave breadcrum.
         /// </summary>
@@ -223,6 +284,10 @@ namespace CrittercismSDK
         /// </summary>
         public static void LogHandledException(Exception e)
         {
+            if (OptOut)
+            {
+                return;
+            }
             var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
             Breadcrumbs breadcrumbs = new Breadcrumbs();
             breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
@@ -239,6 +304,10 @@ namespace CrittercismSDK
         /// <param name="currentException"> The current exception. </param>
         internal static void CreateCrashReport(Exception currentException)
         {
+            if (OptOut)
+            {
+                return;
+            }
             var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
             Breadcrumbs breadcrumbs = new Breadcrumbs();
             breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
@@ -256,6 +325,10 @@ namespace CrittercismSDK
         /// </summary>
         private static void CreateAppLoadReport()
         {
+            if (OptOut)
+            {
+                return;
+            }
             var appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
             // the following code doesn't work because the executing assembly is the same crittercimswp8sdk in WP8 ... 
             // var appVersion = System.Reflection.Assembly.GetExecutingAssembly().FullName.Split('=')[1].Split(',')[0].ToString();
@@ -354,8 +427,6 @@ namespace CrittercismSDK
         /// This method is invoked when the application starts or resume
         /// </summary>
         /// <param name="appID">    Identifier for the application. </param>
-        /// <param name="key">      The key. </param>
-        /// <param name="secret">   The secret. </param>
         private static void StartApplication(string appID)
         {
             AppID = appID;
