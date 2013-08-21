@@ -3,9 +3,13 @@
 namespace CrittercismSDK.DataContracts
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.IO.IsolatedStorage;
     using System.Reflection;
+    using Microsoft.Phone.Net.NetworkInformation;
+    using Windows.Devices.Sensors;
+    using Windows.Graphics.Display;
 
     /// <summary>
     /// Message report.
@@ -29,6 +33,30 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> true if this object is loaded, false if not. </value>
         internal bool IsLoaded { get; set; }
+
+        protected Dictionary<string,object> ComputeAppState(string appVersion)
+        {
+            // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
+            // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
+
+            return new Dictionary<string, object> {
+                { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion },
+                // RemainingChargePercent returns an integer in [0,100]
+                { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent / 100.0 },
+                { "carrier", DeviceNetworkInformation.CellularMobileOperator },
+                { "disk_space_free", System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().AvailableFreeSpace },
+                { "device_total_ram_bytes", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("DeviceTotalMemory") },
+                // skipping "name" for device name as it requires manifest approval
+                // all counters below in bytes
+                { "memory_usage", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("ApplicationCurrentMemoryUsage") },
+                { "memory_usage_peak", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("ApplicationPeakMemoryUsage") },
+                { "on_cellular_data", DeviceNetworkInformation.IsCellularDataEnabled },
+                { "on_wifi", DeviceNetworkInformation.IsWiFiEnabled },
+                { "orientation", DisplayProperties.NativeOrientation.ToString() },
+                { "reported_at", DateTime.Now }
+            };
+        }
+
 
         /// <summary>
         /// Saves the message to disk.

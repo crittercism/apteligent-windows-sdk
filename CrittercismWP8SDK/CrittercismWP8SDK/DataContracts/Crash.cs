@@ -73,26 +73,7 @@ namespace CrittercismSDK.DataContracts
         public Crash(string appId, string appVersion, Dictionary<string,string> currentMetadata, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
         {
             app_id = appId;
-            // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
-            // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
-
-            // FIXME jbley pull a good chunk of this stuff up to a base class
-            app_state = new Dictionary<string, object> { 
-                    { "app_version", String.IsNullOrEmpty(appVersion) ? "Unspecified" : appVersion },
-                    // RemainingChargePercent returns an integer in [0,100]
-                    { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent / 100.0 },
-                    { "carrier", DeviceNetworkInformation.CellularMobileOperator },
-                    { "disk_space_free", System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().AvailableFreeSpace },
-                    { "device_total_ram_bytes", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("DeviceTotalMemory") },
-                    // skipping "name" for device name as it requires manifest approval
-                    // all counters below in bytes
-                    { "memory_usage", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("ApplicationCurrentMemoryUsage") },
-                    { "memory_usage_peak", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("ApplicationPeakMemoryUsage") },
-                    { "on_cellular_data", DeviceNetworkInformation.IsCellularDataEnabled },
-                    { "on_wifi", DeviceNetworkInformation.IsWiFiEnabled },
-                    { "orientation", DisplayProperties.NativeOrientation.ToString() },
-                    { "reported_at", DateTime.Now }
-                };
+            app_state = ComputeAppState(appVersion);
             metadata = currentMetadata;
             breadcrumbs = currentBreadcrumbs;
             crash = exception;
