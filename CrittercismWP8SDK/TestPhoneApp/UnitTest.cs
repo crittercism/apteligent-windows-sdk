@@ -160,12 +160,12 @@ namespace TestPhoneApp
                 "\"device_model\":",
                 "\"os_name\":",
                 "\"os_version\":",
+                "\"locale\":",
             };
             foreach (string jsonFragment in jsonStrings)
             {
                 Assert.IsTrue(loadedJsonMessage.Contains(jsonFragment));
             }
-
         }
 
         [TestMethod]

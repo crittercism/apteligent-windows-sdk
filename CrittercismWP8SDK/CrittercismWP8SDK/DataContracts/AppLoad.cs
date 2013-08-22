@@ -44,12 +44,7 @@ namespace CrittercismSDK.DataContracts
             {
                 app_id = _appId;
 
-                // FIXME jbley any particular rhyme or reason here?  Why not all the other fields?
-                // Initialize app state dictionary with base battery level and app version keys
-                app_state = new Dictionary<string, object> { 
-                    { "app_version", String.IsNullOrEmpty(_appVersion) ? "Unspecified" : _appVersion },
-                    { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString() }
-                };
+                app_state = ComputeAppState(_appVersion);
 
                 platform = new Platform();
             }

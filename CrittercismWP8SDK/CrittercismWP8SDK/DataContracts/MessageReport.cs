@@ -47,6 +47,7 @@ namespace CrittercismSDK.DataContracts
                 { "disk_space_free", System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication().AvailableFreeSpace },
                 { "device_total_ram_bytes", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("DeviceTotalMemory") },
                 // skipping "name" for device name as it requires manifest approval
+                { "locale", System.Globalization.CultureInfo.CurrentCulture.Name},
                 // all counters below in bytes
                 { "memory_usage", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("ApplicationCurrentMemoryUsage") },
                 { "memory_usage_peak", Microsoft.Phone.Info.DeviceExtendedProperties.GetValue("ApplicationPeakMemoryUsage") },
