@@ -11,13 +11,14 @@ namespace CrittercismSDK.DataContracts {
     /// </summary>
     [DataContract]
     public class Platform {
-        private const string DEVICE_ID_KEY = "device_id";
+        // Need a prefix here to reduce chance of collisions
+        private const string DEVICE_ID_KEY = "crittercism_device_id";
 
         /// <summary>
         /// Identifies this library to Crittercism
         /// </summary>
         [DataMember]
-        public readonly string client = "wp8v1.0";
+        public readonly string client = "wp8v1.0"; // FIXME JBLEY check before shipping
 
         /// <summary>
         /// A GUID identifying this device
@@ -38,20 +39,20 @@ namespace CrittercismSDK.DataContracts {
         public readonly string os_version = Environment.OSVersion.Version.ToString();
 
         public Platform() {
-            var storedAppId = GetAppId();
+            var storedDeviceId = GetDeviceId();
             
-            if(storedAppId != null) {
-                this.device_id = storedAppId;
+            if(storedDeviceId != null) {
+                this.device_id = storedDeviceId;
             } else {
-                this.device_id = CreateStoreNewAppId();
+                this.device_id = CreateStoreNewDeviceId();
             }
         }
 
         /// <summary>
-        /// Attempts to retrieve the app_id from storage.
+        /// Attempts to retrieve the device_id from storage.
         /// </summary>
-        /// <returns>String with app_id, null otherwise</returns>
-        private string GetAppId() {
+        /// <returns>String with device_id, null otherwise</returns>
+        private string GetDeviceId() {
             if(System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.Contains(DEVICE_ID_KEY)) {
                 return System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings[DEVICE_ID_KEY] as String;
             } else {
@@ -59,7 +60,7 @@ namespace CrittercismSDK.DataContracts {
             }
         }
 
-        private string CreateStoreNewAppId() {
+        private string CreateStoreNewDeviceId() {
             var device_id = Guid.NewGuid().ToString();
             System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings[DEVICE_ID_KEY] = device_id;
 
