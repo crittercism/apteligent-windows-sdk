@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>CrittercismWP8SDK</id>
+    <version>12.0.0</version>
+    <authors>Crittercism, Inc.</authors>
+    <owners>johnbley</owners>
+    <projectUrl>http://www.crittercism.com</projectUrl>
+    <!-- FIXME jbley possibly add licenseUrl and iconUrl -->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Provides the Crittercism SDK for Windows Phone</description>
+    <releaseNotes>Adjustments and API enhancements for the Crittercism STBLZ product.</releaseNotes>
+    <copyright>Copyright 2013 Crittercism, Inc.</copyright>
+    <tags>crittercism wp8 unhandled exception bug trace apm</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="4.5.11" />
+    </dependencies>
+  </metadata>
+</package>
