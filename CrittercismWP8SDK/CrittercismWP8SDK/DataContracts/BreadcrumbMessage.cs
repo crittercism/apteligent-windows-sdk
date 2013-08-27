@@ -43,7 +43,7 @@ namespace CrittercismSDK.DataContracts
         public BreadcrumbMessage(string messageString)
         {
             message = messageString;
-            timestamp = DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", System.Globalization.CultureInfo.InvariantCulture);
+            timestamp = MessageReport.DateTimeString(DateTime.Now);
         }
     }
 }

@@ -34,6 +34,11 @@ namespace CrittercismSDK.DataContracts
         /// <value> true if this object is loaded, false if not. </value>
         internal bool IsLoaded { get; set; }
 
+        internal static string DateTimeString(DateTime dt)
+        {
+            return dt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
         protected Dictionary<string,object> ComputeAppState(string appVersion)
         {
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
@@ -54,7 +59,7 @@ namespace CrittercismSDK.DataContracts
                 { "on_cellular_data", DeviceNetworkInformation.IsCellularDataEnabled },
                 { "on_wifi", DeviceNetworkInformation.IsWiFiEnabled },
                 { "orientation", DisplayProperties.NativeOrientation.ToString() },
-                { "reported_at", DateTime.Now }
+                { "reported_at", DateTimeString(DateTime.Now) }
             };
         }
 

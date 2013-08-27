@@ -166,6 +166,8 @@ namespace TestPhoneApp
             {
                 Assert.IsTrue(loadedJsonMessage.Contains(jsonFragment));
             }
+            // Make sure DateTimes are stringified in the canonical way and not in this goofy default way
+            Assert.IsFalse(loadedJsonMessage.Contains("Date("));
         }
 
         [TestMethod]
