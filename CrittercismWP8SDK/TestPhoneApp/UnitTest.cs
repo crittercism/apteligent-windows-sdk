@@ -95,6 +95,35 @@ namespace TestPhoneApp
             // delete the message from disk
             newMessageReport.DeleteFromDisk();
         }
+        [TestMethod]
+        public void AddMetadataTwiceTest()
+        {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            Crittercism.SetUsername("george");
+            Crittercism.SetValue("username", "ron");
+            Crittercism.SetValue("username", "ginny");
+            Crittercism.SetUsername("percy");
+            Crittercism.SetUsername("charlie");
+            Crittercism.SetUsername("bill");
+            Crittercism.SetUsername("fred");
+            CleanUp(); // drop all previous messages
+            int i = 0;
+            int j = 5;
+            try
+            {
+                int k = j / i;
+            }
+            catch (Exception ex)
+            {
+                Crittercism.CreateCrashReport(ex);
+            }
+            Crash crash = Crittercism.MessageQueue.Dequeue() as Crash;
+            crash.DeleteFromDisk();
+            Assert.IsNotNull(crash, "Expected a Crash message");
+            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
+            Assert.IsTrue(asJson.Contains("fred"));
+        }
 
         [TestMethod]
         public void CrashDataContractTest()

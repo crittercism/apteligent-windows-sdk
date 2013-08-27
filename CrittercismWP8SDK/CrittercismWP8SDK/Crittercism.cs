@@ -204,7 +204,7 @@ namespace CrittercismSDK
         {
             lock (ArbitraryUserMetadata)
             {
-                ArbitraryUserMetadata.Add(key, value);
+                ArbitraryUserMetadata[key] = value;
             }
         }
 
