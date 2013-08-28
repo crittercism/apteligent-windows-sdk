@@ -15,6 +15,8 @@ mkdir tmp\lib\WindowsPhone8
 
 copy ..\CrittercismWP8SDK\CrittercismWP8SDK\Bin\Release\CrittercismWP8SDK.dll tmp\lib\WindowsPhone8
 copy CrittercismWP8SDK.nuspec tmp\CrittercismWP8SDK.nuspec
+rem this file will show up in Visual Studio when you install the package.
+copy README_PUBLIC.txt tmp\README.txt
 .\NuGet.exe pack tmp\CrittercismWP8SDK.nuspec
 
 
