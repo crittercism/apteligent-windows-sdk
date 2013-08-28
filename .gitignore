@@ -1,5 +1,6 @@
 *.suo
 Thumbs.db
 build/tmp/
-*/obj/
-*/Bin/
+build/*.nupkg
+obj
+Bin
