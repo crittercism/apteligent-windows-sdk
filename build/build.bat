@@ -8,13 +8,14 @@ msbuild /p:Configuration=Release
 
 cd ..\build
 
-rd /s /q lib
-mkdir lib
-mkdir lib\WindowsPhone8
+rd /s /q tmp
+mkdir tmp\
+mkdir tmp\lib
+mkdir tmp\lib\WindowsPhone8
 
-copy ..\CrittercismWP8SDK\CrittercismWP8SDK\Bin\Release\CrittercismWP8SDK.dll lib\WindowsPhone8
-.\NuGet.exe pack CrittercismWP8SDK.nuspec
-
+copy ..\CrittercismWP8SDK\CrittercismWP8SDK\Bin\Release\CrittercismWP8SDK.dll tmp\lib\WindowsPhone8
+copy CrittercismWP8SDK.nuspec tmp\CrittercismWP8SDK.nuspec
+.\NuGet.exe pack tmp\CrittercismWP8SDK.nuspec
 
 
 
