@@ -259,7 +259,7 @@ namespace CrittercismSDK
                 IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
                 return storage.FileExists(CrittercismOptOutFile);
             }
-            catch (Exception ex)
+            catch
             {
                 // swallow, best effort
                 return false;

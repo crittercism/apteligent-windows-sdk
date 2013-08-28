@@ -164,7 +164,7 @@ namespace CrittercismSDK.DataContracts
 
                 return false;
              }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
