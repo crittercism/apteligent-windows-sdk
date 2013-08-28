@@ -1,3 +1,5 @@
 *.suo
 Thumbs.db
 build/tmp/
+*/obj/
+*/Bin/
