@@ -233,6 +233,40 @@ namespace TestPhoneApp
                 Assert.IsTrue(asJson.Contains(jsonFragment));
             }
         }
+        [TestMethod]
+        public void TruncatedBreadcrumbTest()
+        {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            CleanUp(); // drop all previous messages
+            // start breadcrumb with sentinel to ensure we don't left-truncate
+            string breadcrumb = "raaaaaaaaa";
+            for (int x = 0; x < 13; x++)
+            {
+                breadcrumb += "aaaaaaaaaa";
+            }
+            // end breadcrumb with "illegal" chars and check for their presence
+            breadcrumb += "zzzzzzzzzz";
+            Crittercism.LeaveBreadcrumb(breadcrumb);
+            int i = 0;
+            int j = 5;
+            try
+            {
+                int k = j / i;
+            }
+            catch (Exception ex)
+            {
+                Crittercism.LogHandledException(ex);
+            }
+            Error error = Crittercism.MessageQueue.Dequeue() as Error;
+            error.DeleteFromDisk();
+            Assert.IsNotNull(error, "Expected an Error message");
+            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(error);
+            Assert.IsTrue(asJson.Contains("\"breadcrumbs\":"));
+            Assert.IsTrue(asJson.Contains("\"raaaaaa"));
+            Assert.IsFalse(asJson.Contains("aaaaz"));
+            Assert.IsFalse(asJson.Contains("zzz"));
+        }
 
         [TestMethod]
         public void LogHandledExceptionTest()

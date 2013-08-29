@@ -13,6 +13,7 @@ namespace CrittercismSDK.DataContracts
     [DataContract]
     public class BreadcrumbMessage
     {
+        const int MaxBreadcrumbLength = 140;
         /// <summary>
         /// Gets or sets the message.
         /// </summary>
@@ -43,6 +44,10 @@ namespace CrittercismSDK.DataContracts
         public BreadcrumbMessage(string messageString)
         {
             message = messageString;
+            if (message.Length > MaxBreadcrumbLength)
+            {
+                message = message.Substring(0, MaxBreadcrumbLength);
+            }
             timestamp = MessageReport.DateTimeString(DateTime.Now);
         }
     }
