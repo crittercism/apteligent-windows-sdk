@@ -19,24 +19,15 @@ All Crittercism calls take place to a global singleton available in CrittercismS
   * Inputs: The application's app id, available from the "Settings" page on the Crittercism website. 
   * Returns: None
 
-* **LeaveBreadcrumb()**: Leave a textual description of what's going on in the app, useful for remote debugging. Examples: "Clicked the red button", "Character leveded up", "Document saved". Crittercism marks the time each breadcrumb was created, and uploads the full list of breadcrumbs (with times) to the server if a crash occurs.
+* **LeaveBreadcrumb()**: Leave a textual description of what's going on in the app, useful for remote debugging. Examples: "Clicked the red button", "Character leveded up", "Document saved". Crittercism marks the time each breadcrumb was created, and uploads the full list of breadcrumbs (with times) to the server if a crash occurs.  Breadcrumbs are limited to/truncated at 140 characters.
 
-* **LeaveErrorReport(Exception e)**: Record the occurrance of a handled exception. 
+* **LogHandledException(Exception e)**: Record the occurrance of a handled exception. 
   * Inputs: Takes the exception that occurred, will save a detailed stack trace and metadata log of the issue for later analysis.
 
 ### Metadata functions
 Crittercism "metadata" is a set of arbitrary key/value pairs attached to a user's session. Metadata is useful for tracking demographic information about the user (email address, username) or various session parameters (level of a game, points, etc.) Crittercism automatically sets many pieces of system metadata when a crash occurs, including memory and disk use, operating system version, mobile carrier, and a handful of other data.
 
-To set metadata, use one of the following special-purpose functions:
+To set metadata, use **Crittercism.SetValue(string value, string key)** to set custom data or **Crittercism.SetUsername(string username)** to set the current username.
 
-* **Crittercism.SetAge**
-
-* **Crittercism.SetEmail**
-
-* **Crittercism.SetGender**
-
-* **Crittercism.SetUsername**
-
-Alternately, use **Crittercism.SetValue(string value, string key)** to set an arbitrary string value pair.
-
-
+### Opt-Out
+You can optionally expose a capability in your application to allow your users to opt out of providing data to Crittercism.  Use **SetOptOutStatus(boolean optOut)** and **GetOptOutStatus()**.  How and where you expose this facility is up to you.
