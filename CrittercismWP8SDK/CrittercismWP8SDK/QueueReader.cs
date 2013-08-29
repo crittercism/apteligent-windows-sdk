@@ -10,7 +10,7 @@ using CrittercismSDK.DataContracts;
 
 namespace CrittercismSDK
 {
-    class QueueReader
+    internal class QueueReader
     {
         internal static string HostToUse;
 
@@ -48,7 +48,7 @@ namespace CrittercismSDK
         /// <summary>
         /// Reads the queue.
         /// </summary>
-        public void ReadQueue()
+        internal void ReadQueue()
         {
             int retry = 0;
             while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0 && NetworkInterface.GetIsNetworkAvailable() && retry < 3)

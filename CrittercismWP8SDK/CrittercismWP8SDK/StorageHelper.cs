@@ -10,7 +10,7 @@ namespace CrittercismSDK
     /// <summary>
     /// Storage helper.
     /// </summary>
-    public static class StorageHelper
+    internal static class StorageHelper
     {
         /// <summary>
         /// Data Folder Name
@@ -22,7 +22,7 @@ namespace CrittercismSDK
         /// </summary>
         /// <param name="Data"> The data. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
-        public static bool SaveToDisk(object data)
+        internal static bool SaveToDisk(object data)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace CrittercismSDK
         /// </summary>
         /// <param name="dataType"> Type of the data. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
-        public static object LoadFromDisk(Type dataType)
+        internal static object LoadFromDisk(Type dataType)
         {
             object data = null;
             try
