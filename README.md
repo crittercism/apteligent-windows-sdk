@@ -7,7 +7,7 @@ Getting started with Crittercism for Windows takes just three easy steps:
 
 2. **Download the library from NuGet**. The package is called **Crittercism**, and is downloadable using the [standard procedure](http://nuget.org/packages/Crittercism). Note: installing Windows 8 NuGet packages requires a recent version of NuGet; you might have to upgrade. NuGet 2.2.31210 worked for us.
 
-3. **Instrument your app**. After the NuGet installation completes, Crittercism will be available under the CrittercismSDK namespace. Obtain your App Id from the app's settings page (e.g. 50807ba33a47481dd5000002) and add a call to CrittercismSDK.Crittercism.Init() with your app id, to the app's initialization code.
+3. **Instrument your app**. After the NuGet installation completes, Crittercism will be available under the CrittercismSDK namespace. Obtain your App Id from the app's settings page (e.g. 50807ba33a47481dd5000002) and add a call to CrittercismSDK.Crittercism.Init() with your app id, to the app's initialization code (you'll probably want to do this in your Application_Launching()).
 
 That's it! The Crittercism.Init() call installed error collection and tracked session start (app loads). The full API reference follows.
 
