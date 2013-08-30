@@ -454,8 +454,14 @@ namespace CrittercismSDK
         /// <param name="e">        Application unhandled exception event information. </param>
         static void Current_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
         {
-            CreateCrashReport((Exception)e.ExceptionObject);
-            e.Handled = true;
+            try
+            {
+                CreateCrashReport((Exception)e.ExceptionObject);
+            }
+            catch
+            {
+                // explicit nop
+            }
         }
 
         static void Current_Activated(object sender, ActivatedEventArgs e)
