@@ -92,8 +92,8 @@
     <Compile Include="DataContracts\BreadcrumbMessage.cs" />
     <Compile Include="DataContracts\Breadcrumbs.cs" />
     <Compile Include="DataContracts\Crash.cs" />
-    <Compile Include="DataContracts\Error.cs" />
     <Compile Include="DataContracts\ExceptionObject.cs" />
+    <Compile Include="DataContracts\HandledException.cs" />
     <Compile Include="DataContracts\MessageReport.cs" />
     <Compile Include="DataContracts\Platform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

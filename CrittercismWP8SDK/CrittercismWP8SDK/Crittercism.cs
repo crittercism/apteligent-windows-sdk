@@ -293,9 +293,9 @@ namespace CrittercismSDK
             breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
             breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
             ExceptionObject exception = new ExceptionObject(e.GetType().FullName, e.Message, e.StackTrace);
-            Error error = new Error(AppID, appVersion, new Dictionary<string,string>(ArbitraryUserMetadata), breadcrumbs, exception);
-            error.SaveToDisk();
-            AddMessageToQueue(error);
+            HandledException he = new HandledException(AppID, appVersion, new Dictionary<string, string>(ArbitraryUserMetadata), breadcrumbs, exception);
+            he.SaveToDisk();
+            AddMessageToQueue(he);
         }
         
         /// <summary>
@@ -359,8 +359,8 @@ namespace CrittercismSDK
                             message = new AppLoad();
                             break;
 
-                        case "Error":
-                            message = new Error();
+                        case "HandledException":
+                            message = new HandledException();
                             break;
 
                         default:

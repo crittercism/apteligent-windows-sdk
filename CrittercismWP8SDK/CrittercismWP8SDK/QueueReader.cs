@@ -96,12 +96,16 @@ namespace CrittercismSDK
                         case "AppLoad":
                             request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v1/loads", UriKind.Absolute));
                             break;
-                        case "Error":
+                        case "HandledException":
+                            // FIXME jbley fix up the URI here
                             request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v1/errors", UriKind.Absolute));
                             break;
-                        default:
+                        case "Crash":
                             request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v1/crashes", UriKind.Absolute));
                             break;
+                        default:
+                            // FIXME jbley maybe some logging here?
+                            return true; // consider this message "consumed"
                     }
 
                     request.Method = "POST";

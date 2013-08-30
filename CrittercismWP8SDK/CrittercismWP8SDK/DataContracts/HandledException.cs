@@ -1,6 +1,4 @@
-﻿// file:	DataContracts\Error.cs
-// summary:	Implements the error class
-namespace CrittercismSDK.DataContracts
+﻿namespace CrittercismSDK.DataContracts
 {
     using Microsoft.Phone.Net.NetworkInformation;
     using System;
@@ -11,12 +9,8 @@ namespace CrittercismSDK.DataContracts
     using Windows.Devices.Sensors;
     using Windows.Graphics.Display;
 
-    /// <summary>
-    /// Error.
-    /// FIXME johnbley - rename to HandledException at some point.
-    /// </summary>
     [DataContract]
-    internal class Error : MessageReport
+    internal class HandledException : MessageReport
     {
         /// <summary>
         /// Gets or sets the identifier of the application.
@@ -53,7 +47,7 @@ namespace CrittercismSDK.DataContracts
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public Error()
+        public HandledException()
         {
         }
 
@@ -62,7 +56,7 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <param name="appId">     Identifier for the application. </param>
         /// <param name="exception"> The exception. </param>
-        public Error(string appId, string appVersion, Dictionary<string,string> currentMetadata, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
+        public HandledException(string appId, string appVersion, Dictionary<string,string> currentMetadata, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
         {
             app_id = appId;
             app_state = ComputeAppState(appVersion);

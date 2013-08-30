@@ -48,7 +48,7 @@ namespace TestPhoneApp
         {
             int i = 0;
             int j = 5;
-            Error newMessageReport = null;
+            HandledException newMessageReport = null;
             string errorName = string.Empty;
             string errorMessage = string.Empty;
             string errorStackTrace = string.Empty;
@@ -63,13 +63,13 @@ namespace TestPhoneApp
                 errorMessage = ex.Message;
                 errorStackTrace = ex.StackTrace;
                 ExceptionObject exception = new ExceptionObject(errorName, errorMessage, errorStackTrace);
-                newMessageReport = new Error("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), new Dictionary<string,string>(), new Breadcrumbs(), exception);
+                newMessageReport = new HandledException("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), new Dictionary<string, string>(), new Breadcrumbs(), exception);
                 newMessageReport.SaveToDisk();
             }
 
             // check that message is saved by try loading it with the helper
             // load saved version of the error event
-            Error messageReportLoaded = new Error();
+            HandledException messageReportLoaded = new HandledException();
             messageReportLoaded.Name = newMessageReport.Name;
             messageReportLoaded.LoadFromDisk();
 
@@ -258,10 +258,10 @@ namespace TestPhoneApp
             {
                 Crittercism.LogHandledException(ex);
             }
-            Error error = Crittercism.MessageQueue.Dequeue() as Error;
-            error.DeleteFromDisk();
-            Assert.IsNotNull(error, "Expected an Error message");
-            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(error);
+            HandledException he = Crittercism.MessageQueue.Dequeue() as HandledException;
+            he.DeleteFromDisk();
+            Assert.IsNotNull(he, "Expected a HandledException message");
+            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(he);
             Assert.IsTrue(asJson.Contains("\"breadcrumbs\":"));
             Assert.IsTrue(asJson.Contains("\"raaaaaa"));
             Assert.IsFalse(asJson.Contains("aaaaz"));
@@ -286,10 +286,10 @@ namespace TestPhoneApp
             {
                 Crittercism.LogHandledException(ex);
             }
-            Error error = Crittercism.MessageQueue.Dequeue() as Error;
-            error.DeleteFromDisk();
-            Assert.IsNotNull(error, "Expected an Error message");
-            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(error);
+            HandledException he = Crittercism.MessageQueue.Dequeue() as HandledException;
+            he.DeleteFromDisk();
+            Assert.IsNotNull(he, "Expected a HandledException message");
+            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(he);
             checkCommonJsonFragments(asJson);
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
@@ -359,33 +359,33 @@ namespace TestPhoneApp
                 Crittercism.LogHandledException(ex);
                 if (Crittercism.MessageQueue.Count == 1)
                 {
-                    Error error = Crittercism.MessageQueue.Dequeue() as Error;
-                    // verify that the message in the queue is an error type
-                    Assert.IsNotNull(error, "The message isn´t Error type");
+                    HandledException he = Crittercism.MessageQueue.Dequeue() as HandledException;
+                    // verify that the message in the queue is a HandledException type
+                    Assert.IsNotNull(he, "The message isn't HandledException type");
 
                     // verify each field of the error message
-                    Assert.AreEqual("50807ba33a47481dd5000002", error.app_id, "The app_id is incorrect");
-                    Assert.AreEqual(System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), error.app_state["app_version"], "The app_version is incorrect");
+                    Assert.AreEqual("50807ba33a47481dd5000002", he.app_id, "The app_id is incorrect");
+                    Assert.AreEqual(System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), he.app_state["app_version"], "The app_version is incorrect");
                     //Assert.AreEqual(Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent.ToString(), error.app_state["battery_level"], "The battery_level is incorrect");
-                    Assert.AreEqual(ex.GetType().FullName, error.error.name, "The error name is incorrect");
-                    Assert.AreEqual(ex.Message, error.error.reason, "The error reason is incorrect");
+                    Assert.AreEqual(ex.GetType().FullName, he.error.name, "The error name is incorrect");
+                    Assert.AreEqual(ex.Message, he.error.reason, "The error reason is incorrect");
                     List<string> stackTraceList = ex.StackTrace.Split(new string[] { "\n\r" }, StringSplitOptions.RemoveEmptyEntries).ToList();
                     for (int index = 0; index < stackTraceList.Count; index++)
                     {
-                        Assert.AreEqual(stackTraceList[index], error.error.stack_trace[index], "The stack_trace is incorrect");
+                        Assert.AreEqual(stackTraceList[index], he.error.stack_trace[index], "The stack_trace is incorrect");
                     }
 
                     Platform p = new Platform();
                     //Assert.AreEqual("wp8v1.0", error.platform.client, "The client is incorrect");
-                    Assert.AreEqual(p.device_id, error.platform.device_id, "The device_id is incorrect");
+                    Assert.AreEqual(p.device_id, he.platform.device_id, "The device_id is incorrect");
                     //Assert.AreEqual("Nokia Lumia 800", error.platform.device_model, "The device_model is incorrect");
                     //Assert.AreEqual("Windows Phone", error.platform.os_name, "The os_name is incorrect");
                     //Assert.AreEqual("8.0", error.platform.os_version, "The os_version is incorrect");
-                    error.DeleteFromDisk();
+                    he.DeleteFromDisk();
                 }
                 else
                 {
-                    Assert.Fail("The Error message isn't in the queue");
+                    Assert.Fail("HandledException message isn't in the queue");
                 }
             }
         }
@@ -644,7 +644,7 @@ namespace TestPhoneApp
             {
                 // Create the error message
                 Crittercism.LogHandledException(ex);
-                Error message = Crittercism.MessageQueue.Last() as Error;
+                HandledException message = Crittercism.MessageQueue.Last() as HandledException;
                 message.app_id = "WrongAppID";
 
                 // Create a queuereader
