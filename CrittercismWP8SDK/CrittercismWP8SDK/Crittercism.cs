@@ -362,10 +362,11 @@ namespace CrittercismSDK
                         case "HandledException":
                             message = new HandledException();
                             break;
-
-                        default:
+                        case "Crash":
                             message = new Crash();
                             break;
+                        default:
+                            continue; // skip this file
                     }
 
                     message.Name = file;
