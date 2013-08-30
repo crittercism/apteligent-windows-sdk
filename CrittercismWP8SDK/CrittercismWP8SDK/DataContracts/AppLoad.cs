@@ -10,7 +10,7 @@ namespace CrittercismSDK.DataContracts
     /// Application load.
     /// </summary>
     [DataContract]
-    public class AppLoad : MessageReport
+    internal class AppLoad : MessageReport
     {
         /// <summary>
         /// Crittercism-issued Application identification string

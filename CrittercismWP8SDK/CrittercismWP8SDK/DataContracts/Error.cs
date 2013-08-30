@@ -16,7 +16,7 @@ namespace CrittercismSDK.DataContracts
     /// FIXME johnbley - rename to HandledException at some point.
     /// </summary>
     [DataContract]
-    public class Error : MessageReport
+    internal class Error : MessageReport
     {
         /// <summary>
         /// Gets or sets the identifier of the application.

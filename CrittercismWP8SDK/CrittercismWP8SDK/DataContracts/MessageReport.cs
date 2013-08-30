@@ -14,7 +14,7 @@ namespace CrittercismSDK.DataContracts
     /// <summary>
     /// Message report.
     /// </summary>
-    public abstract class MessageReport
+    internal abstract class MessageReport
     {
         /// <summary>
         /// Gets or sets the file name.

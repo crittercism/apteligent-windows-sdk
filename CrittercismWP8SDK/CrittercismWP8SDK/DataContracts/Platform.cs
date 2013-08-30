@@ -10,7 +10,7 @@ namespace CrittercismSDK.DataContracts {
     /// Represents the platform on which the application (app) is running.
     /// </summary>
     [DataContract]
-    public class Platform {
+    internal class Platform {
         // Need a prefix here to reduce chance of collisions
         private const string DEVICE_ID_KEY = "crittercism_device_id";
 

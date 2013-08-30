@@ -12,7 +12,7 @@ namespace CrittercismSDK.DataContracts
     /// Exception object.
     /// </summary>
     [DataContract]
-    public class ExceptionObject
+    internal class ExceptionObject
     {
         /// <summary>
         /// Gets or sets the name of the exception.
