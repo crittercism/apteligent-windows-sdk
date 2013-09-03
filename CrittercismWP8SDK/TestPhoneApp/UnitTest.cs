@@ -124,6 +124,20 @@ namespace TestPhoneApp
             String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
             Assert.IsTrue(asJson.Contains("fred"));
         }
+        [TestMethod]
+        public void MetadataPersistenceTest()
+        {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            Crittercism.SetUsername("harry");
+            Crittercism.SetValue("familiar", "hedwig");
+            Assert.AreEqual("hedwig", Crittercism.LoadUserMetadataFromDisk()["familiar"]);
+            Assert.AreEqual("harry", Crittercism.LoadUserMetadataFromDisk()["username"]);
+            Crittercism.SetUsername("hermione");
+            Crittercism.SetValue("familiar", "crookshanks");
+            Assert.AreEqual("crookshanks", Crittercism.LoadUserMetadataFromDisk()["familiar"]);
+            Assert.AreEqual("hermione", Crittercism.LoadUserMetadataFromDisk()["username"]);
+        }
 
         [TestMethod]
         public void CrashDataContractTest()
@@ -226,7 +240,7 @@ namespace TestPhoneApp
                 "\"breadcrumbs\":",
                 "\"current_session\":[{\"message\":\"CrashReportBreadcrumb\"",
                 "\"metadata\":{",
-                "\"username\":\"Mr. McUnitTest\"}",
+                "\"username\":\"Mr. McUnitTest\"",
             };
             foreach (String jsonFragment in jsonStrings)
             {

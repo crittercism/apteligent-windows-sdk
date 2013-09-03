@@ -146,9 +146,27 @@ namespace CrittercismSDK
 
         #region Methods
 
+        internal static readonly string CrittercismUserMetadataKey = "crittercism_user_metadata";
         static Crittercism()
         {
-            ArbitraryUserMetadata = new Dictionary<string, string>();
+            ArbitraryUserMetadata = LoadUserMetadataFromDisk();
+        }
+
+        internal static Dictionary<string,string> LoadUserMetadataFromDisk()
+        {
+            try
+            {
+                if (System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.Contains(CrittercismUserMetadataKey))
+                {
+                    return new Dictionary<string, string>((Dictionary<string, string>)
+                        System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings[CrittercismUserMetadataKey]);
+                }
+            }
+            catch
+            {
+                // nop
+            }
+            return new Dictionary<string, string>();
         }
 
         /// <summary>
@@ -202,9 +220,19 @@ namespace CrittercismSDK
         /// <param name="value">    The value. </param>
         public static void SetValue(string key, string value)
         {
+            Dictionary<string, string> copyToSend = null; // set to non-null copy (for atomicity) if we should send metadata (because something changed)
             lock (ArbitraryUserMetadata)
             {
-                ArbitraryUserMetadata[key] = value;
+                if (!ArbitraryUserMetadata.ContainsKey(key) || !ArbitraryUserMetadata[key].Equals(value))
+                {
+                    ArbitraryUserMetadata[key] = value;
+                    copyToSend = new Dictionary<string, string>(ArbitraryUserMetadata);
+                    System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings[CrittercismUserMetadataKey] = copyToSend;
+                }
+            }
+            if (copyToSend != null)
+            {
+                // FIXME jbey send to appropriate URL here
             }
         }
 
