@@ -15,10 +15,11 @@ no build environment or source checkout required!
 Steps to publish to nuget.org for public release
 
 1) Audit the nuspec file - all fields!  Check version #, release notes, description, etc.
-2) Update Platform.cs, check the client string.
-3) Commit any changes from the above steps.
-4) Run build.bat
-5) Do last-minute manual testing of the package by publishing locally as above.
-6) Tag the release in github
-7) ??? FIXME jbley figure the authentiation to nuget.org out
-8) Profit
+2) Audit AssemblyInfo - versions, copyright, etc.
+3) Update Platform.cs, check the client string.
+4) Commit any changes from the above steps.
+5) Run build.bat
+6) Do last-minute manual testing of the package by publishing locally as above.
+7) Tag the release in github
+8) ??? FIXME jbley figure the authentiation to nuget.org out
+9) Profit
