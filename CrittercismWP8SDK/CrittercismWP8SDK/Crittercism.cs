@@ -223,41 +223,32 @@ namespace CrittercismSDK
             SetOptOutOnDisk(optOut);
         }
 
-        private static readonly string CrittercismConfigFolder = "CrittercismConfig";
-        private static readonly string CrittercismOptOutFile = CrittercismConfigFolder + "\\" + "OptOut.txt";
+        private static readonly string CrittercismOptOutKey = "crittercism_OptOut";
         private static void SetOptOutOnDisk(bool optOut)
         {
             IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
             if (optOut)
             {
-                if (!storage.DirectoryExists(CrittercismConfigFolder))
+                if (!System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.Contains(CrittercismOptOutKey)) 
                 {
-                    storage.CreateDirectory(CrittercismConfigFolder);
-                }
-                if (!storage.FileExists(CrittercismOptOutFile))
-                {
-                    using (IsolatedStorageFileStream optOutFile = new IsolatedStorageFileStream(CrittercismOptOutFile, FileMode.Create, FileAccess.Write, storage))
-                    {
-                        optOutFile.Close();
-                    }
+                    System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.Add(CrittercismOptOutKey, "true");
                 }
             }
             else
             {
-                if (storage.FileExists(CrittercismOptOutFile))
+                if (System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.Contains(CrittercismOptOutKey))
                 {
-                    storage.DeleteFile(CrittercismOptOutFile);
+                    System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.Remove(CrittercismOptOutKey);
                 }
             }
-
         }
+           
 
         internal static bool CheckOptOutFromDisk()
         {
             try
             {
-                IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                return storage.FileExists(CrittercismOptOutFile);
+                return System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.Contains(CrittercismOptOutKey);
             }
             catch
             {
