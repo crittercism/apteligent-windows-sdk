@@ -44,6 +44,20 @@ namespace TestPhoneApp
         }
 
         [TestMethod]
+        public void ComputeMetadataFormPostBodyTest()
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+            dict.Add("key with space", "value1");
+            dict.Add("key&%", "value2");
+            UserMetadata um = new UserMetadata("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), dict);
+            string formEncoded = QueueReader.ComputeFormPostBody(um);
+            Assert.IsTrue(formEncoded.Contains("%26")); // ampersand
+            Assert.IsTrue(formEncoded.Contains("%25")); // percent
+            Assert.IsFalse(formEncoded.Contains("{"));
+            Assert.IsFalse(formEncoded.Contains("\""));
+        }
+
+        [TestMethod]
         public void HandledExceptionDataContractTest()
         {
             int i = 0;
@@ -218,9 +232,9 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism.Init("50807ba33a47481dd5000002");
-            CleanUp(); // drop all previous messages
             Crittercism.LeaveBreadcrumb("CrashReportBreadcrumb");
             Crittercism.SetUsername("Mr. McUnitTest");
+            CleanUp(); // drop all previous messages
             int i = 0;
             int j = 5;
             try
@@ -287,9 +301,9 @@ namespace TestPhoneApp
         {
             Crittercism._autoRunQueueReader = false;
             Crittercism.Init("50807ba33a47481dd5000002");
-            CleanUp(); // drop all previous messages
             Crittercism.LeaveBreadcrumb("HandledExceptionBreadcrumb");
             Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");
+            CleanUp(); // drop all previous messages
             int i = 0;
             int j = 5;
             try

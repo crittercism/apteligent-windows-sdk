@@ -202,6 +202,7 @@ namespace CrittercismSDK
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             System.Windows.Application.Current.Activated += new EventHandler(Current_Activated);
 #endif
+            System.Diagnostics.Debug.WriteLine("Crittercism initialized.");
         }
 
         /// <summary>
@@ -232,7 +233,10 @@ namespace CrittercismSDK
             }
             if (copyToSend != null)
             {
-                // FIXME jbey send to appropriate URL here
+                string appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
+                UserMetadata um = new UserMetadata(AppID, appVersion, new Dictionary<string, string>(ArbitraryUserMetadata));
+                um.SaveToDisk();
+                AddMessageToQueue(um);
             }
         }
 
@@ -383,6 +387,9 @@ namespace CrittercismSDK
                             break;
                         case "Crash":
                             message = new Crash();
+                            break;
+                        case "UserMetadata":
+                            message = new UserMetadata();
                             break;
                         default:
                             continue; // skip this file

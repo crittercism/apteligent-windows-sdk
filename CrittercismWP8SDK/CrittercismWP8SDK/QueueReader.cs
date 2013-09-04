@@ -89,19 +89,32 @@ namespace CrittercismSDK
             {
                 try
                 {
-                    string jsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+                    // FIXME jbley many many things special-cased for UserMetadata - really need /v1 here
+                    string postBody = null;
                     HttpWebRequest request = null;
                     switch (message.GetType().Name)
                     {
                         case "AppLoad":
                             request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v1/loads", UriKind.Absolute));
+                            request.ContentType = "application/json; charset=utf-8";
+                            postBody = Newtonsoft.Json.JsonConvert.SerializeObject(message);
                             break;
                         case "HandledException":
                             // FIXME jbley fix up the URI here
                             request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v1/errors", UriKind.Absolute));
+                            request.ContentType = "application/json; charset=utf-8";
+                            postBody = Newtonsoft.Json.JsonConvert.SerializeObject(message);
                             break;
                         case "Crash":
                             request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v1/crashes", UriKind.Absolute));
+                            request.ContentType = "application/json; charset=utf-8";
+                            postBody = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+                            break;
+                        case "UserMetadata":
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/feedback/update_user_metadata", UriKind.Absolute));
+                            request.ContentType = "application/x-www-form-urlencoded";
+                            UserMetadata um = message as UserMetadata;
+                            postBody = ComputeFormPostBody(um);
                             break;
                         default:
                             // FIXME jbley maybe some logging here?
@@ -109,7 +122,7 @@ namespace CrittercismSDK
                     }
 
                     request.Method = "POST";
-                    request.ContentType = "application/json; charset=utf-8";
+
                     bool sendCompleted = false;
                     Exception lastException = null;
                     System.Threading.ManualResetEvent resetEvent = new System.Threading.ManualResetEvent(false);
@@ -120,7 +133,7 @@ namespace CrittercismSDK
                             {
                                 Stream requestStream = request.EndGetRequestStream(result);
                                 StreamWriter writer = new StreamWriter(requestStream);
-                                writer.Write(jsonMessage);
+                                writer.Write(postBody);
                                 writer.Flush();
                                 writer.Close();
                                 request.BeginGetResponse(
@@ -196,5 +209,17 @@ namespace CrittercismSDK
                 return false;
             }
         }
+
+        internal static string ComputeFormPostBody(UserMetadata um)
+        {
+            string postBody = "";
+            postBody += "did=" + um.platform.device_id + "&";
+            postBody += "app_id=" + um.app_id + "&";
+            string metadataJson = Newtonsoft.Json.JsonConvert.SerializeObject(um.metadata);
+            postBody += "metadata=" + HttpUtility.UrlEncode(metadataJson)+"&";
+            postBody += "device_name=" + HttpUtility.UrlEncode(um.platform.device_model);
+            return postBody;
+        }
+
     }
 }
