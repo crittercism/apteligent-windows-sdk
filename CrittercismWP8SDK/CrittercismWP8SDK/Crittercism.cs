@@ -504,7 +504,7 @@ namespace CrittercismSDK
 
         static void Current_Deactivated(object sender, DeactivatedEventArgs e)
         {
-            PhoneApplicationService.Current.State.Add("Crittercism.AppID", AppID);
+            PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
         }
 
         static void DeviceNetworkInformation_NetworkAvailabilityChanged(object sender, NetworkNotificationEventArgs e)
