@@ -380,6 +380,9 @@ namespace CrittercismSDK
                 MessageQueue.Enqueue(message);
                 if (_autoRunQueueReader)  // This flag is for unit test
                 {
+                    // FIXME jbley I don't like the threading here - would prefer one single background thread
+                    // with blocking queue rather than this (duplicated-code) spin-a-thread-each-batch-of-messages
+                    // stuff.
                     if (readerThread.ThreadState == ThreadState.Unstarted)
                     {
                         readerThread.Start();
