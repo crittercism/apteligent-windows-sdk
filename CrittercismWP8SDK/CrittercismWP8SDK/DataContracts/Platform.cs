@@ -39,7 +39,7 @@ namespace CrittercismSDK.DataContracts {
         public readonly string os_version = Environment.OSVersion.Version.ToString();
 
         public Platform() {
-            var storedDeviceId = GetDeviceId();
+            string storedDeviceId = GetDeviceId();
             
             if(storedDeviceId != null) {
                 this.device_id = storedDeviceId;
@@ -61,7 +61,7 @@ namespace CrittercismSDK.DataContracts {
         }
 
         private string CreateStoreNewDeviceId() {
-            var device_id = Guid.NewGuid().ToString();
+            string device_id = Guid.NewGuid().ToString();
             System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings[DEVICE_ID_KEY] = device_id;
 
             return device_id;
