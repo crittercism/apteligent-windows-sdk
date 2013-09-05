@@ -11,15 +11,19 @@ Steps to publish locally for testing
 Steps 2-6 above can also work with any old directory that has the .nuspec and .nupkg file placed into it - 
 no build environment or source checkout required!
 
+If you're rebuilding the package and want to pull this new version into your app, 
+simply go back to the package manager, "uninstall" the Crittercism package, and 
+re-install it.  This is easier than making a new version # for every build.
 
 Steps to publish to nuget.org for public release
 
 1) Audit the nuspec file - all fields!  Check version #, release notes, description, etc.
 2) Audit AssemblyInfo - versions, copyright, etc.
 3) Update Platform.cs, check the client string.
-4) Commit any changes from the above steps.
-5) Run build.bat
-6) Do last-minute manual testing of the package by publishing locally as above.
-7) Tag the release in github
-8) ??? FIXME jbley figure the authentiation to nuget.org out
-9) Profit
+4) Check the README_PUBLIC.txt
+5) Commit any changes from the above steps.
+6) Run build.bat
+7) Do last-minute manual testing of the package by publishing locally as above.
+8) Tag the release in github
+9) ??? FIXME jbley figure the authentiation to nuget.org out
+10) Profit
