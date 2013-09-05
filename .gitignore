@@ -1,4 +1,5 @@
 *.suo
+*.csproj.user
 Thumbs.db
 build/tmp/
 build/*.nupkg
