@@ -23,23 +23,23 @@ namespace CrittercismSDK {
         /// <summary>
         /// The auto run queue reader
         /// </summary>
-        public static bool _autoRunQueueReader = true;
+        internal static bool _autoRunQueueReader = true;
 
         /// <summary>
         /// The enable communication layer
         /// </summary>
-        public static bool _enableCommunicationLayer = true;
+        internal static bool _enableCommunicationLayer = true;
 
         /// <summary>
         /// The enable raise exception in communication layer
         /// </summary>
-        public static bool _enableRaiseExceptionInCommunicationLayer = false;
+        internal static bool _enableRaiseExceptionInCommunicationLayer = false;
 
         /// <summary>
         /// Gets or sets a queue of messages.
         /// </summary>
         /// <value> A Queue of messages. </value>
-        public static Queue<CrittercismSDK.DataContracts.MessageReport> MessageQueue { get; set; }
+        internal static Queue<CrittercismSDK.DataContracts.MessageReport> MessageQueue { get; set; }
 
         /// <summary>
         /// Gets or sets the current breadcrumbs.
@@ -195,7 +195,6 @@ namespace CrittercismSDK {
                 }
             }
         }
-           
 
         internal static bool CheckOptOutFromDisk() {
             try {
@@ -383,7 +382,6 @@ namespace CrittercismSDK {
             StartApplication(AppID);
         }
 
-#if WINDOWS_PHONE
         /// <summary>
         /// Event handler. Called by Current for unhandled exception events.
         /// </summary>
@@ -448,35 +446,6 @@ namespace CrittercismSDK {
                 }
             }
         }
-#else
-        /// <summary>
-        /// Event handler. Called by CurrentDomain for unhandled exception events.
-        /// </summary>
-        /// <param name="sender"> Source of the event. </param>
-        /// <param name="e">      Unhandled exception event information. </param>
-        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            CreateCrashReport((Exception)e.ExceptionObject);
-        }
-
-        /// <summary>
-        /// Event handler. Called by Current for activated events.
-        /// </summary>
-        /// <param name="sender">   Source of the event. </param>
-        /// <param name="e">        Event information. </param>
-        static void Current_Activated(object sender, EventArgs e)
-        {
-            BackgroundWorker backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
-            backgroundWorker.RunWorkerAsync();
-        }
-
-        static void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            StartApplication();
-        }
-#endif
-
         #endregion
     }
 }

@@ -11,7 +11,7 @@ namespace CrittercismSDK.DataContracts.Legacy
     /// Breadcrumb Message
     /// </summary>
     [DataContract]
-    public class BreadcrumbMessage
+    internal class BreadcrumbMessage
     {
         const int MaxBreadcrumbLength = 140;
         /// <summary>

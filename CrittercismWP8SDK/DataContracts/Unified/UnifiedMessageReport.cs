@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using Windows.Graphics.Display;
 
 namespace CrittercismSDK.DataContracts.Unified {
-    public class UnifiedMessageReport : CrittercismSDK.DataContracts.MessageReport {
+    internal class UnifiedMessageReport : CrittercismSDK.DataContracts.MessageReport {
         /// <summary>
         /// Gets Windows Phone-specific App Load Data
         /// </summary>

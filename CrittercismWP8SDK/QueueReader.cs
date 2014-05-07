@@ -12,7 +12,7 @@ using System.Net;
 
 namespace CrittercismSDK
 {
-    public class QueueReader
+    internal class QueueReader
     {
         internal static string HostToUse;
 

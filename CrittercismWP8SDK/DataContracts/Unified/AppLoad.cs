@@ -18,7 +18,7 @@ namespace CrittercismSDK.DataContracts.Unified {
     using System.Runtime.Serialization;
 
     [DataContract]
-    public class AppLoadInner {
+    internal class AppLoadInner {
         [DataMember]
         public string appID;
         [DataMember]
@@ -54,7 +54,7 @@ namespace CrittercismSDK.DataContracts.Unified {
     }
     
     [DataContract]
-    public class AppLoad : UnifiedMessageReport {
+    internal class AppLoad : UnifiedMessageReport {
         [DataMember]
         public AppLoadInner appLoads { get; set; }
         [DataMember]

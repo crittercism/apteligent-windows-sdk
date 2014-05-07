@@ -10,7 +10,7 @@ namespace CrittercismSDK.DataContracts.Legacy {
     /// Represents the platform on which the application (app) is running.
     /// </summary>
     [DataContract]
-    public class Platform {
+    internal class Platform {
         /// <summary>
         /// Identifies this library to Crittercism
         /// </summary>
