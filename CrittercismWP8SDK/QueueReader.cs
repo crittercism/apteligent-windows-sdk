@@ -99,7 +99,8 @@ namespace CrittercismSDK
                         case "AppLoad":
                             request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v0/appload", UriKind.Absolute));
                             request.ContentType = "application/json; charset=utf-8";
-                            postBody = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+                            MessageReport[] messages = { message };
+                            postBody = Newtonsoft.Json.JsonConvert.SerializeObject(messages);
                             break;
                         case "HandledException":
                             // FIXME jbley fix up the URI here
