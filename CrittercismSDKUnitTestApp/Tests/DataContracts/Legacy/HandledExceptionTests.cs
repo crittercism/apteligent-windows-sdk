@@ -57,5 +57,55 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             // delete the message from disk
             newMessageReport.DeleteFromDisk();
         }
+
+        [TestMethod]
+        public void HandledExceptionCommunicationTest() {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism._enableRaiseExceptionInCommunicationLayer = true;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            int i = 0;
+            int j = 5;
+            try {
+                int k = j / i;
+            } catch (Exception ex) {
+                // Create the error message
+                Crittercism.LogHandledException(ex);
+
+                // Create a queuereader
+                QueueReader queueReader = new QueueReader();
+
+                // call sendmessage with the error, no exception should be rise
+                queueReader.ReadQueue();
+            }
+        }
+
+        [TestMethod]
+        public void HandledExceptionCommunicationFailTest() {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism._enableRaiseExceptionInCommunicationLayer = true;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            int i = 0;
+            int j = 5;
+            try {
+                int k = j / i;
+            } catch (Exception ex) {
+                // Create the error message
+                Crittercism.LogHandledException(ex);
+                HandledException message = Crittercism.MessageQueue.Last() as HandledException;
+                message.app_id = "WrongAppID";
+
+                // Create a queuereader
+                QueueReader queueReader = new QueueReader();
+
+                // call sendmessage with the error, exception should be rise
+                try {
+                    queueReader.ReadQueue();
+                    Assert.Fail("This ReadQueue method should fail because the AppID is invalid");
+                } catch (Exception e) {
+                    Assert.IsInstanceOfType(e, typeof(System.Exception), "Expected handled exception with inner message of the webexception");
+                    Assert.IsInstanceOfType(e.InnerException, typeof(System.Net.WebException), "Expected handled exception with inner message of the webexception");
+                }
+            }
+        }
     }
 }

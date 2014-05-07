@@ -55,5 +55,7 @@ namespace CrittercismSDKUnitTestApp.Tests {
                 Console.WriteLine("cleanUp exception: " + ex);
             }
         }
+
+        public const string VALID_APPID = "50807ba33a47481dd5000002";
     }
 }

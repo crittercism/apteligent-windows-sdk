@@ -116,6 +116,11 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="appID">  Identifier for the application. </param>
         public static void Init(string appID) {
+            System.Text.RegularExpressions.Regex r = new System.Text.RegularExpressions.Regex("^[0-9a-fA-F]{24}$");
+            if(!r.IsMatch(appID)) {
+                throw new InvalidAppIdException("Invalid AppId in Init. AppId should be 24 hex characters from the Crittercism portal.");
+            }
+
             OptOut = CheckOptOutFromDisk();
             QueueReader queueReader = new QueueReader();
             ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);

@@ -1,6 +1,7 @@
 ﻿using CrittercismSDK;
 using CrittercismSDK.DataContracts.Legacy;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,6 +86,30 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             };
             foreach (String jsonFragment in jsonStrings) {
                 Assert.IsTrue(asJson.Contains(jsonFragment));
+            }
+        }
+
+        [TestMethod]
+        public void CrashCommunicationTest() {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism._enableRaiseExceptionInCommunicationLayer = true;
+            Crittercism.Init("50807ba33a47481dd5000002");
+            int i = 0;
+            int j = 5;
+            try {
+                int k = j / i;
+            } catch (Exception ex) {
+                // Create a Breadcrum
+                Crittercism.LeaveBreadcrumb("Breadcrum test");
+
+                // Create the error message
+                Crittercism.CreateCrashReport(ex);
+
+                // Create a queuereader
+                QueueReader queueReader = new QueueReader();
+
+                // call sendmessage with the crash, no exception should be rise
+                queueReader.ReadQueue();
             }
         }
     }

@@ -14,11 +14,12 @@ namespace CrittercismSDK.DataContracts.Unified {
 
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using System.Runtime.Serialization;
 
     [DataContract]
-    internal class AppLoadInner {
+    internal class AppLoadInner : System.IEquatable<AppLoadInner> {
         [DataMember]
         public string appID;
         [DataMember]
@@ -51,10 +52,26 @@ namespace CrittercismSDK.DataContracts.Unified {
             this.appID = _appID;
             this.deviceID = StorageHelper.GetOrCreateDeviceId();
         }
+
+        private static bool platformSpecificDataEqual(Dictionary<string, object> x, Dictionary<string, object> y) {
+            return x.Keys.Count == y.Keys.Count && 
+                x.Keys.All(k => y.ContainsKey(k) && object.Equals(x[k], y[k]));
+        }
+
+        public bool Equals(AppLoadInner other) {
+            // TODO: Convert this class into some kind of struct or value type -- this nonsense
+            // shouldn't be necessary
+            return (appID == other.appID && deviceID == other.deviceID &&
+                crPlatform == other.crPlatform && crVersion == other.crVersion &&
+                deviceModel == other.deviceModel && osName == other.osName &&
+                osVersion == other.osVersion && carrier == other.carrier &&
+                appVersion == other.appVersion && locale == other.locale &&
+                platformSpecificDataEqual(platformSpecificData, other.platformSpecificData));
+        }
     }
     
     [DataContract]
-    internal class AppLoad : UnifiedMessageReport {
+    internal class AppLoad : UnifiedMessageReport, IEquatable<AppLoad> {
         [DataMember]
         public AppLoadInner appLoads { get; set; }
         [DataMember]
@@ -66,5 +83,11 @@ namespace CrittercismSDK.DataContracts.Unified {
             this.appLoads = new AppLoadInner(_appID);
         }
         public AppLoad() { }
+
+        public bool Equals(AppLoad other) {
+            return appLoads.Equals(other.appLoads) &&
+                this.count == other.count &&
+                this.current == other.current;
+        }
     }
 }

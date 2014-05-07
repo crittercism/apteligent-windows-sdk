@@ -1,6 +1,6 @@
-﻿using CrittercismSDK.DataContracts.Unified;
+﻿using CrittercismSDK;
+using CrittercismSDK.DataContracts.Unified;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,32 +9,48 @@ using System.Threading.Tasks;
 
 namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Unified {
     [TestClass]
-    class AppLoadTests {
+    public class AppLoadTests {
         [TestMethod]
-        public void AppLoadDataContractTest() {
-            // create new appload message
-            AppLoad newMessageReport = new AppLoad("50807ba33a47481dd5000002");
+        public void AppLoadDiskRoundtrip() {
+            // There is so much wrong here I don't know where to begin...
+            // Refactor this byzantine load/store thing to use a platform service
+            // Also, shouldn't require random fields to be set arbitrarily for loads?!
+            // Also, concerns are inappropriately mixed, should CREATE then SAVE object, not do
+            //   this as a single bundled/atomic action
+
+            AppLoad newMessageReport = new AppLoad(TestHelpers.VALID_APPID);
             newMessageReport.SaveToDisk();
 
-            // check that message is saved by try loading it with the helper
-            // load saved version of the appload event
-            AppLoad messageReportLoaded = new AppLoad();
-            messageReportLoaded.Name = newMessageReport.Name;
-            messageReportLoaded.LoadFromDisk();
+            AppLoad loadedMessageReport = new AppLoad();
+            loadedMessageReport.Name = newMessageReport.Name;
+            loadedMessageReport.LoadFromDisk();
 
-            Assert.IsNotNull(messageReportLoaded);
-
-            // validate that the loaded object is corrected agains the original one via json serialization
-            string originalJsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(newMessageReport);
-            string loadedJsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(messageReportLoaded);
-
-            Assert.AreEqual(loadedJsonMessage, originalJsonMessage);
-
-            // compare against known json to verify that the serialization is in the correct format
-            TestHelpers.checkCommonJsonFragments(loadedJsonMessage);
-
-            // delete the message from disk
+            Assert.IsTrue(newMessageReport.Equals(loadedMessageReport));
             newMessageReport.DeleteFromDisk();
+        }
+
+        [TestMethod]
+        public void AppLoadFormat() {
+            AppLoad newMessageReport = new AppLoad(TestHelpers.VALID_APPID);
+            AppLoadInner inner = newMessageReport.appLoads;
+
+            Assert.AreEqual(newMessageReport.count, 1);
+            Assert.AreEqual(newMessageReport.current, true);
+            Assert.AreEqual(inner.osName, "wp");
+            Assert.AreEqual(inner.carrier, "Fake GSM Network");     // On emulator
+        }
+
+        [TestMethod]
+        public void AppLoadCommunicationTest() {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism._enableRaiseExceptionInCommunicationLayer = true;
+            Crittercism.Init("50807ba33a47481dd5000002");
+
+            // Create a queuereader
+            QueueReader queueReader = new QueueReader();
+
+            // call sendmessage with the appload, no exception should be rise
+            queueReader.ReadQueue();
         }
     }
 }

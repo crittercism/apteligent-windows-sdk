@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{FC7AA4A2-CB81-4001-AF83-D7D0640C7B05}</ProjectGuid>
+    <ProjectGuid>{A137487E-45B1-417B-ABBE-FF8CB8CA88F1}</ProjectGuid>
     <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -72,16 +72,20 @@
   <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
-      <SubType>
-      </SubType>
     </Compile>
-    <Compile Include="Tests\DataContracts\Legacy\CrashTest.cs" />
-    <Compile Include="Tests\DataContracts\Legacy\HandledExceptionTest.cs" />
-    <Compile Include="Tests\DataContracts\Legacy\UserMetadataTest.cs" />
+    <Compile Include="LocalizedStrings.cs" />
+    <Compile Include="Tests\CrittercismTests.cs" />
+    <Compile Include="Tests\DataContracts\Legacy\CrashTests.cs" />
+    <Compile Include="Tests\DataContracts\Legacy\HandledExceptionTests.cs" />
+    <Compile Include="Tests\DataContracts\Legacy\UserMetadataTests.cs" />
     <Compile Include="Tests\DataContracts\Unified\AppLoadTests.cs" />
+    <Compile Include="Tests\ExceptionHandlersTests.cs" />
+    <Compile Include="Tests\MiscTests.cs" />
+    <Compile Include="Tests\QueueManagementTests.cs" />
     <Compile Include="Tests\TestHelpers.cs" />
-    <Compile Include="Tests\QueueManagement.cs" />
-    <Compile Include="UnitTest.cs" />
+    <Compile Include="MainPage.xaml.cs">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\AppResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -94,6 +98,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="MainPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -128,20 +136,20 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\CrittercismWP8SDK\CrittercismWP8SDK.csproj">
       <Project>{B880017A-2B87-41DA-B834-BC3D188231E2}</Project>
       <Name>CrittercismWP8SDK</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
