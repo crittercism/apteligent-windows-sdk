@@ -12,7 +12,7 @@ using System.Net;
 
 namespace CrittercismSDK
 {
-    internal class QueueReader
+    public class QueueReader
     {
         internal static string HostToUse;
 
@@ -213,7 +213,7 @@ namespace CrittercismSDK
             }
         }
 
-        internal static string ComputeFormPostBody(UserMetadata um)
+        public static string ComputeFormPostBody(UserMetadata um)
         {
             string postBody = "";
             postBody += "did=" + um.platform.device_id + "&";

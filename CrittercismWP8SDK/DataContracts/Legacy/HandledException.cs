@@ -10,7 +10,7 @@
     using Windows.Graphics.Display;
 
     [DataContract]
-    internal class HandledException : MessageReport
+    public class HandledException : MessageReport
     {
         /// <summary>
         /// Gets or sets the identifier of the application.

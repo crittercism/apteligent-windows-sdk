@@ -17,7 +17,7 @@ namespace CrittercismSDK.DataContracts.Legacy
     /// Crash (Unhandled Exception).
     /// </summary>
     [DataContract]
-    internal class Crash : MessageReport
+    public class Crash : MessageReport
     {
         /// <summary>
         /// Gets or sets the identifier of the application.

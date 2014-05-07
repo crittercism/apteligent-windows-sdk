@@ -14,7 +14,7 @@ namespace CrittercismSDK.DataContracts
     /// <summary>
     /// Message report.
     /// </summary>
-    internal abstract class MessageReport
+    public abstract class MessageReport
     {
         /// <summary>
         /// Gets or sets the file name.
@@ -68,7 +68,7 @@ namespace CrittercismSDK.DataContracts
         /// Saves the message to disk.
         /// </summary>
         /// <returns>   true if it succeeds, false if it fails. </returns>
-        internal bool SaveToDisk()
+        public bool SaveToDisk()
         {
             try
             {

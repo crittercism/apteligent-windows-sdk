@@ -12,7 +12,7 @@ namespace CrittercismSDK.DataContracts.Legacy
     /// Breadcrumbs.
     /// </summary>
     [DataContract]
-    internal class Breadcrumbs
+    public class Breadcrumbs
     {
         /// <summary>
         /// Gets or sets the breadcrumbs of the current session.

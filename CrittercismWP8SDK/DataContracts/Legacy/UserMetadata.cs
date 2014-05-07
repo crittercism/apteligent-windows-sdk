@@ -10,7 +10,7 @@
     /// Application load.
     /// </summary>
     [DataContract]
-    internal class UserMetadata : MessageReport
+    public class UserMetadata : MessageReport
     {
         /// <summary>
         /// Crittercism-issued Application identification string

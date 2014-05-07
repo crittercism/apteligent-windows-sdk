@@ -23,23 +23,23 @@ namespace CrittercismSDK {
         /// <summary>
         /// The auto run queue reader
         /// </summary>
-        internal static bool _autoRunQueueReader = true;
+        public static bool _autoRunQueueReader = true;
 
         /// <summary>
         /// The enable communication layer
         /// </summary>
-        internal static bool _enableCommunicationLayer = true;
+        public static bool _enableCommunicationLayer = true;
 
         /// <summary>
         /// The enable raise exception in communication layer
         /// </summary>
-        internal static bool _enableRaiseExceptionInCommunicationLayer = false;
+        public static bool _enableRaiseExceptionInCommunicationLayer = false;
 
         /// <summary>
         /// Gets or sets a queue of messages.
         /// </summary>
         /// <value> A Queue of messages. </value>
-        internal static Queue<CrittercismSDK.DataContracts.MessageReport> MessageQueue { get; set; }
+        public static Queue<CrittercismSDK.DataContracts.MessageReport> MessageQueue { get; set; }
 
         /// <summary>
         /// Gets or sets the current breadcrumbs.
