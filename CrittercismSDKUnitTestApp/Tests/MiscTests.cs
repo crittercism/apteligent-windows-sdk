@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CrittercismSDKUnitTestApp.Tests {
     [TestClass]
-    class MiscTests {
+    public class MiscTests {
         [TestMethod]
         public void TruncatedBreadcrumbTest() {
             Crittercism._autoRunQueueReader = false;
@@ -57,7 +57,7 @@ namespace CrittercismSDKUnitTestApp.Tests {
             } catch (Exception ex) {
                 Crittercism.LogHandledException(ex);
             }
-            Assert.IsTrue(Crittercism.MessageQueue == null || Crittercism.MessageQueue.Count == 0);
+            Assert.IsTrue(Crittercism.MessageQueue.Count == 0);
             // Now turn it back on
             Crittercism.SetOptOutStatus(false);
             Assert.IsFalse(Crittercism.CheckOptOutFromDisk());

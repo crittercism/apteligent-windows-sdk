@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CrittercismSDKUnitTestApp.Tests {
     [TestClass]
-    class ExceptionHandlersTests {
+    public class ExceptionHandlersTests {
         [TestMethod]
         public void LogHandledExceptionTest() {
             Crittercism._autoRunQueueReader = false;
@@ -17,18 +17,15 @@ namespace CrittercismSDKUnitTestApp.Tests {
             Crittercism.LeaveBreadcrumb("HandledExceptionBreadcrumb");
             Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");
             TestHelpers.CleanUp(); // drop all previous messages
-            int i = 0;
-            int j = 5;
-            try {
-                int k = j / i;
-            } catch (Exception ex) {
-                Crittercism.LogHandledException(ex);
-            }
+
+            Crittercism.LogHandledException(new Exception());
+
             HandledException he = Crittercism.MessageQueue.Dequeue() as HandledException;
             he.DeleteFromDisk();
             Assert.IsNotNull(he, "Expected a HandledException message");
+
             String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(he);
-            TestHelpers.checkCommonJsonFragments(asJson);
+            TestHelpers.CheckCommonJsonFragments(asJson);
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
                 "\"current_session\":[{\"message\":\"HandledExceptionBreadcrumb\"",

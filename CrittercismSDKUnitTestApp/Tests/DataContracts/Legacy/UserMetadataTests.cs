@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
     [TestClass]
-    class UserMetadataTests {
+    public class UserMetadataTests {
         [TestMethod]
         public void ComputeMetadataFormPostBodyTest() {
             Dictionary<string, string> dict = new Dictionary<string, string>();
@@ -43,8 +43,8 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
                 Crittercism.CreateCrashReport(ex);
             }
             Crash crash = Crittercism.MessageQueue.Dequeue() as Crash;
-            crash.DeleteFromDisk();
             Assert.IsNotNull(crash, "Expected a Crash message");
+            crash.DeleteFromDisk();
             String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
             Assert.IsTrue(asJson.Contains("fred"));
         }

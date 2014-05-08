@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
     [TestClass]
-    class HandledExceptionTests {
+    public class HandledExceptionTests {
         [TestMethod]
         public void HandledExceptionDataContractTest() {
             int i = 0;
@@ -45,7 +45,7 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             Assert.AreEqual(loadedJsonMessage, originalJsonMessage);
 
             // compare against known json to verify that the serialization is in the correct format
-            TestHelpers.checkCommonJsonFragments(loadedJsonMessage);
+            TestHelpers.CheckCommonJsonFragments(loadedJsonMessage);
 
             string[] jsonStrings = new string[] {
                 "\"error\":{\"name\":\"" + errorName + "\",\"reason\":\"" + errorMessage + "\",\"stack_trace\":[\"" + errorStackTrace.Replace(@"\", @"\\") + "\"]}",

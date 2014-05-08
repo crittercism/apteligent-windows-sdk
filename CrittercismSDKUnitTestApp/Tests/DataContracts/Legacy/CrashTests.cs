@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
     [TestClass]
-    class CrashTests {
+    public class CrashTests {
         [TestMethod]
         public void CrashDataContractTest() {
             int i = 0;
@@ -20,43 +20,49 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             string errorMessage = string.Empty;
             string errorStackTrace = string.Empty;
             try {
-                int k = j / i;
-            } catch (Exception ex) {
-                // create new crash message
-                errorName = ex.GetType().FullName;
-                errorMessage = ex.Message;
-                errorStackTrace = ex.StackTrace;
-                ExceptionObject exception = new ExceptionObject(errorName, errorMessage, errorStackTrace);
-                newMessageReport = new Crash("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), new Dictionary<string, string>(), new Breadcrumbs(), exception);
-                newMessageReport.SaveToDisk();
+                try {
+                    int k = j / i;
+                } catch (Exception ex) {
+                    // create new crash message
+                    errorName = ex.GetType().FullName;
+                    errorMessage = ex.Message;
+                    errorStackTrace = ex.StackTrace;
+                    ExceptionObject exception = new ExceptionObject(errorName, errorMessage,
+                        errorStackTrace);
+                    newMessageReport = new Crash("50807ba33a47481dd5000002", System.Windows.
+                        Application.Current.GetType().Assembly.GetName().Version.ToString(),
+                        new Dictionary<string, string>(), new Breadcrumbs(), exception);
+                    newMessageReport.SaveToDisk();
+                }
+
+                // check that message is saved by try loading it with the helper
+                // load saved version of the crash event
+                Crash messageReportLoaded = new Crash {
+                    Name = newMessageReport.Name
+                };
+                messageReportLoaded.LoadFromDisk();
+
+                Assert.IsNotNull(messageReportLoaded);
+
+                // validate that the loaded object is corrected agains the original one via json serialization
+                string originalJsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(newMessageReport);
+                string loadedJsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(messageReportLoaded);
+
+                Assert.AreEqual(loadedJsonMessage, originalJsonMessage);
+
+                // compare against known json to verify that the serialization is in the correct format
+                TestHelpers.CheckCommonJsonFragments(loadedJsonMessage);
+                string[] jsonStrings = new string[] {
+                    "\"breadcrumbs\":{\"current_session\":[],\"previous_session\":[]}",
+                    "\"crash\":{\"name\":\"" + errorName + "\",\"reason\":\"" + errorMessage + "\",\"stack_trace\":[\"" + errorStackTrace.Replace(@"\", @"\\") + "\"]}",
+                };
+                foreach (string jsonFragment in jsonStrings) {
+                    Assert.IsTrue(loadedJsonMessage.Contains(jsonFragment));
+                }
+            } finally {
+                // delete the message from disk
+                newMessageReport.DeleteFromDisk();
             }
-
-            // check that message is saved by try loading it with the helper
-            // load saved version of the crash event
-            Crash messageReportLoaded = new Crash();
-            messageReportLoaded.Name = newMessageReport.Name;
-            messageReportLoaded.LoadFromDisk();
-
-            Assert.IsNotNull(messageReportLoaded);
-
-            // validate that the loaded object is corrected agains the original one via json serialization
-            string originalJsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(newMessageReport);
-            string loadedJsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(messageReportLoaded);
-
-            Assert.AreEqual(loadedJsonMessage, originalJsonMessage);
-
-            // compare against known json to verify that the serialization is in the correct format
-            TestHelpers.checkCommonJsonFragments(loadedJsonMessage);
-            string[] jsonStrings = new string[] {
-                "\"breadcrumbs\":{\"current_session\":[],\"previous_session\":[]}",
-                "\"crash\":{\"name\":\"" + errorName + "\",\"reason\":\"" + errorMessage + "\",\"stack_trace\":[\"" + errorStackTrace.Replace(@"\", @"\\") + "\"]}",
-            };
-            foreach (string jsonFragment in jsonStrings) {
-                Assert.IsTrue(loadedJsonMessage.Contains(jsonFragment));
-            }
-
-            // delete the message from disk
-            newMessageReport.DeleteFromDisk();
         }
 
         [TestMethod]
@@ -77,7 +83,7 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             crash.DeleteFromDisk();
             Assert.IsNotNull(crash, "Expected a Crash message");
             String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
-            TestHelpers.checkCommonJsonFragments(asJson);
+            TestHelpers.CheckCommonJsonFragments(asJson);
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
                 "\"current_session\":[{\"message\":\"CrashReportBreadcrumb\"",

@@ -1,7 +1,6 @@
 ﻿// file:	CrittercismSDK\MessageReport.cs
 // summary:	Implements the message report class
-namespace CrittercismSDK.DataContracts
-{
+namespace CrittercismSDK.DataContracts {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -14,8 +13,7 @@ namespace CrittercismSDK.DataContracts
     /// <summary>
     /// Message report.
     /// </summary>
-    public abstract class MessageReport
-    {
+    public abstract class MessageReport {
         /// <summary>
         /// Gets or sets the file name.
         /// </summary>
@@ -34,13 +32,11 @@ namespace CrittercismSDK.DataContracts
         /// <value> true if this object is loaded, false if not. </value>
         internal bool IsLoaded { get; set; }
 
-        internal static string DateTimeString(DateTime dt)
-        {
+        internal static string DateTimeString(DateTime dt) {
             return dt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        protected Dictionary<string,object> ComputeAppState(string appVersion)
-        {
+        protected Dictionary<string,object> ComputeAppState(string appVersion) {
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
             // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
 
@@ -68,22 +64,19 @@ namespace CrittercismSDK.DataContracts
         /// Saves the message to disk.
         /// </summary>
         /// <returns>   true if it succeeds, false if it fails. </returns>
-        public bool SaveToDisk()
-        {
-            try
-            {
+        public bool SaveToDisk() {
+            // TODO(DA): On-disk serialization in JSON isn't type-preserving.
+            // This isn't intended for transmission or portability, so should use something more
+            // typesafe, even if it's C#-specific
+            try {
                 string folderName = Crittercism.FolderName;
                 IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                if (!storage.DirectoryExists(folderName))
-                {
+                if (!storage.DirectoryExists(folderName)) {
                     storage.CreateDirectory(folderName);
                 }
 
                 Name = this.GetType().Name + "_" + Guid.NewGuid().ToString() + ".txt";
-                using (IsolatedStorageFileStream writeFile = new IsolatedStorageFileStream(folderName + "\\" + this.Name, FileMode.CreateNew, FileAccess.Write, storage))
-                {
-                    // DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
-                    // serializer.WriteObject(writeFile, this);
+                using (IsolatedStorageFileStream writeFile = new IsolatedStorageFileStream(folderName + "\\" + this.Name, FileMode.CreateNew, FileAccess.Write, storage)) {
                     StreamWriter writer = new StreamWriter(writeFile);
                     writer.Write(Newtonsoft.Json.JsonConvert.SerializeObject(this));
                     writer.Flush();
@@ -92,9 +85,8 @@ namespace CrittercismSDK.DataContracts
                 }
 
                 return true;
-            }
-            catch
-            {
+            } catch {
+                // TODO(DA) failing silently like this totally sucks, fix this
                 return false;
             }
         }
@@ -103,16 +95,12 @@ namespace CrittercismSDK.DataContracts
         /// Deletes the message from disk.
         /// </summary>
         /// <returns>   true if it succeeds, false if it fails. </returns>
-        internal bool DeleteFromDisk()
-        {
+        internal bool DeleteFromDisk() {
             string folderName = Crittercism.FolderName;
-            try
-            {
+            try {
                 IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                if (storage.DirectoryExists(folderName))
-                {
-                    if (storage.FileExists(folderName + "\\" + this.Name))
-                    {
+                if (storage.DirectoryExists(folderName)) {
+                    if (storage.FileExists(folderName + "\\" + this.Name)) {
                         storage.DeleteFile(folderName + "\\" + this.Name);
                     }
 
@@ -120,9 +108,7 @@ namespace CrittercismSDK.DataContracts
                 }
 
                 return false;
-            }
-            catch
-            {
+            } catch {
                 return false;
             }
         }
@@ -131,26 +117,18 @@ namespace CrittercismSDK.DataContracts
         /// Loads the message from disk.
         /// </summary>
         /// <returns>  true if it succeeds, false if it fails. </returns>
-        internal bool LoadFromDisk()
-        {
+        internal bool LoadFromDisk() {
             string folderName = Crittercism.FolderName;
-            try
-            {
+            try {
                 IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                if (storage.DirectoryExists(folderName))
-                {
-                    if (storage.FileExists(folderName + "\\" + this.Name))
-                    {
-                        using (IsolatedStorageFileStream readFile = storage.OpenFile(folderName + "\\" + this.Name, FileMode.Open, FileAccess.Read))
-                        {
-                            //DataContractJsonSerializer serializer = new DataContractJsonSerializer(this.GetType());
-                            //MessageReport message = (MessageReport)serializer.ReadObject(readFile);
+                if (storage.DirectoryExists(folderName)) {
+                    if (storage.FileExists(folderName + "\\" + this.Name)) {
+                        using (IsolatedStorageFileStream readFile = storage.OpenFile(folderName + "\\" + this.Name, FileMode.Open, FileAccess.Read)) {
                             StreamReader reader = new StreamReader(readFile);
                             string json = reader.ReadToEnd();
                             MessageReport message = (MessageReport)Newtonsoft.Json.JsonConvert.DeserializeObject(json, this.GetType());
                             PropertyInfo[] properties = this.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
-                            foreach (PropertyInfo property in properties)
-                            {
+                            foreach (PropertyInfo property in properties) {
                                 property.SetValue(this, property.GetValue(message, null), null);
                             }
 
@@ -163,9 +141,7 @@ namespace CrittercismSDK.DataContracts
                 }
 
                 return false;
-             }
-            catch
-            {
+             } catch {
                 return false;
             }
         }

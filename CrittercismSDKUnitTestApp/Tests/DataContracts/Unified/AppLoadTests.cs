@@ -14,19 +14,31 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Unified {
         public void AppLoadDiskRoundtrip() {
             // There is so much wrong here I don't know where to begin...
             // Refactor this byzantine load/store thing to use a platform service
-            // Also, shouldn't require random fields to be set arbitrarily for loads?!
+            // Use more self-describing persistence strategy for messages, to avoid need to set
+            //   "Name" before loading
             // Also, concerns are inappropriately mixed, should CREATE then SAVE object, not do
             //   this as a single bundled/atomic action
 
             AppLoad newMessageReport = new AppLoad(TestHelpers.VALID_APPID);
-            newMessageReport.SaveToDisk();
 
-            AppLoad loadedMessageReport = new AppLoad();
-            loadedMessageReport.Name = newMessageReport.Name;
-            loadedMessageReport.LoadFromDisk();
+            try {    
+                newMessageReport.SaveToDisk();
 
-            Assert.IsTrue(newMessageReport.Equals(loadedMessageReport));
-            newMessageReport.DeleteFromDisk();
+                AppLoad loadedMessageReport = new AppLoad {
+                    Name = newMessageReport.Name
+                };
+
+                loadedMessageReport.LoadFromDisk();
+            
+                // TODO(DA) should do overlaoded object equality test here
+                // We can't right now because types get mangled when round-tripping to/from JSON :/
+                //Assert.IsTrue(newMessageReport.Equals(loadedMessageReport));
+
+                Assert.AreEqual(Newtonsoft.Json.JsonConvert.SerializeObject(newMessageReport),
+                    Newtonsoft.Json.JsonConvert.SerializeObject(loadedMessageReport));
+            } finally {
+                newMessageReport.DeleteFromDisk();
+            }
         }
 
         [TestMethod]

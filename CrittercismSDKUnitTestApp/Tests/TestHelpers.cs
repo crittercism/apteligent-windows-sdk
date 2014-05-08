@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace CrittercismSDKUnitTestApp.Tests {
     class TestHelpers {
-        public static void checkCommonJsonFragments(String loadedJsonMessage) {
+        public static void CheckCommonJsonFragments(String loadedJsonMessage) {
             Platform p = new Platform();
             string[] jsonStrings = new string[] {
                 "\"app_id\":\"50807ba33a47481dd5000002\"",

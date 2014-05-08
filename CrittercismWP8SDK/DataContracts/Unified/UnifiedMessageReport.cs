@@ -23,8 +23,7 @@ namespace CrittercismSDK.DataContracts.Unified {
         public static Dictionary<string, object> GetPlatformSpecificData() {
             return new Dictionary<string, object> {
                 // RemainingChargePercent returns an integer in [0,100]
-                { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().
-                    RemainingChargePercent / 100.0 },
+                { "battery_level", Windows.Phone.Devices.Power.Battery.GetDefault().RemainingChargePercent },
                 { "disk_space_free", System.IO.IsolatedStorage.IsolatedStorageFile.
                     GetUserStoreForApplication().AvailableFreeSpace },
                 { "device_total_ram_bytes", Microsoft.Phone.Info.DeviceExtendedProperties.
@@ -37,8 +36,7 @@ namespace CrittercismSDK.DataContracts.Unified {
                     GetValue("ApplicationPeakMemoryUsage") },
                 { "on_cellular_data", DeviceNetworkInformation.IsCellularDataEnabled },
                 { "on_wifi", DeviceNetworkInformation.IsWiFiEnabled },
-                { "orientation", DisplayProperties.NativeOrientation.ToString() },
-                { "reported_at", DateTimeString(DateTime.Now) }
+                { "orientation", DisplayProperties.NativeOrientation.ToString() }
             };
         }
     }
