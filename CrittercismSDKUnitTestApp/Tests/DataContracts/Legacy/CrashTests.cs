@@ -13,15 +13,13 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
     public class CrashTests {
         [TestMethod]
         public void CrashDataContractTest() {
-            int i = 0;
-            int j = 5;
             Crash newMessageReport = null;
             string errorName = string.Empty;
             string errorMessage = string.Empty;
             string errorStackTrace = string.Empty;
             try {
                 try {
-                    int k = j / i;
+                    TestHelpers.ThrowDivideByZeroException();
                 } catch (Exception ex) {
                     // create new crash message
                     errorName = ex.GetType().FullName;
@@ -67,8 +65,7 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
 
         [TestMethod]
         public void CreateCrashReportTest() {
-            Crittercism._autoRunQueueReader = false;
-            Crittercism.Init("50807ba33a47481dd5000002");
+            TestHelpers.InitializeLeaveLoadOnQueue(TestHelpers.VALID_APPID);
             Crittercism.LeaveBreadcrumb("CrashReportBreadcrumb");
             Crittercism.SetUsername("Mr. McUnitTest");
             TestHelpers.CleanUp(); // drop all previous messages
@@ -97,24 +94,17 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
 
         [TestMethod]
         public void CrashCommunicationTest() {
-            Crittercism._autoRunQueueReader = false;
+            TestHelpers.InitializeLeaveLoadOnQueue(TestHelpers.VALID_APPID);
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("50807ba33a47481dd5000002");
-            int i = 0;
-            int j = 5;
+
             try {
-                int k = j / i;
+                TestHelpers.ThrowDivideByZeroException();
             } catch (Exception ex) {
-                // Create a Breadcrum
                 Crittercism.LeaveBreadcrumb("Breadcrum test");
-
-                // Create the error message
                 Crittercism.CreateCrashReport(ex);
-
-                // Create a queuereader
                 QueueReader queueReader = new QueueReader();
 
-                // call sendmessage with the crash, no exception should be rise
+                // TODO(DA): Assert.DoesNotThrow()...need a better assertion here
                 queueReader.ReadQueue();
             }
         }

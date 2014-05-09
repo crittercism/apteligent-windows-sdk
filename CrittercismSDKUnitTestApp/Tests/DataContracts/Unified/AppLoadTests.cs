@@ -51,18 +51,5 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Unified {
             Assert.AreEqual(inner.osName, "wp");
             Assert.AreEqual(inner.carrier, "Fake GSM Network");     // On emulator
         }
-
-        [TestMethod]
-        public void AppLoadCommunicationTest() {
-            Crittercism._autoRunQueueReader = false;
-            Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("50807ba33a47481dd5000002");
-
-            // Create a queuereader
-            QueueReader queueReader = new QueueReader();
-
-            // call sendmessage with the appload, no exception should be rise
-            queueReader.ReadQueue();
-        }
     }
 }

@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace CrittercismSDKUnitTestApp.Tests {
     class TestHelpers {
+        public const string VALID_APPID = "50807ba33a47481dd5000002";
+
         public static void CheckCommonJsonFragments(String loadedJsonMessage) {
             Platform p = new Platform();
             string[] jsonStrings = new string[] {
@@ -56,6 +58,27 @@ namespace CrittercismSDKUnitTestApp.Tests {
             }
         }
 
-        public const string VALID_APPID = "50807ba33a47481dd5000002";
+        public static void InitializeLeaveLoadOnQueue(string appId) {
+            StartApp(appId, true);
+        }
+        
+        public static void InitializeRemoveLoadFromQueue(string appId) {
+            StartApp(appId, false);
+        }
+
+        private static void StartApp(string appId, bool leaveAppLoadOnQueue) {
+            Crittercism._autoRunQueueReader = false;
+            Crittercism.Init(appId);
+            if (!leaveAppLoadOnQueue) {
+                MessageReport message = Crittercism.MessageQueue.Dequeue();
+                message.DeleteFromDisk();
+            }
+        }
+
+        public static void ThrowDivideByZeroException() {
+            int i = 0;
+            int j = 5;
+            int k = j / i;
+        }
     }
 }

@@ -35,16 +35,20 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             Crittercism.SetUsername("bill");
             Crittercism.SetUsername("fred");
             TestHelpers.CleanUp(); // drop all previous messages
-            int i = 0;
-            int j = 5;
+            
             try {
-                int k = j / i;
+                TestHelpers.ThrowDivideByZeroException();
             } catch (Exception ex) {
                 Crittercism.CreateCrashReport(ex);
             }
+
             Crash crash = Crittercism.MessageQueue.Dequeue() as Crash;
-            Assert.IsNotNull(crash, "Expected a Crash message");
-            crash.DeleteFromDisk();
+            try {
+                Assert.IsNotNull(crash, "Expected a Crash message");
+            } finally {
+                crash.DeleteFromDisk();
+            }
+
             String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
             Assert.IsTrue(asJson.Contains("fred"));
         }
@@ -62,6 +66,5 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             Assert.AreEqual("crookshanks", Crittercism.LoadUserMetadataFromDisk()["familiar"]);
             Assert.AreEqual("hermione", Crittercism.LoadUserMetadataFromDisk()["username"]);
         }
-
     }
 }

@@ -10,11 +10,13 @@ using System.Threading.Tasks;
 namespace CrittercismSDKUnitTestApp.Tests {
     [TestClass]
     public class MiscTests {
+        [TestInitialize]
+        public void Init() {
+            TestHelpers.InitializeRemoveLoadFromQueue(TestHelpers.VALID_APPID);
+        }
+
         [TestMethod]
         public void TruncatedBreadcrumbTest() {
-            Crittercism._autoRunQueueReader = false;
-            Crittercism.Init("50807ba33a47481dd5000002");
-            TestHelpers.CleanUp(); // drop all previous messages
             // start breadcrumb with sentinel to ensure we don't left-truncate
             string breadcrumb = "raaaaaaaaa";
             for (int x = 0; x < 13; x++) {
@@ -23,13 +25,13 @@ namespace CrittercismSDKUnitTestApp.Tests {
             // end breadcrumb with "illegal" chars and check for their presence
             breadcrumb += "zzzzzzzzzz";
             Crittercism.LeaveBreadcrumb(breadcrumb);
-            int i = 0;
-            int j = 5;
+
             try {
-                int k = j / i;
+                TestHelpers.ThrowDivideByZeroException();
             } catch (Exception ex) {
                 Crittercism.LogHandledException(ex);
             }
+
             HandledException he = Crittercism.MessageQueue.Dequeue() as HandledException;
             he.DeleteFromDisk();
             Assert.IsNotNull(he, "Expected a HandledException message");
@@ -42,10 +44,9 @@ namespace CrittercismSDKUnitTestApp.Tests {
 
         [TestMethod]
         public void OptOutTest() {
-            Crittercism._autoRunQueueReader = false;
+            TestHelpers.InitializeRemoveLoadFromQueue(TestHelpers.VALID_APPID);
             Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-            Crittercism.Init("50807ba33a47481dd5000002");
-            TestHelpers.CleanUp();
+            
             Assert.IsTrue(Crittercism.MessageQueue == null || Crittercism.MessageQueue.Count == 0);
             Crittercism.SetOptOutStatus(true);
             Assert.IsTrue(Crittercism.CheckOptOutFromDisk());

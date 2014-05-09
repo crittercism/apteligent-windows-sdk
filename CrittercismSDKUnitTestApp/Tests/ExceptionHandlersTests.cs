@@ -13,7 +13,8 @@ namespace CrittercismSDKUnitTestApp.Tests {
         [TestMethod]
         public void LogHandledExceptionTest() {
             Crittercism._autoRunQueueReader = false;
-            Crittercism.Init("50807ba33a47481dd5000002");
+            TestHelpers.InitializeRemoveLoadFromQueue(TestHelpers.VALID_APPID);
+
             Crittercism.LeaveBreadcrumb("HandledExceptionBreadcrumb");
             Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");
             TestHelpers.CleanUp(); // drop all previous messages
@@ -35,6 +36,11 @@ namespace CrittercismSDKUnitTestApp.Tests {
             foreach (String jsonFragment in jsonStrings) {
                 Assert.IsTrue(asJson.Contains(jsonFragment));
             }
+        }
+
+        public void HandledExceptionWithNullStackTraceOK() {
+            var ex = new Exception();
+            Crittercism.LogHandledException(ex);
         }
     }
 }
