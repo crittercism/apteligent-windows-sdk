@@ -15,7 +15,8 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             Dictionary<string, string> dict = new Dictionary<string, string>();
             dict.Add("key with space", "value1");
             dict.Add("key&%", "value2");
-            UserMetadata um = new UserMetadata("50807ba33a47481dd5000002", System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString(), dict);
+            UserMetadata um = new UserMetadata(TestHelpers.VALID_APPID, System.Windows.Application.
+                Current.GetType().Assembly.GetName().Version.ToString(), dict);
             string formEncoded = CrittercismSDK.QueueReader.ComputeFormPostBody(um);
             Assert.IsTrue(formEncoded.Contains("%26")); // ampersand
             Assert.IsTrue(formEncoded.Contains("%25")); // percent

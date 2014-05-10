@@ -81,7 +81,6 @@
     <Compile Include="Tests\DataContracts\Unified\AppLoadTests.cs" />
     <Compile Include="Tests\ExceptionHandlersTests.cs" />
     <Compile Include="Tests\MiscTests.cs" />
-    <Compile Include="Tests\QueueManagementTests.cs" />
     <Compile Include="Tests\TestHelpers.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>

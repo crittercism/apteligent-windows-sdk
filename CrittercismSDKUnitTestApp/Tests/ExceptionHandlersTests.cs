@@ -19,7 +19,11 @@ namespace CrittercismSDKUnitTestApp.Tests {
             Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");
             TestHelpers.CleanUp(); // drop all previous messages
 
-            Crittercism.LogHandledException(new Exception());
+            try {
+                TestHelpers.ThrowDivideByZeroException();
+            } catch (Exception ex) {
+                Crittercism.LogHandledException(ex);
+            }
 
             HandledException he = Crittercism.MessageQueue.Dequeue() as HandledException;
             he.DeleteFromDisk();
@@ -38,6 +42,7 @@ namespace CrittercismSDKUnitTestApp.Tests {
             }
         }
 
+        // TODO(DA) Specify better behavior here. What should this do?
         public void HandledExceptionWithNullStackTraceOK() {
             var ex = new Exception();
             Crittercism.LogHandledException(ex);

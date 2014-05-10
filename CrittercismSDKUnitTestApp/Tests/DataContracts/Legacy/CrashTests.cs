@@ -11,58 +11,65 @@ using System.Threading.Tasks;
 namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
     [TestClass]
     public class CrashTests {
-        [TestMethod]
-        public void CrashDataContractTest() {
-            Crash newMessageReport = null;
-            string errorName = string.Empty;
-            string errorMessage = string.Empty;
-            string errorStackTrace = string.Empty;
+        private Crash GetCrashMessage() {
+            // A stricter language would detect that this code is unreachable.
+            // I think because we allow global variable mutation to i and j?
+            var crEx = new ExceptionObject("Unreachable", "Unreachable",
+                "Unreachable");
+            
             try {
-                try {
-                    TestHelpers.ThrowDivideByZeroException();
-                } catch (Exception ex) {
-                    // create new crash message
-                    errorName = ex.GetType().FullName;
-                    errorMessage = ex.Message;
-                    errorStackTrace = ex.StackTrace;
-                    ExceptionObject exception = new ExceptionObject(errorName, errorMessage,
-                        errorStackTrace);
-                    newMessageReport = new Crash("50807ba33a47481dd5000002", System.Windows.
-                        Application.Current.GetType().Assembly.GetName().Version.ToString(),
-                        new Dictionary<string, string>(), new Breadcrumbs(), exception);
-                    newMessageReport.SaveToDisk();
-                }
+                int i = 1;
+                int j = 0;
+                var k = i / j;
 
-                // check that message is saved by try loading it with the helper
-                // load saved version of the crash event
+                // This is unreachable; above always throws divide-by-zero
+                return new Crash(TestHelpers.VALID_APPID, System.Windows.Application.Current.
+                    GetType().Assembly.GetName().Version.ToString(),
+                    new Dictionary<string, string>(), new Breadcrumbs(), crEx);
+            } catch(Exception ex) {
+                crEx = new ExceptionObject(ex.GetType().FullName, ex.Message, ex.StackTrace);
+                return new Crash(TestHelpers.VALID_APPID, System.Windows.
+                    Application.Current.GetType().Assembly.GetName().Version.ToString(),
+                    new Dictionary<string, string>(), new Breadcrumbs(), crEx);
+            }
+        }
+        
+        [TestMethod]
+        public void CrashDiskRoundTripTest() {
+            var crash = GetCrashMessage();
+            string expectedJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
+
+            try {
+                crash.SaveToDisk();
+
                 Crash messageReportLoaded = new Crash {
-                    Name = newMessageReport.Name
+                    Name = crash.Name
                 };
                 messageReportLoaded.LoadFromDisk();
+                var actualJson = Newtonsoft.Json.JsonConvert.SerializeObject(messageReportLoaded);
 
-                Assert.IsNotNull(messageReportLoaded);
-
-                // validate that the loaded object is corrected agains the original one via json serialization
-                string originalJsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(newMessageReport);
-                string loadedJsonMessage = Newtonsoft.Json.JsonConvert.SerializeObject(messageReportLoaded);
-
-                Assert.AreEqual(loadedJsonMessage, originalJsonMessage);
-
-                // compare against known json to verify that the serialization is in the correct format
-                TestHelpers.CheckCommonJsonFragments(loadedJsonMessage);
-                string[] jsonStrings = new string[] {
-                    "\"breadcrumbs\":{\"current_session\":[],\"previous_session\":[]}",
-                    "\"crash\":{\"name\":\"" + errorName + "\",\"reason\":\"" + errorMessage + "\",\"stack_trace\":[\"" + errorStackTrace.Replace(@"\", @"\\") + "\"]}",
-                };
-                foreach (string jsonFragment in jsonStrings) {
-                    Assert.IsTrue(loadedJsonMessage.Contains(jsonFragment));
-                }
+                Assert.AreEqual(expectedJson, actualJson);
             } finally {
-                // delete the message from disk
-                newMessageReport.DeleteFromDisk();
+                crash.DeleteFromDisk();
             }
         }
 
+        [TestMethod]
+        public void CrashFormatTest() {
+            TestHelpers.InitializeRemoveLoadFromQueue(TestHelpers.VALID_APPID);
+            var crash = GetCrashMessage();
+
+            Assert.AreEqual(crash.app_id, TestHelpers.VALID_APPID);
+            Assert.AreEqual(crash.crash.name, "System.DivideByZeroException");
+            Assert.AreEqual(crash.crash.reason, "Attempted to divide by zero.");
+            Assert.AreEqual(crash.crash.stack_trace.Count, 1);
+            Assert.AreEqual(crash.crash.stack_trace[0], "   at CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy.CrashTests.GetCrashMessage()");
+            Assert.AreEqual(crash.platform.client, "wp8v2.0");
+            Assert.IsNotNull(crash.platform.device_id);
+            Assert.AreEqual(crash.platform.device_model, "XDeviceEmulator");
+            Assert.AreEqual(crash.platform.os_name, "wp");
+        }
+        
         [TestMethod]
         public void CreateCrashReportTest() {
             TestHelpers.InitializeLeaveLoadOnQueue(TestHelpers.VALID_APPID);
