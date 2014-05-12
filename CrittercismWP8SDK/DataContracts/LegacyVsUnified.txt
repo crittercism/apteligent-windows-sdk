@@ -1,0 +1,8 @@
+﻿For the past 2 years, Crittercism has been transitioning our client libraries
+to use a single set of endpoints across all platforms/client libraries. The new
+"unified' endpoints use a single URI, data format, and request/response
+semantics (e.g. use of HTTP return codes).
+
+The DataContracts in the "Unified" package serialize into the new data formats
+common to all the platforms. "Legacy" DataContracts use the old, fragmented
+format with somewhat idiosyncratic behavior on each platform.
