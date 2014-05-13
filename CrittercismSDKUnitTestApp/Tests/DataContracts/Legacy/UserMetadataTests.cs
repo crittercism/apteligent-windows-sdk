@@ -11,17 +11,19 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
     [TestClass]
     public class UserMetadataTests {
         [TestMethod]
-        public void ComputeMetadataFormPostBodyTest() {
+        public void MetadataFormBodyEncodingTest() {
             Dictionary<string, string> dict = new Dictionary<string, string>();
             dict.Add("key with space", "value1");
             dict.Add("key&%", "value2");
             UserMetadata um = new UserMetadata(TestHelpers.VALID_APPID, System.Windows.Application.
                 Current.GetType().Assembly.GetName().Version.ToString(), dict);
             string formEncoded = CrittercismSDK.QueueReader.ComputeFormPostBody(um);
-            Assert.IsTrue(formEncoded.Contains("%26")); // ampersand
-            Assert.IsTrue(formEncoded.Contains("%25")); // percent
-            Assert.IsFalse(formEncoded.Contains("{"));
-            Assert.IsFalse(formEncoded.Contains("\""));
+            
+            // We're form-encoding JSON here...gross
+            // Encoded metadata string: {"key with space":"value1","key&%":"value2"}
+            // URL encoded form: %7b%22key+with+space%22%3a%22value1%22%2c%22key%26%25%22%3a%22value2%22%7d
+            Assert.IsTrue(formEncoded.Contains(
+                "%7b%22key+with+space%22%3a%22value1%22%2c%22key%26%25%22%3a%22value2%22%7d"));
         }
 
         [TestMethod]

@@ -8,5 +8,4 @@ namespace CrittercismSDK {
     class InvalidAppIdException : Exception {
         public InvalidAppIdException(string message) : base(message) { }
     }
-
 }

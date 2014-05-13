@@ -1,17 +1,13 @@
 ﻿// UnifiedAppLoadMessage.cs
 // David R. Albrecht for Crittercism, Inc.
 //
-// Implementes a .NET DataContract for the new single app load format we use across all libraries.
-// Eventually we'll retire the old data format; I've started moving it aside and calling it
-// "legacy". Apologies for the code duplication, eventually we'll only have the unified
-// messages/handlers.
-//
-// There is so much wrong with this code I don't even know where to begin...we should be using
-// immutable data objects, we should use an OS-provided persistence framework rather than rolling
-// our own with files, etc...fix this as time allows
+// This library has a lot of room for improvement. A few areas I saw working on this in May 2014:
+//   (1) More prevalent use of immutable data objects is good defensive programming against errors
+//   (2) Currently we persist objects to "disk" manually -- is there an OS-provided storage system
+//       (maybe IsolatedStorage) or a .NET-provided object persistence system we can use, rather
+//       than writing raw files?
 
 namespace CrittercismSDK.DataContracts.Unified {
-
     using System;
     using System.Collections.Generic;
     using System.Linq;

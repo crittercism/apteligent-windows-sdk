@@ -11,11 +11,15 @@ using System.Threading.Tasks;
 namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
     [TestClass]
     public class CrashTests {
+        /// <summary>
+        /// Returns a Crash object with a well-formed stack trace, like a real stack trace would. 
+        /// </summary>
+        /// We end up using a roundabout procedure beacuse I want the function to have Crash
+        /// return type, so all code paths must return that type, even if one path is unreachable
+        /// by dint of always throwing a (caught) exception.
+        /// <returns></returns>
         private Crash GetCrashMessage() {
-            // A stricter language would detect that this code is unreachable.
-            // I think because we allow global variable mutation to i and j?
-            var crEx = new ExceptionObject("Unreachable", "Unreachable",
-                "Unreachable");
+            var crEx = new ExceptionObject("Unreachable", "Unreachable", "Unreachable");
             
             try {
                 int i = 1;
@@ -35,7 +39,7 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
         }
         
         [TestMethod]
-        public void CrashDiskRoundTripTest() {
+        public void CrashLoadAfterSaveTest() {
             var crash = GetCrashMessage();
             string expectedJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
 
@@ -55,7 +59,7 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
         }
 
         [TestMethod]
-        public void CrashFormatTest() {
+        public void CrashHasExpectedDataItemsTest() {
             TestHelpers.InitializeRemoveLoadFromQueue(TestHelpers.VALID_APPID);
             var crash = GetCrashMessage();
 
@@ -68,52 +72,6 @@ namespace CrittercismSDKUnitTestApp.Tests.DataContracts.Legacy {
             Assert.IsNotNull(crash.platform.device_id);
             Assert.AreEqual(crash.platform.device_model, "XDeviceEmulator");
             Assert.AreEqual(crash.platform.os_name, "wp");
-        }
-        
-        [TestMethod]
-        public void CreateCrashReportTest() {
-            TestHelpers.InitializeLeaveLoadOnQueue(TestHelpers.VALID_APPID);
-            Crittercism.LeaveBreadcrumb("CrashReportBreadcrumb");
-            Crittercism.SetUsername("Mr. McUnitTest");
-            TestHelpers.CleanUp(); // drop all previous messages
-            int i = 0;
-            int j = 5;
-            try {
-                int k = j / i;
-            } catch (Exception ex) {
-                Crittercism.CreateCrashReport(ex);
-            }
-            Crash crash = Crittercism.MessageQueue.Dequeue() as Crash;
-            crash.DeleteFromDisk();
-            Assert.IsNotNull(crash, "Expected a Crash message");
-            String asJson = Newtonsoft.Json.JsonConvert.SerializeObject(crash);
-            TestHelpers.CheckCommonJsonFragments(asJson);
-            string[] jsonStrings = new string[] {
-                "\"breadcrumbs\":",
-                "\"current_session\":[{\"message\":\"CrashReportBreadcrumb\"",
-                "\"metadata\":{",
-                "\"username\":\"Mr. McUnitTest\"",
-            };
-            foreach (String jsonFragment in jsonStrings) {
-                Assert.IsTrue(asJson.Contains(jsonFragment));
-            }
-        }
-
-        [TestMethod]
-        public void CrashCommunicationTest() {
-            TestHelpers.InitializeLeaveLoadOnQueue(TestHelpers.VALID_APPID);
-            Crittercism._enableRaiseExceptionInCommunicationLayer = true;
-
-            try {
-                TestHelpers.ThrowDivideByZeroException();
-            } catch (Exception ex) {
-                Crittercism.LeaveBreadcrumb("Breadcrum test");
-                Crittercism.CreateCrashReport(ex);
-                QueueReader queueReader = new QueueReader();
-
-                // TODO(DA): Assert.DoesNotThrow()...need a better assertion here
-                queueReader.ReadQueue();
-            }
         }
     }
 }
