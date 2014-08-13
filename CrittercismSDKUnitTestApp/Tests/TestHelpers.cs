@@ -1,6 +1,6 @@
-﻿using CrittercismSDK;
+using CrittercismSDK;
 using CrittercismSDK.DataContracts;
-using CrittercismSDK.DataContracts.Legacy;
+using CrittercismSDK.DataContracts;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
 using System.Collections.Generic;

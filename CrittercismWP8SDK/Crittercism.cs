@@ -1,8 +1,8 @@
-﻿// file:	CrittercismSDK\Crittercism.cs
+// file:	CrittercismSDK\Crittercism.cs
 // summary:	Implements the crittercism class
 namespace CrittercismSDK {
     using CrittercismSDK.DataContracts;
-    using CrittercismSDK.DataContracts.Legacy;
+    using CrittercismSDK.DataContracts;
     using Microsoft.Phone.Shell;
     using Microsoft.Phone.Net.NetworkInformation;
     using System;
@@ -38,14 +38,14 @@ namespace CrittercismSDK {
         /// <summary>
         /// Gets or sets a queue of messages.
         /// </summary>
-        /// <value> A Queue of messages. </value>
-        internal static Queue<CrittercismSDK.DataContracts.MessageReport> MessageQueue { get; set; }
+        /// <value> A SynchronizedQueue of messages. </value>
+        internal static SynchronizedQueue<MessageReport> MessageQueue { get; set; }
 
         /// <summary>
         /// Gets or sets the current breadcrumbs.
         /// </summary>
         /// <value> The breadcrumbs. </value>
-        internal static CrittercismSDK.DataContracts.Legacy.Breadcrumbs CurrentBreadcrumbs { get; set; }
+        internal static CrittercismSDK.DataContracts.Breadcrumbs CurrentBreadcrumbs { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier of the application.
@@ -88,6 +88,11 @@ namespace CrittercismSDK {
         /// </summary>
         internal static Thread readerThread = null;
 
+        /// <summary>
+        /// AutoResetEvent for readerThread to observe
+        /// </summary>
+        internal static AutoResetEvent readerEvent = new AutoResetEvent(false);
+
         #endregion
 
         #region Methods
@@ -126,6 +131,7 @@ namespace CrittercismSDK {
             ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
             readerThread = new Thread(threadStart);
             readerThread.Name = "Crittercism Sender";
+            readerThread.Start();
             StartApplication(appID);
 
             if (_autoRunQueueReader && _enableCommunicationLayer && !(_enableRaiseExceptionInCommunicationLayer))  // for unit test purposes
@@ -167,7 +173,7 @@ namespace CrittercismSDK {
                 }
             } if (copyToSend != null) {
                 string appVersion = System.Windows.Application.Current.GetType().Assembly.GetName().Version.ToString();
-                CrittercismSDK.DataContracts.Legacy.UserMetadata um = new CrittercismSDK.DataContracts.Legacy.UserMetadata(
+                CrittercismSDK.DataContracts.UserMetadata um = new CrittercismSDK.DataContracts.UserMetadata(
                     AppID, appVersion, new Dictionary<string, string>(ArbitraryUserMetadata));
                 um.SaveToDisk();
                 AddMessageToQueue(um);
@@ -266,8 +272,8 @@ namespace CrittercismSDK {
                 return;
             }
 
-            CrittercismSDK.DataContracts.Unified.AppLoad appLoad = new CrittercismSDK.
-                DataContracts.Unified.AppLoad(AppID);
+            CrittercismSDK.DataContracts.AppLoad appLoad = new CrittercismSDK.
+                DataContracts.AppLoad(AppID);
 
             appLoad.SaveToDisk();
             AddMessageToQueue(appLoad);
@@ -292,7 +298,7 @@ namespace CrittercismSDK {
                         // Note: this whole approach is wrong, we should be using immutable 
                         // data objects here, and maybe an interface rather an explicit object?
                         case "AppLoad":
-                            message = new CrittercismSDK.DataContracts.Unified.AppLoad();
+                            message = new CrittercismSDK.DataContracts.AppLoad();
                             break;
                         case "HandledException":
                             message = new HandledException();
@@ -340,24 +346,7 @@ namespace CrittercismSDK {
             if (messageCounter < 50)
             {
                 MessageQueue.Enqueue(message);
-                if (_autoRunQueueReader)  // This flag is for unit test
-                {
-                    // FIXME jbley I don't like the threading here - would prefer one single background thread
-                    // with blocking queue rather than this (duplicated-code) spin-a-thread-each-batch-of-messages
-                    // stuff.
-                    if (readerThread.ThreadState == ThreadState.Unstarted)
-                    {
-                        readerThread.Start();
-                    }
-                    else if (readerThread.ThreadState == ThreadState.Stopped || readerThread.ThreadState == ThreadState.Aborted)
-                    {
-                        QueueReader queueReader = new QueueReader();
-                        ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
-                        readerThread = new Thread(threadStart);
-                        readerThread.Name = "Crittercism Sender";
-                        readerThread.Start();
-                    }
-                }
+                readerEvent.Set();
             }
             else
             {
@@ -374,7 +363,7 @@ namespace CrittercismSDK {
             AppID = appID;
             CurrentBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
             OSPlatform = Environment.OSVersion.Platform.ToString();
-            MessageQueue = new Queue<MessageReport>();
+            MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
             LoadQueueFromDisk();
             CreateAppLoadReport();
         }
@@ -432,18 +421,7 @@ namespace CrittercismSDK {
                         {
                             if (MessageQueue != null && MessageQueue.Count > 0)
                             {
-                                if (readerThread.ThreadState == ThreadState.Unstarted)
-                                {
-                                    readerThread.Start();
-                                }
-                                else if (readerThread.ThreadState == ThreadState.Stopped || readerThread.ThreadState == ThreadState.Aborted)
-                                {
-                                    QueueReader queueReader = new QueueReader();
-                                    ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
-                                    readerThread = new Thread(threadStart);
-                                    readerThread.Name = "Crittercism Sender";
-                                    readerThread.Start();
-                                }
+                                readerEvent.Set();
                             }
                         }
 

@@ -1,6 +1,6 @@
-﻿using CrittercismSDK.DataContracts;
-using CrittercismSDK.DataContracts.Legacy;
-using CrittercismSDK.DataContracts.Unified;
+using CrittercismSDK.DataContracts;
+using CrittercismSDK.DataContracts;
+using CrittercismSDK.DataContracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,6 @@ namespace CrittercismSDK
         static QueueReader()
         {
             const string CRITTERCISM_API_HOST = "https://api.crittercism.com";
-
             // Use this as follows in your test app's AssemblyInfo.cs:
             //[assembly: AssemblyMetadata("Crittercism.CustomApiUrl", "http://127.0.0.1:8080")]
             const string CRITTERCISM_API_HOST_OVERRIDE_KEY = "Crittercism.CustomApiUrl";
@@ -52,26 +51,41 @@ namespace CrittercismSDK
         /// </summary>
         internal void ReadQueue()
         {
-            int retry = 0;
-            while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0 && NetworkInterface.GetIsNetworkAvailable() && retry < 3)
-            {
-                MessageReport message = Crittercism.MessageQueue.Peek();
-                if (!message.IsLoaded)
+            //System.Diagnostics.Debug.WriteLine("ReadQueue: QueueReader.ReadQueue ENTER");
+            while (true) {
+                Crittercism.readerEvent.WaitOne();
+                int retry = 0;
+                while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0 && NetworkInterface.GetIsNetworkAvailable() && retry < 3)
                 {
-                    message.LoadFromDisk();
-                }
-
-                if (SendMessage(message))
-                {
-                    Crittercism.MessageQueue.Dequeue();
-                    message.DeleteFromDisk();
-                    retry = 0;
-                }
-                else
-                {
-                    retry++;
-                }
-            }
+                    //System.Diagnostics.Debug.WriteLine("ReadQueue: QueueReader.ReadQueue retry == {0}",retry);
+                    MessageReport message = Crittercism.MessageQueue.Peek();
+                    if (!message.IsLoaded)
+                    {
+                        message.LoadFromDisk();
+                    }
+                    if (SendMessage(message))
+                    {
+                        //System.Diagnostics.Debug.WriteLine("ReadQueue: Crittercism.MessageQueue.Count == {0}",Crittercism.MessageQueue.Count);
+                        //System.Diagnostics.Debug.WriteLine("ReadQueue: Crittercism.MessageQueue.Dequeue()");
+                        try
+                        {
+                            Crittercism.MessageQueue.Dequeue();
+                        }
+                        catch (Exception e)
+                        {
+                            //System.Diagnostics.Debug.WriteLine("ReadQueue: ERROR!!! Shouldn't happen!!!");
+                            //System.Diagnostics.Debug.WriteLine(e.GetType().ToString() + ": " + "\n" + e.StackTrace + "\n");
+                        };
+                        message.DeleteFromDisk();
+                        retry = 0;
+                    }
+                    else
+                    {
+                        retry++;
+                    }
+                };
+            };
+            //System.Diagnostics.Debug.WriteLine("ReadQueue: QueueReader.ReadQueue EXIT");
         }
 
         /// <summary>
@@ -97,10 +111,9 @@ namespace CrittercismSDK
                     switch (message.GetType().Name)
                     {
                         case "AppLoad":
-                            request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v0/appload", UriKind.Absolute));
+                            request = (HttpWebRequest)WebRequest.Create(new Uri(HostToUse + "/v1/loads", UriKind.Absolute));
                             request.ContentType = "application/json; charset=utf-8";
-                            MessageReport[] messages = { message };
-                            postBody = Newtonsoft.Json.JsonConvert.SerializeObject(messages);
+                            postBody = Newtonsoft.Json.JsonConvert.SerializeObject(message);
                             break;
                         case "HandledException":
                             // FIXME jbley fix up the URI here
@@ -126,25 +139,31 @@ namespace CrittercismSDK
 
                     request.Method = "POST";
 
+                    //System.Diagnostics.Debug.WriteLine("SendMessage: request.RequestUri == {0}", request.RequestUri);
+
                     bool sendCompleted = false;
                     Exception lastException = null;
                     System.Threading.ManualResetEvent resetEvent = new System.Threading.ManualResetEvent(false);
                     request.BeginGetRequestStream(
                         (result) =>
                         {
+                            //System.Diagnostics.Debug.WriteLine("SendMessage: BeginGetRequestStream");
                             try
                             {
                                 Stream requestStream = request.EndGetRequestStream(result);
                                 StreamWriter writer = new StreamWriter(requestStream);
                                 writer.Write(postBody);
+                                //System.Diagnostics.Debug.WriteLine("SendMessage: postBody == {0}",postBody);
                                 writer.Flush();
                                 writer.Close();
                                 request.BeginGetResponse(
                                      (asyncResponse) =>
                                      {
+                                         //System.Diagnostics.Debug.WriteLine("SendMessage: BeginGetResponse");
                                          try
                                          {
                                              HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse);
+                                             //System.Diagnostics.Debug.WriteLine("SendMessage: response == {0}",response);
                                              if (response.StatusCode == HttpStatusCode.OK)
                                              {
                                                  sendCompleted = true;
@@ -152,9 +171,11 @@ namespace CrittercismSDK
                                          }
                                          catch (WebException webEx)
                                          {
+                                             //System.Diagnostics.Debug.WriteLine("SendMessage: webEx == {0}",webEx);
                                              if (webEx.Response != null)
                                              {
                                                  HttpWebResponse response = (HttpWebResponse)webEx.Response;
+                                                 //System.Diagnostics.Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
                                                  if (response.StatusCode == HttpStatusCode.BadRequest)
                                                  {
                                                      try
@@ -173,6 +194,7 @@ namespace CrittercismSDK
                                          }
                                          catch (Exception ex)
                                          {
+                                             //System.Diagnostics.Debug.WriteLine("SendMessageKBR: ex == {0}",ex);
                                              lastException = ex;
                                          }
 
@@ -181,6 +203,7 @@ namespace CrittercismSDK
                             }
                             catch (Exception ex)
                             {
+                                //System.Diagnostics.Debug.WriteLine("SendMessage: ex#2 == {0}",ex);
                                 lastException = ex;
 
                                 // release the lock if something fail.
@@ -197,6 +220,7 @@ namespace CrittercismSDK
                 }
                 catch
                 {
+                    //System.Diagnostics.Debug.WriteLine("KSendMessageBR: catch");
                     if (Crittercism._enableRaiseExceptionInCommunicationLayer)
                     {
                         throw;

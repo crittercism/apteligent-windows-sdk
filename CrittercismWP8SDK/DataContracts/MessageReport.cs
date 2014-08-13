@@ -1,4 +1,4 @@
-﻿// file:	CrittercismSDK\MessageReport.cs
+// file:	CrittercismSDK\MessageReport.cs
 // summary:	Implements the message report class
 namespace CrittercismSDK.DataContracts {
     using System;
@@ -79,6 +79,7 @@ namespace CrittercismSDK.DataContracts {
                 using (IsolatedStorageFileStream writeFile = new IsolatedStorageFileStream(folderName + "\\" + this.Name, FileMode.CreateNew, FileAccess.Write, storage)) {
                     StreamWriter writer = new StreamWriter(writeFile);
                     writer.Write(Newtonsoft.Json.JsonConvert.SerializeObject(this));
+                    //System.Diagnostics.Debug.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(this));
                     writer.Flush();
                     writer.Close();
                     this.IsLoaded = true;

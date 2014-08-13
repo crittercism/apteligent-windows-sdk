@@ -23,18 +23,20 @@
         <!--TitlePanel contains the name of the application and page title-->
         <StackPanel Grid.Row="0" Margin="12,17,0,28">
             <TextBlock Text="CRITTERCISM" Style="{StaticResource PhoneTextNormalStyle}"/>
-            <TextBlock Text="crashes" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
+            <TextBlock Text="Test" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
         </StackPanel>
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Margin="14,151,10,10" Grid.RowSpan="2">
-            <Button Content="Simulate Crash" HorizontalAlignment="Left" Margin="257,178,-4,0" VerticalAlignment="Top" Click="crashSimulateClick"/>
+            <Button Content="Leave Breadcrumb" HorizontalAlignment="Left" Margin="217,61,-4,0" VerticalAlignment="Top" Click="leaveBreadcrumbClick"/>
+            <Button Content="Handled Exception" HorizontalAlignment="Left" Margin="217,136,-4,0" VerticalAlignment="Top" Click="handledExceptionClick"/>
+            <Button Content="Simulate Crash" HorizontalAlignment="Left" Margin="217,211,-4,0" VerticalAlignment="Top" Click="testCrashClick"/>
+            <Button Content="Test Multithread" HorizontalAlignment="Left" Margin="217,286,-4,0" VerticalAlignment="Top" Click="testMultithreadClick"/>
             <Button Content="Back" HorizontalAlignment="Left" Margin="0,535,0,0" VerticalAlignment="Top" Height="72" Width="120" Click="backButtonClicked"/>
             <Button Content="Next" HorizontalAlignment="Left" Margin="336,535,0,0" VerticalAlignment="Top" Height="72" Width="120" Click="nextButtonClicked" />
-            <Image Margin="10,41,199,236" Source="/stacktrace.png" Stretch="Fill"/>
-
+            <Image Margin="10,41,239,236" Source="/stacktrace.png" Stretch="Fill"/>
         </Grid>
-        <TextBlock FontSize="16" HorizontalAlignment="Left" Margin="26,383,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="112" Width="436" Grid.Row="1" Text="Pressing the button above forces a divide-by-zero bug in this app's code. Crittercism saves a detailed error report and sends an email to the application's owner, notifying him that a problem has occurred. The email includes a stack trace and the device on which the problem occurred."/>
+        <TextBlock FontSize="16" HorizontalAlignment="Left" Margin="26,383,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="112" Width="436" Grid.Row="1" Text="Pressing the Simulate Crash button above forces a divide-by-zero bug in this app's code. Crittercism saves a detailed error report and sends an email to the application's owner, notifying him that a problem has occurred. The email includes a stack trace and the device on which the problem occurred."/>
     </Grid>
 
 </phone:PhoneApplicationPage>
