@@ -75,10 +75,10 @@
     </Compile>
     <Compile Include="LocalizedStrings.cs" />
     <Compile Include="Tests\CrittercismTests.cs" />
-    <Compile Include="Tests\DataContracts\Legacy\CrashTests.cs" />
-    <Compile Include="Tests\DataContracts\Legacy\HandledExceptionTests.cs" />
-    <Compile Include="Tests\DataContracts\Legacy\UserMetadataTests.cs" />
-    <Compile Include="Tests\DataContracts\Unified\AppLoadTests.cs" />
+    <Compile Include="Tests\DataContracts\AppLoadTests.cs" />
+    <Compile Include="Tests\DataContracts\CrashTests.cs" />
+    <Compile Include="Tests\DataContracts\HandledExceptionTests.cs" />
+    <Compile Include="Tests\DataContracts\UserMetadataTests.cs" />
     <Compile Include="Tests\ExceptionHandlersTests.cs" />
     <Compile Include="Tests\MiscTests.cs" />
     <Compile Include="Tests\TestHelpers.cs" />

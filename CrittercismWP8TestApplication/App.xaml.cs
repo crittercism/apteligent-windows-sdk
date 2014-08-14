@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Resources;
 using System.Windows;
@@ -60,7 +60,7 @@ namespace CrittercismWP8TestApplication
         private void Application_Launching(object sender, LaunchingEventArgs e)
         {
             //// Call the Init of the unhandled managed class library "Crittercism"
-            Crittercism.Init("536814f228a78845c4000003");
+            Crittercism.Init("537a4e738039805d82000002");
             Crittercism.LeaveBreadcrumb("Start the application");
         }
 
