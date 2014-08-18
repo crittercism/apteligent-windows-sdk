@@ -1,6 +1,4 @@
 using CrittercismSDK.DataContracts;
-using CrittercismSDK.DataContracts;
-using CrittercismSDK.DataContracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,33 +52,25 @@ namespace CrittercismSDK
             //System.Diagnostics.Debug.WriteLine("ReadQueue: QueueReader.ReadQueue ENTER");
             while (true) {
                 Crittercism.readerEvent.WaitOne();
-                int retry = 0;
-                while (Crittercism.MessageQueue != null && Crittercism.MessageQueue.Count > 0 && NetworkInterface.GetIsNetworkAvailable() && retry < 3)
-                {
+                int retry=0;
+                while (Crittercism.MessageQueue!=null&&Crittercism.MessageQueue.Count>0&&NetworkInterface.GetIsNetworkAvailable()&&retry<3) {
                     //System.Diagnostics.Debug.WriteLine("ReadQueue: QueueReader.ReadQueue retry == {0}",retry);
-                    MessageReport message = Crittercism.MessageQueue.Peek();
-                    if (!message.IsLoaded)
-                    {
+                    MessageReport message=Crittercism.MessageQueue.Peek();
+                    if (!message.IsLoaded) {
                         message.LoadFromDisk();
                     }
-                    if (SendMessage(message))
-                    {
+                    if (SendMessage(message)) {
                         //System.Diagnostics.Debug.WriteLine("ReadQueue: Crittercism.MessageQueue.Count == {0}",Crittercism.MessageQueue.Count);
                         //System.Diagnostics.Debug.WriteLine("ReadQueue: Crittercism.MessageQueue.Dequeue()");
-                        try
-                        {
+                        //try {
                             Crittercism.MessageQueue.Dequeue();
-                        }
-                        catch (Exception e)
-                        {
+                        //} catch (Exception e) {
                             //System.Diagnostics.Debug.WriteLine("ReadQueue: ERROR!!! Shouldn't happen!!!");
                             //System.Diagnostics.Debug.WriteLine(e.GetType().ToString() + ": " + "\n" + e.StackTrace + "\n");
-                        };
+                        //};
                         message.DeleteFromDisk();
-                        retry = 0;
-                    }
-                    else
-                    {
+                        retry=0;
+                    } else {
                         retry++;
                     }
                 };
