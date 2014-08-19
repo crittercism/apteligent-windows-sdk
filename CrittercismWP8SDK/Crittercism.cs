@@ -2,7 +2,6 @@
 // summary:	Implements the crittercism class
 namespace CrittercismSDK {
     using CrittercismSDK.DataContracts;
-    using CrittercismSDK.DataContracts;
     using Microsoft.Phone.Shell;
     using Microsoft.Phone.Net.NetworkInformation;
     using System;
