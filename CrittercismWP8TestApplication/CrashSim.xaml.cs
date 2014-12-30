@@ -25,11 +25,21 @@ namespace CrittercismWP8TestApplication {
         {
             int i = 0;
             int j = 5;
-            try {
+            try
+            {
                 int k = j / i;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Crittercism.LogHandledException(ex);
             }
+        }
+
+        private void handledUnthrownExceptionClick(object sender, RoutedEventArgs e)
+        {
+            Exception exception = new Exception("description");
+            exception.Data.Add("MethodName", "methodName");
+            Crittercism.LogHandledException(exception);
         }
 
         private void testCrashClick(object sender, RoutedEventArgs e)
