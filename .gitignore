@@ -5,3 +5,4 @@ build/tmp/
 build/*.nupkg
 obj
 Bin
+packages/*
