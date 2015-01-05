@@ -42,10 +42,19 @@ namespace CrittercismSDKUnitTestApp.Tests {
             }
         }
 
-        // TODO(DA) Specify better behavior here. What should this do?
-        public void HandledExceptionWithNullStackTraceOK() {
-            var ex = new Exception();
-            Crittercism.LogHandledException(ex);
+        [TestMethod]
+        public void HandledUnthrownExceptionTest()
+        {
+            try {
+                Exception exception = new Exception("description");
+                exception.Data.Add("MethodName", "methodName");
+                Crittercism.LogHandledException(exception);
+            } catch (Exception) {
+                // logHandledException should not throw its own exception
+                // when passed an unthrown user created Exception object
+                // with null stacktrace.
+                Assert.Fail();
+            }
         }
     }
 }

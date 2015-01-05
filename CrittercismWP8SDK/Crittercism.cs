@@ -7,6 +7,7 @@ namespace CrittercismSDK {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Diagnostics;
     using System.IO;
     using System.IO.IsolatedStorage;
     using System.Linq;
@@ -237,7 +238,16 @@ namespace CrittercismSDK {
             Breadcrumbs breadcrumbs = new Breadcrumbs();
             breadcrumbs.current_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
             breadcrumbs.previous_session = new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
-            ExceptionObject exception = new ExceptionObject(e.GetType().FullName, e.Message, e.StackTrace);
+            string stacktrace = e.StackTrace;
+            if (stacktrace == null) {
+                // Assuming the Exception e being passed in hasn't been thrown.  In this case,
+                // supply our own current "stacktrace".  Input "1" to the StackTrace constructor
+                // omits the "LogHandledException" frame.  StackTrace ToString is documented
+                // "Builds a readable representation of the stack trace" overriding usual
+                // Object.ToString().
+                stacktrace = (new StackTrace(1)).ToString();
+            }
+            ExceptionObject exception = new ExceptionObject(e.GetType().FullName, e.Message, stacktrace);
             HandledException he = new HandledException(AppID, appVersion, new Dictionary<string, string>(ArbitraryUserMetadata), breadcrumbs, exception);
             he.SaveToDisk();
             AddMessageToQueue(he);
