@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Crittercism</id>
+    <version>3.0.0</version>
+    <authors>Crittercism, Inc.</authors>
+    <owners>dshirley</owners>
+    <projectUrl>http://www.crittercism.com</projectUrl>
+    <!-- FIXME possibly add licenseUrl and iconUrl -->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Provides the Crittercism SDK for Windows Platforms</description>
+    <releaseNotes>Support for Windows Store Apps</releaseNotes>
+    <copyright>Copyright 2012-2015 Crittercism, Inc.</copyright>
+    <tags>crittercism wp8 unhandled exception bug trace apm store</tags>
+    <dependencies>
+      <dependency id="Newtonsoft.Json" version="6.0.8" />
+    </dependencies>
+  </metadata>
+</package>
