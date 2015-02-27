@@ -163,7 +163,7 @@ namespace CrittercismSDK {
         private static string PrivateDeviceModel() {
             // TODO: We wish this method could be a lot better.
 #if NETFX_CORE
-#if WINDOWS_APP_PHONE
+#if WINDOWS_PHONE_APP
             return "Windows Phone";
 #endif
             return "Windows PC";
@@ -240,12 +240,13 @@ namespace CrittercismSDK {
             }
             {
                 // TODO: THIS LINE IS TEMPORARY
-                LeaveBreadcrumb(StorageHelper.GetStorePath());
+                //LeaveBreadcrumb(StorageHelper.GetStorePath());
+                LeaveBreadcrumb(Crittercism.DeviceModel);
             }
         }
 
         /// <summary>
-        /// Sets a username.
+        /// Sets "username" metadata value.
         /// </summary>
         /// <param name="username"> The username. </param>
         public static void SetUsername(string username) {
@@ -253,7 +254,14 @@ namespace CrittercismSDK {
         }
 
         /// <summary>
-        /// Sets an arbitrary user metadata value.
+        /// Gets "username" metadata value.
+        /// </summary>
+        public static string Username() {
+            return ValueFor("username");
+        }
+
+        /// <summary>
+        /// Sets a user metadata value.
         /// </summary>
         /// <param name="key">      The key. </param>
         /// <param name="value">    The value. </param>
@@ -267,6 +275,20 @@ namespace CrittercismSDK {
                     AddMessageToQueue(metadata);
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns a user metadata value.
+        /// </summary>
+        /// <param name="key">      The key. </param>
+        public static string ValueFor(string key) {
+            string answer=null;
+            lock (Metadata) {
+                if (Metadata.ContainsKey(key)) {
+                    answer=Metadata[key];
+                }
+            }
+            return answer;
         }
 
         public static bool GetOptOutStatus() {

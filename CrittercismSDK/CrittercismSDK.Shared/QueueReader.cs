@@ -142,6 +142,8 @@ namespace CrittercismSDK
                 using (Stream writer=writerTask.Result) {
                     // NOTE: SendMessage caller's request.ContentType=="application/json; charset=utf-8"
                     // or request.ContentType=="application/x-www-form-urlencoded"
+                    Debug.WriteLine("SendMessage: POST BODY:");
+                    Debug.WriteLine(postBody);
                     byte[] postBytes=Encoding.UTF8.GetBytes(postBody);
                     writer.Write(postBytes,0,postBytes.Length);
                     writer.Flush();

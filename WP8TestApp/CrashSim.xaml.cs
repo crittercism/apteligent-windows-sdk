@@ -16,7 +16,11 @@ namespace WP8TestApp {
             InitializeComponent();
         }
 
-        private void leaveBreadcrumbClick(object sender, RoutedEventArgs e)
+        private void setUsernameClick(object sender,RoutedEventArgs e) {
+            Crittercism.SetUsername("MrsCritter");
+        }
+
+        private void leaveBreadcrumbClick(object sender,RoutedEventArgs e)
         {
             Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
         }
@@ -38,13 +42,13 @@ namespace WP8TestApp {
             Crittercism.LogHandledException(exception);
         }
 
-        private void testCrashClick(object sender, RoutedEventArgs e)
+        private void testCrashClick(object sender,RoutedEventArgs e)
         {
             int x = 0;
             int y = 1 / x;
         }
 
-        private void testMultithreadClick(object sender, RoutedEventArgs e)
+        private void testMultithreadClick(object sender,RoutedEventArgs e)
         {
             Thread thread = new Thread(new ThreadStart(Worker.Work));
             thread.Start();

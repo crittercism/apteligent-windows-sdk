@@ -16,17 +16,33 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 cd build
 
 mkdir tmp\
-mkdir tmp\lib
-mkdir tmp\lib\CrittercismSDK
+if %errorlevel% neq 0 exit /b %errorlevel%
 
-copy ..\CrittercismSDK\CrittercismSDK.WindowsPhoneSilverlight\Bin\ARM\Release\CrittercismSDK.WindowsPhoneSilverlight.dll tmp\lib\CrittercismSDK
-copy ..\CrittercismSDK\CrittercismSDK.Windows\bin\x86\Release\CrittercismSDK.Windows.dll tmp\lib\CrittercismSDK
-copy ..\CrittercismSDK\CrittercismSDK.WindowsDesktop\bin\Release\CrittercismSDK.WindowsDesktop.dll tmp\lib\CrittercismSDK
-copy ..\CrittercismSDK\CrittercismSDK.WindowsPhone\bin\ARM\Release\CrittercismSDK.WindowsPhone.dll tmp\lib\CrittercismSDK
+mkdir tmp\lib
+mkdir tmp\lib\netcore451
+mkdir tmp\lib\net45
+mkdir tmp\lib\wpa81
+mkdir tmp\lib\windowsphone8
+
+copy ..\CrittercismSDK\CrittercismSDK.Windows\bin\Release\CrittercismSDK.dll tmp\lib\netcore451
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+copy ..\CrittercismSDK\CrittercismSDK.WindowsDesktop\bin\Release\CrittercismSDK.dll tmp\lib\net45
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+copy ..\CrittercismSDK\CrittercismSDK.WindowsPhone\bin\Release\CrittercismSDK.dll tmp\lib\wpa81
+if %errorlevel% neq 0 exit /b %errorlevel%
+
+copy ..\CrittercismSDK\CrittercismSDK.WindowsPhoneSilverlight\Bin\Release\CrittercismSDK.dll tmp\lib\windowsphone8
+if %errorlevel% neq 0 exit /b %errorlevel%
 
 copy CrittercismSDK.nuspec tmp\CrittercismSDK.nuspec
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 rem this file will show up in Visual Studio when you install the package.
 copy README_PUBLIC.txt tmp\README.txt
+if %errorlevel% neq 0 exit /b %errorlevel%
+
 .\NuGet.exe pack tmp\CrittercismSDK.nuspec
 if %errorlevel% neq 0 exit /b %errorlevel%
 

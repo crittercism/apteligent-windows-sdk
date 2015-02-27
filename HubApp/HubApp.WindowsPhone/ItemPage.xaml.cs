@@ -69,7 +69,6 @@ namespace HubApp
         /// a dictionary of state preserved by this page during an earlier
         /// session.  The state will be null the first time a page is visited.</param>
         private async void NavigationHelper_LoadState(object sender,LoadStateEventArgs e) {
-            // TODO: Create an appropriate data model for your problem domain to replace the sample data
             var item=await SampleDataSource.GetItemAsync((string)e.NavigationParameter);
             this.DefaultViewModel["Item"]=item;
             Debug.WriteLine("UniqueId == "+item.UniqueId);
@@ -81,35 +80,44 @@ namespace HubApp
             if (item.UniqueId.Equals("Group-4-Item-1")) {
                 Crittercism.LeaveBreadcrumb("Test Windows Store LogHandledException");
                 {
-                    int i=0;
-                    int j=5;
                     try {
-                        int k=j/i;
+                        DeepError1(10);
                     } catch (Exception ex) {
                         Crittercism.LogHandledException(ex);
                     }
                 }
             } else if (item.UniqueId.Equals("Group-4-Item-2")) {
-                Crittercism.LeaveBreadcrumb("Test Windows Store App Current_UnhandledException");
-                int x=0;
-                int y=1/x;
+                Crittercism.LeaveBreadcrumb("Test Windows Store App Crash");
+                DeepError1(10);
             } else if (item.UniqueId.Equals("Group-4-Item-3")) {
-                Crittercism.LeaveBreadcrumb("Test Windows Store App LogCrash");
-                {
-                    try {
-                        int x=0;
-                        int y=1/x;
-                    } catch (Exception ex) {
-                        Crittercism.LogCrash(ex);
-                    }
-                }
-            } else if (item.UniqueId.Equals("Group-4-Item-4")) {
                 Crittercism.LeaveBreadcrumb("Q: Do you love Crittercism? A: YES!");
-            } else if (item.UniqueId.Equals("Group-4-Item-5")) {
-                Random random = new Random();
+            } else if (item.UniqueId.Equals("Group-4-Item-4")) {
+                Random random=new Random();
                 string[] names= { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
                 string name=names[random.Next(0,names.Length)];
                 Crittercism.SetUsername("Critter "+name);
+            }
+        }
+
+        void DeepError1(int n) {
+            DeepError2(n-1);
+        }
+
+        void DeepError2(int n) {
+            DeepError3(n-1);
+        }
+
+        void DeepError3(int n) {
+            DeepError4(n-1);
+        }
+
+        void DeepError4(int n) {
+            if (n<=0) {
+                int i=0;
+                int j=5;
+                int k=j/i;
+            } else {
+                DeepError1(n-1);
             }
         }
 

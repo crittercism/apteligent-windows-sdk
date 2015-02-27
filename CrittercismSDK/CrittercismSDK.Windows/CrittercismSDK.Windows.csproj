@@ -9,8 +9,8 @@
     <ProjectGuid>{A26C33F6-7B77-4616-8171-65986205053D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CrittercismSDK.Windows</RootNamespace>
-    <AssemblyName>CrittercismSDK.Windows</AssemblyName>
+    <RootNamespace>CrittercismSDK</RootNamespace>
+    <AssemblyName>CrittercismSDK</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformVersion>8.1</TargetPlatformVersion>
     <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>

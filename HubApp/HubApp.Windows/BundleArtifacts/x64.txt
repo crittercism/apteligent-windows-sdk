@@ -1,2 +1,0 @@
-MainPackage=C:\WindowsPhone\windows-client-surface\HubApp\HubApp.Windows\bin\x64\Release\HubApp.Windows_1.0.0.14_Bundle\HubApp.Windows_1.0.0.14_x64.appx
-SymbolPackage=C:\WindowsPhone\windows-client-surface\HubApp\HubApp.Windows\AppPackages\HubApp.Windows_1.0.0.14_Test\HubApp.Windows_1.0.0.14_x64.appxsym

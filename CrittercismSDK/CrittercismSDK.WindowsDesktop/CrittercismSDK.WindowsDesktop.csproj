@@ -7,8 +7,8 @@
     <ProjectGuid>{5714C832-AD96-4F67-BB27-F6F7DFBD170C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CrittercismSDK.WindowsDesktop</RootNamespace>
-    <AssemblyName>CrittercismSDK.WindowsDesktop</AssemblyName>
+    <RootNamespace>CrittercismSDK</RootNamespace>
+    <AssemblyName>CrittercismSDK</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -24,6 +24,10 @@ namespace DesktopApp
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void setUsernameClick(object sender,RoutedEventArgs e) {
+            Crittercism.SetUsername("MrsCritter");
         }
 
         private void leaveBreadcrumbClick(object sender,RoutedEventArgs e) {
@@ -52,16 +56,26 @@ namespace DesktopApp
         }
 
         private void testMultithreadClick(object sender,RoutedEventArgs e) {
-            //Thread thread=new Thread(new ThreadStart(Worker.Work));
-            //thread.Start();
+            Thread thread=new Thread(new ThreadStart(Worker.Work));
+            thread.Start();
         }
 
-        private void backButtonClicked(object sender,RoutedEventArgs e) {
-            //NavigationService.Navigate(new Uri("/Crashes.xaml",UriKind.Relative));
-        }
-
-        private void nextButtonClicked(object sender,RoutedEventArgs e) {
-            //NavigationService.Navigate(new Uri("/Loads.xaml",UriKind.Relative));
+        private void critterClick(object sender,RoutedEventArgs e) {
+            string username=Crittercism.Username();
+            if (username==null) {
+                username="User";
+            }
+            string response="";
+            MessageBoxResult result=MessageBox.Show("Do you love Crittercism?","DesktopApp",MessageBoxButton.YesNo);
+            switch (result) {
+                case MessageBoxResult.Yes:
+                    response=" loves Crittercism.";
+                    break;
+                case MessageBoxResult.No:
+                    response=" doesn't love Crittercism.";
+                    break;
+            }
+            Crittercism.LeaveBreadcrumb(username+" "+response);
         }
     }
 }

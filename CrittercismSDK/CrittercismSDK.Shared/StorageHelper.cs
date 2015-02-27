@@ -138,6 +138,8 @@ namespace CrittercismSDK
             try {
                 Debug.WriteLine("Save: "+Path.Combine(GetStorePath(),path));
                 string dataString=JsonConvert.SerializeObject(data);
+                Debug.WriteLine("JSON:");
+                Debug.WriteLine(dataString);
                 SaveString(path,dataString);
                 answer=true;
             } catch (Exception e) {
