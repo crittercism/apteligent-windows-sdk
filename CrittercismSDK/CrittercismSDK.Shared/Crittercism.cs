@@ -283,14 +283,19 @@ namespace CrittercismSDK {
             if (OptOut) {
                 return;
             }
-            lock (Metadata) {
-                if (!Metadata.ContainsKey(key) || !Metadata[key].Equals(value)) {
-                    Metadata[key]=value;
-                    UserMetadata metadata=new UserMetadata(
-                        AppID,new Dictionary<string,string>(Metadata));
-                    metadata.Save();
-                    AddMessageToQueue(metadata);
+            try {
+                lock (Metadata) {
+                    if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
+                        Metadata[key]=value;
+                        UserMetadata metadata=new UserMetadata(
+                            AppID,new Dictionary<string,string>(Metadata));
+                        metadata.Save();
+                        AddMessageToQueue(metadata);
+                    }
                 }
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
+                // explicit nop
             }
         }
 
@@ -344,9 +349,14 @@ namespace CrittercismSDK {
             if (OptOut) {
                 return;
             }
-            lock (PrivateBreadcrumbs) {
-                PrivateBreadcrumbs.current_session.Add(new BreadcrumbMessage(breadcrumb));
-                PrivateBreadcrumbs.Save();
+            try {
+                lock (PrivateBreadcrumbs) {
+                    PrivateBreadcrumbs.current_session.Add(new BreadcrumbMessage(breadcrumb));
+                    PrivateBreadcrumbs.Save();
+                };
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
+                // explicit nop
             }
         }
 
