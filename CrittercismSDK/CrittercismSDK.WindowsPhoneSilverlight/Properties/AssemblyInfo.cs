@@ -9,7 +9,7 @@ using System.Resources;
 [assembly: AssemblyTitle("CrittercismSDK.WindowsPhoneSilverlight")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Crittercism")]
 [assembly: AssemblyProduct("CrittercismSDK.WindowsPhoneSilverlight")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]

@@ -9,7 +9,7 @@ using System.Resources;
 [assembly: AssemblyTitle("WP8TestApp")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Crittercism")]
 [assembly: AssemblyProduct("WP8TestApp")]
 [assembly: AssemblyCopyright("Copyright © 2012-2015")]
 [assembly: AssemblyTrademark("")]

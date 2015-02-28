@@ -9,7 +9,7 @@ using System.Resources;
 [assembly: AssemblyTitle("UnitTestApp")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Crittercism")]
 [assembly: AssemblyProduct("UnitTestApp")]
 [assembly: AssemblyCopyright("Copyright © 2014-2015")]
 [assembly: AssemblyTrademark("")]

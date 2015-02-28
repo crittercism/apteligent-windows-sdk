@@ -21,18 +21,14 @@ namespace DesktopApp
                 // Wait around 2 second.
                 Thread.Sleep(rnd.Next(4000));
                 if (rnd.Next(10)==0) {
-                    try {
-                        Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
-                    } catch (Exception ex) {
-                        Console.WriteLine("Worker.Work caught LeaveBreadcrumb throwing exception.");
-                    };
+                    Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
                 } else {
                     int i=0;
                     int j=5;
                     try {
                         int k=j/i;
-                    } catch (Exception ex) {
-                        Crittercism.LogHandledException(ex);
+                    } catch (Exception e) {
+                        Crittercism.LogHandledException(e);
                     }
                 }
             }

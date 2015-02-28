@@ -55,7 +55,15 @@ namespace CrittercismSDK {
         /// Gets or sets the current breadcrumbs.
         /// </summary>
         /// <value> The breadcrumbs. </value>
-        internal static Breadcrumbs CurrentBreadcrumbs { get; set; }
+        internal static Breadcrumbs PrivateBreadcrumbs { get; set; }
+
+        private static Breadcrumbs CurrentBreadcrumbs() {
+            Breadcrumbs answer=null;
+            lock (PrivateBreadcrumbs) {
+                answer=PrivateBreadcrumbs.Copy();
+            }
+            return answer;
+        }
 
         internal static object lockObject=new Object();
         internal static volatile bool initialized=false;
@@ -66,7 +74,7 @@ namespace CrittercismSDK {
         /// <value> The identifier of the application. </value>
         internal static string AppID { get; set; }
 
-        internal static bool OptOut {get; set; }
+        internal static volatile bool OptOut;
 
         /// <summary>
         /// Gets or sets the operating system platform.
@@ -79,6 +87,14 @@ namespace CrittercismSDK {
         /// </summary>
         /// <value> The user metadata. </value>
         internal static Dictionary<string, string> Metadata { get; set; }
+
+        private static Dictionary<string,string> CurrentMetadata() {
+            Dictionary<string,string> answer=null;
+            lock (Metadata) {
+                answer=new Dictionary<string,string>(Metadata);
+            }
+            return answer;
+        }
 
         /// <summary> 
         /// Message Counter
@@ -238,11 +254,6 @@ namespace CrittercismSDK {
                     Debug.WriteLine("Crittercism initialized.");
                 }
             }
-            {
-                // TODO: THIS LINE IS TEMPORARY
-                //LeaveBreadcrumb(StorageHelper.GetStorePath());
-                LeaveBreadcrumb(Crittercism.DeviceModel);
-            }
         }
 
         /// <summary>
@@ -250,6 +261,9 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="username"> The username. </param>
         public static void SetUsername(string username) {
+            if (OptOut) {
+                return;
+            }
             SetValue("username", username);
         }
 
@@ -265,7 +279,10 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="key">      The key. </param>
         /// <param name="value">    The value. </param>
-        public static void SetValue(string key, string value) {
+        public static void SetValue(string key,string value) {
+            if (OptOut) {
+                return;
+            }
             lock (Metadata) {
                 if (!Metadata.ContainsKey(key) || !Metadata[key].Equals(value)) {
                     Metadata[key]=value;
@@ -296,9 +313,13 @@ namespace CrittercismSDK {
         }
 
         public static void SetOptOutStatus(bool optOut) {
-            if (optOut!=OptOut) {
-                OptOut=optOut;
-                SaveOptOutStatus(optOut);
+            // OptOut is volatile, but this method accesses it twice,
+            // so we need the lock
+            lock (lockObject) {
+                if (optOut!=OptOut) {
+                    OptOut=optOut;
+                    SaveOptOutStatus(optOut);
+                }
             }
         }
 
@@ -320,9 +341,12 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="breadcrumb">   The breadcrumb. </param>
         public static void LeaveBreadcrumb(string breadcrumb) {
-            lock (CurrentBreadcrumbs) {
-                CurrentBreadcrumbs.current_session.Add(new BreadcrumbMessage(breadcrumb));
-                CurrentBreadcrumbs.Save();
+            if (OptOut) {
+                return;
+            }
+            lock (PrivateBreadcrumbs) {
+                PrivateBreadcrumbs.current_session.Add(new BreadcrumbMessage(breadcrumb));
+                PrivateBreadcrumbs.Save();
             }
         }
 
@@ -354,9 +378,8 @@ namespace CrittercismSDK {
             if (OptOut) {
                 return;
             }
-            Breadcrumbs breadcrumbs=new Breadcrumbs();
-            breadcrumbs.current_session=new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
-            breadcrumbs.previous_session=new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
+            Dictionary<string,string> metadata=CurrentMetadata();
+            Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
             string stacktrace=e.StackTrace;
             if (stacktrace==null) {
                 // Assuming the Exception e being passed in hasn't been thrown.  In this case,
@@ -370,7 +393,7 @@ namespace CrittercismSDK {
                 }
             }
             ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-            HandledException he=new HandledException(AppID,new Dictionary<string,string>(Metadata),breadcrumbs,exception);
+            HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
             he.Save();
             AddMessageToQueue(he);
         }
@@ -383,15 +406,16 @@ namespace CrittercismSDK {
             if (OptOut) {
                 return;
             }
-            Breadcrumbs breadcrumbs=new Breadcrumbs();
-            breadcrumbs.current_session=new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
-            breadcrumbs.previous_session=new List<BreadcrumbMessage>(CurrentBreadcrumbs.previous_session);
+            Dictionary<string,string> metadata=CurrentMetadata();
+            Breadcrumbs breadcrumbs;
+            lock (PrivateBreadcrumbs) {
+                breadcrumbs=CurrentBreadcrumbs();
+                PrivateBreadcrumbs.Clear();
+            }
             ExceptionObject exception=new ExceptionObject(currentException.GetType().FullName,currentException.Message,currentException.StackTrace);
-            Crash crash=new Crash(AppID,new Dictionary<string,string>(Metadata),breadcrumbs,exception);
+            Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
             crash.Save();
             AddMessageToQueue(crash);
-            CurrentBreadcrumbs.previous_session=new List<BreadcrumbMessage>(CurrentBreadcrumbs.current_session);
-            CurrentBreadcrumbs.current_session.Clear();
         }
 
         /// <summary>
@@ -454,7 +478,7 @@ namespace CrittercismSDK {
             // TODO: Why do we pass appID arg to this method?
             AppID=appID;
             OSVersion=PrivateOSVersion();
-            CurrentBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
+            PrivateBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
             MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
             LoadQueue();
             CreateAppLoadReport();

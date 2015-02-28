@@ -19,14 +19,14 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The breadcrumbs of the current session. </value>
         [DataMember]
-        public List<BreadcrumbMessage> current_session { get; internal set; }
+        public List<BreadcrumbMessage> current_session { get; private set; }
 
         /// <summary>
         /// Gets or sets the breadcrumbs of the previous session.
         /// </summary>
         /// <value> The breadcrumbs of the previous session. </value>
         [DataMember]
-        public List<BreadcrumbMessage> previous_session { get; internal set; }
+        public List<BreadcrumbMessage> previous_session { get; private set; }
 
         /// <summary>
         /// Default constructor.
@@ -35,6 +35,20 @@ namespace CrittercismSDK.DataContracts
         {
             current_session = new List<BreadcrumbMessage>();
             previous_session = new List<BreadcrumbMessage>();
+        }
+
+        public Breadcrumbs Copy() {
+            Breadcrumbs answer=new Breadcrumbs();
+            answer.current_session=new List<BreadcrumbMessage>(current_session);
+            answer.previous_session=new List<BreadcrumbMessage>(previous_session);
+            return answer;
+        }
+
+        public void Clear() {
+            lock (this) {
+                previous_session=current_session;
+                current_session=new List<BreadcrumbMessage>();
+            }
         }
 
         /// <summary>
