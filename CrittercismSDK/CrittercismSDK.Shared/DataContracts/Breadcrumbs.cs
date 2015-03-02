@@ -28,6 +28,8 @@ namespace CrittercismSDK.DataContracts
         [DataMember]
         public List<BreadcrumbMessage> previous_session { get; private set; }
 
+        private bool Saved { get; set; }
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -35,19 +37,44 @@ namespace CrittercismSDK.DataContracts
         {
             current_session = new List<BreadcrumbMessage>();
             previous_session = new List<BreadcrumbMessage>();
+            Saved=false;
         }
 
-        public Breadcrumbs Copy() {
+        internal Breadcrumbs Copy() {
             Breadcrumbs answer=new Breadcrumbs();
-            answer.current_session=new List<BreadcrumbMessage>(current_session);
-            answer.previous_session=new List<BreadcrumbMessage>(previous_session);
+            lock (this) {
+                answer.current_session=new List<BreadcrumbMessage>(current_session);
+                answer.previous_session=new List<BreadcrumbMessage>(previous_session);
+            }
             return answer;
         }
 
-        public void Clear() {
+        internal void Clear() {
             lock (this) {
                 previous_session=current_session;
                 current_session=new List<BreadcrumbMessage>();
+                Saved=false;
+            }
+        }
+
+        internal Breadcrumbs CopyAndClear() {
+            Breadcrumbs answer;
+            lock (this) {
+                answer=Copy();
+                Clear();
+            }
+            return answer;
+        }
+
+        internal void LeaveBreadcrumb(string breadcrumb) {
+            try {
+                lock (this) {
+                    current_session.Add(new BreadcrumbMessage(breadcrumb));
+                    Saved=false;
+                };
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
+                // explicit nop
             }
         }
 
@@ -56,12 +83,18 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         internal bool Save() {
+            bool answer=false;
             try {
-                return StorageHelper.Save(this);
+                lock (this) {
+                    if (!Saved) {
+                        answer=StorageHelper.Save(this);
+                        Saved=true;
+                    }
+                }
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
-                return false;
             }
+            return answer;
         }
 
         /// <summary>

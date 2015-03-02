@@ -35,10 +35,8 @@ namespace DesktopApp
         }
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
-            int i=0;
-            int j=5;
             try {
-                int k=j/i;
+                DeepError1(10);
             } catch (Exception ex) {
                 Crittercism.LogHandledException(ex);
             }
@@ -51,10 +49,31 @@ namespace DesktopApp
         }
 
         private void testCrashClick(object sender,RoutedEventArgs e) {
-            int x=0;
-            int y=1/x;
+            DeepError1(10);
         }
 
+        void DeepError1(int n) {
+            DeepError2(n-1);
+        }
+
+        void DeepError2(int n) {
+            DeepError3(n-1);
+        }
+
+        void DeepError3(int n) {
+            DeepError4(n-1);
+        }
+
+        void DeepError4(int n) {
+            if (n<=0) {
+                int i=0;
+                int j=5;
+                int k=j/i;
+            } else {
+                DeepError1(n-1);
+            }
+        }
+        
         private void testMultithreadClick(object sender,RoutedEventArgs e) {
             Thread thread=new Thread(new ThreadStart(Worker.Work));
             thread.Start();

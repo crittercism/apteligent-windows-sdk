@@ -31,6 +31,8 @@ namespace CrittercismSDK.DataContracts {
         /// <value> The date of the creation. </value>
         internal DateTimeOffset CreationTime { get; set; }
 
+        private bool Saved { get; set; }
+
         internal static string DateTimeString(DateTime dt) {
             return dt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", CultureInfo.InvariantCulture);
         }
@@ -71,10 +73,15 @@ namespace CrittercismSDK.DataContracts {
             // typesafe, even if it's C#-specific
             bool answer=false;
             try {
-                Name=this.GetType().Name+"_"+Guid.NewGuid().ToString()+".js";
-                string path=Path.Combine(folderName,Name);
-                StorageHelper.Save(this,path);
-                answer=true;
+                lock (this) {
+                    if (!Saved) {
+                        Name=this.GetType().Name+"_"+Guid.NewGuid().ToString()+".js";
+                        string path=Path.Combine(folderName,Name);
+                        StorageHelper.Save(this,path);
+                        Saved=true;
+                        answer=true;
+                    }
+                }
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
             };
@@ -88,7 +95,7 @@ namespace CrittercismSDK.DataContracts {
         internal bool Delete() {
             bool answer=false;
             try {
-                if (StorageHelper.FolderExists(folderName)) {
+                lock (this) {
                     string path=Path.Combine(folderName,this.Name);
                     if (StorageHelper.FileExists(path)) {
                         StorageHelper.DeleteFile(path);
@@ -153,6 +160,14 @@ namespace CrittercismSDK.DataContracts {
                 Crittercism.LogInternalException(e);
             }
             return message;
+        }
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public MessageReport()
+        {
+            Saved=false;
         }
 
         static MessageReport() {

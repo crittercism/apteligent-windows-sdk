@@ -39,6 +39,11 @@ namespace CrittercismSDK.DataContracts {
                 this._q.CopyTo(array,arrayIndex);
         }
         public void Enqueue(T value) {
+            ////////////////////////////////////////////////////////////////
+            // NOTE: MSDN doc excerpt re Queue<T>.Enqueue Method 
+            // "Adds an object to the end of the Queue<T>."
+            // https://msdn.microsoft.com/en-us/library/t249c2y7(v=vs.110).aspx
+            ////////////////////////////////////////////////////////////////
             lock (this._q)
                 this._q.Enqueue(value);
         }
@@ -51,10 +56,24 @@ namespace CrittercismSDK.DataContracts {
                 return this._q.GetEnumerator();
         }
         public T Peek() {
+            ////////////////////////////////////////////////////////////////
+            // NOTE: MSDN doc excerpt re Queue<T>.Peek Method 
+            // "Returns the object at the beginning of the Queue<T> without
+            // removing it."
+            // https://msdn.microsoft.com/en-us/library/1cz28y5c(v=vs.110).aspx
+            ////////////////////////////////////////////////////////////////
             lock (this._q)
                 return this._q.Peek();
         }
         public T[] ToArray() {
+            ////////////////////////////////////////////////////////////////
+            // NOTE: MSDN doc excerpt re Queue<T>.ToArray Method 
+            // "The Queue<T> is not modified. The order of the elements in the new
+            // array is the same as the order of the elements from the beginning
+            // of the Queue<T> to its end. This method is an O(n) operation, where
+            // n is Count."
+            // https://msdn.microsoft.com/en-us/library/0d49dexz(v=vs.110).aspx
+            ////////////////////////////////////////////////////////////////
             lock (this._q)
                 return this._q.ToArray();
         }

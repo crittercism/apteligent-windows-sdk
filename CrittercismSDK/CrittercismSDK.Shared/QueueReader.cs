@@ -59,6 +59,10 @@ namespace CrittercismSDK
                         Debug.WriteLine("ReadStep: retry == {0}",retry);
                     }
                 };
+                // Opportune time to save Crittercism state.  Unable to make the MessageQueue
+                // shorter either because SendMessage failed or MessageQueue has gone empty.
+                // The readerThread will be going into a do nothing wait state after this.
+                Crittercism.Save();
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
             }
@@ -245,7 +249,6 @@ namespace CrittercismSDK
                         } catch (Exception ex) {
                             //Debug.WriteLine("SendMessage: ex#2 == {0}",ex);
                             lastException=ex;
-                            // release the lock if something fail.
                             resetEvent.Set();
                         }
                     },null);

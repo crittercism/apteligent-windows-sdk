@@ -58,10 +58,7 @@ namespace CrittercismSDK {
         internal static Breadcrumbs PrivateBreadcrumbs { get; set; }
 
         private static Breadcrumbs CurrentBreadcrumbs() {
-            Breadcrumbs answer=null;
-            lock (PrivateBreadcrumbs) {
-                answer=PrivateBreadcrumbs.Copy();
-            }
+            Breadcrumbs answer=PrivateBreadcrumbs.Copy();
             return answer;
         }
 
@@ -90,7 +87,7 @@ namespace CrittercismSDK {
 
         private static Dictionary<string,string> CurrentMetadata() {
             Dictionary<string,string> answer=null;
-            lock (Metadata) {
+            lock (lockObject) {
                 answer=new Dictionary<string,string>(Metadata);
             }
             return answer;
@@ -284,12 +281,11 @@ namespace CrittercismSDK {
                 return;
             }
             try {
-                lock (Metadata) {
+                lock (lockObject) {
                     if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
                         Metadata[key]=value;
                         UserMetadata metadata=new UserMetadata(
                             AppID,new Dictionary<string,string>(Metadata));
-                        metadata.Save();
                         AddMessageToQueue(metadata);
                     }
                 }
@@ -305,7 +301,7 @@ namespace CrittercismSDK {
         /// <param name="key">      The key. </param>
         public static string ValueFor(string key) {
             string answer=null;
-            lock (Metadata) {
+            lock (lockObject) {
                 if (Metadata.ContainsKey(key)) {
                     answer=Metadata[key];
                 }
@@ -325,6 +321,21 @@ namespace CrittercismSDK {
                     OptOut=optOut;
                     SaveOptOutStatus(optOut);
                 }
+            }
+        }
+
+        internal static void Save() {
+            // Save current Crittercism state
+            try {
+                lock (lockObject) {
+                    foreach (MessageReport message in MessageQueue) {
+                        message.Save();
+                    }
+                    PrivateBreadcrumbs.Save();
+                    // TODO: OptOut -- maybe
+                }
+            } catch (Exception e) {
+                LogInternalException(e);
             }
         }
 
@@ -349,15 +360,7 @@ namespace CrittercismSDK {
             if (OptOut) {
                 return;
             }
-            try {
-                lock (PrivateBreadcrumbs) {
-                    PrivateBreadcrumbs.current_session.Add(new BreadcrumbMessage(breadcrumb));
-                    PrivateBreadcrumbs.Save();
-                };
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
-                // explicit nop
-            }
+            PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
         }
 
         /// <summary>
@@ -404,7 +407,6 @@ namespace CrittercismSDK {
             }
             ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
             HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
-            he.Save();
             AddMessageToQueue(he);
         }
         
@@ -413,17 +415,13 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="currentException"> The current exception. </param>
         internal static void CreateCrashReport(Exception currentException) {
-            if (OptOut) {
-                return;
-            }
             Dictionary<string,string> metadata=CurrentMetadata();
-            Breadcrumbs breadcrumbs;
-            lock (PrivateBreadcrumbs) {
-                breadcrumbs=CurrentBreadcrumbs();
-                PrivateBreadcrumbs.Clear();
-            }
+            Breadcrumbs breadcrumbs=PrivateBreadcrumbs.CopyAndClear();
             ExceptionObject exception=new ExceptionObject(currentException.GetType().FullName,currentException.Message,currentException.StackTrace);
             Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
+            // It seems reasonable to assume crashes occur so seldomly, but
+            // are so important, that we'll make very sure these get Save'd
+            // immediately, and sent ASAP
             crash.Save();
             AddMessageToQueue(crash);
         }
@@ -436,7 +434,6 @@ namespace CrittercismSDK {
                 return;
             }
             AppLoad appLoad=new AppLoad();
-            appLoad.Save();
             AddMessageToQueue(appLoad);
         }
 

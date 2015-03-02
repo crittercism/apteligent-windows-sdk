@@ -23,8 +23,8 @@ namespace WP8TestApp
                 if (rnd.Next(10)==0) {
                     try {
                         Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
-                    } catch (Exception ex) {
-                        Console.WriteLine("Worker.Work caught LeaveBreadcrumb throwing exception.");
+                    } catch (Exception e) {
+                        Console.WriteLine("UNEXPECTED ERROR!!! "+e.Message);
                     };
                 } else {
                     int i=0;
