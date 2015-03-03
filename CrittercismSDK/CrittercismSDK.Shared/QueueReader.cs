@@ -75,7 +75,7 @@ namespace CrittercismSDK
         /// <param name="message">  The message. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         private bool SendMessage(MessageReport message) {
-            Debug.WriteLine("SendMessage: ENTER");
+            //Debug.WriteLine("SendMessage: ENTER");
             bool sendCompleted=false;
             try {
                 if (!Crittercism._enableCommunicationLayer) {
@@ -129,9 +129,9 @@ namespace CrittercismSDK
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
             }
-            Debug.WriteLine("SendMessage: WAKE UP READER");
+            //Debug.WriteLine("SendMessage: WAKE UP READER");
             Crittercism.readerEvent.Set();
-            Debug.WriteLine("SendMessage: EXIT ---> "+sendCompleted);
+            //Debug.WriteLine("SendMessage: EXIT ---> "+sendCompleted);
             return sendCompleted;
         }
 
@@ -204,7 +204,8 @@ namespace CrittercismSDK
                             using (Stream requestStream=request.EndGetRequestStream(result)) {
                                 using (StreamWriter writer=new StreamWriter(requestStream)) {
                                     writer.Write(postBody);
-                                    //Debug.WriteLine("SendMessage: postBody == {0}",postBody);
+                                    Debug.WriteLine("SendMessage: POST BODY:");
+                                    Debug.WriteLine(postBody);
                                     writer.Flush();
 #if NETFX_CORE
 #else

@@ -96,9 +96,11 @@ namespace CrittercismSDK.DataContracts {
             bool answer=false;
             try {
                 lock (this) {
-                    string path=Path.Combine(folderName,this.Name);
-                    if (StorageHelper.FileExists(path)) {
-                        StorageHelper.DeleteFile(path);
+                    if (Saved) {
+                        string path=Path.Combine(folderName,this.Name);
+                        if (StorageHelper.FileExists(path)) {
+                            StorageHelper.DeleteFile(path);
+                        }
                     }
                     answer=true;
                 }
@@ -155,6 +157,7 @@ namespace CrittercismSDK.DataContracts {
                 } else {
                     message.Name=name;
                     message.CreationTime=StorageHelper.GetCreationTime(path);
+                    message.Saved=true;
                 }
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);

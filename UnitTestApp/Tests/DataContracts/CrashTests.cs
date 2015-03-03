@@ -28,11 +28,11 @@ namespace UnitTestApp.Tests.DataContracts {
 
                 // This is unreachable; above always throws divide-by-zero
                 return new Crash(TestHelpers.VALID_APPID,
-                    new Dictionary<string, string>(), new Breadcrumbs(), crEx);
+                    new Dictionary<string,string>(),Breadcrumbs.SessionStart(),crEx);
             } catch(Exception ex) {
                 crEx = new ExceptionObject(ex.GetType().FullName, ex.Message, ex.StackTrace);
                 return new Crash(TestHelpers.VALID_APPID,
-                    new Dictionary<string, string>(), new Breadcrumbs(), crEx);
+                    new Dictionary<string,string>(),Breadcrumbs.SessionStart(),crEx);
             }
         }
         

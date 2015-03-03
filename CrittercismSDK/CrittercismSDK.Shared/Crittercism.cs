@@ -328,11 +328,11 @@ namespace CrittercismSDK {
             // Save current Crittercism state
             try {
                 lock (lockObject) {
+                    Debug.WriteLine("Save: SAVE STATE");
                     foreach (MessageReport message in MessageQueue) {
                         message.Save();
                     }
                     PrivateBreadcrumbs.Save();
-                    // TODO: OptOut -- maybe
                 }
             } catch (Exception e) {
                 LogInternalException(e);
@@ -416,16 +416,22 @@ namespace CrittercismSDK {
         /// <param name="currentException"> The current exception. </param>
         internal static void CreateCrashReport(Exception currentException) {
             Dictionary<string,string> metadata=CurrentMetadata();
-            Breadcrumbs breadcrumbs=PrivateBreadcrumbs.CopyAndClear();
+            Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Crash();
             ExceptionObject exception=new ExceptionObject(currentException.GetType().FullName,currentException.Message,currentException.StackTrace);
             Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
             // It seems reasonable to assume crashes occur so seldomly, but
             // are so important, that we'll make very sure these get Save'd
-            // immediately, and sent ASAP
-            crash.Save();
+            // immediately, and save state .
             AddMessageToQueue(crash);
+            crash.Save();
+            PrivateBreadcrumbs.Save();
+            Save();
+            // App is probably going to crash now, because we choose not
+            // to handle the unhandled exception ourselves and typically
+            // most apps will choose to log the exception (e.g. with Crittercism)
+            // but let the crash go ahead.
         }
-
+        
         /// <summary>
         /// Creates the application load report.
         /// </summary>
@@ -485,7 +491,7 @@ namespace CrittercismSDK {
             // TODO: Why do we pass appID arg to this method?
             AppID=appID;
             OSVersion=PrivateOSVersion();
-            PrivateBreadcrumbs = Breadcrumbs.GetBreadcrumbs();
+            PrivateBreadcrumbs = Breadcrumbs.LoadBreadcrumbs();
             MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
             LoadQueue();
             CreateAppLoadReport();

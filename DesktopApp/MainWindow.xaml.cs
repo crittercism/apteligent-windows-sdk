@@ -27,7 +27,10 @@ namespace DesktopApp
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
-            Crittercism.SetUsername("MrsCritter");
+            Random random=new Random();
+            string[] names= { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
+            string name=names[random.Next(0,names.Length)];
+            Crittercism.SetUsername("Critter "+name);
         }
 
         private void leaveBreadcrumbClick(object sender,RoutedEventArgs e) {

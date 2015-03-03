@@ -70,7 +70,7 @@ namespace CrittercismSDK
         internal static object Load(string path,Type dataType) {
             object data=null;
             try {
-                Debug.WriteLine("Load: "+Path.Combine(GetStorePath(),path));
+                Debug.WriteLine("Load: "+Path.Combine(StoragePath(),path));
                 if (FileExists(path)) {
                     string dataString=LoadString(path);
                     if (dataString!=null) {
@@ -136,7 +136,7 @@ namespace CrittercismSDK
         internal static bool Save(object data,string path) {
             bool answer=false;
             try {
-                Debug.WriteLine("Save: "+Path.Combine(GetStorePath(),path));
+                Debug.WriteLine("Save: "+Path.Combine(StoragePath(),path));
                 string dataString=JsonConvert.SerializeObject(data);
                 Debug.WriteLine("JSON:");
                 Debug.WriteLine(dataString);
@@ -350,15 +350,6 @@ namespace CrittercismSDK
         }
 #endif // NETFX_CORE
 
-        internal static string GetStorePath() {
-#if NETFX_CORE
-            return GetStore().Path;
-#else
-            // TODO: Can't we do better than this?
-            return "";
-#endif
-        }
-
         internal static DateTimeOffset GetCreationTime(string path) {
 #if NETFX_CORE
             {
@@ -396,6 +387,23 @@ namespace CrittercismSDK
 #endif
         }
 
+        internal static string StoragePath() {
+            return PrivatePath;
+        }
 
+        private static string PrivatePath=null;
+        static StorageHelper() {
+#if NETFX_CORE
+            PrivatePath=GetStore().Path;
+#else
+            {
+                IsolatedStorageFile storage=GetStore();
+                PropertyInfo property=storage.GetType().GetProperty("RootDirectory",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetProperty);
+                PrivatePath=(string)property.GetValue(storage,null);
+            }
+#endif
+            Debug.WriteLine("STORAGE PATH: "+PrivatePath);
+            Debug.WriteLine("");
+        }
     }
 }
