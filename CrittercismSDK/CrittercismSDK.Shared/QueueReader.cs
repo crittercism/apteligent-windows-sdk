@@ -53,13 +53,8 @@ namespace CrittercismSDK
                         message.Delete();
                         retry=0;
                     } else {
-                        // 300000 milliseconds == 5 minutes
-                        const int READSTEP_MILLISECONDS_SLEEP=300000;
-#if NETFX_CORE
-                        Task.Delay(READSTEP_MILLISECONDS_SLEEP).Wait();
-#else
-                        Thread.Sleep(READSTEP_MILLISECONDS_SLEEP);
-#endif
+                        // TODO: Use System.Timers.Timer to generate an event
+                        // 5 minutes from now, wait for it, then proceed.
                         retry++;
                         Debug.WriteLine("ReadStep: retry == {0}",retry);
                     }
