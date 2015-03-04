@@ -29,6 +29,10 @@ namespace CrittercismSDK {
     /// Crittercism.
     /// </summary>
     public class Crittercism {
+        #region Constants
+        private const string errorNotInitialized="ERROR: Crittercism not initialized yet.";
+        #endregion
+
         #region Properties
         /// <summary>
         /// The auto run queue reader
@@ -44,6 +48,10 @@ namespace CrittercismSDK {
         /// The enable raise exception in communication layer
         /// </summary>
         internal static bool _enableRaiseExceptionInCommunicationLayer = false;
+
+        internal static string AppVersion { get; private set; }
+        internal static string DeviceId { get; private set; }
+        internal static string DeviceModel { get; private set; }
 
         /// <summary>
         /// Gets or sets a queue of messages.
@@ -123,14 +131,11 @@ namespace CrittercismSDK {
 
         #region Methods
 
-        internal static readonly string AppVersion="";
-        internal static readonly string DeviceId="";
-        internal static readonly string DeviceModel="";
         static Crittercism() {
-            AppVersion=PrivateAppVersion();
-            DeviceId=PrivateDeviceId();
-            DeviceModel=PrivateDeviceModel();
-            Metadata=LoadMetadata();
+            // Developer's app only needs to OptOut once in it's life time.
+            // To ever undo this, SetOptOutStatus(false) before calling
+            // Init again.
+            OptOut=LoadOptOutStatus();
         }
 
         private static string PrivateAppVersion() {
@@ -210,49 +215,53 @@ namespace CrittercismSDK {
         /// <param name="appID">  Identifier for the application. </param>
         public static void Init(string appID) {
             try {
+                if (OptOut) {
+                    // SaveOptOutStatus must have been called in this session
+                    // and OptOut = true is already persisted.
+                    return;
+                } else if (initialized) {
+                    Debug.WriteLine("ERROR: Crittercism is already initialized");
+                    return;
+                };
                 lock (lockObject) {
-                    OptOut=LoadOptOutStatus();
-                    if (OptOut) {
-                        return;
-                    }
-                    if (initialized) {
-                        Debug.WriteLine("ERROR: Crittercism is already initialized");
-                    } else {
-                        appLocator=new AppLocator(appID);
-                        QueueReader queueReader=new QueueReader(appLocator);
+                    AppVersion=PrivateAppVersion();
+                    DeviceId=PrivateDeviceId();
+                    DeviceModel=PrivateDeviceModel();
+                    Metadata=LoadMetadata();
+                    appLocator=new AppLocator(appID);
+                    QueueReader queueReader=new QueueReader(appLocator);
 #if NETFX_CORE
-                        Action threadStart=() => { queueReader.ReadQueue(); };
-                        readerThread=new Task(threadStart);
+                    Action threadStart=() => { queueReader.ReadQueue(); };
+                    readerThread=new Task(threadStart);
 #else
-                        ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
-                        readerThread=new Thread(threadStart);
-                        readerThread.Name="Crittercism Sender";
+                    ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
+                    readerThread=new Thread(threadStart);
+                    readerThread.Name="Crittercism Sender";
 #endif
-                        readerThread.Start();
-                        StartApplication(appID);
-                        // _autoRunQueueReader for unit test purposes
-                        if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
+                    readerThread.Start();
+                    StartApplication(appID);
+                    // _autoRunQueueReader for unit test purposes
+                    if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
 #if NETFX_CORE
-                            Application.Current.UnhandledException+=Current_UnhandledException;
+                        Application.Current.UnhandledException+=Current_UnhandledException;
 #elif WINDOWS_PHONE
-                            Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
-                            DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
-                            try {
-                                if (PhoneApplicationService.Current!=null) {
-                                    PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(Current_Activated);
-                                    PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
-                                }
-                            } catch (Exception e) {
-                                Crittercism.LogInternalException(e);
+                        Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
+                        DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
+                        try {
+                            if (PhoneApplicationService.Current!=null) {
+                                PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(Current_Activated);
+                                PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
                             }
-#else
-                            AppDomain currentDomain=AppDomain.CurrentDomain;
-                            currentDomain.UnhandledException+=new UnhandledExceptionEventHandler(Current_UnhandledException);
-#endif
+                        } catch (Exception e) {
+                            Crittercism.LogInternalException(e);
                         }
-                        initialized=true;
-                        Debug.WriteLine("Crittercism initialized.");
+#else
+                        AppDomain currentDomain=AppDomain.CurrentDomain;
+                        currentDomain.UnhandledException+=new UnhandledExceptionEventHandler(Current_UnhandledException);
+#endif
                     }
+                    initialized=true;
+                    Debug.WriteLine("Crittercism initialized.");
                 }
             } catch (Exception) {
             }
@@ -266,9 +275,7 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="username"> The username. </param>
         public static void SetUsername(string username) {
-            if (OptOut) {
-                return;
-            }
+            // SetValue will check OptOut and initialized .
             SetValue("username", username);
         }
 
@@ -276,6 +283,7 @@ namespace CrittercismSDK {
         /// Gets "username" metadata value.
         /// </summary>
         public static string Username() {
+            // ValueFor will check OptOut and initialized .
             return ValueFor("username");
         }
 
@@ -286,6 +294,9 @@ namespace CrittercismSDK {
         /// <param name="value">    The value. </param>
         public static void SetValue(string key,string value) {
             if (OptOut) {
+                return;
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
                 return;
             }
             try {
@@ -308,6 +319,12 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="key">      The key. </param>
         public static string ValueFor(string key) {
+            if (OptOut) {
+                return null;
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+                return null;
+            };
             string answer=null;
             lock (lockObject) {
                 if (Metadata.ContainsKey(key)) {
@@ -356,7 +373,7 @@ namespace CrittercismSDK {
             bool answer=false;
             if (StorageHelper.FileExists(optOutStatusPath)) {
                 answer=(bool)StorageHelper.Load(optOutStatusPath,typeof(Boolean));
-            }
+            };
             return answer;
         }
 
@@ -367,7 +384,10 @@ namespace CrittercismSDK {
         public static void LeaveBreadcrumb(string breadcrumb) {
             if (OptOut) {
                 return;
-            }
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+                return;
+            };
             PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
         }
 
@@ -375,9 +395,13 @@ namespace CrittercismSDK {
         /// Creates crash report.
         /// </summary>
         public static void LogCrash(Exception exception) {
+            // TODO: Are we going to document this?  What's the reason?
             if (OptOut) {
                 return;
-            }
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+                return;
+            };
             try {
                 CreateCrashReport(exception);
             } catch (Exception e) {
@@ -398,7 +422,10 @@ namespace CrittercismSDK {
         public static void LogHandledException(Exception e) {
             if (OptOut) {
                 return;
-            }
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+                return;
+            };
             Dictionary<string,string> metadata=CurrentMetadata();
             Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
             string stacktrace=e.StackTrace;
