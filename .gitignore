@@ -7,5 +7,7 @@ obj
 Bin
 packages/*
 .DS_Store
-._.DS_Store
+._*
 *~
+**/AppPackages
+**/BundleArtifacts

@@ -12,7 +12,6 @@ namespace CrittercismSDK.DataContracts {
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using System.Windows;
 #if NETFX_CORE
     using Windows.ApplicationModel;
 #elif WINDOWS_PHONE
@@ -28,8 +27,11 @@ namespace CrittercismSDK.DataContracts {
         [DataMember]
         public string crPlatform = "windows";
         [DataMember]
-        //public string crVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+#if NETFX_CORE
         public string crVersion=typeof(UnifiedAppLoadInner).GetTypeInfo().Assembly.GetName().Version.ToString();
+#else
+        public string crVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+#endif
         [DataMember]
         public string deviceModel="PC";
         [DataMember]

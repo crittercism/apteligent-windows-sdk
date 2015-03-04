@@ -20,14 +20,14 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 mkdir tmp\lib
 mkdir tmp\lib\netcore451
-mkdir tmp\lib\net45
+mkdir tmp\lib\net40
 mkdir tmp\lib\wpa81
 mkdir tmp\lib\windowsphone8
 
 copy ..\CrittercismSDK\CrittercismSDK.Windows\bin\Release\CrittercismSDK.dll tmp\lib\netcore451
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-copy ..\CrittercismSDK\CrittercismSDK.WindowsDesktop\bin\Release\CrittercismSDK.dll tmp\lib\net45
+copy ..\CrittercismSDK\CrittercismSDK.WindowsDesktop\bin\Release\CrittercismSDK.dll tmp\lib\net40
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 copy ..\CrittercismSDK\CrittercismSDK.WindowsPhone\bin\Release\CrittercismSDK.dll tmp\lib\wpa81

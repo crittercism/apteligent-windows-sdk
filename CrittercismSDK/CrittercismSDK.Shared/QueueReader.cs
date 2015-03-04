@@ -15,6 +15,9 @@ using System.Windows;
 #if NETFX_CORE
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
+#elif WINDOWS_PHONE
+#else
+using System.Web;
 #endif
 
 namespace CrittercismSDK
@@ -287,8 +290,15 @@ namespace CrittercismSDK
             postBody+="did="+um.platform.device_id+"&";
             postBody+="app_id="+um.app_id+"&";
             string metadataJson=JsonConvert.SerializeObject(um.metadata);
+#if NETFX_CORE
             postBody+="metadata="+WebUtility.UrlEncode(metadataJson)+"&";
             postBody+="device_name="+WebUtility.UrlEncode(um.platform.device_model);
+#else
+            // Only .NETFramework 4.5 has WebUtility.UrlEncode, earlier version
+            // .NETFramework 4.0 has HttpUtility.UrlEncode
+            postBody+="metadata="+HttpUtility.UrlEncode(metadataJson)+"&";
+            postBody+="device_name="+HttpUtility.UrlEncode(um.platform.device_model);
+#endif
             return postBody;
         }
 
