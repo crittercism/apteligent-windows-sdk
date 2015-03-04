@@ -19,7 +19,8 @@ namespace UnitTestApp.Tests.DataContracts {
                 TestHelpers.ThrowDivideByZeroException();
             } catch (Exception ex) {
                 Crittercism.LogHandledException(ex);
-                QueueReader queueReader = new QueueReader();
+                AppLocator appLocator=new AppLocator(TestHelpers.VALID_APPID);
+                QueueReader queueReader=new QueueReader(appLocator);
                 queueReader.ReadQueue();
             }
         }

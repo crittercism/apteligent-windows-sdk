@@ -9,6 +9,7 @@
     <Import_RootNamespace>CrittercismSDK</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AppLocator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Crittercism.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\AppLoad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\BreadcrumbMessage.cs" />

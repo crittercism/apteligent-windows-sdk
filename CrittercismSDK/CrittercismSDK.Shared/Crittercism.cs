@@ -71,6 +71,8 @@ namespace CrittercismSDK {
         /// <value> The identifier of the application. </value>
         internal static string AppID { get; set; }
 
+        internal static AppLocator appLocator { get; private set; }
+
         internal static volatile bool OptOut;
 
         /// <summary>
@@ -207,49 +209,55 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="appID">  Identifier for the application. </param>
         public static void Init(string appID) {
-            lock (lockObject) {
-                if (!initialized) {
-                    Regex r=new Regex("^[0-9a-fA-F]{24}$");
-                    if (!r.IsMatch(appID)) {
-                        Debug.WriteLine("Invalid AppId in Init.");
-                        Debug.WriteLine("AppId should be 24 hex characters from the Crittercism portal.");
+            try {
+                lock (lockObject) {
+                    OptOut=LoadOptOutStatus();
+                    if (OptOut) {
                         return;
                     }
-                    OptOut=LoadOptOutStatus();
-                    QueueReader queueReader=new QueueReader();
+                    if (initialized) {
+                        Debug.WriteLine("ERROR: Crittercism is already initialized");
+                    } else {
+                        appLocator=new AppLocator(appID);
+                        QueueReader queueReader=new QueueReader(appLocator);
 #if NETFX_CORE
-                    Action threadStart=() => { queueReader.ReadQueue(); };
-                    readerThread=new Task(threadStart);
+                        Action threadStart=() => { queueReader.ReadQueue(); };
+                        readerThread=new Task(threadStart);
 #else
-                    ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
-                    readerThread=new Thread(threadStart);
-                    readerThread.Name="Crittercism Sender";
+                        ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
+                        readerThread=new Thread(threadStart);
+                        readerThread.Name="Crittercism Sender";
 #endif
-                    readerThread.Start();
-                    StartApplication(appID);
-                    // _autoRunQueueReader for unit test purposes
-                    if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
+                        readerThread.Start();
+                        StartApplication(appID);
+                        // _autoRunQueueReader for unit test purposes
+                        if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
 #if NETFX_CORE
-                        Application.Current.UnhandledException+=Current_UnhandledException;
+                            Application.Current.UnhandledException+=Current_UnhandledException;
 #elif WINDOWS_PHONE
-                        Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
-                        DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
-                        try {
-                            if (PhoneApplicationService.Current!=null) {
-                                PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(Current_Activated);
-                                PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
+                            Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
+                            DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
+                            try {
+                                if (PhoneApplicationService.Current!=null) {
+                                    PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(Current_Activated);
+                                    PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
+                                }
+                            } catch (Exception e) {
+                                Crittercism.LogInternalException(e);
                             }
-                        } catch (Exception e) {
-                            Crittercism.LogInternalException(e);
-                        }
 #else
-                        AppDomain currentDomain=AppDomain.CurrentDomain;
-                        currentDomain.UnhandledException+=new UnhandledExceptionEventHandler(Current_UnhandledException);
+                            AppDomain currentDomain=AppDomain.CurrentDomain;
+                            currentDomain.UnhandledException+=new UnhandledExceptionEventHandler(Current_UnhandledException);
 #endif
+                        }
+                        initialized=true;
+                        Debug.WriteLine("Crittercism initialized.");
                     }
-                    initialized=true;
-                    Debug.WriteLine("Crittercism initialized.");
                 }
+            } catch (Exception) {
+            }
+            if (!initialized) {
+                Debug.WriteLine("Crittercism did not initialize.");
             }
         }
 

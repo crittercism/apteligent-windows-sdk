@@ -21,7 +21,12 @@ namespace CrittercismSDK
 {
     internal class QueueReader
     {
-        private const string CRITTERCISM_HOST="https://api.crittercism.com";
+        private AppLocator appLocator;
+        internal QueueReader(AppLocator appLocator) {
+            // No support for APM nor TXNs yet.  appLocator.apiURL is
+            // all we currently care about.
+            this.appLocator=appLocator;
+        }
 
         /// <summary>
         /// Reads the queue.
@@ -88,23 +93,23 @@ namespace CrittercismSDK
                         HttpWebRequest request=null;
                         switch (message.GetType().Name) {
                             case "AppLoad":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(CRITTERCISM_HOST+"/v1/loads",UriKind.Absolute));
+                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/loads",UriKind.Absolute));
                                 request.ContentType="application/json; charset=utf-8";
                                 postBody=JsonConvert.SerializeObject(message);
                                 break;
                             case "HandledException":
                                 // FIXME jbley fix up the URI here
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(CRITTERCISM_HOST+"/v1/errors",UriKind.Absolute));
+                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/errors",UriKind.Absolute));
                                 request.ContentType="application/json; charset=utf-8";
                                 postBody=JsonConvert.SerializeObject(message);
                                 break;
                             case "Crash":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(CRITTERCISM_HOST+"/v1/crashes",UriKind.Absolute));
+                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/crashes",UriKind.Absolute));
                                 request.ContentType="application/json; charset=utf-8";
                                 postBody=JsonConvert.SerializeObject(message);
                                 break;
                             case "UserMetadata":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(CRITTERCISM_HOST+"/feedback/update_user_metadata",UriKind.Absolute));
+                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/feedback/update_user_metadata",UriKind.Absolute));
                                 request.ContentType="application/x-www-form-urlencoded";
                                 UserMetadata um=message as UserMetadata;
                                 postBody=ComputeFormPostBody(um);
