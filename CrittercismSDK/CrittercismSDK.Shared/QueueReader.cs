@@ -13,10 +13,8 @@ using System.Reflection;
 using System.Threading;
 using System.Windows;
 #if NETFX_CORE
-using Windows.UI.Xaml;
-#if WINDOWS_PHONE_APP
 using System.Threading.Tasks;
-#endif
+using Windows.UI.Xaml;
 #endif
 
 namespace CrittercismSDK
@@ -47,7 +45,7 @@ namespace CrittercismSDK
             Debug.WriteLine("ReadStep: ENTER");
             try {
                 int retry=0;
-                while (Crittercism.MessageQueue!=null&&Crittercism.MessageQueue.Count>0&&NetworkInterface.GetIsNetworkAvailable()&&retry<100) {
+                while (Crittercism.MessageQueue!=null&&Crittercism.MessageQueue.Count>0&&NetworkInterface.GetIsNetworkAvailable()&&retry<5) {
                     MessageReport message=Crittercism.MessageQueue.Peek();
                     if (SendMessage(message)) {
                         Debug.WriteLine("ReadStep: SendMessage "+message.Name);
@@ -55,6 +53,13 @@ namespace CrittercismSDK
                         message.Delete();
                         retry=0;
                     } else {
+                        // 300000 milliseconds == 5 minutes
+                        const int READSTEP_MILLISECONDS_SLEEP=300000;
+#if NETFX_CORE
+                        Task.Delay(READSTEP_MILLISECONDS_SLEEP).Wait();
+#else
+                        Thread.Sleep(READSTEP_MILLISECONDS_SLEEP);
+#endif
                         retry++;
                         Debug.WriteLine("ReadStep: retry == {0}",retry);
                     }
@@ -256,7 +261,15 @@ namespace CrittercismSDK
                 {
                     // 300000 milliseconds == 5 minute timeout.
                     const int SENDREQUEST_MILLISECONDS_TIMEOUT=300000;
+#if DEBUG
+                    Stopwatch stopWatch=new Stopwatch();
+                    stopWatch.Start();
+#endif
                     resetEvent.WaitOne(SENDREQUEST_MILLISECONDS_TIMEOUT);
+#if DEBUG
+                    stopWatch.Stop();
+                    Debug.WriteLine("SendMessage: TOTAL SECONDS == "+stopWatch.Elapsed.TotalSeconds);
+#endif
                 }
                 if (Crittercism._enableRaiseExceptionInCommunicationLayer&&lastException!=null) {
                     throw lastException;

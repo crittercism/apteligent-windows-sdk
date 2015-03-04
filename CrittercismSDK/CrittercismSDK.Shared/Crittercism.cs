@@ -454,22 +454,19 @@ namespace CrittercismSDK {
             }
         }
 
+        private const int MaxMessageQueueCount=100;
+
         /// <summary>
-        /// Adds  message to queue
+        /// Adds message to queue
         /// </summary>
         private static void AddMessageToQueue(MessageReport message) {
-            if (DateTime.Now.Subtract(initialDate)<=new TimeSpan(0,0,0,1,0)) {
-                messageCounter++;
-            } else {
-                messageCounter=0;
-                initialDate=DateTime.Now;
+            while (MessageQueue.Count>=MaxMessageQueueCount) {
+                // Sacrifice an oldMessage
+                MessageReport oldMessage=MessageQueue.Dequeue();
+                oldMessage.Delete();
             }
-            if (messageCounter<50) {
-                MessageQueue.Enqueue(message);
-                readerEvent.Set();
-            } else {
-                message.Delete();
-            }
+            MessageQueue.Enqueue(message);
+            readerEvent.Set();
         }
 
         private static string PrivateOSVersion() {
