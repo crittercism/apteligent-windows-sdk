@@ -509,8 +509,11 @@ namespace CrittercismSDK {
 
         private static string PrivateOSVersion() {
 #if NETFX_CORE
-            // TODO: We don't want to return hardcoded string here.
-            string answer="8.1";
+            // TODO: Returning an empty string here makes us sad.
+            // "You cannot get the OS or .NET framework version in a Windows Store app ...
+            // Marked as answer by Anne Jing Microsoft contingent staff, Moderator"
+            // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/66e662a9-9ece-4863-8cf1-a5e259c7b571/c-windows-store-8-os-version-name-and-net-version-name
+            string answer="";
 #else
             string answer=Environment.OSVersion.Platform.ToString();
 #endif
