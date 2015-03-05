@@ -222,39 +222,39 @@ namespace CrittercismSDK
                                 }
                             }
                             request.BeginGetResponse(
-                                 (asyncResponse) => {
-                                     //Debug.WriteLine("SendMessage: BeginGetResponse");
-                                     try {
-                                         using (HttpWebResponse response=(HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                                             Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
-                                             if (response.StatusCode==HttpStatusCode.OK) {
-                                                 sendCompleted=true;
-                                             }
-                                         }
-                                     } catch (WebException webEx) {
-                                         Debug.WriteLine("SendMessage: webEx == {0}",webEx);
-                                         if (webEx.Response!=null) {
-                                             using (HttpWebResponse response=(HttpWebResponse)webEx.Response) {
-                                                 //Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
-                                                 if (response.StatusCode==HttpStatusCode.BadRequest) {
-                                                     try {
-                                                         using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
-                                                             string errorMessage=errorReader.ReadToEnd();
-                                                             Debug.WriteLine(errorMessage);
-                                                             lastException=new Exception(errorMessage,webEx);
-                                                         }
-                                                     } catch (Exception ex) {
-                                                         lastException=ex;
-                                                     }
-                                                 }
-                                             }
-                                         }
-                                     } catch (Exception ex) {
-                                         //Debug.WriteLine("SendMessageKBR: ex == {0}",ex);
-                                         lastException=ex;
-                                     }
-                                     resetEvent.Set();
-                                 },null);
+                                (asyncResponse) => {
+                                    //Debug.WriteLine("SendMessage: BeginGetResponse");
+                                    try {
+                                        using (HttpWebResponse response=(HttpWebResponse)request.EndGetResponse(asyncResponse)) {
+                                            Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                                            if (response.StatusCode==HttpStatusCode.OK) {
+                                                sendCompleted=true;
+                                            }
+                                        }
+                                    } catch (WebException webEx) {
+                                        Debug.WriteLine("SendMessage: webEx == {0}",webEx);
+                                        if (webEx.Response!=null) {
+                                            using (HttpWebResponse response=(HttpWebResponse)webEx.Response) {
+                                                //Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                                                if (response.StatusCode==HttpStatusCode.BadRequest) {
+                                                    try {
+                                                        using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
+                                                            string errorMessage=errorReader.ReadToEnd();
+                                                            Debug.WriteLine(errorMessage);
+                                                            lastException=new Exception(errorMessage,webEx);
+                                                        }
+                                                    } catch (Exception ex) {
+                                                        lastException=ex;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } catch (Exception ex) {
+                                        //Debug.WriteLine("SendMessage: ex == {0}",ex);
+                                        lastException=ex;
+                                    }
+                                    resetEvent.Set();
+                                },null);
                         } catch (Exception ex) {
                             //Debug.WriteLine("SendMessage: ex#2 == {0}",ex);
                             lastException=ex;
