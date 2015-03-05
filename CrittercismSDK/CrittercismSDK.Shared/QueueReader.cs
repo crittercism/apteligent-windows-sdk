@@ -38,7 +38,12 @@ namespace CrittercismSDK
             Debug.WriteLine("ReadQueue: ENTER");
             try {
                 while (true) {
-                    Crittercism.readerEvent.WaitOne();
+                    // wake up again 300000 milliseconds == 5 minute timeout from now
+                    // even without prompting.  Useful if last SendMessage failed and
+                    // it seems time to try again despite no new messages have poured
+                    // into the MessageQueue which would have "Set" the readerEvent.
+                    const int READQUEUE_MILLISECONDS_TIMEOUT=300000;
+                    Crittercism.readerEvent.WaitOne(READQUEUE_MILLISECONDS_TIMEOUT);
                     Debug.WriteLine("ReadQueue: WAKE");
                     ReadStep();
                     Debug.WriteLine("ReadQueue: SLEEP");
@@ -137,8 +142,6 @@ namespace CrittercismSDK
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
             }
-            //Debug.WriteLine("SendMessage: WAKE UP READER");
-            Crittercism.readerEvent.Set();
             //Debug.WriteLine("SendMessage: EXIT ---> "+sendCompleted);
             return sendCompleted;
         }
@@ -262,13 +265,11 @@ namespace CrittercismSDK
                         }
                     },null);
                 {
-                    // 300000 milliseconds == 5 minute timeout.
-                    const int SENDREQUEST_MILLISECONDS_TIMEOUT=300000;
 #if DEBUG
                     Stopwatch stopWatch=new Stopwatch();
                     stopWatch.Start();
 #endif
-                    resetEvent.WaitOne(SENDREQUEST_MILLISECONDS_TIMEOUT);
+                    resetEvent.WaitOne();
 #if DEBUG
                     stopWatch.Stop();
                     Debug.WriteLine("SendMessage: TOTAL SECONDS == "+stopWatch.Elapsed.TotalSeconds);

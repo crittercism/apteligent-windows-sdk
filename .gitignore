@@ -9,5 +9,5 @@ packages/*
 .DS_Store
 ._*
 *~
-**/AppPackages
-**/BundleArtifacts
+AppPackages
+BundleArtifacts
