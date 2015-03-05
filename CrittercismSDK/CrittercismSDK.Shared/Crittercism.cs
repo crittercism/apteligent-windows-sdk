@@ -17,6 +17,7 @@ namespace CrittercismSDK {
     using Windows.ApplicationModel;
     using Windows.UI.Xaml;
     using Windows.UI.Xaml.Controls;
+    using Windows.Networking.Connectivity;
 #elif WINDOWS_PHONE
     using Microsoft.Phone.Info;
     using Microsoft.Phone.Shell;
@@ -245,6 +246,7 @@ namespace CrittercismSDK {
                     if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
 #if NETFX_CORE
                         Application.Current.UnhandledException+=Current_UnhandledException;
+                        NetworkInformation.NetworkStatusChanged+=NetworkInformation_NetworkStatusChanged;
 #elif WINDOWS_PHONE
                         Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
                         DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
@@ -540,6 +542,18 @@ namespace CrittercismSDK {
             Crittercism.LogCrash(e);
             //args.Handled=true;
             Debug.WriteLine("Current_UnhandledException EXIT");
+        }
+
+        static void NetworkInformation_NetworkStatusChanged(object sender) {
+            Debug.WriteLine("NetworkStatusChanged");
+            ConnectionProfile profile=NetworkInformation.GetInternetConnectionProfile();
+            bool isConnected=(profile!=null
+                &&(profile.GetNetworkConnectivityLevel()==NetworkConnectivityLevel.InternetAccess));
+            if (isConnected) {
+                if (MessageQueue!=null&&MessageQueue.Count>0) {
+                    readerEvent.Set();
+                }
+            }
         }
 #elif WINDOWS_PHONE
         /// <summary>
