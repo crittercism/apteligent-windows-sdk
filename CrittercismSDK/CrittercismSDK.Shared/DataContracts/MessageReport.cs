@@ -151,9 +151,8 @@ namespace CrittercismSDK.DataContracts {
                         break;
                 }
                 if (message==null) {
-                    // Our fault tolerant strategy here is to just return null
-                    Debug.WriteLine("UNEXPECTED ERROR!!! Couldn't Load "+path);
-                    StorageHelper.DeleteFile(path);
+                    // Possibly file is still being written.  Skip file for
+                    // now by returning null .
                 } else {
                     message.Name=name;
                     message.CreationTime=StorageHelper.GetCreationTime(path);

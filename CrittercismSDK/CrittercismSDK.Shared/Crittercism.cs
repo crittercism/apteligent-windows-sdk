@@ -185,13 +185,14 @@ namespace CrittercismSDK {
 #if NETFX_CORE
 #if WINDOWS_PHONE_APP
             return "Windows Phone";
-#endif
+#else
             return "Windows PC";
+#endif // WINDOWS_PHONE_APP
 #elif WINDOWS_PHONE
             return DeviceStatus.DeviceName;
 #else
             return "Windows PC";
-#endif
+#endif // NETFX_CORE
         }
         
         internal static Dictionary<string,string> LoadMetadata() {
@@ -530,6 +531,7 @@ namespace CrittercismSDK {
         }
 
 #if NETFX_CORE
+#pragma warning disable 1998
         private static async void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
             Debug.WriteLine("Current_UnhandledException ENTER");
             Exception e=args.Exception;

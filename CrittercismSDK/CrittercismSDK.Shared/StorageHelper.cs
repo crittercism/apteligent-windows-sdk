@@ -73,10 +73,21 @@ namespace CrittercismSDK
                 Debug.WriteLine("Load: "+Path.Combine(StoragePath(),path));
                 if (FileExists(path)) {
                     string dataString=LoadString(path);
-                    if (dataString!=null) {
-                        data=JsonConvert.DeserializeObject(dataString,dataType);
+                    if (dataString==null) {
+                        // Unable to read file.  Maybe something is still writing
+                        // it?  Return null in this case.  Will try again later.
                     } else {
-                        Debug.WriteLine("Load: Unable to parse "+path);
+                        try {
+                            data=JsonConvert.DeserializeObject(dataString,dataType);
+                        } catch (Exception) {
+                            Debug.WriteLine("Load: Unable to parse "+path);
+                            // Try to DeleteFile anything we can't parse.  It might be
+                            // a partly written file terminated by an earlier crash.
+                            try {
+                                StorageHelper.DeleteFile(path);
+                            } catch (Exception) {
+                            }
+                        }
                     }
                 } else {
                     Debug.WriteLine("Load: File doesn't exist "+path);
@@ -89,26 +100,32 @@ namespace CrittercismSDK
 
         private static string LoadString(string path) {
             string dataString=null;
+            try {
 #if NETFX_CORE
-            {
-                StorageFile file=WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
-                    GetStore().GetFileAsync(path),
-                    CancellationToken.None
-                ).Result;
-                dataString=(string)WindowsRuntimeSystemExtensions.AsTask(
-                    FileIO.ReadTextAsync(file)
-                ).Result;
-                Debug.WriteLine("LoadString: "+dataString);
-            }
-#else
-            {
-                IsolatedStorageFile storage=StorageHelper.GetStore();
-                using (IsolatedStorageFileStream stream=storage.OpenFile(path,FileMode.Open,FileAccess.Read)) {
-                    StreamReader reader=new StreamReader(stream);
-                    dataString=reader.ReadToEnd();
+                {
+                    StorageFile file=WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
+                        GetStore().GetFileAsync(path),
+                        CancellationToken.None
+                    ).Result;
+                    dataString=(string)WindowsRuntimeSystemExtensions.AsTask(
+                        FileIO.ReadTextAsync(file)
+                    ).Result;
+                    Debug.WriteLine("LoadString: "+dataString);
                 }
-            }
+#else
+                {
+                    IsolatedStorageFile storage=StorageHelper.GetStore();
+                    using (IsolatedStorageFileStream stream=storage.OpenFile(path,FileMode.Open,FileAccess.Read,FileShare.None)) {
+                        StreamReader reader=new StreamReader(stream);
+                        dataString=reader.ReadToEnd();
+                    }
+                }
 #endif
+            } catch (Exception) {
+                // There is a small chance the file is still being
+                // written to by another thread.  Return null in
+                // this case.  Reader will try again later.
+            }
             return dataString;
         }
 
@@ -268,7 +285,7 @@ namespace CrittercismSDK
 #else
             {
                 IsolatedStorageFile storage=StorageHelper.GetStore();
-                using (IsolatedStorageFileStream stream=new IsolatedStorageFileStream(path,FileMode.Create,FileAccess.Write,storage)) {
+                using (IsolatedStorageFileStream stream=new IsolatedStorageFileStream(path,FileMode.Create,FileAccess.Write,FileShare.None,storage)) {
                     StreamWriter writer=new StreamWriter(stream);
                     writer.Write(dataString);
                     writer.Flush();
