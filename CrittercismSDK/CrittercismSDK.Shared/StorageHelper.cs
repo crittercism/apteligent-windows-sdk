@@ -31,7 +31,11 @@ namespace CrittercismSDK
             // TODO: Return something better than zero.
             return 0;
 #else
-            return (ulong)GetStore().AvailableFreeSpace;
+            // Tested GetStore().AvailableFreeSpace using DesktopApp. 
+            // It returns 9223372036854713343 .  Predictable, but wrong.
+            //return (ulong)GetStore().AvailableFreeSpace;
+            // TODO: Return something better than zero.
+            return 0;
 #endif
         }
 
