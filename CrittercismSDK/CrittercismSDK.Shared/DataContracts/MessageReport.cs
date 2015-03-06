@@ -33,6 +33,21 @@ namespace CrittercismSDK.DataContracts {
 
         private bool Saved { get; set; }
 
+        internal static string messagesDirectoryName="Crittercism\\Messages";
+
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
+        public MessageReport() {
+            Saved=false;
+        }
+
+        static MessageReport() {
+            if (!StorageHelper.FolderExists(messagesDirectoryName)) {
+                StorageHelper.CreateFolder(messagesDirectoryName);
+            }
+        }
+
         internal static string DateTimeString(DateTime dt) {
             return dt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", CultureInfo.InvariantCulture);
         }
@@ -76,7 +91,7 @@ namespace CrittercismSDK.DataContracts {
                 lock (this) {
                     if (!Saved) {
                         Name=this.GetType().Name+"_"+Guid.NewGuid().ToString()+".js";
-                        string path=Path.Combine(folderName,Name);
+                        string path=Path.Combine(messagesDirectoryName,Name);
                         StorageHelper.Save(this,path);
                         Saved=true;
                         answer=true;
@@ -97,7 +112,7 @@ namespace CrittercismSDK.DataContracts {
             try {
                 lock (this) {
                     if (Saved) {
-                        string path=Path.Combine(folderName,this.Name);
+                        string path=Path.Combine(messagesDirectoryName,this.Name);
                         if (StorageHelper.FileExists(path)) {
                             StorageHelper.DeleteFile(path);
                         }
@@ -110,11 +125,10 @@ namespace CrittercismSDK.DataContracts {
             return answer;
         }
 
-        internal static string folderName="Messages";
         internal static List<MessageReport> LoadMessages() {
             List<MessageReport> messages=new List<MessageReport>();
-            if (StorageHelper.FolderExists(folderName)) {
-                string[] names=StorageHelper.GetFileNames(folderName);
+            if (StorageHelper.FolderExists(messagesDirectoryName)) {
+                string[] names=StorageHelper.GetFileNames(messagesDirectoryName);
                 foreach (string name in names) {
                     MessageReport message=LoadMessage(name);
                     if (message!=null) {
@@ -127,11 +141,11 @@ namespace CrittercismSDK.DataContracts {
         }
 
         internal static MessageReport LoadMessage(string name) {
-            // name is wrt folderName "Messages", e.g "Crash_<guid>"
-            // path is Messages\name
+            // name is wrt messagesDirectoryName "Crittercism\Messages", e.g "Crash_<guid>"
+            // path is Crittercism\Messages\name
             MessageReport message=null;
             try {
-                string path=Path.Combine(folderName,name);
+                string path=Path.Combine(messagesDirectoryName,name);
                 string[] nameSplit=name.Split('_');
                 switch (nameSplit[0]) {
                     case "AppLoad":
@@ -162,20 +176,6 @@ namespace CrittercismSDK.DataContracts {
                 Crittercism.LogInternalException(e);
             }
             return message;
-        }
-
-        /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public MessageReport()
-        {
-            Saved=false;
-        }
-
-        static MessageReport() {
-            if (!StorageHelper.FolderExists(folderName)) {
-                StorageHelper.CreateFolder(folderName);
-            }
         }
     }
 }

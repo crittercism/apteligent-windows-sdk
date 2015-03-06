@@ -4,6 +4,7 @@ namespace CrittercismSDK.DataContracts
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
@@ -115,7 +116,7 @@ namespace CrittercismSDK.DataContracts
         internal static Breadcrumbs LoadBreadcrumbs() {
             Breadcrumbs answer=null;
             try {
-                const string path="Breadcrumbs.js";
+                string path=Path.Combine(StorageHelper.crittercismDirectoryName,"Breadcrumbs.js");
                 if (StorageHelper.FileExists(path)) {
                     answer=StorageHelper.Load(path,typeof(Breadcrumbs)) as Breadcrumbs;
                 }

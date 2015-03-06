@@ -25,6 +25,37 @@ namespace CrittercismSDK
     /// Storage helper.
     /// </summary>
     internal static class StorageHelper {
+        internal const string crittercismDirectoryName="Crittercism";
+
+        private static string PrivatePath="";
+
+        static StorageHelper() {
+            if (!FolderExists(crittercismDirectoryName)) {
+                CreateFolder(crittercismDirectoryName);
+            }
+#if DEBUG
+#if NETFX_CORE
+            PrivatePath=GetStore().Path;
+#else
+            {
+                IsolatedStorageFile storage=GetStore();
+#if WINDOWS_PHONE
+                // TODO: Explore WINDOWS_PHONE case again.
+                //FieldInfo field=storage.GetType().GetField("m_AppFilesPath",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
+                //PrivatePath=(string)field.GetValue(storage);
+#else
+                FieldInfo field=storage.GetType().GetField("m_RootDir",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
+                PrivatePath=(string)field.GetValue(storage);
+                // NOTE: This would work too.
+                //PropertyInfo property=storage.GetType().GetProperty("RootDirectory",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetProperty);
+                //PrivatePath=(string)property.GetValue(storage,null);
+#endif // WINDOWS_PHONE
+            }
+#endif // NETFX_CORE
+            Debug.WriteLine("STORAGE PATH: "+PrivatePath);
+            Debug.WriteLine("");
+#endif // DEBUG
+        }
 
         internal static ulong AvailableFreeSpace() {
 #if NETFX_CORE
@@ -58,7 +89,7 @@ namespace CrittercismSDK
         internal static object Load(Type dataType) {
             object data=null;
             try {
-                string path=dataType.Name+".js";
+                string path=Path.Combine(crittercismDirectoryName,dataType.Name+".js");
                 data=Load(path,dataType);
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
@@ -74,7 +105,7 @@ namespace CrittercismSDK
         internal static object Load(string path,Type dataType) {
             object data=null;
             try {
-                Debug.WriteLine("Load: "+Path.Combine(StoragePath(),path));
+                Debug.WriteLine("Load: "+Path.Combine(PrivatePath,path));
                 if (FileExists(path)) {
                     string dataString=LoadString(path);
                     if (dataString==null) {
@@ -141,7 +172,7 @@ namespace CrittercismSDK
         internal static bool Save(object data) {
             bool answer=false;
             try {
-                string path=data.GetType().Name+".js";
+                string path=Path.Combine(crittercismDirectoryName,data.GetType().Name+".js");
                 answer=Save(data,path);
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
@@ -157,7 +188,7 @@ namespace CrittercismSDK
         internal static bool Save(object data,string path) {
             bool answer=false;
             try {
-                Debug.WriteLine("Save: "+Path.Combine(StoragePath(),path));
+                Debug.WriteLine("Save: "+Path.Combine(PrivatePath,path));
                 string dataString=JsonConvert.SerializeObject(data);
                 Debug.WriteLine("JSON:");
                 Debug.WriteLine(dataString);
@@ -408,33 +439,5 @@ namespace CrittercismSDK
 #endif
         }
 
-        internal static string StoragePath() {
-            return PrivatePath;
-        }
-
-        private static string PrivatePath="";
-        static StorageHelper() {
-#if DEBUG
-#if NETFX_CORE
-            PrivatePath=GetStore().Path;
-#else
-            {
-                IsolatedStorageFile storage=GetStore();
-#if WINDOWS_PHONE
-                FieldInfo field=storage.GetType().GetField("m_AppFilesPath",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
-                PrivatePath=(string)field.GetValue(storage);
-#else
-                FieldInfo field=storage.GetType().GetField("m_RootDir",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
-                PrivatePath=(string)field.GetValue(storage);
-                // NOTE: This would work too.
-                //PropertyInfo property=storage.GetType().GetProperty("RootDirectory",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetProperty);
-                //PrivatePath=(string)property.GetValue(storage,null);
-#endif // WINDOWS_PHONE
-            }
-#endif // NETFX_CORE
-            Debug.WriteLine("STORAGE PATH: "+PrivatePath);
-            Debug.WriteLine("");
-#endif // DEBUG
-        }
     }
 }

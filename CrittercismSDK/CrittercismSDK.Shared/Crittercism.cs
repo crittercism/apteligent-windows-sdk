@@ -159,7 +159,7 @@ namespace CrittercismSDK {
         /// <returns>String with device_id, null otherwise</returns>
         private static string PrivateDeviceId() {
             string deviceId=null;
-            const string path="DeviceId.js";
+            string path=Path.Combine(StorageHelper.crittercismDirectoryName,"DeviceId.js");
             try {
                 if (StorageHelper.FileExists(path)) {
                     deviceId=(string)StorageHelper.Load(path,typeof(String));
@@ -367,7 +367,7 @@ namespace CrittercismSDK {
             }
         }
 
-        private static string optOutStatusPath="OptOutStatus.js";
+        private static string optOutStatusPath="Crittercism\\OptOutStatus.js";
         private static void SaveOptOutStatus(bool optOut) {
             StorageHelper.Save(Convert.ToBoolean(optOut),optOutStatusPath);
         }
