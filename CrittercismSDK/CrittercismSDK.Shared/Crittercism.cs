@@ -394,25 +394,6 @@ namespace CrittercismSDK {
             PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
         }
 
-        /// <summary>
-        /// Creates crash report.
-        /// </summary>
-        public static void LogCrash(Exception exception) {
-            // TODO: Are we going to document this?  What's the reason?
-            if (OptOut) {
-                return;
-            } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
-                return;
-            };
-            try {
-                CreateCrashReport(exception);
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
-                // explicit nop
-            }
-        }
-
         internal static void LogInternalException(Exception e) {
             Debug.WriteLine("UNEXPECTED ERROR!!! "+e.Message);
             Debug.WriteLine(e.StackTrace);
@@ -538,16 +519,21 @@ namespace CrittercismSDK {
 #if NETFX_CORE
 #pragma warning disable 1998
         private static async void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
-            Debug.WriteLine("Current_UnhandledException ENTER");
-            Exception e=args.Exception;
-            Debug.WriteLine("Current_UnhandledException e.Message == "+e.Message);
-            Debug.WriteLine("Current_UnhandledException e.StackTrace == "+e.StackTrace);
-            Crittercism.LogCrash(e);
-            //args.Handled=true;
-            Debug.WriteLine("Current_UnhandledException EXIT");
+            if (OptOut) {
+                return;
+            }
+            try {
+                CreateCrashReport(args.Exception);
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
+                // explicit nop
+            }
         }
 
         static void NetworkInformation_NetworkStatusChanged(object sender) {
+            if (OptOut) {
+                return;
+            }
             Debug.WriteLine("NetworkStatusChanged");
             ConnectionProfile profile=NetworkInformation.GetInternetConnectionProfile();
             bool isConnected=(profile!=null
@@ -565,6 +551,9 @@ namespace CrittercismSDK {
         /// <param name="sender">   Source of the event. </param>
         /// <param name="e">        Application unhandled exception event information. </param>
         static void Current_UnhandledException(object sender,ApplicationUnhandledExceptionEventArgs args) {
+            if (OptOut) {
+                return;
+            }
             try {
                 CreateCrashReport((Exception)args.ExceptionObject);
             } catch (Exception e) {
@@ -572,8 +561,11 @@ namespace CrittercismSDK {
                 // explicit nop
             }
         }
-        static void Current_Activated(object sender, ActivatedEventArgs e)
-        {
+
+        static void Current_Activated(object sender, ActivatedEventArgs e) {
+            if (OptOut) {
+                return;
+            }
             BackgroundWorker backgroundWorker = new BackgroundWorker();
             backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
             backgroundWorker.RunWorkerAsync();
@@ -586,10 +578,16 @@ namespace CrittercismSDK {
 
         static void Current_Deactivated(object sender, DeactivatedEventArgs e)
         {
+            if (OptOut) {
+                return;
+            }
             PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
         }
 
         static void DeviceNetworkInformation_NetworkAvailabilityChanged(object sender,NetworkNotificationEventArgs e) {
+            if (OptOut) {
+                return;
+            }
             // This flag is for unit test
             if (_autoRunQueueReader) {
                 switch (e.NotificationType) {
@@ -605,6 +603,9 @@ namespace CrittercismSDK {
         }
 #else
         static void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
+            if (OptOut) {
+                return;
+            }
             try {
                 CreateCrashReport((Exception)args.ExceptionObject);
             } catch (Exception e) {
