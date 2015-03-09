@@ -17,7 +17,7 @@ namespace CrittercismSDK.DataContracts {
         /// Identifies this library to Crittercism
         /// </summary>
         [DataMember]
-        public readonly string client = "wp8v3.0.0"; // FIXME JBLEY check before shipping, possibly determine dynamically
+        public readonly string client = "wp8v2.2.0"; // FIXME JBLEY check before shipping, possibly determine dynamically
 
         /// <summary>
         /// A GUID identifying this device

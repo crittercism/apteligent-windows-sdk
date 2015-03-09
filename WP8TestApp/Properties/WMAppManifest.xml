@@ -2,7 +2,7 @@
 
 <Deployment xmlns="http://schemas.microsoft.com/windowsphone/2012/deployment" AppPlatformVersion="8.0">
   <DefaultLanguage xmlns="" code="en-US"/>
-  <App xmlns="" ProductID="{28a67cfa-daaf-4040-ab29-2c55b91989bb}" Title="Crittercism Demo" RuntimeType="Silverlight" Version="1.0.0.0" Genre="apps.normal"  Author="Crittercism, Inc." Description="Sample description" Publisher="WP8TestApp" PublisherID="{ecbecd5b-6f1b-4641-b9de-cbf12cc391b6}">
+  <App xmlns="" ProductID="{28a67cfa-daaf-4040-ab29-2c55b91989bb}" Title="Crittercism Demo" RuntimeType="Silverlight" Version="2.2.0" Genre="apps.normal"  Author="Crittercism, Inc." Description="Sample description" Publisher="WP8TestApp" PublisherID="{ecbecd5b-6f1b-4641-b9de-cbf12cc391b6}">
     <IconPath IsRelative="true" IsResource="false">Assets\ApplicationIcon.png</IconPath>
     <Capabilities>
       <Capability Name="ID_CAP_NETWORKING"/>

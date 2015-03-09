@@ -105,13 +105,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\..\CrittercismSDK\CrittercismSDK.Windows\CrittercismSDK.Windows.csproj">
-      <Project>{a26c33f6-7b77-4616-8171-65986205053d}</Project>
-      <Name>CrittercismSDK.Windows</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="HubPage.xaml.cs">
       <DependentUpon>HubPage.xaml</DependentUpon>
     </Compile>
@@ -159,6 +152,12 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.8\lib\netcore45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\CrittercismSDK\CrittercismSDK.Windows\CrittercismSDK.Windows.csproj">
+      <Project>{a26c33f6-7b77-4616-8171-65986205053d}</Project>
+      <Name>CrittercismSDK.Windows</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

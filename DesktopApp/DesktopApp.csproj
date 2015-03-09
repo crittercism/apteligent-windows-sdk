@@ -103,12 +103,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CrittercismSDK\CrittercismSDK.WindowsDesktop\CrittercismSDK.WindowsDesktop.csproj">
-      <Project>{5714c832-ad96-4f67-bb27-f6f7dfbd170c}</Project>
-      <Name>CrittercismSDK.WindowsDesktop</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="stacktrace.png" />
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +110,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Crittercism.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CrittercismSDK\CrittercismSDK.WindowsDesktop\CrittercismSDK.WindowsDesktop.csproj">
+      <Project>{5714c832-ad96-4f67-bb27-f6f7dfbd170c}</Project>
+      <Name>CrittercismSDK.WindowsDesktop</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

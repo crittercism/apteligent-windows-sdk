@@ -62,7 +62,6 @@ namespace UnitTestApp.Tests.DataContracts {
             Assert.AreEqual(crash.crash.reason, "Attempted to divide by zero.");
             Assert.AreEqual(crash.crash.stack_trace.Count, 1);
             Assert.AreEqual(crash.crash.stack_trace[0], "   at UnitTestApp.Tests.DataContracts.CrashTests.GetCrashMessage()");
-            Assert.AreEqual(crash.platform.client, "wp8v2.0");
             Assert.IsNotNull(crash.platform.device_id);
             Assert.AreEqual(crash.platform.device_model, "XDeviceEmulator");
             Assert.AreEqual(crash.platform.os_name, "wp");
