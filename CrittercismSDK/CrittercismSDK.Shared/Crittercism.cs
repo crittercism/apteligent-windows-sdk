@@ -435,7 +435,7 @@ namespace CrittercismSDK {
         /// <param name="currentException"> The current exception. </param>
         internal static void CreateCrashReport(Exception currentException) {
             Dictionary<string,string> metadata=CurrentMetadata();
-            Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Crash();
+            Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Copy();
             ExceptionObject exception=new ExceptionObject(currentException.GetType().FullName,currentException.Message,currentException.StackTrace);
             Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
             // It seems reasonable to assume crashes occur so seldomly, but
@@ -510,7 +510,7 @@ namespace CrittercismSDK {
             // TODO: Why do we pass appID arg to this method?
             AppID=appID;
             OSVersion=PrivateOSVersion();
-            PrivateBreadcrumbs = Breadcrumbs.LoadBreadcrumbs();
+            PrivateBreadcrumbs=Breadcrumbs.SessionStart();
             MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
             LoadQueue();
             CreateAppLoadReport();

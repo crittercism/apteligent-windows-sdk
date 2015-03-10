@@ -20,7 +20,7 @@ namespace CrittercismSDK.DataContracts
         /// </summary>
         /// <value> The breadcrumbs of the crashed session. </value>
         [DataMember]
-        public List<BreadcrumbMessage> crashed_session { get; private set; }
+        public List<BreadcrumbMessage> previous_session { get; private set; }
 
         /// <summary>
         /// Gets or sets the breadcrumbs of the current session.
@@ -38,7 +38,7 @@ namespace CrittercismSDK.DataContracts
         /// Default constructor.
         /// </summary>
         private Breadcrumbs() {
-            crashed_session=new List<BreadcrumbMessage>();
+            previous_session=new List<BreadcrumbMessage>();
             current_session=new List<BreadcrumbMessage>();
             Saved=false;
         }
@@ -47,29 +47,7 @@ namespace CrittercismSDK.DataContracts
             Breadcrumbs answer=new Breadcrumbs();
             lock (this) {
                 answer.current_session=new List<BreadcrumbMessage>(current_session);
-                answer.crashed_session=new List<BreadcrumbMessage>(crashed_session);
-            }
-            return answer;
-        }
-
-        private void Clear() {
-            crashed_session=current_session;
-            current_session=new List<BreadcrumbMessage>();
-            current_session.Add(new BreadcrumbMessage("session_start"));
-            Saved=false;
-        }
-
-        internal static Breadcrumbs SessionStart() {
-            Breadcrumbs answer=new Breadcrumbs();
-            answer.current_session.Add(new BreadcrumbMessage("session_start"));
-            return answer;
-        }
-
-        internal Breadcrumbs Crash() {
-            Breadcrumbs answer;
-            lock (this) {
-                answer=Copy();
-                Clear();
+                answer.previous_session=new List<BreadcrumbMessage>(previous_session);
             }
             return answer;
         }
@@ -110,21 +88,24 @@ namespace CrittercismSDK.DataContracts
         }
 
         /// <summary>
-        /// Gets the breadcrumbs.
+        /// Gets new session breadcrumbs.
         /// </summary>
         /// <returns>   The breadcrumbs. </returns>
-        internal static Breadcrumbs LoadBreadcrumbs() {
+        internal static Breadcrumbs SessionStart() {
             Breadcrumbs answer=null;
             try {
+                // Breadcrumbs answer has previous_session == the previous current_session
+                // and new current_session == empty but for new session_start breadcrumb .
                 string path=Path.Combine(StorageHelper.crittercismDirectoryName,"Breadcrumbs.js");
                 if (StorageHelper.FileExists(path)) {
                     answer=StorageHelper.Load(path,typeof(Breadcrumbs)) as Breadcrumbs;
                 }
                 if (answer==null) {
-                    answer=SessionStart();
-                } else {
-                    answer.Saved=true;
+                    answer=new Breadcrumbs();
                 }
+                answer.previous_session=answer.current_session;
+                answer.current_session=new List<BreadcrumbMessage>();
+                answer.current_session.Add(new BreadcrumbMessage("session_start"));
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
             };
