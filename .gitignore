@@ -6,3 +6,8 @@ build/*.nupkg
 obj
 Bin
 packages/*
+.DS_Store
+._*
+*~
+AppPackages
+BundleArtifacts

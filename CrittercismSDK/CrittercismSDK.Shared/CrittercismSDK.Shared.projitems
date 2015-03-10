@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>c69e11fe-1fde-4b40-8a28-98d2d29ac605</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CrittercismSDK</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AppLocator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Crittercism.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\AppLoad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\BreadcrumbMessage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Breadcrumbs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Crash.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\ExceptionObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\HandledException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\MessageReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Platform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\SynchronizedQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\UnifiedAppLoad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\UnifiedMessageReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\UserMetadata.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QueueReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)StorageHelper.cs" />
+  </ItemGroup>
+</Project>
