@@ -82,8 +82,6 @@ namespace CrittercismSDK {
 
         internal static AppLocator appLocator { get; private set; }
 
-        internal static volatile bool OptOut;
-
         /// <summary>
         /// Gets or sets the operating system platform.
         /// </summary>
@@ -130,14 +128,69 @@ namespace CrittercismSDK {
 
         #endregion
 
-        #region Methods
+        #region OptOutStatus
 
-        static Crittercism() {
-            // Developer's app only needs to OptOut once in it's life time.
-            // To ever undo this, SetOptOutStatus(false) before calling
-            // Init again.
-            OptOut=LoadOptOutStatus();
+        ////////////////////////////////////////////////////////////////
+        // Developer's app only needs to OptOut once in it's life time.
+        // To ever undo this, SetOptOutStatus(false) before calling
+        // Init again.
+        ////////////////////////////////////////////////////////////////
+
+        // OptOut is internal for test cleanup, OW only 2 methods in
+        // class Crittercism.cs should be touching member variable OptOut directly.
+        internal static volatile bool OptOut=false;
+
+        // Is OptOut known to be equal to what's persisted on disk?
+        internal static volatile bool OptOutLoaded=false;
+
+        private static string OptOutStatusPath="Crittercism\\OptOutStatus.js";
+        private static void SaveOptOutStatus(bool optOutStatus) {
+            // Knows how to persist value of OptOut
+            StorageHelper.Save(Convert.ToBoolean(optOutStatus),OptOutStatusPath);
         }
+
+        private static bool LoadOptOutStatus() {
+            // Knows how to unpersist value of OptOut
+            bool answer=false;
+            if (StorageHelper.FileExists(OptOutStatusPath)) {
+                answer=(bool)StorageHelper.Load(OptOutStatusPath,typeof(Boolean));
+            };
+            return answer;
+        }
+
+        public static bool GetOptOutStatus() {
+            // Returns in memory cached value OptOut, getting it to be correct
+            // value from persisted storage first, if necessary.
+            if (!OptOutLoaded) {
+                // Logic here to make sure OptOut is unpersisted correctly from
+                // any possible previous session.  App is born with default OptOut
+                // value equal to false (Crittercism enabled).
+                lock (lockObject) {
+                    // Check flag again inside lock in case our thread loses race.
+                    if (!OptOutLoaded) {
+                        OptOut=LoadOptOutStatus();
+                        OptOutLoaded=true;
+                    };
+                };
+            };
+            return OptOut;
+        }
+
+        public static void SetOptOutStatus(bool optOut) {
+            // Set in memory cached value OptOut, persisting if necessary.
+            lock (lockObject) {
+                // OptOut is volatile, but this method accesses it twice,
+                // so we need the lock
+                if (optOut!=GetOptOutStatus()) {
+                    OptOut=optOut;
+                    SaveOptOutStatus(optOut);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Methods
 
         private static string PrivateAppVersion() {
 #if NETFX_CORE
@@ -159,7 +212,7 @@ namespace CrittercismSDK {
         /// <returns>String with device_id, null otherwise</returns>
         private static string PrivateDeviceId() {
             string deviceId=null;
-            string path=Path.Combine(StorageHelper.crittercismDirectoryName,"DeviceId.js");
+            string path=Path.Combine(StorageHelper.CrittercismPath(),"DeviceId.js");
             try {
                 if (StorageHelper.FileExists(path)) {
                     deviceId=(string)StorageHelper.Load(path,typeof(String));
@@ -217,15 +270,14 @@ namespace CrittercismSDK {
         /// <param name="appID">  Identifier for the application. </param>
         public static void Init(string appID) {
             try {
-                if (OptOut) {
-                    // SaveOptOutStatus must have been called in this session
-                    // and OptOut = true is already persisted.
+                if (GetOptOutStatus()) {
                     return;
                 } else if (initialized) {
                     Debug.WriteLine("ERROR: Crittercism is already initialized");
                     return;
                 };
                 lock (lockObject) {
+                    MessageReport.Init();
                     AppVersion=PrivateAppVersion();
                     DeviceId=PrivateDeviceId();
                     DeviceModel=PrivateDeviceModel();
@@ -278,7 +330,7 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="username"> The username. </param>
         public static void SetUsername(string username) {
-            // SetValue will check OptOut and initialized .
+            // SetValue will check GetOptOutStatus() and initialized .
             SetValue("username", username);
         }
 
@@ -286,7 +338,7 @@ namespace CrittercismSDK {
         /// Gets "username" metadata value.
         /// </summary>
         public static string Username() {
-            // ValueFor will check OptOut and initialized .
+            // ValueFor will check GetOptOutStatus() and initialized .
             return ValueFor("username");
         }
 
@@ -296,7 +348,7 @@ namespace CrittercismSDK {
         /// <param name="key">      The key. </param>
         /// <param name="value">    The value. </param>
         public static void SetValue(string key,string value) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
@@ -322,7 +374,7 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="key">      The key. </param>
         public static string ValueFor(string key) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return null;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
@@ -337,47 +389,19 @@ namespace CrittercismSDK {
             return answer;
         }
 
-        public static bool GetOptOutStatus() {
-            return OptOut;
-        }
-
-        public static void SetOptOutStatus(bool optOut) {
-            // OptOut is volatile, but this method accesses it twice,
-            // so we need the lock
-            lock (lockObject) {
-                if (optOut!=OptOut) {
-                    OptOut=optOut;
-                    SaveOptOutStatus(optOut);
-                }
-            }
-        }
-
         internal static void Save() {
             // Save current Crittercism state
             try {
                 lock (lockObject) {
                     Debug.WriteLine("Save: SAVE STATE");
+                    PrivateBreadcrumbs.Save();
                     foreach (MessageReport message in MessageQueue) {
                         message.Save();
                     }
-                    PrivateBreadcrumbs.Save();
                 }
             } catch (Exception e) {
                 LogInternalException(e);
             }
-        }
-
-        private static string optOutStatusPath="Crittercism\\OptOutStatus.js";
-        private static void SaveOptOutStatus(bool optOut) {
-            StorageHelper.Save(Convert.ToBoolean(optOut),optOutStatusPath);
-        }
-
-        internal static bool LoadOptOutStatus() {
-            bool answer=false;
-            if (StorageHelper.FileExists(optOutStatusPath)) {
-                answer=(bool)StorageHelper.Load(optOutStatusPath,typeof(Boolean));
-            };
-            return answer;
         }
 
         /// <summary>
@@ -385,7 +409,7 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="breadcrumb">   The breadcrumb. </param>
         public static void LeaveBreadcrumb(string breadcrumb) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
@@ -404,7 +428,7 @@ namespace CrittercismSDK {
         /// Creates handled exception report.
         /// </summary>
         public static void LogHandledException(Exception e) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
@@ -438,12 +462,8 @@ namespace CrittercismSDK {
             Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Copy();
             ExceptionObject exception=new ExceptionObject(currentException.GetType().FullName,currentException.Message,currentException.StackTrace);
             Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
-            // It seems reasonable to assume crashes occur so seldomly, but
-            // are so important, that we'll make very sure these get Save'd
-            // immediately, and save state .
+            // Add crash to message queue and save state .
             AddMessageToQueue(crash);
-            crash.Save();
-            PrivateBreadcrumbs.Save();
             Save();
             // App is probably going to crash now, because we choose not
             // to handle the unhandled exception ourselves and typically
@@ -455,7 +475,7 @@ namespace CrittercismSDK {
         /// Creates the application load report.
         /// </summary>
         private static void CreateAppLoadReport() {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             }
             AppLoad appLoad=new AppLoad();
@@ -519,7 +539,7 @@ namespace CrittercismSDK {
 #if NETFX_CORE
 #pragma warning disable 1998
         private static async void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             }
             try {
@@ -531,7 +551,7 @@ namespace CrittercismSDK {
         }
 
         static void NetworkInformation_NetworkStatusChanged(object sender) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             }
             Debug.WriteLine("NetworkStatusChanged");
@@ -551,7 +571,7 @@ namespace CrittercismSDK {
         /// <param name="sender">   Source of the event. </param>
         /// <param name="e">        Application unhandled exception event information. </param>
         static void Current_UnhandledException(object sender,ApplicationUnhandledExceptionEventArgs args) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             }
             try {
@@ -563,7 +583,7 @@ namespace CrittercismSDK {
         }
 
         static void Current_Activated(object sender, ActivatedEventArgs e) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             }
             BackgroundWorker backgroundWorker = new BackgroundWorker();
@@ -578,14 +598,14 @@ namespace CrittercismSDK {
 
         static void Current_Deactivated(object sender, DeactivatedEventArgs e)
         {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             }
             PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
         }
 
         static void DeviceNetworkInformation_NetworkAvailabilityChanged(object sender,NetworkNotificationEventArgs e) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             }
             // This flag is for unit test
@@ -603,7 +623,7 @@ namespace CrittercismSDK {
         }
 #else
         static void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
-            if (OptOut) {
+            if (GetOptOutStatus()) {
                 return;
             }
             try {

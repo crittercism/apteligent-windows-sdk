@@ -50,7 +50,6 @@ namespace UnitTestApp.Tests {
             
             Assert.IsTrue(Crittercism.MessageQueue == null || Crittercism.MessageQueue.Count == 0);
             Crittercism.SetOptOutStatus(true);
-            Assert.IsTrue(Crittercism.LoadOptOutStatus());
             Assert.IsTrue(Crittercism.GetOptOutStatus());
             int i = 0;
             int j = 5;
@@ -62,7 +61,6 @@ namespace UnitTestApp.Tests {
             Assert.IsTrue(Crittercism.MessageQueue.Count == 0);
             // Now turn it back on
             Crittercism.SetOptOutStatus(false);
-            Assert.IsFalse(Crittercism.LoadOptOutStatus());
             Assert.IsFalse(Crittercism.GetOptOutStatus());
             try {
                 int k = j / i;

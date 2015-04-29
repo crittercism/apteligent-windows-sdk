@@ -19,6 +19,8 @@ namespace CrittercismSDK.DataContracts {
     /// Message report.
     /// </summary>
     public abstract class MessageReport {
+
+        #region Properties
         /// <summary>
         /// Gets or sets the file name.  E.g. Crash_guid
         /// </summary>
@@ -32,20 +34,28 @@ namespace CrittercismSDK.DataContracts {
         internal DateTimeOffset CreationTime { get; set; }
 
         private bool Saved { get; set; }
+        #endregion
 
-        internal static string messagesDirectoryName="Crittercism\\Messages";
+        #region Init
+
+        private static string MessagesPath;
+
+        internal static void Init() {
+            MessagesPath=Path.Combine(StorageHelper.CrittercismPath(),"Messages");
+            if (!StorageHelper.FolderExists(MessagesPath)) {
+                StorageHelper.CreateFolder(MessagesPath);
+            }
+        }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public MessageReport() {
             Saved=false;
-        }
-
-        static MessageReport() {
-            if (!StorageHelper.FolderExists(messagesDirectoryName)) {
-                StorageHelper.CreateFolder(messagesDirectoryName);
-            }
         }
 
         internal static string DateTimeString(DateTime dt) {
@@ -91,7 +101,7 @@ namespace CrittercismSDK.DataContracts {
                 lock (this) {
                     if (!Saved) {
                         Name=this.GetType().Name+"_"+Guid.NewGuid().ToString()+".js";
-                        string path=Path.Combine(messagesDirectoryName,Name);
+                        string path=Path.Combine(MessagesPath,Name);
                         StorageHelper.Save(this,path);
                         Saved=true;
                         answer=true;
@@ -112,7 +122,7 @@ namespace CrittercismSDK.DataContracts {
             try {
                 lock (this) {
                     if (Saved) {
-                        string path=Path.Combine(messagesDirectoryName,this.Name);
+                        string path=Path.Combine(MessagesPath,this.Name);
                         if (StorageHelper.FileExists(path)) {
                             StorageHelper.DeleteFile(path);
                         }
@@ -127,8 +137,8 @@ namespace CrittercismSDK.DataContracts {
 
         internal static List<MessageReport> LoadMessages() {
             List<MessageReport> messages=new List<MessageReport>();
-            if (StorageHelper.FolderExists(messagesDirectoryName)) {
-                string[] names=StorageHelper.GetFileNames(messagesDirectoryName);
+            if (StorageHelper.FolderExists(MessagesPath)) {
+                string[] names=StorageHelper.GetFileNames(MessagesPath);
                 foreach (string name in names) {
                     MessageReport message=LoadMessage(name);
                     if (message!=null) {
@@ -141,11 +151,11 @@ namespace CrittercismSDK.DataContracts {
         }
 
         internal static MessageReport LoadMessage(string name) {
-            // name is wrt messagesDirectoryName "Crittercism\Messages", e.g "Crash_<guid>"
+            // name is wrt MessagesPath "Crittercism\Messages", e.g "Crash_<guid>"
             // path is Crittercism\Messages\name
             MessageReport message=null;
             try {
-                string path=Path.Combine(messagesDirectoryName,name);
+                string path=Path.Combine(MessagesPath,name);
                 string[] nameSplit=name.Split('_');
                 switch (nameSplit[0]) {
                     case "AppLoad":
@@ -177,5 +187,7 @@ namespace CrittercismSDK.DataContracts {
             }
             return message;
         }
+
+        #endregion
     }
 }
