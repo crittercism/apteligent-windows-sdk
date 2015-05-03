@@ -1,43 +1,38 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using CrittercismSDK;
 
-namespace WPFApp
-{
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
-    {
-        public MainWindow()
-        {
+namespace WindowsFormsApp {
+    public partial class Form1 : Form {
+        public Form1() {
             InitializeComponent();
         }
 
-        private void setUsernameClick(object sender,RoutedEventArgs e) {
+        protected override void OnLoad(EventArgs e) {
+            Crittercism.Init("537a4e738039805d82000002");
+            Crittercism.LeaveBreadcrumb("OnLoad");
+        }
+
+        private void setUsername_Click(object sender,EventArgs e) {
             Random random=new Random();
             string[] names= { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
             string name=names[random.Next(0,names.Length)];
             Crittercism.SetUsername("Critter "+name);
         }
 
-        private void leaveBreadcrumbClick(object sender,RoutedEventArgs e) {
+        private void leaveBreadcrumb_Click(object sender,EventArgs e) {
             Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
         }
 
-        private void handledExceptionClick(object sender,RoutedEventArgs e) {
+        private void handledException_Click(object sender,EventArgs e) {
             try {
                 DeepError1(10);
             } catch (Exception ex) {
@@ -45,13 +40,7 @@ namespace WPFApp
             }
         }
 
-        private void handledUnthrownExceptionClick(object sender,RoutedEventArgs e) {
-            Exception exception=new Exception("description");
-            exception.Data.Add("MethodName","methodName");
-            Crittercism.LogHandledException(exception);
-        }
-
-        private void testCrashClick(object sender,RoutedEventArgs e) {
+        private void testCrash_Click(object sender,EventArgs e) {
             DeepError1(10);
         }
 
@@ -76,24 +65,25 @@ namespace WPFApp
                 DeepError1(n-1);
             }
         }
-        
-        private void testMultithreadClick(object sender,RoutedEventArgs e) {
+
+        private void testMultithreadClick(object sender,EventArgs e) {
             Thread thread=new Thread(new ThreadStart(Worker.Work));
             thread.Start();
         }
 
-        private void critterClick(object sender,RoutedEventArgs e) {
+        private void pictureBox1_Click(object sender,EventArgs e) {
+            
             string username=Crittercism.Username();
             if (username==null) {
                 username="User";
             }
             string response="";
-            MessageBoxResult result=MessageBox.Show("Do you love Crittercism?","WPFApp",MessageBoxButton.YesNo);
+            DialogResult result=MessageBox.Show("Do you love Crittercism?","WindowsFormsApp",MessageBoxButtons.YesNo);
             switch (result) {
-                case MessageBoxResult.Yes:
+                case DialogResult.Yes:
                     response="loves Crittercism.";
                     break;
-                case MessageBoxResult.No:
+                case DialogResult.No:
                     response="doesn't love Crittercism.";
                     break;
             }

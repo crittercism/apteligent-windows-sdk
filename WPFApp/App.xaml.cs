@@ -20,7 +20,7 @@ namespace WPFApp
         {
             //// Call the Init of the unhandled managed class library "Crittercism"
             Crittercism.Init("537a4e738039805d82000002");
-            Crittercism.LeaveBreadcrumb("Start the desktop application");
+            Crittercism.LeaveBreadcrumb("Application_Startup");
         }
     }
 }

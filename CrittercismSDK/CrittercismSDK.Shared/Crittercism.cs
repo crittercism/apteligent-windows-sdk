@@ -24,7 +24,8 @@ namespace CrittercismSDK {
     using Microsoft.Phone.Net.NetworkInformation;
 #else
     using Microsoft.Win32;
-#endif
+    using System.Reflection;
+#endif // NETFX_CORE
 
     /// <summary>
     /// Crittercism.
@@ -198,9 +199,11 @@ namespace CrittercismSDK {
             string answer=""+version.Major+"."+version.Minor+"."+version.Build+"."+version.Revision;
             Debug.WriteLine("PrivateAppVersion == "+answer);
             return answer;
-#else
-            // Note that GetExecutingAssembly wouldn't work because we (Crittercism) *are* the executing assembly
+#elif WINDOWS_PHONE
             return Application.Current.GetType().Assembly.GetName().Version.ToString();
+#else
+            // Should probably work in most cases.
+            return Assembly.GetCallingAssembly().GetName().Version.ToString();
 #endif
         }
 
@@ -313,6 +316,8 @@ namespace CrittercismSDK {
 #else
                         AppDomain currentDomain=AppDomain.CurrentDomain;
                         currentDomain.UnhandledException+=new UnhandledExceptionEventHandler(Current_UnhandledException);
+                        // Add event handler for handling System.Windows.Forms UI thread exceptions .
+                        System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsForm_UIThreadException);
 #endif
                     }
                     initialized=true;
@@ -324,6 +329,26 @@ namespace CrittercismSDK {
                 Debug.WriteLine("Crittercism did not initialize.");
             }
         }
+
+#if NETFX_CORE
+#elif WINDOWS_PHONE
+#else
+        private static void WindowsForm_UIThreadException(object sender,ThreadExceptionEventArgs t) {
+            ////////////////////////////////////////////////////////////////
+            // Crittercism unhandled exception handler for Windows Forms apps.
+            // Crittercism users must add
+            //     Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            // to their Program.cs Main() .
+            // MSDN: "Application.SetUnhandledExceptionMode Method (UnhandledExceptionMode)
+            // Call SetUnhandledExceptionMode before you instantiate the main form
+            // of your application using the Run method.
+            // To catch exceptions that occur in threads not created and owned by
+            // Windows Forms, use the UnhandledException event handler."
+            // https://msdn.microsoft.com/en-us/library/ms157905(v=vs.110).aspx
+            ////////////////////////////////////////////////////////////////
+            LogUnhandledException(t.Exception);
+        }
+#endif
 
         /// <summary>
         /// Sets "username" metadata value.
@@ -457,10 +482,10 @@ namespace CrittercismSDK {
         /// Creates a crash report.
         /// </summary>
         /// <param name="currentException"> The current exception. </param>
-        internal static void CreateCrashReport(Exception currentException) {
+        internal static void LogUnhandledException(Exception e) {
             Dictionary<string,string> metadata=CurrentMetadata();
             Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Copy();
-            ExceptionObject exception=new ExceptionObject(currentException.GetType().FullName,currentException.Message,currentException.StackTrace);
+            ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,e.StackTrace);
             Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
             // Add crash to message queue and save state .
             AddMessageToQueue(crash);
@@ -543,7 +568,7 @@ namespace CrittercismSDK {
                 return;
             }
             try {
-                CreateCrashReport(args.Exception);
+                LogUnhandledException(args.Exception);
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
                 // explicit nop
@@ -575,7 +600,7 @@ namespace CrittercismSDK {
                 return;
             }
             try {
-                CreateCrashReport((Exception)args.ExceptionObject);
+                LogUnhandledException((Exception)args.ExceptionObject);
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
                 // explicit nop
@@ -627,7 +652,7 @@ namespace CrittercismSDK {
                 return;
             }
             try {
-                CreateCrashReport((Exception)args.ExceptionObject);
+                LogUnhandledException((Exception)args.ExceptionObject);
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
                 // explicit nop

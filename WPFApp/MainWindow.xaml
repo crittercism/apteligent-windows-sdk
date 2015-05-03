@@ -53,7 +53,7 @@
                 Click="critterClick">
             <Button.Template>
                 <ControlTemplate>
-                    <Image Source="Crittercism.png"/>
+                    <Image Source="CrittercismCropped.png"/>
                 </ControlTemplate>
             </Button.Template>
         </Button>
