@@ -1,5 +1,4 @@
 using CrittercismSDK;
-using CrittercismSDK.DataContracts;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json;
 using System;

@@ -16,7 +16,7 @@ using Windows.Graphics.Display;
 using Windows.Phone.Devices.Power;
 #endif
 
-namespace CrittercismSDK.DataContracts {
+namespace CrittercismSDK {
     internal class UnifiedMessageReport : MessageReport {
         /// <summary>
         /// Gets Windows Phone-specific App Load Data

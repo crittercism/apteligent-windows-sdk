@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CrittercismSDK.DataContracts {
+namespace CrittercismSDK {
     public class SynchronizedQueue<T> {
         private Queue<T> _q;
         public bool IsSynchronized {

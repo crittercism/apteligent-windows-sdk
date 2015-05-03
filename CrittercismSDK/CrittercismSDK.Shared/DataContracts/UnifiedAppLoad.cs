@@ -4,7 +4,7 @@
 // This library has a lot of room for improvement. A few areas I saw working on this in May 2014:
 //   (1) More prevalent use of immutable data objects is good defensive programming against errors
 
-namespace CrittercismSDK.DataContracts {
+namespace CrittercismSDK {
     using System;
     using System.Collections.Generic;
     using System.Globalization;

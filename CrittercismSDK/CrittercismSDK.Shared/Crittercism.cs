@@ -1,7 +1,7 @@
 // file:	CrittercismSDK\Crittercism.cs
 // summary:	Implements the crittercism class
 namespace CrittercismSDK {
-    using CrittercismSDK.DataContracts;
+    using CrittercismSDK;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;

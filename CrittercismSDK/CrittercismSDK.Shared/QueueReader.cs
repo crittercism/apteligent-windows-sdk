@@ -1,4 +1,4 @@
-using CrittercismSDK.DataContracts;
+using CrittercismSDK;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

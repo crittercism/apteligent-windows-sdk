@@ -1,4 +1,4 @@
-namespace CrittercismSDK.DataContracts
+namespace CrittercismSDK
 {
     using System;
     using System.Collections.Generic;

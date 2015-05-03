@@ -1,6 +1,6 @@
 // file:	DataContracts\ExceptionObject.cs
 // summary:	Implements the exception object class
-namespace CrittercismSDK.DataContracts
+namespace CrittercismSDK
 {
     using System;
     using System.Collections.Generic;

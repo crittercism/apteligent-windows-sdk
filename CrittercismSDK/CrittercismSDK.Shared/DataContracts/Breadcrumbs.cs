@@ -1,6 +1,6 @@
 // file:	DataContracts\Breadcrumbs.cs
 // summary:	Implements the breadcrumbs class
-namespace CrittercismSDK.DataContracts
+namespace CrittercismSDK
 {
     using System;
     using System.Collections.Generic;

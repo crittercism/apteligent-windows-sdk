@@ -1,6 +1,6 @@
 // file:	CrittercismSDK\MessageReport.cs
 // summary:	Implements the message report class
-namespace CrittercismSDK.DataContracts {
+namespace CrittercismSDK {
     using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;

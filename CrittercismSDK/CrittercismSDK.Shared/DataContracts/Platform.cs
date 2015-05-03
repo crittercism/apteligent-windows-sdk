@@ -1,7 +1,7 @@
 // Platform.cs
 // David R. Albrecht for Crittercism, Inc.
 
-namespace CrittercismSDK.DataContracts {
+namespace CrittercismSDK {
     using System;
     using System.Runtime.Serialization;
 #if WINDOWS_PHONE

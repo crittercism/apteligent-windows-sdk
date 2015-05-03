@@ -1,6 +1,6 @@
 // file:	DataContracts\Crash.cs
 // summary:	Implements the crash class (Unhandled Exception)
-namespace CrittercismSDK.DataContracts
+namespace CrittercismSDK
 {
     using System;
     using System.Collections.Generic;
