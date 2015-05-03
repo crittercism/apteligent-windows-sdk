@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CrittercismSDK;
 
-namespace DesktopApp
+namespace WPFApp
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -88,7 +88,7 @@ namespace DesktopApp
                 username="User";
             }
             string response="";
-            MessageBoxResult result=MessageBox.Show("Do you love Crittercism?","DesktopApp",MessageBoxButton.YesNo);
+            MessageBoxResult result=MessageBox.Show("Do you love Crittercism?","WPFApp",MessageBoxButton.YesNo);
             switch (result) {
                 case MessageBoxResult.Yes:
                     response=" loves Crittercism.";

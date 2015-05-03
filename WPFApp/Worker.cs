@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CrittercismSDK;
 
-namespace DesktopApp
+namespace WPFApp
 {
     class Worker
     {

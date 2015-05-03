@@ -7,9 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using CrittercismSDK;
-using DesktopApp;
+using WPFApp;
 
-namespace DesktopApp
+namespace WPFApp
 {
     /// <summary>
     /// Interaction logic for App.xaml
