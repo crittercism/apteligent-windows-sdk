@@ -59,11 +59,7 @@ namespace CrittercismSDK
             try {
                 int retry=0;
                 while (Crittercism.MessageQueue!=null&&Crittercism.MessageQueue.Count>0&&NetworkInterface.GetIsNetworkAvailable()&&retry<5) {
-                    MessageReport message=Crittercism.MessageQueue.Peek();
-                    if (SendMessage(message)) {
-                        Debug.WriteLine("ReadStep: SendMessage "+message.Name);
-                        Crittercism.MessageQueue.Dequeue();
-                        message.Delete();
+                    if (SendMessage()) {
                         retry=0;
                     } else {
                         // TODO: Use System.Timers.Timer to generate an event
@@ -85,12 +81,14 @@ namespace CrittercismSDK
         /// <summary>
         /// Send message to the endpoint.
         /// </summary>
-        /// <param name="message">  The message. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
-        private bool SendMessage(MessageReport message) {
+        private bool SendMessage() {
             //Debug.WriteLine("SendMessage: ENTER");
             bool sendCompleted=false;
             try {
+                MessageReport message=Crittercism.MessageQueue.Peek();
+                Crittercism.MessageQueue.Dequeue();
+                message.Delete();
                 if (!Crittercism._enableCommunicationLayer) {
                     // check if the communication layer is enable and if not return true.. this is used for unit testing.
                     sendCompleted=true;
@@ -138,6 +136,9 @@ namespace CrittercismSDK
                             throw;
                         }
                     }
+                }
+                if (!sendCompleted) {
+                    Crittercism.MessageQueue.Enqueue(message);
                 }
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
