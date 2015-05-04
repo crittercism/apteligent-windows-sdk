@@ -1,32 +1,30 @@
-// file:	CrittercismSDK\Crittercism.cs
-// summary:	Implements the crittercism class
-namespace CrittercismSDK {
-    using CrittercismSDK;
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Text.RegularExpressions;
-    using System.Threading;
-    using System.Windows;
+using CrittercismSDK;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Windows;
 #if NETFX_CORE
-    using System.Threading.Tasks;
-    using Windows.ApplicationModel;
-    using Windows.UI.Xaml;
-    using Windows.UI.Xaml.Controls;
-    using Windows.Networking.Connectivity;
+using System.Threading.Tasks;
+using Windows.ApplicationModel;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.Networking.Connectivity;
 #elif WINDOWS_PHONE
-    using Microsoft.Phone.Info;
-    using Microsoft.Phone.Shell;
-    using Microsoft.Phone.Net.NetworkInformation;
+using Microsoft.Phone.Info;
+using Microsoft.Phone.Shell;
+using Microsoft.Phone.Net.NetworkInformation;
 #else
-    using Microsoft.Win32;
-    using System.Reflection;
+using Microsoft.Win32;
+using System.Reflection;
 #endif // NETFX_CORE
 
+namespace CrittercismSDK {
     /// <summary>
     /// Crittercism.
     /// </summary>

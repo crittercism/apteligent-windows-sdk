@@ -1,26 +1,24 @@
-﻿// file:	CrittercismSDK\StorageHelper.cs
-// summary:	Implements the storage helper class
-namespace CrittercismSDK
-{
-    using Newtonsoft.Json;
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Runtime.Serialization.Json;
+﻿using Newtonsoft.Json;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.Serialization.Json;
 #if NETFX_CORE
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
-    using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Windows.Foundation;
-    using Windows.Storage;
-    using Windows.Storage.Search;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.Foundation;
+using Windows.Storage;
+using Windows.Storage.Search;
 #else
-    using System.IO.IsolatedStorage;
-    using System.Reflection;
+using System.IO.IsolatedStorage;
+using System.Reflection;
 #endif
 
+namespace CrittercismSDK
+{
     /// <summary>
     /// Storage helper.
     /// </summary>

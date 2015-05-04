@@ -1,9 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+
 namespace CrittercismSDK
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
-    
     // FIXME jbley note that this class will not be serialized in the standard way.
 
     /// <summary>

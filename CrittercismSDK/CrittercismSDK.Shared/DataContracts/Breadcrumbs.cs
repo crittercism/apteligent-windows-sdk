@@ -1,14 +1,12 @@
-// file:	DataContracts\Breadcrumbs.cs
-// summary:	Implements the breadcrumbs class
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
+
 namespace CrittercismSDK
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Text;
-
     /// <summary>
     /// Breadcrumbs.
     /// </summary>

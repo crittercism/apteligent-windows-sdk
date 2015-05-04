@@ -1,20 +1,18 @@
-// file:	CrittercismSDK\MessageReport.cs
-// summary:	Implements the message report class
-namespace CrittercismSDK {
-    using Newtonsoft.Json;
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.IO;
-    using System.Reflection;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
 #if WINDOWS_PHONE
-    using Microsoft.Phone.Info;
-    using Windows.Devices.Sensors;
-    using Windows.Graphics.Display;
-    using Microsoft.Phone.Net.NetworkInformation;
+using Microsoft.Phone.Info;
+using Windows.Devices.Sensors;
+using Windows.Graphics.Display;
+using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
+namespace CrittercismSDK {
     /// <summary>
     /// Message report.
     /// </summary>

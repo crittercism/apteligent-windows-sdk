@@ -1,12 +1,10 @@
-// file:    DataContracts\AppLoad.cs
-// summary:    Implements the application load class
+using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Windows;
+   
 namespace CrittercismSDK
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Runtime.Serialization;
-    using System.Windows;
-   
     /// <summary>
     /// Application load.
     /// </summary>

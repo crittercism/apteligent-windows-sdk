@@ -1,19 +1,17 @@
-// file:	DataContracts\Crash.cs
-// summary:	Implements the crash class (Unhandled Exception)
-namespace CrittercismSDK
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Text;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 #if WINDOWS_PHONE
-    using Windows.Devices.Sensors;
-    using Windows.Graphics.Display;
-    using Microsoft.Phone.Net.NetworkInformation;
+using Windows.Devices.Sensors;
+using Windows.Graphics.Display;
+using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
+namespace CrittercismSDK
+{
     /// <summary>
     /// Crash (Unhandled Exception).
     /// </summary>
