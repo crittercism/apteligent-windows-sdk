@@ -449,6 +449,36 @@ namespace CrittercismSDK {
             Debug.WriteLine("");
         }
 
+        private static string StackTrace(Exception e) {
+            // Allowing for the fact that the "name" and "reason" of the outermost
+            // exception e are already shown in the Crittercism portal, we don't
+            // need to repeat that bit of info.  However, for InnerException's, we
+            // will include this information in the StackTrace .  The horizontal
+            // lines (hyphens) separate InnerException's from each other and the
+            // outermost Exception e .
+            string answer=e.StackTrace;
+            // Using seen for cycle detection to break cycling.
+            List<Exception> seen=new List<Exception>();
+            seen.Add(e);
+            if (answer!=null) {
+                // There has to be some way of telling where InnerException ie stacktrace
+                // ends and main Exception e stacktrace begins.  This is it.
+                answer=((e.GetType().FullName+" : "+e.Message+"\r\n")
+                    +answer);
+                Exception ie=e.InnerException;
+                while ((ie!=null)&&(seen.IndexOf(ie)<0)) {
+                    seen.Add(ie);
+                    answer=((ie.GetType().FullName+" : "+ie.Message+"\r\n")
+                        +(ie.StackTrace+"\r\n")
+                        +answer);
+                    ie=ie.InnerException;
+                }
+            } else {
+                answer="";
+            }
+            return answer;
+        }
+
         /// <summary>
         /// Creates handled exception report.
         /// </summary>
@@ -461,18 +491,7 @@ namespace CrittercismSDK {
             };
             Dictionary<string,string> metadata=CurrentMetadata();
             Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
-            string stacktrace=e.StackTrace;
-            if (stacktrace==null) {
-                // Assuming the Exception e being passed in hasn't been thrown.  In this case,
-                // supply our own current "stacktrace".  The mscorlib System.Diagnostics.Stacktrace
-                // isn't available for Windows Store library.  Instead, generate our own stacktrace
-                // string by throwing and catching our own Exception.
-                try {
-                    throw new Exception();
-                } catch (Exception e2) {
-                    stacktrace=e2.StackTrace;
-                }
-            }
+            string stacktrace=StackTrace(e);
             ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
             HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
             AddMessageToQueue(he);
@@ -485,7 +504,8 @@ namespace CrittercismSDK {
         internal static void LogUnhandledException(Exception e) {
             Dictionary<string,string> metadata=CurrentMetadata();
             Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Copy();
-            ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,e.StackTrace);
+            string stacktrace=StackTrace(e);
+            ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
             Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
             // Add crash to message queue and save state .
             AddMessageToQueue(crash);
