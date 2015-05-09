@@ -1,13 +1,11 @@
-// file:	DataContracts\ExceptionObject.cs
-// summary:	Implements the exception object class
-namespace CrittercismSDK.DataContracts
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Text;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 
+namespace CrittercismSDK
+{
     /// <summary>
     /// Exception object.
     /// </summary>

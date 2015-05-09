@@ -1,61 +1,99 @@
-﻿// file:	CrittercismSDK\StorageHelper.cs
-// summary:	Implements the storage helper class
-namespace CrittercismSDK
-{
-    using Newtonsoft.Json;
-    using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Runtime.Serialization.Json;
+﻿using Newtonsoft.Json;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Runtime.Serialization.Json;
 #if NETFX_CORE
-    using System.Collections.Generic;
-    using System.Runtime.InteropServices;
-    using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Windows.Foundation;
-    using Windows.Storage;
-    using Windows.Storage.Search;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Windows.Foundation;
+using Windows.Storage;
+using Windows.Storage.Search;
 #else
-    using System.IO.IsolatedStorage;
-    using System.Reflection;
+using System.IO.IsolatedStorage;
+using System.Reflection;
 #endif
 
+namespace CrittercismSDK
+{
     /// <summary>
     /// Storage helper.
     /// </summary>
     internal static class StorageHelper {
-        internal const string crittercismDirectoryName="Crittercism";
 
-        private static string PrivatePath="";
+        private static object lockObject=new Object();
 
-        static StorageHelper() {
-            if (!FolderExists(crittercismDirectoryName)) {
-                CreateFolder(crittercismDirectoryName);
-            }
+        #region CrittercismPath
+
+        private static volatile bool PrivateCrittercismPathCreated=false;
+
+        internal static string CrittercismPath() {
+            // Ensure CrittercismPath folder gets created if it doesn't already
+            // exist as a side effect.
+            const string relativePath="Crittercism";
+            if (!PrivateCrittercismPathCreated) {
+                lock (lockObject) {
+                    if (!PrivateCrittercismPathCreated) {
+                        // Check flag again inside lock in case our thread loses race.
+                        if (!FolderExists(relativePath)) {
+                            CreateFolder(relativePath);
+                        };
+                        PrivateCrittercismPathCreated=true;
+                    };
+                };
+            };
+            // relativePath wrt StoragePath()
+            return relativePath;
+        }
+
+        #endregion
+
+        #region StoragePath
+
+        private static volatile bool PrivateStoragePathComputed=false;
+        private static string PrivateStoragePath="";
+
+        private static string StoragePath() {
+            // Get PrivateStoragePath == app's storage folder, used for debugging.
+            // WindowsPhonePowerTools.exe may be used to view into a
+            // Windows Phone emulator or real device file system.
+            if (!PrivateStoragePathComputed) {
+                lock (lockObject) {
+                    if (!PrivateStoragePathComputed) {
+                        // Check flag again inside lock in case our thread loses race.
 #if DEBUG
 #if NETFX_CORE
-            PrivatePath=GetStore().Path;
+                        PrivateStoragePath=GetStore().Path;
 #else
-            {
-                IsolatedStorageFile storage=GetStore();
+                        {
+                            IsolatedStorageFile storage=GetStore();
 #if WINDOWS_PHONE
-                // TODO: Explore WINDOWS_PHONE case again.
-                //FieldInfo field=storage.GetType().GetField("m_AppFilesPath",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
-                //PrivatePath=(string)field.GetValue(storage);
+                            FieldInfo field=storage.GetType().GetField("m_AppFilesPath",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
+                            PrivateStoragePath=(string)field.GetValue(storage);
 #else
-                FieldInfo field=storage.GetType().GetField("m_RootDir",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
-                PrivatePath=(string)field.GetValue(storage);
-                // NOTE: This would work too.
-                //PropertyInfo property=storage.GetType().GetProperty("RootDirectory",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetProperty);
-                //PrivatePath=(string)property.GetValue(storage,null);
+                            FieldInfo field=storage.GetType().GetField("m_RootDir",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
+                            PrivateStoragePath=(string)field.GetValue(storage);
+                            // NOTE: This would work too.
+                            //PropertyInfo property=storage.GetType().GetProperty("RootDirectory",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetProperty);
+                            //PrivateStoragePath=(string)property.GetValue(storage,null);
 #endif // WINDOWS_PHONE
-            }
+                        }
 #endif // NETFX_CORE
-            Debug.WriteLine("STORAGE PATH: "+PrivatePath);
-            Debug.WriteLine("");
+                        Debug.WriteLine("STORAGE PATH: "+PrivateStoragePath);
+                        Debug.WriteLine("");
 #endif // DEBUG
+                    }
+                }
+            };
+            return PrivateStoragePath;
         }
+
+        #endregion
+
+        #region Methods
 
         internal static ulong AvailableFreeSpace() {
 #if NETFX_CORE
@@ -89,7 +127,7 @@ namespace CrittercismSDK
         internal static object Load(Type dataType) {
             object data=null;
             try {
-                string path=Path.Combine(crittercismDirectoryName,dataType.Name+".js");
+                string path=Path.Combine(CrittercismPath(),dataType.Name+".js");
                 data=Load(path,dataType);
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
@@ -105,7 +143,7 @@ namespace CrittercismSDK
         internal static object Load(string path,Type dataType) {
             object data=null;
             try {
-                Debug.WriteLine("Load: "+Path.Combine(PrivatePath,path));
+                Debug.WriteLine("Load: "+Path.Combine(StoragePath(),path));
                 if (FileExists(path)) {
                     string dataString=LoadString(path);
                     if (dataString==null) {
@@ -172,7 +210,7 @@ namespace CrittercismSDK
         internal static bool Save(object data) {
             bool answer=false;
             try {
-                string path=Path.Combine(crittercismDirectoryName,data.GetType().Name+".js");
+                string path=Path.Combine(CrittercismPath(),data.GetType().Name+".js");
                 answer=Save(data,path);
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
@@ -188,7 +226,7 @@ namespace CrittercismSDK
         internal static bool Save(object data,string path) {
             bool answer=false;
             try {
-                Debug.WriteLine("Save: "+Path.Combine(PrivatePath,path));
+                Debug.WriteLine("Save: "+Path.Combine(StoragePath(),path));
                 string dataString=JsonConvert.SerializeObject(data);
                 Debug.WriteLine("JSON:");
                 Debug.WriteLine(dataString);
@@ -280,7 +318,7 @@ namespace CrittercismSDK
                         ).Result;
                         answer=null;
                         foreach (StorageFolder folder in folders) {
-                            if (folder.Name.Equals(path,StringComparison.OrdinalIgnoreCase)) {
+                            if (folder.Name.Equals(fileName,StringComparison.OrdinalIgnoreCase)) {
                                 answer=folder;
                                 break;
                             }
@@ -438,6 +476,8 @@ namespace CrittercismSDK
             return GetStore().GetFileNames(path+"\\*");
 #endif
         }
+
+        #endregion
 
     }
 }

@@ -1,14 +1,12 @@
-// file:	DataContracts\Breadcrumbs.cs
-// summary:	Implements the breadcrumbs class
-namespace CrittercismSDK.DataContracts
-{
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Text;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 
+namespace CrittercismSDK
+{
     /// <summary>
     /// Breadcrumbs.
     /// </summary>
@@ -96,7 +94,7 @@ namespace CrittercismSDK.DataContracts
             try {
                 // Breadcrumbs answer has previous_session == the previous current_session
                 // and new current_session == empty but for new session_start breadcrumb .
-                string path=Path.Combine(StorageHelper.crittercismDirectoryName,"Breadcrumbs.js");
+                string path=Path.Combine(StorageHelper.CrittercismPath(),"Breadcrumbs.js");
                 if (StorageHelper.FileExists(path)) {
                     answer=StorageHelper.Load(path,typeof(Breadcrumbs)) as Breadcrumbs;
                 }

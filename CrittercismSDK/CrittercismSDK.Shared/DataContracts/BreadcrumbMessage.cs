@@ -1,12 +1,10 @@
-// file:	DataContracts\BreadcrumbMessage.cs
-// summary:	Implements the breadcrumb message class
-namespace CrittercismSDK.DataContracts
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
   
+namespace CrittercismSDK
+{
     /// <summary>
     /// Breadcrumb Message
     /// </summary>

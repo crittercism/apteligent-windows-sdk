@@ -1,16 +1,16 @@
-namespace CrittercismSDK.DataContracts
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Runtime.Serialization;
-    using System.Text;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 #if WINDOWS_PHONE
-    using Windows.Devices.Sensors;
-    using Windows.Graphics.Display;
-    using Microsoft.Phone.Net.NetworkInformation;
+using Windows.Devices.Sensors;
+using Windows.Graphics.Display;
+using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
+namespace CrittercismSDK
+{
     [DataContract]
     internal class HandledException : MessageReport
     {

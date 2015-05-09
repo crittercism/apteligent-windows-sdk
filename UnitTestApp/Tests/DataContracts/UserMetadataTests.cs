@@ -1,5 +1,4 @@
 using CrittercismSDK;
-using CrittercismSDK.DataContracts;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json;
 using System;
@@ -42,7 +41,7 @@ namespace UnitTestApp.Tests.DataContracts {
             try {
                 TestHelpers.ThrowDivideByZeroException();
             } catch (Exception ex) {
-                Crittercism.CreateCrashReport(ex);
+                Crittercism.LogUnhandledException(ex);
             }
 
             Crash crash = Crittercism.MessageQueue.Dequeue() as Crash;

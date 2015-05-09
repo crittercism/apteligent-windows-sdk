@@ -1,22 +1,22 @@
-// UnifiedAppLoad.cs
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+#if NETFX_CORE
+using Windows.ApplicationModel;
+#elif WINDOWS_PHONE
+using Microsoft.Phone.Info;
+#endif
+
 // David R. Albrecht for Crittercism, Inc.
 //
 // This library has a lot of room for improvement. A few areas I saw working on this in May 2014:
 //   (1) More prevalent use of immutable data objects is good defensive programming against errors
 
-namespace CrittercismSDK.DataContracts {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-    using System.Reflection;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
-#if NETFX_CORE
-    using Windows.ApplicationModel;
-#elif WINDOWS_PHONE
-    using Microsoft.Phone.Info;
-#endif
+namespace CrittercismSDK {
 
     [DataContract]
     internal class UnifiedAppLoadInner : System.IEquatable<UnifiedAppLoadInner> {

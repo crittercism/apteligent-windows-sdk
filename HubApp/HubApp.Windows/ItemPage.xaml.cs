@@ -79,14 +79,14 @@ namespace HubApp
                 Crittercism.LeaveBreadcrumb("Test Windows Store LogHandledException");
                 {
                     try {
-                        DeepError1(10);
+                        ThrowException();
                     } catch (Exception ex) {
                         Crittercism.LogHandledException(ex);
                     }
                 }
             } else if (item.UniqueId.Equals("Group-4-Item-2")) {
                 Crittercism.LeaveBreadcrumb("Test Windows Store App Crash");
-                DeepError1(10);
+                ThrowException();
             } else if (item.UniqueId.Equals("Group-4-Item-3")) {
                 Crittercism.LeaveBreadcrumb("Q: Do you love Crittercism? A: YES!");
             } else if (item.UniqueId.Equals("Group-4-Item-4")) {
@@ -97,25 +97,19 @@ namespace HubApp
             }
         }
 
-        void DeepError1(int n) {
-            DeepError2(n-1);
-        }
-
-        void DeepError2(int n) {
-            DeepError3(n-1);
-        }
-
-        void DeepError3(int n) {
-            DeepError4(n-1);
-        }
-
-        void DeepError4(int n) {
-            if (n<=0) {
-                int i=0;
-                int j=5;
-                int k=j/i;
+        private void DeepError(int n) {
+            if (n==0) {
+                throw new Exception("Deep Inner Exception");
             } else {
-                DeepError1(n-1);
+                DeepError(n-1);
+            }
+        }
+
+        private void ThrowException() {
+            try {
+                DeepError(4);
+            } catch (Exception ie) {
+                throw new Exception("Outer Exception",ie);
             }
         }
 

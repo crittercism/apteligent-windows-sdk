@@ -14,7 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CrittercismSDK;
 
-namespace DesktopApp
+namespace WPFApp
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -39,12 +39,12 @@ namespace DesktopApp
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
             try {
-                DeepError1(10);
+                ThrowException();
             } catch (Exception ex) {
                 Crittercism.LogHandledException(ex);
             }
         }
-
+        
         private void handledUnthrownExceptionClick(object sender,RoutedEventArgs e) {
             Exception exception=new Exception("description");
             exception.Data.Add("MethodName","methodName");
@@ -52,28 +52,22 @@ namespace DesktopApp
         }
 
         private void testCrashClick(object sender,RoutedEventArgs e) {
-            DeepError1(10);
+            ThrowException();
         }
 
-        void DeepError1(int n) {
-            DeepError2(n-1);
-        }
-
-        void DeepError2(int n) {
-            DeepError3(n-1);
-        }
-
-        void DeepError3(int n) {
-            DeepError4(n-1);
-        }
-
-        void DeepError4(int n) {
-            if (n<=0) {
-                int i=0;
-                int j=5;
-                int k=j/i;
+        private void DeepError(int n) {
+            if (n==0) {
+                throw new Exception("Deep Inner Exception");
             } else {
-                DeepError1(n-1);
+                DeepError(n-1);
+            }
+        }
+
+        private void ThrowException() {
+            try {
+                DeepError(4);
+            } catch (Exception ie) {
+                throw new Exception("Outer Exception",ie);
             }
         }
         
@@ -88,13 +82,13 @@ namespace DesktopApp
                 username="User";
             }
             string response="";
-            MessageBoxResult result=MessageBox.Show("Do you love Crittercism?","DesktopApp",MessageBoxButton.YesNo);
+            MessageBoxResult result=MessageBox.Show("Do you love Crittercism?","WPFApp",MessageBoxButton.YesNo);
             switch (result) {
                 case MessageBoxResult.Yes:
-                    response=" loves Crittercism.";
+                    response="loves Crittercism.";
                     break;
                 case MessageBoxResult.No:
-                    response=" doesn't love Crittercism.";
+                    response="doesn't love Crittercism.";
                     break;
             }
             Crittercism.LeaveBreadcrumb(username+" "+response);

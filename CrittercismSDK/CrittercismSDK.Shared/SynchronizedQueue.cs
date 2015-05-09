@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CrittercismSDK.DataContracts {
+namespace CrittercismSDK {
     public class SynchronizedQueue<T> {
         private Queue<T> _q;
         public bool IsSynchronized {
@@ -15,8 +15,6 @@ namespace CrittercismSDK.DataContracts {
                 return this._q;
             }
         }
-        // Unfortunately, we can't "override" the Queue<T>'s own "Count".
-        // Just remember to use "SafeCount" instead of "Count".
         public int Count {
             get {
                 lock (this._q)
@@ -48,6 +46,12 @@ namespace CrittercismSDK.DataContracts {
                 this._q.Enqueue(value);
         }
         public T Dequeue() {
+            ////////////////////////////////////////////////////////////////
+            // NOTE: MSDN doc excerpt re Queue<T>.Dequeue Method
+            // "Removes and returns the object at the beginning of the Queue<T>."
+            // InvalidOperationException if The Queue<T> is empty.
+            // https://msdn.microsoft.com/en-us/library/1c8bzx97(v=vs.110).aspx
+            ////////////////////////////////////////////////////////////////
             lock (this._q)
                 return this._q.Dequeue();
         }

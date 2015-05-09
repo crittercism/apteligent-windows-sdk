@@ -7,9 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using CrittercismSDK;
-using DesktopApp;
+using WPFApp;
 
-namespace DesktopApp
+namespace WPFApp
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -20,7 +20,7 @@ namespace DesktopApp
         {
             //// Call the Init of the unhandled managed class library "Crittercism"
             Crittercism.Init("537a4e738039805d82000002");
-            Crittercism.LeaveBreadcrumb("Start the desktop application");
+            Crittercism.LeaveBreadcrumb("Application_Startup");
         }
     }
 }

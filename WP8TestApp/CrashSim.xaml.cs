@@ -26,10 +26,8 @@ namespace WP8TestApp {
         }
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
-            int i=0;
-            int j=5;
             try {
-                int k=j/i;
+                ThrowException(); ;
             } catch (Exception ex) {
                 Crittercism.LogHandledException(ex);
             }
@@ -44,10 +42,25 @@ namespace WP8TestApp {
 
         private void testCrashClick(object sender,RoutedEventArgs e)
         {
-            int x = 0;
-            int y = 1 / x;
+            ThrowException();
         }
 
+        private void DeepError(int n) {
+            if (n==0) {
+                throw new Exception("Deep Inner Exception");
+            } else {
+                DeepError(n-1);
+            }
+        }
+
+        private void ThrowException() {
+            try {
+                DeepError(4);
+            } catch (Exception ie) {
+                throw new Exception("Outer Exception",ie);
+            }
+        }
+        
         private void testMultithreadClick(object sender,RoutedEventArgs e)
         {
             Thread thread = new Thread(new ThreadStart(Worker.Work));

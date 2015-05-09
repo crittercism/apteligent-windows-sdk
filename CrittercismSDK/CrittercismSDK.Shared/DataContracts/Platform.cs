@@ -1,12 +1,12 @@
-// Platform.cs
+using System;
+using System.Runtime.Serialization;
+#if WINDOWS_PHONE
+using Microsoft.Phone.Info;
+#endif
+
 // David R. Albrecht for Crittercism, Inc.
 
-namespace CrittercismSDK.DataContracts {
-    using System;
-    using System.Runtime.Serialization;
-#if WINDOWS_PHONE
-    using Microsoft.Phone.Info;
-#endif
+namespace CrittercismSDK {
 
     /// <summary>
     /// Represents the platform on which the application (app) is running.
