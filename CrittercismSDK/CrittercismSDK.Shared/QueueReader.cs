@@ -37,7 +37,9 @@ namespace CrittercismSDK
         internal void ReadQueue() {
             Debug.WriteLine("ReadQueue: ENTER");
             try {
-                while (true) {
+                while (Crittercism.initialized) {
+                    ReadStep();
+                    Debug.WriteLine("ReadQueue: SLEEP");
                     // wake up again 300000 milliseconds == 5 minute timeout from now
                     // even without prompting.  Useful if last SendMessage failed and
                     // it seems time to try again despite no new messages have poured
@@ -45,8 +47,6 @@ namespace CrittercismSDK
                     const int READQUEUE_MILLISECONDS_TIMEOUT=300000;
                     Crittercism.readerEvent.WaitOne(READQUEUE_MILLISECONDS_TIMEOUT);
                     Debug.WriteLine("ReadQueue: WAKE");
-                    ReadStep();
-                    Debug.WriteLine("ReadQueue: SLEEP");
                 };
             } catch (Exception e) {
                 Crittercism.LogInternalException(e);
@@ -58,7 +58,10 @@ namespace CrittercismSDK
             Debug.WriteLine("ReadStep: ENTER");
             try {
                 int retry=0;
-                while (Crittercism.MessageQueue!=null&&Crittercism.MessageQueue.Count>0&&NetworkInterface.GetIsNetworkAvailable()&&retry<5) {
+                while ((Crittercism.MessageQueue!=null)
+                    &&(Crittercism.MessageQueue.Count>0)
+                    &&(NetworkInterface.GetIsNetworkAvailable())
+                    &&(retry<3)) {
                     if (SendMessage()) {
                         retry=0;
                     } else {

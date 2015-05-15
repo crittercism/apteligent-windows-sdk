@@ -296,7 +296,7 @@ namespace CrittercismSDK {
         }
 
         /// <summary>
-        /// Initialises this object.
+        /// Initialises Crittercism.
         /// </summary>
         /// <param name="appID">  Identifier for the application. </param>
         public static void Init(string appID) {
@@ -321,7 +321,7 @@ namespace CrittercismSDK {
 #else
                     ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
                     readerThread=new Thread(threadStart);
-                    readerThread.Name="Crittercism Sender";
+                    readerThread.Name="Crittercism";
 #endif
                     readerThread.Start();
                     StartApplication(appID);
@@ -372,6 +372,29 @@ namespace CrittercismSDK {
                 }
             } catch (Exception e) {
                 LogInternalException(e);
+            }
+        }
+
+        /// <summary>
+        /// Shuts down Crittercism.
+        /// </summary>
+        public static void Shutdown() {
+            // Shutdown Crittercism, including readerThread .
+            if (initialized) {
+                lock (lockObject) {
+                    if (initialized) {
+                        initialized=false;
+                        // Get the readerThread to exit.
+                        readerEvent.Set();
+#if NETFX_CORE
+                        readerThread.Wait();
+#else
+                        readerThread.Join();
+#endif
+                        // Save state.
+                        Save();
+                    }
+                }
             }
         }
         #endregion Shutdown
