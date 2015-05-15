@@ -30,10 +30,13 @@ namespace CrittercismSDK {
     /// </summary>
     public class Crittercism {
         #region Constants
+
         private const string errorNotInitialized="ERROR: Crittercism not initialized yet.";
-        #endregion
+
+        #endregion Constants
 
         #region Properties
+
         /// <summary>
         /// The auto run queue reader
         /// </summary>
@@ -125,7 +128,7 @@ namespace CrittercismSDK {
         /// </summary>
         internal static AutoResetEvent readerEvent = new AutoResetEvent(false);
 
-        #endregion
+        #endregion Properties
 
         #region OptOutStatus
 
@@ -187,9 +190,9 @@ namespace CrittercismSDK {
             }
         }
 
-        #endregion
+        #endregion OptOutStatus
 
-        #region Methods
+        #region Init
 
         private static string PrivateAppVersion() {
 #if NETFX_CORE
@@ -265,6 +268,33 @@ namespace CrittercismSDK {
             return answer;
         }
 
+        private static string PrivateOSVersion() {
+#if NETFX_CORE
+            // TODO: Returning an empty string here makes us sad.
+            // "You cannot get the OS or .NET framework version in a Windows Store app ...
+            // Marked as answer by Anne Jing Microsoft contingent staff, Moderator"
+            // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/66e662a9-9ece-4863-8cf1-a5e259c7b571/c-windows-store-8-os-version-name-and-net-version-name
+            string answer="";
+#else
+            string answer=Environment.OSVersion.Platform.ToString();
+#endif
+            return answer;
+        }
+
+        /// <summary>
+        /// This method is invoked when the application starts or resume
+        /// </summary>
+        /// <param name="appID">    Identifier for the application. </param>
+        private static void StartApplication(string appID) {
+            // TODO: Why do we pass appID arg to this method?
+            AppID=appID;
+            OSVersion=PrivateOSVersion();
+            PrivateBreadcrumbs=Breadcrumbs.SessionStart();
+            MessageQueue=new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
+            LoadQueue();
+            CreateAppLoadReport();
+        }
+
         /// <summary>
         /// Initialises this object.
         /// </summary>
@@ -327,91 +357,9 @@ namespace CrittercismSDK {
                 Debug.WriteLine("Crittercism did not initialize.");
             }
         }
+        #endregion Init
 
-#if NETFX_CORE
-#elif WINDOWS_PHONE
-#else
-        private static void WindowsForm_UIThreadException(object sender,ThreadExceptionEventArgs t) {
-            ////////////////////////////////////////////////////////////////
-            // Crittercism unhandled exception handler for Windows Forms apps.
-            // Crittercism users must add
-            //     Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            // to their Program.cs Main() .
-            // MSDN: "Application.SetUnhandledExceptionMode Method (UnhandledExceptionMode)
-            // Call SetUnhandledExceptionMode before you instantiate the main form
-            // of your application using the Run method.
-            // To catch exceptions that occur in threads not created and owned by
-            // Windows Forms, use the UnhandledException event handler."
-            // https://msdn.microsoft.com/en-us/library/ms157905(v=vs.110).aspx
-            ////////////////////////////////////////////////////////////////
-            LogUnhandledException(t.Exception);
-        }
-#endif
-
-        /// <summary>
-        /// Sets "username" metadata value.
-        /// </summary>
-        /// <param name="username"> The username. </param>
-        public static void SetUsername(string username) {
-            // SetValue will check GetOptOutStatus() and initialized .
-            SetValue("username", username);
-        }
-
-        /// <summary>
-        /// Gets "username" metadata value.
-        /// </summary>
-        public static string Username() {
-            // ValueFor will check GetOptOutStatus() and initialized .
-            return ValueFor("username");
-        }
-
-        /// <summary>
-        /// Sets a user metadata value.
-        /// </summary>
-        /// <param name="key">      The key. </param>
-        /// <param name="value">    The value. </param>
-        public static void SetValue(string key,string value) {
-            if (GetOptOutStatus()) {
-                return;
-            } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
-                return;
-            }
-            try {
-                lock (lockObject) {
-                    if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
-                        Metadata[key]=value;
-                        UserMetadata metadata=new UserMetadata(
-                            AppID,new Dictionary<string,string>(Metadata));
-                        AddMessageToQueue(metadata);
-                    }
-                }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
-                // explicit nop
-            }
-        }
-
-        /// <summary>
-        /// Returns a user metadata value.
-        /// </summary>
-        /// <param name="key">      The key. </param>
-        public static string ValueFor(string key) {
-            if (GetOptOutStatus()) {
-                return null;
-            } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
-                return null;
-            };
-            string answer=null;
-            lock (lockObject) {
-                if (Metadata.ContainsKey(key)) {
-                    answer=Metadata[key];
-                }
-            }
-            return answer;
-        }
-
+        #region ShutDown
         internal static void Save() {
             // Save current Crittercism state
             try {
@@ -426,9 +374,24 @@ namespace CrittercismSDK {
                 LogInternalException(e);
             }
         }
+        #endregion Shutdown
 
+        #region AppLoads
         /// <summary>
-        /// Leave breadcrum.
+        /// Creates the application load report.
+        /// </summary>
+        private static void CreateAppLoadReport() {
+            if (GetOptOutStatus()) {
+                return;
+            }
+            AppLoad appLoad=new AppLoad();
+            AddMessageToQueue(appLoad);
+        }
+        #endregion AppLoads
+
+        #region Breadcrumbs
+        /// <summary>
+        /// Leave breadcrumb.
         /// </summary>
         /// <param name="breadcrumb">   The breadcrumb. </param>
         public static void LeaveBreadcrumb(string breadcrumb) {
@@ -440,7 +403,9 @@ namespace CrittercismSDK {
             };
             PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
         }
+        #endregion Breadcrumbs
 
+        #region Exceptions and Crashes
         internal static void LogInternalException(Exception e) {
             Debug.WriteLine("UNEXPECTED ERROR!!! "+e.Message);
             Debug.WriteLine(e.StackTrace);
@@ -513,18 +478,75 @@ namespace CrittercismSDK {
             // most apps will choose to log the exception (e.g. with Crittercism)
             // but let the crash go ahead.
         }
-        
+        #endregion Exceptions and Crashes
+
+        #region Metadata
         /// <summary>
-        /// Creates the application load report.
+        /// Sets "username" metadata value.
         /// </summary>
-        private static void CreateAppLoadReport() {
-            if (GetOptOutStatus()) {
-                return;
-            }
-            AppLoad appLoad=new AppLoad();
-            AddMessageToQueue(appLoad);
+        /// <param name="username"> The username. </param>
+        public static void SetUsername(string username) {
+            // SetValue will check GetOptOutStatus() and initialized .
+            SetValue("username",username);
         }
 
+        /// <summary>
+        /// Gets "username" metadata value.
+        /// </summary>
+        public static string Username() {
+            // ValueFor will check GetOptOutStatus() and initialized .
+            return ValueFor("username");
+        }
+
+        /// <summary>
+        /// Sets a user metadata value.
+        /// </summary>
+        /// <param name="key">      The key. </param>
+        /// <param name="value">    The value. </param>
+        public static void SetValue(string key,string value) {
+            if (GetOptOutStatus()) {
+                return;
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+                return;
+            }
+            try {
+                lock (lockObject) {
+                    if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
+                        Metadata[key]=value;
+                        UserMetadata metadata=new UserMetadata(
+                            AppID,new Dictionary<string,string>(Metadata));
+                        AddMessageToQueue(metadata);
+                    }
+                }
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
+                // explicit nop
+            }
+        }
+
+        /// <summary>
+        /// Returns a user metadata value.
+        /// </summary>
+        /// <param name="key">      The key. </param>
+        public static string ValueFor(string key) {
+            if (GetOptOutStatus()) {
+                return null;
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+                return null;
+            };
+            string answer=null;
+            lock (lockObject) {
+                if (Metadata.ContainsKey(key)) {
+                    answer=Metadata[key];
+                }
+            }
+            return answer;
+        }
+        #endregion Metadata
+
+        #region MessageQueue
         /// <summary>
         /// Loads the messages from disk into the queue.
         /// </summary>
@@ -550,34 +572,9 @@ namespace CrittercismSDK {
             MessageQueue.Enqueue(message);
             readerEvent.Set();
         }
+        #endregion // MessageQueue
 
-        private static string PrivateOSVersion() {
-#if NETFX_CORE
-            // TODO: Returning an empty string here makes us sad.
-            // "You cannot get the OS or .NET framework version in a Windows Store app ...
-            // Marked as answer by Anne Jing Microsoft contingent staff, Moderator"
-            // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/66e662a9-9ece-4863-8cf1-a5e259c7b571/c-windows-store-8-os-version-name-and-net-version-name
-            string answer="";
-#else
-            string answer=Environment.OSVersion.Platform.ToString();
-#endif
-            return answer;
-        }
-
-        /// <summary>
-        /// This method is invoked when the application starts or resume
-        /// </summary>
-        /// <param name="appID">    Identifier for the application. </param>
-        private static void StartApplication(string appID)
-        {
-            // TODO: Why do we pass appID arg to this method?
-            AppID=appID;
-            OSVersion=PrivateOSVersion();
-            PrivateBreadcrumbs=Breadcrumbs.SessionStart();
-            MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
-            LoadQueue();
-            CreateAppLoadReport();
-        }
+        #region Event Handlers
 
 #if NETFX_CORE
 #pragma warning disable 1998
@@ -676,7 +673,24 @@ namespace CrittercismSDK {
                 // explicit nop
             }
         }
+
+        private static void WindowsForm_UIThreadException(object sender,ThreadExceptionEventArgs t) {
+            ////////////////////////////////////////////////////////////////
+            // Crittercism unhandled exception handler for Windows Forms apps.
+            // Crittercism users must add
+            //     Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            // to their Program.cs Main() .
+            // MSDN: "Application.SetUnhandledExceptionMode Method (UnhandledExceptionMode)
+            // Call SetUnhandledExceptionMode before you instantiate the main form
+            // of your application using the Run method.
+            // To catch exceptions that occur in threads not created and owned by
+            // Windows Forms, use the UnhandledException event handler."
+            // https://msdn.microsoft.com/en-us/library/ms157905(v=vs.110).aspx
+            ////////////////////////////////////////////////////////////////
+            LogUnhandledException(t.Exception);
+        }
 #endif
-        #endregion
+
+        #endregion // Event Handlers
     }
 }
