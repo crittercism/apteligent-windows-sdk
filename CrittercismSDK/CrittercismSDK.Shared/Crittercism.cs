@@ -323,7 +323,14 @@ namespace CrittercismSDK {
                     readerThread=new Thread(threadStart);
                     readerThread.Name="Crittercism";
 #endif
+                    // NOTE: Put initialized=true before readerThread.Start() .
+                    // Later on, initialized may be reset back to false during shutdown,
+                    // and readerThread will see initialized==false as a message to exit.
+                    // Spares us from creating an additional "shuttingdown" flag.
+                    initialized=true;
                     readerThread.Start();
+                    // NOTE: Since StartApplication will induce an AppLoad, it seems
+                    // best to put StartApplication after readerThread.Start() .
                     StartApplication(appID);
                     // _autoRunQueueReader for unit test purposes
                     if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
@@ -348,12 +355,13 @@ namespace CrittercismSDK {
                         System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsForm_UIThreadException);
 #endif
                     }
-                    initialized=true;
-                    Debug.WriteLine("Crittercism initialized.");
                 }
             } catch (Exception) {
+                initialized=false;
             }
-            if (!initialized) {
+            if (initialized) {
+                Debug.WriteLine("Crittercism initialized.");
+            } else {
                 Debug.WriteLine("Crittercism did not initialize.");
             }
         }
