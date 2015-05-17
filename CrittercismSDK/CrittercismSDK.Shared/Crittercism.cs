@@ -335,24 +335,22 @@ namespace CrittercismSDK {
                     // _autoRunQueueReader for unit test purposes
                     if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
 #if NETFX_CORE
-                        Application.Current.UnhandledException+=Current_UnhandledException;
+                        Application.Current.UnhandledException+=Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged+=NetworkInformation_NetworkStatusChanged;
 #elif WINDOWS_PHONE
-                        Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
+                        Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(SilverlightApplication_UnhandledException);
                         DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
                         try {
                             if (PhoneApplicationService.Current!=null) {
-                                PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(Current_Activated);
-                                PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
+                                PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(PhoneApplicationService_Activated);
+                                PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(PhoneApplicationService_Deactivated);
                             }
                         } catch (Exception e) {
                             Crittercism.LogInternalException(e);
                         }
 #else
-                        AppDomain currentDomain=AppDomain.CurrentDomain;
-                        currentDomain.UnhandledException+=new UnhandledExceptionEventHandler(Current_UnhandledException);
-                        // Add event handler for handling System.Windows.Forms UI thread exceptions .
-                        System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsForm_UIThreadException);
+                        AppDomain.CurrentDomain.UnhandledException+=new UnhandledExceptionEventHandler(AppDomain_UnhandledException);
+                        System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsFormsApplication_ThreadException);
 #endif
                     }
                 }
@@ -609,7 +607,7 @@ namespace CrittercismSDK {
 
 #if NETFX_CORE
 #pragma warning disable 1998
-        private static async void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
+        private static async void Application_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
                 return;
             }
@@ -641,7 +639,7 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="sender">   Source of the event. </param>
         /// <param name="e">        Application unhandled exception event information. </param>
-        static void Current_UnhandledException(object sender,ApplicationUnhandledExceptionEventArgs args) {
+        static void SilverlightApplication_UnhandledException(object sender,ApplicationUnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
                 return;
             }
@@ -653,21 +651,21 @@ namespace CrittercismSDK {
             }
         }
 
-        static void Current_Activated(object sender, ActivatedEventArgs e) {
+        static void PhoneApplicationService_Activated(object sender, ActivatedEventArgs e) {
             if (GetOptOutStatus()) {
                 return;
             }
             BackgroundWorker backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
+            backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
             backgroundWorker.RunWorkerAsync();
         }
 
-        static void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        static void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
         }
 
-        static void Current_Deactivated(object sender, DeactivatedEventArgs e)
+        static void PhoneApplicationService_Deactivated(object sender, DeactivatedEventArgs e)
         {
             if (GetOptOutStatus()) {
                 return;
@@ -693,7 +691,7 @@ namespace CrittercismSDK {
             }
         }
 #else
-        static void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
+        static void AppDomain_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
                 return;
             }
@@ -705,7 +703,7 @@ namespace CrittercismSDK {
             }
         }
 
-        private static void WindowsForm_UIThreadException(object sender,ThreadExceptionEventArgs t) {
+        private static void WindowsFormsApplication_ThreadException(object sender,ThreadExceptionEventArgs t) {
             ////////////////////////////////////////////////////////////////
             // Crittercism unhandled exception handler for Windows Forms apps.
             // Crittercism users must add
