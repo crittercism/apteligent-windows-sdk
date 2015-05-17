@@ -98,7 +98,7 @@ namespace WindowsFormsApp {
             this.button5.TabIndex = 4;
             this.button5.Text = "Test Multithread";
             this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click+=new System.EventHandler(this.testMultithreadClick);
+            this.button5.Click += new System.EventHandler(this.testMultithreadClick);
             // 
             // pictureBox1
             // 
@@ -127,6 +127,7 @@ namespace WindowsFormsApp {
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Text = "WindowsFormsApp";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 

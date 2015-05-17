@@ -386,6 +386,7 @@ namespace CrittercismSDK {
         /// </summary>
         public static void Shutdown() {
             // Shutdown Crittercism, including readerThread .
+            Debug.WriteLine("Shutdown");
             if (initialized) {
                 lock (lockObject) {
                     if (initialized) {

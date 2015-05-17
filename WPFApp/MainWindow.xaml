@@ -1,7 +1,7 @@
 ﻿<Window x:Class="WPFApp.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WPFApp" Height="575" Width="450">
+        Title="WPFApp" Height="575" Width="450" Closed="Window_Closed">
     <Grid Background="HoneyDew">
         <Grid.Resources>
             <Style x:Key="CritterStyle" TargetType="Button">
@@ -53,7 +53,7 @@
                 Click="critterClick">
             <Button.Template>
                 <ControlTemplate>
-                    <Image Source="CrittercismCropped.png"/>
+                    <Image Source="Crittercism.png"/>
                 </ControlTemplate>
             </Button.Template>
         </Button>

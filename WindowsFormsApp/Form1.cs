@@ -83,5 +83,10 @@ namespace WindowsFormsApp {
             }
             Crittercism.LeaveBreadcrumb(username+" "+response);
         }
+
+        private void Form1_FormClosed(object sender,FormClosedEventArgs e) {
+            Crittercism.LeaveBreadcrumb("FormClosed");
+            Crittercism.Shutdown();
+        }
     }
 }

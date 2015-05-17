@@ -93,5 +93,10 @@ namespace WPFApp
             }
             Crittercism.LeaveBreadcrumb(username+" "+response);
         }
+
+        private void Window_Closed(object sender,EventArgs e) {
+            Crittercism.LeaveBreadcrumb("Closed");
+            Crittercism.Shutdown();
+        }
     }
 }
