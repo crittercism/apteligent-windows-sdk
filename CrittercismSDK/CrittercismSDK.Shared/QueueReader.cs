@@ -58,7 +58,8 @@ namespace CrittercismSDK
             Debug.WriteLine("ReadStep: ENTER");
             try {
                 int retry=0;
-                while ((Crittercism.MessageQueue!=null)
+                while (Crittercism.initialized
+                    &&(Crittercism.MessageQueue!=null)
                     &&(Crittercism.MessageQueue.Count>0)
                     &&(NetworkInterface.GetIsNetworkAvailable())
                     &&(retry<3)) {

@@ -495,18 +495,25 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="currentException"> The current exception. </param>
         internal static void LogUnhandledException(Exception e) {
-            Dictionary<string,string> metadata=CurrentMetadata();
-            Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Copy();
-            string stacktrace=StackTrace(e);
-            ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-            Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
-            // Add crash to message queue and save state .
-            AddMessageToQueue(crash);
-            Save();
-            // App is probably going to crash now, because we choose not
-            // to handle the unhandled exception ourselves and typically
-            // most apps will choose to log the exception (e.g. with Crittercism)
-            // but let the crash go ahead.
+            if (initialized) {
+                // Seems Windows Forms apps can generate unhandled exceptions
+                // without really crashing.  For Windows Forms apps, we're only
+                // reporting the first one in a given session.  This is why
+                // we're checking "initialized".
+                Dictionary<string,string> metadata=CurrentMetadata();
+                Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Copy();
+                string stacktrace=StackTrace(e);
+                ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+                Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
+                // Add crash to message queue and save state .
+                Shutdown();
+                AddMessageToQueue(crash);
+                Save();
+                // App is probably going to crash now, because we choose not
+                // to handle the unhandled exception ourselves and typically
+                // most apps will choose to log the exception (e.g. with Crittercism)
+                // but let the crash go ahead.
+            }
         }
         #endregion Exceptions and Crashes
 
