@@ -105,8 +105,8 @@ namespace CrittercismSDK {
                         answer=true;
                     }
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             };
             return answer;
         }
@@ -127,8 +127,8 @@ namespace CrittercismSDK {
                     }
                     answer=true;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             };
             return answer;
         }
@@ -180,8 +180,8 @@ namespace CrittercismSDK {
                     message.CreationTime=StorageHelper.GetCreationTime(path);
                     message.Saved=true;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             return message;
         }

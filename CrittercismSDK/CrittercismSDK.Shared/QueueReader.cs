@@ -48,8 +48,8 @@ namespace CrittercismSDK
                     Crittercism.readerEvent.WaitOne(READQUEUE_MILLISECONDS_TIMEOUT);
                     Debug.WriteLine("ReadQueue: WAKE");
                 };
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             Debug.WriteLine("ReadQueue: EXIT");
         }
@@ -76,8 +76,8 @@ namespace CrittercismSDK
                 // shorter either because SendMessage failed or MessageQueue has gone empty.
                 // The readerThread will be going into a do nothing wait state after this.
                 Crittercism.Save();
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             Debug.WriteLine("ReadStep: EXIT");
         }
@@ -144,8 +144,8 @@ namespace CrittercismSDK
                 if (!sendCompleted) {
                     Crittercism.MessageQueue.Enqueue(message);
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             //Debug.WriteLine("SendMessage: EXIT ---> "+sendCompleted);
             return sendCompleted;
@@ -199,8 +199,8 @@ namespace CrittercismSDK
                 if (Crittercism._enableRaiseExceptionInCommunicationLayer&&lastException!=null) {
                     throw lastException;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             Debug.WriteLine("SendRequest: EXIT ---> "+sendCompleted);
             return sendCompleted;
@@ -283,8 +283,8 @@ namespace CrittercismSDK
                 if (Crittercism._enableRaiseExceptionInCommunicationLayer&&lastException!=null) {
                     throw lastException;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             Debug.WriteLine("SendRequest: EXIT ---> "+sendCompleted);
             return sendCompleted;

@@ -221,15 +221,15 @@ namespace CrittercismSDK {
                 if (StorageHelper.FileExists(path)) {
                     deviceId=(string)StorageHelper.Load(path,typeof(String));
                 }
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
             if (deviceId==null) {
                 try {
                     deviceId=Guid.NewGuid().ToString();
                     StorageHelper.Save(deviceId,path);
-                } catch (Exception e) {
-                    LogInternalException(e);
+                } catch (Exception ie) {
+                    LogInternalException(ie);
                     // if deviceId==null is returned, then Crittercism should say
                     // it wasn't able to initialize
                 }
@@ -345,8 +345,8 @@ namespace CrittercismSDK {
                                 PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(PhoneApplicationService_Activated);
                                 PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(PhoneApplicationService_Deactivated);
                             }
-                        } catch (Exception e) {
-                            LogInternalException(e);
+                        } catch (Exception ie) {
+                            LogInternalException(ie);
                         }
 #else
                         AppDomain.CurrentDomain.UnhandledException+=new UnhandledExceptionEventHandler(AppDomain_UnhandledException);
@@ -376,8 +376,8 @@ namespace CrittercismSDK {
                         message.Save();
                     }
                 }
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 
@@ -387,21 +387,25 @@ namespace CrittercismSDK {
         public static void Shutdown() {
             // Shutdown Crittercism, including readerThread .
             Debug.WriteLine("Shutdown");
-            if (initialized) {
-                lock (lockObject) {
-                    if (initialized) {
-                        initialized=false;
-                        // Get the readerThread to exit.
-                        readerEvent.Set();
+            try {
+                if (initialized) {
+                    lock (lockObject) {
+                        if (initialized) {
+                            initialized=false;
+                            // Get the readerThread to exit.
+                            readerEvent.Set();
 #if NETFX_CORE
-                        readerThread.Wait();
+                            readerThread.Wait();
 #else
-                        readerThread.Join();
+                            readerThread.Join();
 #endif
-                        // Save state.
-                        Save();
+                            // Save state.
+                            Save();
+                        }
                     }
                 }
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
         #endregion Shutdown
@@ -426,12 +430,15 @@ namespace CrittercismSDK {
         /// <param name="breadcrumb">   The breadcrumb. </param>
         public static void LeaveBreadcrumb(string breadcrumb) {
             if (GetOptOutStatus()) {
-                return;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
-                return;
-            };
-            PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
+            } else {
+                try {
+                    PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
+                } catch (Exception ie) {
+                    LogInternalException(ie);
+                }
+            }
         }
         #endregion Breadcrumbs
 
@@ -477,17 +484,20 @@ namespace CrittercismSDK {
         /// </summary>
         public static void LogHandledException(Exception e) {
             if (GetOptOutStatus()) {
-                return;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
-                return;
-            };
-            Dictionary<string,string> metadata=CurrentMetadata();
-            Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
-            string stacktrace=StackTrace(e);
-            ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-            HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
-            AddMessageToQueue(he);
+            } else {
+                try {
+                    Dictionary<string,string> metadata=CurrentMetadata();
+                    Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
+                    string stacktrace=StackTrace(e);
+                    ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+                    HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
+                    AddMessageToQueue(he);
+                } catch (Exception ie) {
+                    LogInternalException(ie);
+                }
+            }
         }
         
         /// <summary>
@@ -542,23 +552,21 @@ namespace CrittercismSDK {
         /// <param name="value">    The value. </param>
         public static void SetValue(string key,string value) {
             if (GetOptOutStatus()) {
-                return;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
-                return;
-            }
-            try {
-                lock (lockObject) {
-                    if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
-                        Metadata[key]=value;
-                        UserMetadata metadata=new UserMetadata(
-                            AppID,new Dictionary<string,string>(Metadata));
-                        AddMessageToQueue(metadata);
+            } else {
+                try {
+                    lock (lockObject) {
+                        if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
+                            Metadata[key]=value;
+                            UserMetadata metadata=new UserMetadata(
+                                AppID,new Dictionary<string,string>(Metadata));
+                            AddMessageToQueue(metadata);
+                        }
                     }
+                } catch (Exception ie) {
+                    LogInternalException(ie);
                 }
-            } catch (Exception e) {
-                LogInternalException(e);
-                // explicit nop
             }
         }
 
@@ -567,16 +575,19 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="key">      The key. </param>
         public static string ValueFor(string key) {
+            string answer=null;
             if (GetOptOutStatus()) {
-                return null;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
-                return null;
-            };
-            string answer=null;
-            lock (lockObject) {
-                if (Metadata.ContainsKey(key)) {
-                    answer=Metadata[key];
+            } else {
+                try {
+                    lock (lockObject) {
+                        if (Metadata.ContainsKey(key)) {
+                            answer=Metadata[key];
+                        }
+                    }
+                } catch (Exception ie) {
+                    LogInternalException(ie);
                 }
             }
             return answer;
@@ -621,8 +632,8 @@ namespace CrittercismSDK {
             }
             try {
                 LogUnhandledException(args.Exception);
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 
@@ -640,8 +651,8 @@ namespace CrittercismSDK {
                         readerEvent.Set();
                     }
                 }
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 #elif WINDOWS_PHONE
@@ -656,8 +667,8 @@ namespace CrittercismSDK {
             }
             try {
                 LogUnhandledException((Exception)args.ExceptionObject);
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 
@@ -669,8 +680,8 @@ namespace CrittercismSDK {
                 BackgroundWorker backgroundWorker = new BackgroundWorker();
                 backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
                 backgroundWorker.RunWorkerAsync();
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 
@@ -678,8 +689,8 @@ namespace CrittercismSDK {
         {
             try {
                 StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 
@@ -690,8 +701,8 @@ namespace CrittercismSDK {
             }
             try {
                 PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 
@@ -712,8 +723,8 @@ namespace CrittercismSDK {
                             break;
                     }
                 }
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 #else
@@ -723,8 +734,8 @@ namespace CrittercismSDK {
             }
             try {
                 LogUnhandledException((Exception)args.ExceptionObject);
-            } catch (Exception e) {
-                LogInternalException(e);
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
         }
 

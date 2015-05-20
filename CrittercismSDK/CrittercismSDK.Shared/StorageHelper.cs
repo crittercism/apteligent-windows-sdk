@@ -129,8 +129,8 @@ namespace CrittercismSDK
             try {
                 string path=Path.Combine(CrittercismPath(),dataType.Name+".js");
                 data=Load(path,dataType);
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             };
             return data;
         }
@@ -165,8 +165,8 @@ namespace CrittercismSDK
                 } else {
                     Debug.WriteLine("Load: File doesn't exist "+path);
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             return data;
         }
@@ -212,8 +212,8 @@ namespace CrittercismSDK
             try {
                 string path=Path.Combine(CrittercismPath(),data.GetType().Name+".js");
                 answer=Save(data,path);
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             };
             return answer;
         }
@@ -232,8 +232,8 @@ namespace CrittercismSDK
                 Debug.WriteLine(dataString);
                 SaveString(path,dataString);
                 answer=true;
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             };
             return answer;
         }
@@ -394,8 +394,8 @@ namespace CrittercismSDK
                     //Debug.WriteLine("FileExists: answer=true");
                     answer=true;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
 #else
             answer=GetStore().FileExists(path);
@@ -414,8 +414,8 @@ namespace CrittercismSDK
                     //Debug.WriteLine("FolderExists: answer=true");
                     answer=true;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
 #else
             answer=GetStore().DirectoryExists(path);
