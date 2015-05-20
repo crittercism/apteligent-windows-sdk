@@ -488,12 +488,14 @@ namespace CrittercismSDK {
                 Debug.WriteLine(errorNotInitialized);
             } else {
                 try {
-                    Dictionary<string,string> metadata=CurrentMetadata();
-                    Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
-                    string stacktrace=StackTrace(e);
-                    ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                    HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
-                    AddMessageToQueue(he);
+                    lock (lockObject) {
+                        Dictionary<string,string> metadata=CurrentMetadata();
+                        Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
+                        string stacktrace=StackTrace(e);
+                        ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+                        HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
+                        AddMessageToQueue(he);
+                    }
                 } catch (Exception ie) {
                     LogInternalException(ie);
                 }
