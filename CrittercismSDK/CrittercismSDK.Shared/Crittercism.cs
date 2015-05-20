@@ -222,14 +222,14 @@ namespace CrittercismSDK {
                     deviceId=(string)StorageHelper.Load(path,typeof(String));
                 }
             } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+                LogInternalException(e);
             }
             if (deviceId==null) {
                 try {
                     deviceId=Guid.NewGuid().ToString();
                     StorageHelper.Save(deviceId,path);
                 } catch (Exception e) {
-                    Crittercism.LogInternalException(e);
+                    LogInternalException(e);
                     // if deviceId==null is returned, then Crittercism should say
                     // it wasn't able to initialize
                 }
@@ -346,7 +346,7 @@ namespace CrittercismSDK {
                                 PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(PhoneApplicationService_Deactivated);
                             }
                         } catch (Exception e) {
-                            Crittercism.LogInternalException(e);
+                            LogInternalException(e);
                         }
 #else
                         AppDomain.CurrentDomain.UnhandledException+=new UnhandledExceptionEventHandler(AppDomain_UnhandledException);
@@ -557,7 +557,7 @@ namespace CrittercismSDK {
                     }
                 }
             } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+                LogInternalException(e);
                 // explicit nop
             }
         }
@@ -622,8 +622,7 @@ namespace CrittercismSDK {
             try {
                 LogUnhandledException(args.Exception);
             } catch (Exception e) {
-                Crittercism.LogInternalException(e);
-                // explicit nop
+                LogInternalException(e);
             }
         }
 
@@ -631,14 +630,18 @@ namespace CrittercismSDK {
             if (GetOptOutStatus()) {
                 return;
             }
-            Debug.WriteLine("NetworkStatusChanged");
-            ConnectionProfile profile=NetworkInformation.GetInternetConnectionProfile();
-            bool isConnected=(profile!=null
-                &&(profile.GetNetworkConnectivityLevel()==NetworkConnectivityLevel.InternetAccess));
-            if (isConnected) {
-                if (MessageQueue!=null&&MessageQueue.Count>0) {
-                    readerEvent.Set();
+            try {
+                Debug.WriteLine("NetworkStatusChanged");
+                ConnectionProfile profile=NetworkInformation.GetInternetConnectionProfile();
+                bool isConnected=(profile!=null
+                    &&(profile.GetNetworkConnectivityLevel()==NetworkConnectivityLevel.InternetAccess));
+                if (isConnected) {
+                    if (MessageQueue!=null&&MessageQueue.Count>0) {
+                        readerEvent.Set();
+                    }
                 }
+            } catch (Exception e) {
+                LogInternalException(e);
             }
         }
 #elif WINDOWS_PHONE
@@ -654,8 +657,7 @@ namespace CrittercismSDK {
             try {
                 LogUnhandledException((Exception)args.ExceptionObject);
             } catch (Exception e) {
-                Crittercism.LogInternalException(e);
-                // explicit nop
+                LogInternalException(e);
             }
         }
 
@@ -663,14 +665,22 @@ namespace CrittercismSDK {
             if (GetOptOutStatus()) {
                 return;
             }
-            BackgroundWorker backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
-            backgroundWorker.RunWorkerAsync();
+            try {
+                BackgroundWorker backgroundWorker = new BackgroundWorker();
+                backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
+                backgroundWorker.RunWorkerAsync();
+            } catch (Exception e) {
+                LogInternalException(e);
+            }
         }
 
         static void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
+            try {
+                StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
+            } catch (Exception e) {
+                LogInternalException(e);
+            }
         }
 
         static void PhoneApplicationService_Deactivated(object sender, DeactivatedEventArgs e)
@@ -678,24 +688,32 @@ namespace CrittercismSDK {
             if (GetOptOutStatus()) {
                 return;
             }
-            PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
+            try {
+                PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
+            } catch (Exception e) {
+                LogInternalException(e);
+            }
         }
 
         static void DeviceNetworkInformation_NetworkAvailabilityChanged(object sender,NetworkNotificationEventArgs e) {
             if (GetOptOutStatus()) {
                 return;
             }
-            // This flag is for unit test
-            if (_autoRunQueueReader) {
-                switch (e.NotificationType) {
-                    case NetworkNotificationType.InterfaceConnected:
-                        if (NetworkInterface.GetIsNetworkAvailable()) {
-                            if (MessageQueue!=null&&MessageQueue.Count>0) {
-                                readerEvent.Set();
+            try {
+                // This flag is for unit test
+                if (_autoRunQueueReader) {
+                    switch (e.NotificationType) {
+                        case NetworkNotificationType.InterfaceConnected:
+                            if (NetworkInterface.GetIsNetworkAvailable()) {
+                                if (MessageQueue!=null&&MessageQueue.Count>0) {
+                                    readerEvent.Set();
+                                }
                             }
-                        }
-                        break;
+                            break;
+                    }
                 }
+            } catch (Exception e) {
+                LogInternalException(e);
             }
         }
 #else
@@ -706,8 +724,7 @@ namespace CrittercismSDK {
             try {
                 LogUnhandledException((Exception)args.ExceptionObject);
             } catch (Exception e) {
-                Crittercism.LogInternalException(e);
-                // explicit nop
+                LogInternalException(e);
             }
         }
 
@@ -724,7 +741,14 @@ namespace CrittercismSDK {
             // Windows Forms, use the UnhandledException event handler."
             // https://msdn.microsoft.com/en-us/library/ms157905(v=vs.110).aspx
             ////////////////////////////////////////////////////////////////
-            LogUnhandledException(t.Exception);
+            if (GetOptOutStatus()) {
+                return;
+            }
+            try {
+                LogUnhandledException(t.Exception);
+            } catch (Exception e) {
+                LogInternalException(e);
+            }
         }
 #endif
 
