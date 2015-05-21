@@ -506,7 +506,7 @@ namespace CrittercismSDK {
         /// Creates a crash report.
         /// </summary>
         /// <param name="currentException"> The current exception. </param>
-        internal static void LogUnhandledException(Exception e) {
+        public static void LogUnhandledException(Exception e) {
             if (initialized) {
                 // Seems Windows Forms apps can generate unhandled exceptions
                 // without really crashing.  For Windows Forms apps, we're only
