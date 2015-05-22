@@ -83,7 +83,7 @@ namespace WindowsFormsApp {
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(246, 75);
             this.button4.TabIndex = 3;
-            this.button4.Text = "Test Crash";
+            this.button4.Text = "Crash";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.testCrash_Click);
             // 

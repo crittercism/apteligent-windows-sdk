@@ -34,7 +34,10 @@ namespace WPFApp
         }
 
         private void leaveBreadcrumbClick(object sender,RoutedEventArgs e) {
-            Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
+            Random random=new Random();
+            string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
+            string name=names[random.Next(0,names.Length)];
+            Crittercism.LeaveBreadcrumb(name);
         }
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {

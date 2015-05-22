@@ -42,7 +42,7 @@
         <Button Grid.Row="2" Grid.Column="0"  Content="Handled Exception"
                 Style="{StaticResource CritterStyle}"
                 Click="handledExceptionClick"/>
-        <Button Grid.Row="3" Grid.Column="0" Content="Test Crash"
+        <Button Grid.Row="3" Grid.Column="0" Content="Crash"
                 Style="{StaticResource CritterStyle}"
                 Click="testCrashClick"/>
         <Button Grid.Row="4" Grid.Column="0" Content="Test Multithread"

@@ -22,7 +22,10 @@ namespace WP8TestApp
                 Thread.Sleep(rnd.Next(4000));
                 if (rnd.Next(10)==0) {
                     try {
-                        Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
+                        Random random=new Random();
+                        string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
+                        string name=names[random.Next(0,names.Length)];
+                        Crittercism.LeaveBreadcrumb(name);
                     } catch (Exception e) {
                         Console.WriteLine("UNEXPECTED ERROR!!! "+e.Message);
                     };

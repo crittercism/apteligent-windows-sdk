@@ -120,8 +120,6 @@ namespace HubApp
             Window.Current.Activate();
 
             Crittercism.Init("537a4e738039805d82000002");
-            Crittercism.SetUsername("MrsCritter");
-            //Crittercism.SetValue("Bird","Feeder");
         }
 
 #if WINDOWS_PHONE_APP
