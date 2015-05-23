@@ -98,7 +98,7 @@ namespace CrittercismSDK
                     sendCompleted=true;
                 } else if (NetworkInterface.GetIsNetworkAvailable()) {
                     try {
-                        // FIXME jbley many many things special-cased for UserMetadata - really need /v1 here
+                        // FIXME jbley many many things special-cased for MetadataReport - really need /v1 here
                         string postBody=null;
                         HttpWebRequest request=null;
                         switch (message.GetType().Name) {
@@ -118,11 +118,11 @@ namespace CrittercismSDK
                                 request.ContentType="application/json; charset=utf-8";
                                 postBody=JsonConvert.SerializeObject(message);
                                 break;
-                            case "UserMetadata":
+                            case "MetadataReport":
                                 request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/feedback/update_user_metadata",UriKind.Absolute));
                                 request.ContentType="application/x-www-form-urlencoded";
-                                UserMetadata um=message as UserMetadata;
-                                postBody=ComputeFormPostBody(um);
+                                MetadataReport metadataReport=message as MetadataReport;
+                                postBody=ComputeFormPostBody(metadataReport);
                                 break;
                             default:
                                 // FIXME jbley maybe some logging here?
@@ -291,19 +291,19 @@ namespace CrittercismSDK
         }
 #endif // WINDOWS_PHONE_APP
 
-        public static string ComputeFormPostBody(UserMetadata um) {
+        public static string ComputeFormPostBody(MetadataReport metadataReport) {
             string postBody="";
-            postBody+="did="+um.platform.device_id+"&";
-            postBody+="app_id="+um.app_id+"&";
-            string metadataJson=JsonConvert.SerializeObject(um.metadata);
+            postBody+="did="+metadataReport.platform.device_id+"&";
+            postBody+="app_id="+metadataReport.app_id+"&";
+            string metadataJson=JsonConvert.SerializeObject(metadataReport.metadata);
 #if NETFX_CORE
             postBody+="metadata="+WebUtility.UrlEncode(metadataJson)+"&";
-            postBody+="device_name="+WebUtility.UrlEncode(um.platform.device_model);
+            postBody+="device_name="+WebUtility.UrlEncode(metadataReport.platform.device_model);
 #else
             // Only .NETFramework 4.5 has WebUtility.UrlEncode, earlier version
             // .NETFramework 4.0 has HttpUtility.UrlEncode
             postBody+="metadata="+HttpUtility.UrlEncode(metadataJson)+"&";
-            postBody+="device_name="+HttpUtility.UrlEncode(um.platform.device_model);
+            postBody+="device_name="+HttpUtility.UrlEncode(metadataReport.platform.device_model);
 #endif
             return postBody;
         }

@@ -561,7 +561,7 @@ namespace CrittercismSDK {
                     lock (lockObject) {
                         if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
                             Metadata[key]=value;
-                            UserMetadata metadata=new UserMetadata(
+                            MetadataReport metadata=new MetadataReport(
                                 AppID,new Dictionary<string,string>(Metadata));
                             AddMessageToQueue(metadata);
                         }

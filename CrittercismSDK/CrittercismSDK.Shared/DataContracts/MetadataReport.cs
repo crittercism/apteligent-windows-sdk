@@ -10,7 +10,7 @@ namespace CrittercismSDK
     /// Application load.
     /// </summary>
     [DataContract]
-    internal class UserMetadata : MessageReport
+    internal class MetadataReport : MessageReport
     {
         /// <summary>
         /// Crittercism-issued Application identification string
@@ -30,12 +30,12 @@ namespace CrittercismSDK
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public UserMetadata() { }
+        public MetadataReport() { }
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public UserMetadata(string _appId,Dictionary<string,string> userMetadata) {
+        public MetadataReport(string _appId,Dictionary<string,string> userMetadata) {
             if (!String.IsNullOrEmpty(_appId)) {
                 app_id=_appId;
                 metadata=userMetadata;
