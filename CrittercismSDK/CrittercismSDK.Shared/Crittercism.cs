@@ -194,11 +194,11 @@ namespace CrittercismSDK {
 
         #region Init
 
-        private static string PrivateAppVersion() {
+        private static string LoadAppVersion() {
 #if NETFX_CORE
             PackageVersion version=Package.Current.Id.Version;
             string answer=""+version.Major+"."+version.Minor+"."+version.Build+"."+version.Revision;
-            Debug.WriteLine("PrivateAppVersion == "+answer);
+            Debug.WriteLine("LoadAppVersion == "+answer);
             return answer;
 #elif WINDOWS_PHONE
             return Application.Current.GetType().Assembly.GetName().Version.ToString();
@@ -214,7 +214,7 @@ namespace CrittercismSDK {
         /// If we don't have a device id, we create and store a new one.
         /// </summary>
         /// <returns>String with device_id, null otherwise</returns>
-        private static string PrivateDeviceId() {
+        private static string LoadDeviceId() {
             string deviceId=null;
             string path=Path.Combine(StorageHelper.CrittercismPath(),"DeviceId.js");
             try {
@@ -238,7 +238,7 @@ namespace CrittercismSDK {
             return deviceId;
         }
 
-        private static string PrivateDeviceModel() {
+        private static string LoadDeviceModel() {
             // TODO: We wish this method could be a lot better.
 #if NETFX_CORE
 #if WINDOWS_PHONE_APP
@@ -309,9 +309,9 @@ namespace CrittercismSDK {
                 };
                 lock (lockObject) {
                     MessageReport.Init();
-                    AppVersion=PrivateAppVersion();
-                    DeviceId=PrivateDeviceId();
-                    DeviceModel=PrivateDeviceModel();
+                    AppVersion=LoadAppVersion();
+                    DeviceId=LoadDeviceId();
+                    DeviceModel=LoadDeviceModel();
                     Metadata=LoadMetadata();
                     appLocator=new AppLocator(appID);
                     QueueReader queueReader=new QueueReader(appLocator);
