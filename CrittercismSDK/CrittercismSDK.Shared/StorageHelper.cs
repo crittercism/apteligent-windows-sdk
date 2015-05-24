@@ -23,6 +23,13 @@ namespace CrittercismSDK
     /// Storage helper.
     /// </summary>
     internal static class StorageHelper {
+        ////////////////////////////////////////////////////////////////
+        // NOTE: All "path" arguments to all StorageHelper methods are
+        // relative paths wrt GetStore() == app sandbox root .
+        // CrittercismPath() == "Crittercism" is a relative path.
+        // StoragePath() == absolute path of GetStore(), is used purely
+        // for debugging.
+        ////////////////////////////////////////////////////////////////
 
         private static object lockObject=new Object();
 
@@ -100,7 +107,7 @@ namespace CrittercismSDK
             // TODO: Return something better than zero.
             return 0;
 #else
-            // Tested GetStore().AvailableFreeSpace using DesktopApp. 
+            // Tested GetStore().AvailableFreeSpace using WPFApp . 
             // It returns 9223372036854713343 .  Predictable, but wrong.
             //return (ulong)GetStore().AvailableFreeSpace;
             // TODO: Return something better than zero.

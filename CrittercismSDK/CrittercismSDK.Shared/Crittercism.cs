@@ -1,4 +1,5 @@
 using CrittercismSDK;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -66,11 +67,11 @@ namespace CrittercismSDK {
         /// Gets or sets the current breadcrumbs.
         /// </summary>
         /// <value> The breadcrumbs. </value>
-        internal static Breadcrumbs PrivateBreadcrumbs { get; set; }
+        private static Breadcrumbs PrivateBreadcrumbs { get; set; }
 
         private static Breadcrumbs CurrentBreadcrumbs() {
-            Breadcrumbs answer=PrivateBreadcrumbs.Copy();
-            return answer;
+            // Copy of current PrivateBreadcrumbs
+            return PrivateBreadcrumbs.Copy();
         }
 
         internal static object lockObject=new Object();
@@ -94,14 +95,11 @@ namespace CrittercismSDK {
         /// Gets or sets the arbitrary user metadata.
         /// </summary>
         /// <value> The user metadata. </value>
-        internal static Dictionary<string, string> Metadata { get; set; }
+        private static Dictionary<string, string> Metadata { get; set; }
 
         private static Dictionary<string,string> CurrentMetadata() {
-            Dictionary<string,string> answer=null;
-            lock (lockObject) {
-                answer=new Dictionary<string,string>(Metadata);
-            }
-            return answer;
+            // Copy of current Metadata
+            return new Dictionary<string,string>(Metadata);
         }
 
         /// <summary> 
@@ -252,23 +250,39 @@ namespace CrittercismSDK {
             return "Windows PC";
 #endif // NETFX_CORE
         }
-        
+
         internal static Dictionary<string,string> LoadMetadata() {
             Dictionary<string,string> answer=null;
-            const string path="Metadata.js";
-            if (StorageHelper.FileExists(path)) {
-                answer=(Dictionary<string,string>)StorageHelper.Load(
-                     path,
-                     typeof(Dictionary<string,string>)
-                 );
+            try {
+                string path=Path.Combine(StorageHelper.CrittercismPath(),"Metadata.js");
+                if (StorageHelper.FileExists(path)) {
+                    answer=(Dictionary<string,string>)StorageHelper.Load(
+                        path,
+                        typeof(Dictionary<string,string>));
+                }
+            } catch (Exception ie) {
+                LogInternalException(ie);
             }
             if (answer==null) {
                 answer=new Dictionary<string,string>();
             }
+            Debug.WriteLine("LoadMetadata: "+JsonConvert.SerializeObject(answer));
             return answer;
         }
 
-        private static string PrivateOSVersion() {
+        private static bool SaveMetadata() {
+            bool answer=false;
+            try {
+                Debug.WriteLine("SaveMetadata: "+JsonConvert.SerializeObject(Metadata));
+                string path=Path.Combine(StorageHelper.CrittercismPath(),"Metadata.js");
+                answer=StorageHelper.Save(Metadata,path);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            };
+            return answer;
+        }
+
+        private static string LoadOSVersion() {
 #if NETFX_CORE
             // TODO: Returning an empty string here makes us sad.
             // "You cannot get the OS or .NET framework version in a Windows Store app ...
@@ -282,13 +296,13 @@ namespace CrittercismSDK {
         }
 
         /// <summary>
-        /// This method is invoked when the application starts or resume
+        /// This method is invoked when the application starts or resumes
         /// </summary>
         /// <param name="appID">    Identifier for the application. </param>
         private static void StartApplication(string appID) {
             // TODO: Why do we pass appID arg to this method?
             AppID=appID;
-            OSVersion=PrivateOSVersion();
+            OSVersion=LoadOSVersion();
             PrivateBreadcrumbs=Breadcrumbs.SessionStart();
             MessageQueue=new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
             LoadQueue();
@@ -372,6 +386,7 @@ namespace CrittercismSDK {
                 lock (lockObject) {
                     Debug.WriteLine("Save: SAVE STATE");
                     PrivateBreadcrumbs.Save();
+                    SaveMetadata();
                     foreach (MessageReport message in MessageQueue) {
                         message.Save();
                     }
@@ -513,7 +528,7 @@ namespace CrittercismSDK {
                 // reporting the first one in a given session.  This is why
                 // we're checking "initialized".
                 Dictionary<string,string> metadata=CurrentMetadata();
-                Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Copy();
+                Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
                 string stacktrace=StackTrace(e);
                 ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
                 Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
@@ -560,10 +575,14 @@ namespace CrittercismSDK {
                 try {
                     lock (lockObject) {
                         if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
-                            Metadata[key]=value;
-                            MetadataReport metadata=new MetadataReport(
+                            if (value==null) {
+                                Metadata.Remove(key);
+                            } else {
+                                Metadata[key]=value;
+                            }
+                            MetadataReport metadataReport=new MetadataReport(
                                 AppID,new Dictionary<string,string>(Metadata));
-                            AddMessageToQueue(metadata);
+                            AddMessageToQueue(metadataReport);
                         }
                     }
                 } catch (Exception ie) {
