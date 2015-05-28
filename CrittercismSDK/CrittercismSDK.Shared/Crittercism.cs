@@ -505,8 +505,8 @@ namespace CrittercismSDK {
             string stacktrace=StackTrace(e);
             ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
             Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
-            // Add crash to message queue and save state .
-            AddMessageToQueue(crash);
+            // Save crash to be sent next session and save state .
+            crash.Save();
             Save();
             // App is probably going to crash now, because we choose not
             // to handle the unhandled exception ourselves and typically
