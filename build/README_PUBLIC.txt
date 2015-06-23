@@ -1,4 +1,4 @@
-Thanks for installing Crittercism's Windows Phone 8 SDK!
+Thanks for installing Crittercism's Windows SDK!
 
 Now all you need to do is:
 1) Sign up for an account with Crittercism:
