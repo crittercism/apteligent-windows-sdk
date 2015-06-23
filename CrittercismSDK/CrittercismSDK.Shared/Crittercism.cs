@@ -1,5 +1,4 @@
 using CrittercismSDK;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,13 +30,10 @@ namespace CrittercismSDK {
     /// </summary>
     public class Crittercism {
         #region Constants
-
         private const string errorNotInitialized="ERROR: Crittercism not initialized yet.";
-
-        #endregion Constants
+        #endregion
 
         #region Properties
-
         /// <summary>
         /// The auto run queue reader
         /// </summary>
@@ -67,11 +63,11 @@ namespace CrittercismSDK {
         /// Gets or sets the current breadcrumbs.
         /// </summary>
         /// <value> The breadcrumbs. </value>
-        private static Breadcrumbs PrivateBreadcrumbs { get; set; }
+        internal static Breadcrumbs PrivateBreadcrumbs { get; set; }
 
         private static Breadcrumbs CurrentBreadcrumbs() {
-            // Copy of current PrivateBreadcrumbs
-            return PrivateBreadcrumbs.Copy();
+            Breadcrumbs answer=PrivateBreadcrumbs.Copy();
+            return answer;
         }
 
         internal static object lockObject=new Object();
@@ -95,11 +91,14 @@ namespace CrittercismSDK {
         /// Gets or sets the arbitrary user metadata.
         /// </summary>
         /// <value> The user metadata. </value>
-        private static Dictionary<string, string> Metadata { get; set; }
+        internal static Dictionary<string, string> Metadata { get; set; }
 
         private static Dictionary<string,string> CurrentMetadata() {
-            // Copy of current Metadata
-            return new Dictionary<string,string>(Metadata);
+            Dictionary<string,string> answer=null;
+            lock (lockObject) {
+                answer=new Dictionary<string,string>(Metadata);
+            }
+            return answer;
         }
 
         /// <summary> 
@@ -126,7 +125,7 @@ namespace CrittercismSDK {
         /// </summary>
         internal static AutoResetEvent readerEvent = new AutoResetEvent(false);
 
-        #endregion Properties
+        #endregion
 
         #region OptOutStatus
 
@@ -188,15 +187,15 @@ namespace CrittercismSDK {
             }
         }
 
-        #endregion OptOutStatus
+        #endregion
 
-        #region Init
+        #region Methods
 
-        private static string LoadAppVersion() {
+        private static string PrivateAppVersion() {
 #if NETFX_CORE
             PackageVersion version=Package.Current.Id.Version;
             string answer=""+version.Major+"."+version.Minor+"."+version.Build+"."+version.Revision;
-            Debug.WriteLine("LoadAppVersion == "+answer);
+            Debug.WriteLine("PrivateAppVersion == "+answer);
             return answer;
 #elif WINDOWS_PHONE
             return Application.Current.GetType().Assembly.GetName().Version.ToString();
@@ -212,22 +211,22 @@ namespace CrittercismSDK {
         /// If we don't have a device id, we create and store a new one.
         /// </summary>
         /// <returns>String with device_id, null otherwise</returns>
-        private static string LoadDeviceId() {
+        private static string PrivateDeviceId() {
             string deviceId=null;
             string path=Path.Combine(StorageHelper.CrittercismPath(),"DeviceId.js");
             try {
                 if (StorageHelper.FileExists(path)) {
                     deviceId=(string)StorageHelper.Load(path,typeof(String));
                 }
-            } catch (Exception ie) {
-                LogInternalException(ie);
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
             }
             if (deviceId==null) {
                 try {
                     deviceId=Guid.NewGuid().ToString();
                     StorageHelper.Save(deviceId,path);
-                } catch (Exception ie) {
-                    LogInternalException(ie);
+                } catch (Exception e) {
+                    Crittercism.LogInternalException(e);
                     // if deviceId==null is returned, then Crittercism should say
                     // it wasn't able to initialize
                 }
@@ -236,7 +235,7 @@ namespace CrittercismSDK {
             return deviceId;
         }
 
-        private static string LoadDeviceModel() {
+        private static string PrivateDeviceModel() {
             // TODO: We wish this method could be a lot better.
 #if NETFX_CORE
 #if WINDOWS_PHONE_APP
@@ -250,67 +249,24 @@ namespace CrittercismSDK {
             return "Windows PC";
 #endif // NETFX_CORE
         }
-
+        
         internal static Dictionary<string,string> LoadMetadata() {
             Dictionary<string,string> answer=null;
-            try {
-                string path=Path.Combine(StorageHelper.CrittercismPath(),"Metadata.js");
-                if (StorageHelper.FileExists(path)) {
-                    answer=(Dictionary<string,string>)StorageHelper.Load(
-                        path,
-                        typeof(Dictionary<string,string>));
-                }
-            } catch (Exception ie) {
-                LogInternalException(ie);
+            const string path="Metadata.js";
+            if (StorageHelper.FileExists(path)) {
+                answer=(Dictionary<string,string>)StorageHelper.Load(
+                     path,
+                     typeof(Dictionary<string,string>)
+                 );
             }
             if (answer==null) {
                 answer=new Dictionary<string,string>();
             }
-            Debug.WriteLine("LoadMetadata: "+JsonConvert.SerializeObject(answer));
-            return answer;
-        }
-
-        private static bool SaveMetadata() {
-            bool answer=false;
-            try {
-                Debug.WriteLine("SaveMetadata: "+JsonConvert.SerializeObject(Metadata));
-                string path=Path.Combine(StorageHelper.CrittercismPath(),"Metadata.js");
-                answer=StorageHelper.Save(Metadata,path);
-            } catch (Exception ie) {
-                Crittercism.LogInternalException(ie);
-            };
-            return answer;
-        }
-
-        private static string LoadOSVersion() {
-#if NETFX_CORE
-            // TODO: Returning an empty string here makes us sad.
-            // "You cannot get the OS or .NET framework version in a Windows Store app ...
-            // Marked as answer by Anne Jing Microsoft contingent staff, Moderator"
-            // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/66e662a9-9ece-4863-8cf1-a5e259c7b571/c-windows-store-8-os-version-name-and-net-version-name
-            string answer="";
-#else
-            string answer=Environment.OSVersion.Platform.ToString();
-#endif
             return answer;
         }
 
         /// <summary>
-        /// This method is invoked when the application starts or resumes
-        /// </summary>
-        /// <param name="appID">    Identifier for the application. </param>
-        private static void StartApplication(string appID) {
-            // TODO: Why do we pass appID arg to this method?
-            AppID=appID;
-            OSVersion=LoadOSVersion();
-            PrivateBreadcrumbs=Breadcrumbs.SessionStart();
-            MessageQueue=new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
-            LoadQueue();
-            CreateAppLoadReport();
-        }
-
-        /// <summary>
-        /// Initialises Crittercism.
+        /// Initialises this object.
         /// </summary>
         /// <param name="appID">  Identifier for the application. </param>
         public static void Init(string appID) {
@@ -323,9 +279,9 @@ namespace CrittercismSDK {
                 };
                 lock (lockObject) {
                     MessageReport.Init();
-                    AppVersion=LoadAppVersion();
-                    DeviceId=LoadDeviceId();
-                    DeviceModel=LoadDeviceModel();
+                    AppVersion=PrivateAppVersion();
+                    DeviceId=PrivateDeviceId();
+                    DeviceModel=PrivateDeviceModel();
                     Metadata=LoadMetadata();
                     appLocator=new AppLocator(appID);
                     QueueReader queueReader=new QueueReader(appLocator);
@@ -335,129 +291,156 @@ namespace CrittercismSDK {
 #else
                     ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
                     readerThread=new Thread(threadStart);
-                    readerThread.Name="Crittercism";
+                    readerThread.Name="Crittercism Sender";
 #endif
-                    // NOTE: Put initialized=true before readerThread.Start() .
-                    // Later on, initialized may be reset back to false during shutdown,
-                    // and readerThread will see initialized==false as a message to exit.
-                    // Spares us from creating an additional "shuttingdown" flag.
-                    initialized=true;
                     readerThread.Start();
-                    // NOTE: Since StartApplication will induce an AppLoad, it seems
-                    // best to put StartApplication after readerThread.Start() .
                     StartApplication(appID);
                     // _autoRunQueueReader for unit test purposes
                     if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
 #if NETFX_CORE
-                        Application.Current.UnhandledException+=Application_UnhandledException;
+                        Application.Current.UnhandledException+=Current_UnhandledException;
                         NetworkInformation.NetworkStatusChanged+=NetworkInformation_NetworkStatusChanged;
 #elif WINDOWS_PHONE
-                        Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(SilverlightApplication_UnhandledException);
+                        Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(Current_UnhandledException);
                         DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
                         try {
                             if (PhoneApplicationService.Current!=null) {
-                                PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(PhoneApplicationService_Activated);
-                                PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(PhoneApplicationService_Deactivated);
+                                PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(Current_Activated);
+                                PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(Current_Deactivated);
                             }
-                        } catch (Exception ie) {
-                            LogInternalException(ie);
+                        } catch (Exception e) {
+                            Crittercism.LogInternalException(e);
                         }
 #else
-                        AppDomain.CurrentDomain.UnhandledException+=new UnhandledExceptionEventHandler(AppDomain_UnhandledException);
-                        System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsFormsApplication_ThreadException);
+                        AppDomain currentDomain=AppDomain.CurrentDomain;
+                        currentDomain.UnhandledException+=new UnhandledExceptionEventHandler(Current_UnhandledException);
+                        // Add event handler for handling System.Windows.Forms UI thread exceptions .
+                        System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsForm_UIThreadException);
 #endif
                     }
+                    initialized=true;
+                    Debug.WriteLine("Crittercism initialized.");
                 }
             } catch (Exception) {
-                initialized=false;
             }
-            if (initialized) {
-                Debug.WriteLine("Crittercism initialized.");
-            } else {
+            if (!initialized) {
                 Debug.WriteLine("Crittercism did not initialize.");
             }
         }
-        #endregion Init
 
-        #region ShutDown
+#if NETFX_CORE
+#elif WINDOWS_PHONE
+#else
+        private static void WindowsForm_UIThreadException(object sender,ThreadExceptionEventArgs t) {
+            ////////////////////////////////////////////////////////////////
+            // Crittercism unhandled exception handler for Windows Forms apps.
+            // Crittercism users must add
+            //     Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            // to their Program.cs Main() .
+            // MSDN: "Application.SetUnhandledExceptionMode Method (UnhandledExceptionMode)
+            // Call SetUnhandledExceptionMode before you instantiate the main form
+            // of your application using the Run method.
+            // To catch exceptions that occur in threads not created and owned by
+            // Windows Forms, use the UnhandledException event handler."
+            // https://msdn.microsoft.com/en-us/library/ms157905(v=vs.110).aspx
+            ////////////////////////////////////////////////////////////////
+            LogUnhandledException(t.Exception);
+        }
+#endif
+
+        /// <summary>
+        /// Sets "username" metadata value.
+        /// </summary>
+        /// <param name="username"> The username. </param>
+        public static void SetUsername(string username) {
+            // SetValue will check GetOptOutStatus() and initialized .
+            SetValue("username", username);
+        }
+
+        /// <summary>
+        /// Gets "username" metadata value.
+        /// </summary>
+        public static string Username() {
+            // ValueFor will check GetOptOutStatus() and initialized .
+            return ValueFor("username");
+        }
+
+        /// <summary>
+        /// Sets a user metadata value.
+        /// </summary>
+        /// <param name="key">      The key. </param>
+        /// <param name="value">    The value. </param>
+        public static void SetValue(string key,string value) {
+            if (GetOptOutStatus()) {
+                return;
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+                return;
+            }
+            try {
+                lock (lockObject) {
+                    if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
+                        Metadata[key]=value;
+                        UserMetadata metadata=new UserMetadata(
+                            AppID,new Dictionary<string,string>(Metadata));
+                        AddMessageToQueue(metadata);
+                    }
+                }
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
+                // explicit nop
+            }
+        }
+
+        /// <summary>
+        /// Returns a user metadata value.
+        /// </summary>
+        /// <param name="key">      The key. </param>
+        public static string ValueFor(string key) {
+            if (GetOptOutStatus()) {
+                return null;
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+                return null;
+            };
+            string answer=null;
+            lock (lockObject) {
+                if (Metadata.ContainsKey(key)) {
+                    answer=Metadata[key];
+                }
+            }
+            return answer;
+        }
+
         internal static void Save() {
             // Save current Crittercism state
             try {
                 lock (lockObject) {
                     Debug.WriteLine("Save: SAVE STATE");
                     PrivateBreadcrumbs.Save();
-                    SaveMetadata();
                     foreach (MessageReport message in MessageQueue) {
                         message.Save();
                     }
                 }
-            } catch (Exception ie) {
-                LogInternalException(ie);
+            } catch (Exception e) {
+                LogInternalException(e);
             }
         }
 
         /// <summary>
-        /// Shuts down Crittercism.
-        /// </summary>
-        public static void Shutdown() {
-            // Shutdown Crittercism, including readerThread .
-            Debug.WriteLine("Shutdown");
-            try {
-                if (initialized) {
-                    lock (lockObject) {
-                        if (initialized) {
-                            initialized=false;
-                            // Get the readerThread to exit.
-                            readerEvent.Set();
-#if NETFX_CORE
-                            readerThread.Wait();
-#else
-                            readerThread.Join();
-#endif
-                            // Save state.
-                            Save();
-                        }
-                    }
-                }
-            } catch (Exception ie) {
-                LogInternalException(ie);
-            }
-        }
-        #endregion Shutdown
-
-        #region AppLoads
-        /// <summary>
-        /// Creates the application load report.
-        /// </summary>
-        private static void CreateAppLoadReport() {
-            if (GetOptOutStatus()) {
-                return;
-            }
-            AppLoad appLoad=new AppLoad();
-            AddMessageToQueue(appLoad);
-        }
-        #endregion AppLoads
-
-        #region Breadcrumbs
-        /// <summary>
-        /// Leave breadcrumb.
+        /// Leave breadcrum.
         /// </summary>
         /// <param name="breadcrumb">   The breadcrumb. </param>
         public static void LeaveBreadcrumb(string breadcrumb) {
             if (GetOptOutStatus()) {
+                return;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
-            } else {
-                try {
-                    PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
-                } catch (Exception ie) {
-                    LogInternalException(ie);
-                }
-            }
+                return;
+            };
+            PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
         }
-        #endregion Breadcrumbs
 
-        #region Exceptions and Crashes
         internal static void LogInternalException(Exception e) {
             Debug.WriteLine("UNEXPECTED ERROR!!! "+e.Message);
             Debug.WriteLine(e.StackTrace);
@@ -499,123 +482,49 @@ namespace CrittercismSDK {
         /// </summary>
         public static void LogHandledException(Exception e) {
             if (GetOptOutStatus()) {
+                return;
             } else if (!initialized) {
                 Debug.WriteLine(errorNotInitialized);
-            } else {
-                try {
-                    lock (lockObject) {
-                        Dictionary<string,string> metadata=CurrentMetadata();
-                        Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
-                        string stacktrace=StackTrace(e);
-                        ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                        HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
-                        AddMessageToQueue(he);
-                    }
-                } catch (Exception ie) {
-                    LogInternalException(ie);
-                }
-            }
+                return;
+            };
+            Dictionary<string,string> metadata=CurrentMetadata();
+            Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
+            string stacktrace=StackTrace(e);
+            ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+            HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
+            AddMessageToQueue(he);
         }
         
         /// <summary>
         /// Creates a crash report.
         /// </summary>
         /// <param name="currentException"> The current exception. </param>
-        public static void LogUnhandledException(Exception e) {
-            if (initialized) {
-                // Seems Windows Forms apps can generate unhandled exceptions
-                // without really crashing.  For Windows Forms apps, we're only
-                // reporting the first one in a given session.  This is why
-                // we're checking "initialized".
-                Dictionary<string,string> metadata=CurrentMetadata();
-                Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
-                string stacktrace=StackTrace(e);
-                ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
-                // Add crash to message queue and save state .
-                Shutdown();
-                AddMessageToQueue(crash);
-                Save();
-                // App is probably going to crash now, because we choose not
-                // to handle the unhandled exception ourselves and typically
-                // most apps will choose to log the exception (e.g. with Crittercism)
-                // but let the crash go ahead.
-            }
+        internal static void LogUnhandledException(Exception e) {
+            Dictionary<string,string> metadata=CurrentMetadata();
+            Breadcrumbs breadcrumbs=PrivateBreadcrumbs.Copy();
+            string stacktrace=StackTrace(e);
+            ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+            Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
+            // Save crash to be sent next session and save state .
+            crash.Save();
+            Save();
+            // App is probably going to crash now, because we choose not
+            // to handle the unhandled exception ourselves and typically
+            // most apps will choose to log the exception (e.g. with Crittercism)
+            // but let the crash go ahead.
         }
-        #endregion Exceptions and Crashes
-
-        #region Metadata
+        
         /// <summary>
-        /// Sets "username" metadata value.
+        /// Creates the application load report.
         /// </summary>
-        /// <param name="username"> The username. </param>
-        public static void SetUsername(string username) {
-            // SetValue will check GetOptOutStatus() and initialized .
-            SetValue("username",username);
-        }
-
-        /// <summary>
-        /// Gets "username" metadata value.
-        /// </summary>
-        public static string Username() {
-            // ValueFor will check GetOptOutStatus() and initialized .
-            return ValueFor("username");
-        }
-
-        /// <summary>
-        /// Sets a user metadata value.
-        /// </summary>
-        /// <param name="key">      The key. </param>
-        /// <param name="value">    The value. </param>
-        public static void SetValue(string key,string value) {
+        private static void CreateAppLoadReport() {
             if (GetOptOutStatus()) {
-            } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
-            } else {
-                try {
-                    lock (lockObject) {
-                        if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
-                            if (value==null) {
-                                Metadata.Remove(key);
-                            } else {
-                                Metadata[key]=value;
-                            }
-                            MetadataReport metadataReport=new MetadataReport(
-                                AppID,new Dictionary<string,string>(Metadata));
-                            AddMessageToQueue(metadataReport);
-                        }
-                    }
-                } catch (Exception ie) {
-                    LogInternalException(ie);
-                }
+                return;
             }
+            AppLoad appLoad=new AppLoad();
+            AddMessageToQueue(appLoad);
         }
 
-        /// <summary>
-        /// Returns a user metadata value.
-        /// </summary>
-        /// <param name="key">      The key. </param>
-        public static string ValueFor(string key) {
-            string answer=null;
-            if (GetOptOutStatus()) {
-            } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
-            } else {
-                try {
-                    lock (lockObject) {
-                        if (Metadata.ContainsKey(key)) {
-                            answer=Metadata[key];
-                        }
-                    }
-                } catch (Exception ie) {
-                    LogInternalException(ie);
-                }
-            }
-            return answer;
-        }
-        #endregion Metadata
-
-        #region MessageQueue
         /// <summary>
         /// Loads the messages from disk into the queue.
         /// </summary>
@@ -641,20 +550,46 @@ namespace CrittercismSDK {
             MessageQueue.Enqueue(message);
             readerEvent.Set();
         }
-        #endregion // MessageQueue
 
-        #region Event Handlers
+        private static string PrivateOSVersion() {
+#if NETFX_CORE
+            // TODO: Returning an empty string here makes us sad.
+            // "You cannot get the OS or .NET framework version in a Windows Store app ...
+            // Marked as answer by Anne Jing Microsoft contingent staff, Moderator"
+            // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/66e662a9-9ece-4863-8cf1-a5e259c7b571/c-windows-store-8-os-version-name-and-net-version-name
+            string answer="";
+#else
+            string answer=Environment.OSVersion.Platform.ToString();
+#endif
+            return answer;
+        }
+
+        /// <summary>
+        /// This method is invoked when the application starts or resume
+        /// </summary>
+        /// <param name="appID">    Identifier for the application. </param>
+        private static void StartApplication(string appID)
+        {
+            // TODO: Why do we pass appID arg to this method?
+            AppID=appID;
+            OSVersion=PrivateOSVersion();
+            PrivateBreadcrumbs=Breadcrumbs.SessionStart();
+            MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
+            LoadQueue();
+            CreateAppLoadReport();
+        }
 
 #if NETFX_CORE
 #pragma warning disable 1998
-        private static async void Application_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
+        private static async void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
                 return;
             }
             try {
                 LogUnhandledException(args.Exception);
-            } catch (Exception ie) {
-                LogInternalException(ie);
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
+                // explicit nop
             }
         }
 
@@ -662,18 +597,14 @@ namespace CrittercismSDK {
             if (GetOptOutStatus()) {
                 return;
             }
-            try {
-                Debug.WriteLine("NetworkStatusChanged");
-                ConnectionProfile profile=NetworkInformation.GetInternetConnectionProfile();
-                bool isConnected=(profile!=null
-                    &&(profile.GetNetworkConnectivityLevel()==NetworkConnectivityLevel.InternetAccess));
-                if (isConnected) {
-                    if (MessageQueue!=null&&MessageQueue.Count>0) {
-                        readerEvent.Set();
-                    }
+            Debug.WriteLine("NetworkStatusChanged");
+            ConnectionProfile profile=NetworkInformation.GetInternetConnectionProfile();
+            bool isConnected=(profile!=null
+                &&(profile.GetNetworkConnectivityLevel()==NetworkConnectivityLevel.InternetAccess));
+            if (isConnected) {
+                if (MessageQueue!=null&&MessageQueue.Count>0) {
+                    readerEvent.Set();
                 }
-            } catch (Exception ie) {
-                LogInternalException(ie);
             }
         }
 #elif WINDOWS_PHONE
@@ -682,108 +613,70 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="sender">   Source of the event. </param>
         /// <param name="e">        Application unhandled exception event information. </param>
-        static void SilverlightApplication_UnhandledException(object sender,ApplicationUnhandledExceptionEventArgs args) {
+        static void Current_UnhandledException(object sender,ApplicationUnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
                 return;
             }
             try {
                 LogUnhandledException((Exception)args.ExceptionObject);
-            } catch (Exception ie) {
-                LogInternalException(ie);
+            } catch (Exception e) {
+                Crittercism.LogInternalException(e);
+                // explicit nop
             }
         }
 
-        static void PhoneApplicationService_Activated(object sender, ActivatedEventArgs e) {
+        static void Current_Activated(object sender, ActivatedEventArgs e) {
             if (GetOptOutStatus()) {
                 return;
             }
-            try {
-                BackgroundWorker backgroundWorker = new BackgroundWorker();
-                backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
-                backgroundWorker.RunWorkerAsync();
-            } catch (Exception ie) {
-                LogInternalException(ie);
-            }
+            BackgroundWorker backgroundWorker = new BackgroundWorker();
+            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker_DoWork);
+            backgroundWorker.RunWorkerAsync();
         }
 
-        static void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        static void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            try {
-                StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
-            } catch (Exception ie) {
-                LogInternalException(ie);
-            }
+            StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
         }
 
-        static void PhoneApplicationService_Deactivated(object sender, DeactivatedEventArgs e)
+        static void Current_Deactivated(object sender, DeactivatedEventArgs e)
         {
             if (GetOptOutStatus()) {
                 return;
             }
-            try {
-                PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
-            } catch (Exception ie) {
-                LogInternalException(ie);
-            }
+            PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
         }
 
         static void DeviceNetworkInformation_NetworkAvailabilityChanged(object sender,NetworkNotificationEventArgs e) {
             if (GetOptOutStatus()) {
                 return;
             }
-            try {
-                // This flag is for unit test
-                if (_autoRunQueueReader) {
-                    switch (e.NotificationType) {
-                        case NetworkNotificationType.InterfaceConnected:
-                            if (NetworkInterface.GetIsNetworkAvailable()) {
-                                if (MessageQueue!=null&&MessageQueue.Count>0) {
-                                    readerEvent.Set();
-                                }
+            // This flag is for unit test
+            if (_autoRunQueueReader) {
+                switch (e.NotificationType) {
+                    case NetworkNotificationType.InterfaceConnected:
+                        if (NetworkInterface.GetIsNetworkAvailable()) {
+                            if (MessageQueue!=null&&MessageQueue.Count>0) {
+                                readerEvent.Set();
                             }
-                            break;
-                    }
+                        }
+                        break;
                 }
-            } catch (Exception ie) {
-                LogInternalException(ie);
             }
         }
 #else
-        static void AppDomain_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
+        static void Current_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
                 return;
             }
             try {
                 LogUnhandledException((Exception)args.ExceptionObject);
-            } catch (Exception ie) {
-                LogInternalException(ie);
-            }
-        }
-
-        private static void WindowsFormsApplication_ThreadException(object sender,ThreadExceptionEventArgs t) {
-            ////////////////////////////////////////////////////////////////
-            // Crittercism unhandled exception handler for Windows Forms apps.
-            // Crittercism users must add
-            //     Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            // to their Program.cs Main() .
-            // MSDN: "Application.SetUnhandledExceptionMode Method (UnhandledExceptionMode)
-            // Call SetUnhandledExceptionMode before you instantiate the main form
-            // of your application using the Run method.
-            // To catch exceptions that occur in threads not created and owned by
-            // Windows Forms, use the UnhandledException event handler."
-            // https://msdn.microsoft.com/en-us/library/ms157905(v=vs.110).aspx
-            ////////////////////////////////////////////////////////////////
-            if (GetOptOutStatus()) {
-                return;
-            }
-            try {
-                LogUnhandledException(t.Exception);
             } catch (Exception e) {
-                LogInternalException(e);
+                Crittercism.LogInternalException(e);
+                // explicit nop
             }
         }
 #endif
-
-        #endregion // Event Handlers
+        #endregion
     }
 }
