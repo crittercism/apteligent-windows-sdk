@@ -45,9 +45,9 @@
         <Button Grid.Row="3" Grid.Column="0" Content="Crash"
                 Style="{StaticResource CritterStyle}"
                 Click="testCrashClick"/>
-        <Button Grid.Row="4" Grid.Column="0" Content="Test Multithread"
+        <Button Grid.Row="4" Grid.Column="0" Content="New Window"
                 Style="{StaticResource CritterStyle}"
-                Click="testMultithreadClick"/>
+                Click="testNewWindowClick"/>
         <Button Grid.Row="4" Grid.Column="0"
                 HorizontalAlignment="Right" VerticalAlignment="Center"
                 Click="critterClick">

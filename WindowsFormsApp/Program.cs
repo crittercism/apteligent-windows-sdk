@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CrittercismSDK;
 
 namespace WindowsFormsApp {
     static class Program {
@@ -13,7 +14,9 @@ namespace WindowsFormsApp {
         static void Main() {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Crittercism.Init("537a4e738039805d82000002");
+            (new Form1()).Show();
+            Application.Run();
         }
     }
 }

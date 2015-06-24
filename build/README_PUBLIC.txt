@@ -7,7 +7,7 @@ Now all you need to do is:
 2. Obtain your App Id from the Crittercism portal's app settings page.
    Your App Id will be a 24 or 40 digit character string. 
 3. Add the following code to your app's Application_Launching(), OnLaunched(),
-   or Application_Startup() method.
+   Application_Startup(), or Main() method.
      Crittercism.Init("YOUR APP ID GOES HERE");
 
 At this point, your app is enabled to monitor app loads and crashes.

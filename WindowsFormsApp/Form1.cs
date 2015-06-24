@@ -12,12 +12,14 @@ using CrittercismSDK;
 
 namespace WindowsFormsApp {
     public partial class Form1 : Form {
+        private static int ApplicationOpenFormsCount = 0;
+
         public Form1() {
             InitializeComponent();
+            ApplicationOpenFormsCount++;
         }
 
         protected override void OnLoad(EventArgs e) {
-            Crittercism.Init("537a4e738039805d82000002");
             Crittercism.LeaveBreadcrumb("OnLoad");
         }
 
@@ -89,7 +91,16 @@ namespace WindowsFormsApp {
 
         private void Form1_FormClosed(object sender,FormClosedEventArgs e) {
             Crittercism.LeaveBreadcrumb("FormClosed");
-            Crittercism.Shutdown();
+            ApplicationOpenFormsCount--;
+            if (ApplicationOpenFormsCount==0) {
+                // Last window is closing.
+                Crittercism.Shutdown();
+                Application.Exit();
+            }
+        }
+
+        private void testNewWindowClick(object sender,EventArgs e) {
+            (new Form1()).Show();
         }
     }
 }

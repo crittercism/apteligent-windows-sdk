@@ -79,6 +79,10 @@ namespace WPFApp
             thread.Start();
         }
 
+        private void testNewWindowClick(object sender,RoutedEventArgs e) {
+            (new MainWindow()).Show();
+        }
+
         private void critterClick(object sender,RoutedEventArgs e) {
             string username=Crittercism.Username();
             if (username==null) {
@@ -99,7 +103,11 @@ namespace WPFApp
 
         private void Window_Closed(object sender,EventArgs e) {
             Crittercism.LeaveBreadcrumb("Closed");
-            Crittercism.Shutdown();
+            if (Application.Current.Windows.Count==0) {
+                // Last window is closing.
+                Crittercism.Shutdown();
+                Application.Current.Shutdown();
+            }
         }
     }
 }
