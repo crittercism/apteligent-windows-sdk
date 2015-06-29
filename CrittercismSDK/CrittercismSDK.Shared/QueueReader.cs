@@ -37,7 +37,9 @@ namespace CrittercismSDK
         internal void ReadQueue() {
             Debug.WriteLine("ReadQueue: ENTER");
             try {
-                while (true) {
+                while (Crittercism.initialized) {
+                    ReadStep();
+                    Debug.WriteLine("ReadQueue: SLEEP");
                     // wake up again 300000 milliseconds == 5 minute timeout from now
                     // even without prompting.  Useful if last SendMessage failed and
                     // it seems time to try again despite no new messages have poured
@@ -45,11 +47,9 @@ namespace CrittercismSDK
                     const int READQUEUE_MILLISECONDS_TIMEOUT=300000;
                     Crittercism.readerEvent.WaitOne(READQUEUE_MILLISECONDS_TIMEOUT);
                     Debug.WriteLine("ReadQueue: WAKE");
-                    ReadStep();
-                    Debug.WriteLine("ReadQueue: SLEEP");
                 };
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             Debug.WriteLine("ReadQueue: EXIT");
         }
@@ -58,7 +58,11 @@ namespace CrittercismSDK
             Debug.WriteLine("ReadStep: ENTER");
             try {
                 int retry=0;
-                while (Crittercism.MessageQueue!=null&&Crittercism.MessageQueue.Count>0&&NetworkInterface.GetIsNetworkAvailable()&&retry<5) {
+                while (Crittercism.initialized
+                    &&(Crittercism.MessageQueue!=null)
+                    &&(Crittercism.MessageQueue.Count>0)
+                    &&(NetworkInterface.GetIsNetworkAvailable())
+                    &&(retry<3)) {
                     if (SendMessage()) {
                         retry=0;
                     } else {
@@ -72,8 +76,8 @@ namespace CrittercismSDK
                 // shorter either because SendMessage failed or MessageQueue has gone empty.
                 // The readerThread will be going into a do nothing wait state after this.
                 Crittercism.Save();
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             Debug.WriteLine("ReadStep: EXIT");
         }
@@ -94,7 +98,7 @@ namespace CrittercismSDK
                     sendCompleted=true;
                 } else if (NetworkInterface.GetIsNetworkAvailable()) {
                     try {
-                        // FIXME jbley many many things special-cased for UserMetadata - really need /v1 here
+                        // FIXME jbley many many things special-cased for MetadataReport - really need /v1 here
                         string postBody=null;
                         HttpWebRequest request=null;
                         switch (message.GetType().Name) {
@@ -114,11 +118,11 @@ namespace CrittercismSDK
                                 request.ContentType="application/json; charset=utf-8";
                                 postBody=JsonConvert.SerializeObject(message);
                                 break;
-                            case "UserMetadata":
+                            case "MetadataReport":
                                 request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/feedback/update_user_metadata",UriKind.Absolute));
                                 request.ContentType="application/x-www-form-urlencoded";
-                                UserMetadata um=message as UserMetadata;
-                                postBody=ComputeFormPostBody(um);
+                                MetadataReport metadataReport=message as MetadataReport;
+                                postBody=ComputeFormPostBody(metadataReport);
                                 break;
                             default:
                                 // FIXME jbley maybe some logging here?
@@ -140,8 +144,8 @@ namespace CrittercismSDK
                 if (!sendCompleted) {
                     Crittercism.MessageQueue.Enqueue(message);
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             //Debug.WriteLine("SendMessage: EXIT ---> "+sendCompleted);
             return sendCompleted;
@@ -195,8 +199,8 @@ namespace CrittercismSDK
                 if (Crittercism._enableRaiseExceptionInCommunicationLayer&&lastException!=null) {
                     throw lastException;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             Debug.WriteLine("SendRequest: EXIT ---> "+sendCompleted);
             return sendCompleted;
@@ -279,27 +283,27 @@ namespace CrittercismSDK
                 if (Crittercism._enableRaiseExceptionInCommunicationLayer&&lastException!=null) {
                     throw lastException;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             Debug.WriteLine("SendRequest: EXIT ---> "+sendCompleted);
             return sendCompleted;
         }
 #endif // WINDOWS_PHONE_APP
 
-        public static string ComputeFormPostBody(UserMetadata um) {
+        public static string ComputeFormPostBody(MetadataReport metadataReport) {
             string postBody="";
-            postBody+="did="+um.platform.device_id+"&";
-            postBody+="app_id="+um.app_id+"&";
-            string metadataJson=JsonConvert.SerializeObject(um.metadata);
+            postBody+="did="+metadataReport.platform.device_id+"&";
+            postBody+="app_id="+metadataReport.app_id+"&";
+            string metadataJson=JsonConvert.SerializeObject(metadataReport.metadata);
 #if NETFX_CORE
             postBody+="metadata="+WebUtility.UrlEncode(metadataJson)+"&";
-            postBody+="device_name="+WebUtility.UrlEncode(um.platform.device_model);
+            postBody+="device_name="+WebUtility.UrlEncode(metadataReport.platform.device_model);
 #else
             // Only .NETFramework 4.5 has WebUtility.UrlEncode, earlier version
             // .NETFramework 4.0 has HttpUtility.UrlEncode
             postBody+="metadata="+HttpUtility.UrlEncode(metadataJson)+"&";
-            postBody+="device_name="+HttpUtility.UrlEncode(um.platform.device_model);
+            postBody+="device_name="+HttpUtility.UrlEncode(metadataReport.platform.device_model);
 #endif
             return postBody;
         }

@@ -21,7 +21,10 @@ namespace WPFApp
                 // Wait around 2 second.
                 Thread.Sleep(rnd.Next(4000));
                 if (rnd.Next(10)==0) {
-                    Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
+                    Random random=new Random();
+                    string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
+                    string name=names[random.Next(0,names.Length)];
+                    Crittercism.LeaveBreadcrumb(name);
                 } else {
                     int i=0;
                     int j=5;

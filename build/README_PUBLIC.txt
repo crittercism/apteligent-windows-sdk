@@ -1,14 +1,18 @@
 Thanks for installing Crittercism's Windows SDK!
 
 Now all you need to do is:
-1) Sign up for an account with Crittercism:
+1. Sign up for an account with Crittercism:
      https://www.crittercism.com/sign-up/
    Don't worry, it's free to sign up and we don't send spam.
-2) Register your app with Crittercism; we'll give you an appId.
-3) Add a call to CrittercismSDK.Crittercism.Init() with your appId.
-   The best place is probably your Application_Launching() method.
+2. Obtain your App Id from the Crittercism portal's app settings page.
+   Your App Id will be a 24 or 40 digit character string. 
+3. Add the following code to your app's Application_Launching(), OnLaunched(),
+   Application_Startup(), or Main() method.
+     Crittercism.Init("YOUR APP ID GOES HERE");
 
-That's it!  You can read more about our SDK including features like
-breadcrumbs and handled exception logging in the Documentation section
-of your Crittercism account:
-    https://app.crittercism.com/developers/docs-wp
+At this point, your app is enabled to monitor app loads and crashes.
+Additional features require adding more code to your project.
+
+You can find about additional Crittercism features like breadcrumbs
+and logging handled exceptions in Crittercism's Windows SDK documentation:
+    http://docs.crittercism.com/windows/windows.html

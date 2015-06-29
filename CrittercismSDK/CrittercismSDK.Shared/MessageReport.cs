@@ -105,8 +105,8 @@ namespace CrittercismSDK {
                         answer=true;
                     }
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             };
             return answer;
         }
@@ -127,8 +127,8 @@ namespace CrittercismSDK {
                     }
                     answer=true;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             };
             return answer;
         }
@@ -165,8 +165,8 @@ namespace CrittercismSDK {
                     case "Crash":
                         message=(Crash)StorageHelper.Load(path,typeof(Crash));
                         break;
-                    case "UserMetadata":
-                        message=(UserMetadata)StorageHelper.Load(path,typeof(UserMetadata));
+                    case "MetadataReport":
+                        message=(MetadataReport)StorageHelper.Load(path,typeof(MetadataReport));
                         break;
                     default:
                         // Skip this file.
@@ -180,8 +180,8 @@ namespace CrittercismSDK {
                     message.CreationTime=StorageHelper.GetCreationTime(path);
                     message.Saved=true;
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             return message;
         }

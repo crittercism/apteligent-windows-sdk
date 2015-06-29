@@ -60,8 +60,8 @@ namespace CrittercismSDK
                     }
                     Saved=false;
                 };
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
                 // explicit nop
             }
         }
@@ -79,8 +79,8 @@ namespace CrittercismSDK
                         Saved=true;
                     }
                 }
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             return answer;
         }
@@ -104,8 +104,8 @@ namespace CrittercismSDK
                 answer.previous_session=answer.current_session;
                 answer.current_session=new List<BreadcrumbMessage>();
                 answer.current_session.Add(new BreadcrumbMessage("session_start"));
-            } catch (Exception e) {
-                Crittercism.LogInternalException(e);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             };
             return answer;
         }

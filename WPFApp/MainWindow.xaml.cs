@@ -34,7 +34,10 @@ namespace WPFApp
         }
 
         private void leaveBreadcrumbClick(object sender,RoutedEventArgs e) {
-            Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
+            Random random=new Random();
+            string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
+            string name=names[random.Next(0,names.Length)];
+            Crittercism.LeaveBreadcrumb(name);
         }
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
@@ -76,6 +79,10 @@ namespace WPFApp
             thread.Start();
         }
 
+        private void testNewWindowClick(object sender,RoutedEventArgs e) {
+            (new MainWindow()).Show();
+        }
+
         private void critterClick(object sender,RoutedEventArgs e) {
             string username=Crittercism.Username();
             if (username==null) {
@@ -92,6 +99,15 @@ namespace WPFApp
                     break;
             }
             Crittercism.LeaveBreadcrumb(username+" "+response);
+        }
+
+        private void Window_Closed(object sender,EventArgs e) {
+            Crittercism.LeaveBreadcrumb("Closed");
+            if (Application.Current.Windows.Count==0) {
+                // Last window is closing.
+                Crittercism.Shutdown();
+                Application.Current.Shutdown();
+            }
         }
     }
 }

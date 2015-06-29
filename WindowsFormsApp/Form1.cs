@@ -12,12 +12,14 @@ using CrittercismSDK;
 
 namespace WindowsFormsApp {
     public partial class Form1 : Form {
+        private static int ApplicationOpenFormsCount = 0;
+
         public Form1() {
             InitializeComponent();
+            ApplicationOpenFormsCount++;
         }
 
         protected override void OnLoad(EventArgs e) {
-            Crittercism.Init("537a4e738039805d82000002");
             Crittercism.LeaveBreadcrumb("OnLoad");
         }
 
@@ -29,7 +31,10 @@ namespace WindowsFormsApp {
         }
 
         private void leaveBreadcrumb_Click(object sender,EventArgs e) {
-            Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
+            Random random=new Random();
+            string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
+            string name=names[random.Next(0,names.Length)];
+            Crittercism.LeaveBreadcrumb(name);
         }
 
         private void handledException_Click(object sender,EventArgs e) {
@@ -82,6 +87,20 @@ namespace WindowsFormsApp {
                     break;
             }
             Crittercism.LeaveBreadcrumb(username+" "+response);
+        }
+
+        private void Form1_FormClosed(object sender,FormClosedEventArgs e) {
+            Crittercism.LeaveBreadcrumb("FormClosed");
+            ApplicationOpenFormsCount--;
+            if (ApplicationOpenFormsCount==0) {
+                // Last window is closing.
+                Crittercism.Shutdown();
+                Application.Exit();
+            }
+        }
+
+        private void testNewWindowClick(object sender,EventArgs e) {
+            (new Form1()).Show();
         }
     }
 }

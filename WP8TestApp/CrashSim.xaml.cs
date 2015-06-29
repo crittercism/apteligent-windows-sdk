@@ -17,12 +17,18 @@ namespace WP8TestApp {
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
-            Crittercism.SetUsername("MrsCritter");
+            Random random=new Random();
+            string[] names= { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
+            string name=names[random.Next(0,names.Length)];
+            Crittercism.SetUsername("Critter "+name);
         }
 
         private void leaveBreadcrumbClick(object sender,RoutedEventArgs e)
         {
-            Crittercism.LeaveBreadcrumb("Leaving Breadcrumb");
+            Random random=new Random();
+            string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
+            string name=names[random.Next(0,names.Length)];
+            Crittercism.LeaveBreadcrumb(name);
         }
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {

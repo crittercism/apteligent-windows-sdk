@@ -72,13 +72,18 @@ namespace HubApp
             var item=await SampleDataSource.GetItemAsync((string)e.NavigationParameter);
             this.DefaultViewModel["Item"]=item;
             Debug.WriteLine("UniqueId == "+item.UniqueId);
-            Debug.WriteLine("Title == "+item.Title);
-            Debug.WriteLine("Subtitle == "+item.Subtitle);
             Crittercism.LeaveBreadcrumb("UniqueId == "+item.UniqueId);
-            Crittercism.LeaveBreadcrumb("Title == "+item.Title);
-            Crittercism.LeaveBreadcrumb("Subtitle == "+item.Subtitle);
-            if (item.UniqueId.Equals("Group-4-Item-1")) {
-                Crittercism.LeaveBreadcrumb("Test Windows Store LogHandledException");
+            if (item.UniqueId.Equals("SetUsername")) {
+                Random random=new Random();
+                string[] names= { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
+                string name=names[random.Next(0,names.Length)];
+                Crittercism.SetUsername("Critter "+name);
+            } else if (item.UniqueId.Equals("LeaveBreadcrumb")) {
+                Random random=new Random();
+                string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
+                string name=names[random.Next(0,names.Length)];
+                Crittercism.LeaveBreadcrumb(name);
+            } else if (item.UniqueId.Equals("LogHandledException")) {
                 {
                     try {
                         ThrowException();
@@ -86,16 +91,8 @@ namespace HubApp
                         Crittercism.LogHandledException(ex);
                     }
                 }
-            } else if (item.UniqueId.Equals("Group-4-Item-2")) {
-                Crittercism.LeaveBreadcrumb("Test Windows Store App Crash");
+            } else if (item.UniqueId.Equals("LogUnhandledException")) {
                 ThrowException();
-            } else if (item.UniqueId.Equals("Group-4-Item-3")) {
-                Crittercism.LeaveBreadcrumb("Q: Do you love Crittercism? A: YES!");
-            } else if (item.UniqueId.Equals("Group-4-Item-4")) {
-                Random random=new Random();
-                string[] names= { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
-                string name=names[random.Next(0,names.Length)];
-                Crittercism.SetUsername("Critter "+name);
             }
         }
 

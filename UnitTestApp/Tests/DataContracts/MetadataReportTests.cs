@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace UnitTestApp.Tests.DataContracts {
     [TestClass]
-    public class UserMetadataTests {
+    public class MetadataReportTests {
         [TestMethod]
         public void MetadataFormBodyEncodingTest() {
             Dictionary<string, string> dict = new Dictionary<string, string>();
             dict.Add("key with space", "value1");
             dict.Add("key&%", "value2");
-            UserMetadata um = new UserMetadata(TestHelpers.VALID_APPID, dict);
-            string formEncoded = CrittercismSDK.QueueReader.ComputeFormPostBody(um);
+            MetadataReport metadataReport = new MetadataReport(TestHelpers.VALID_APPID, dict);
+            string formEncoded = CrittercismSDK.QueueReader.ComputeFormPostBody(metadataReport);
             
             // We're form-encoding JSON here...gross
             // Encoded metadata string: {"key with space":"value1","key&%":"value2"}
