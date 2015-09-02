@@ -628,9 +628,9 @@ namespace CrittercismSDK {
         ) {
             // TODO: Replace with real code.
             Debug.WriteLine(
-                "LogNetworkRequest({0},{1},{2},{3},{4},{5},{6},{7})",
+                "LogNetworkRequest({0},{1} ,{2},{3},{4},{5},{6})",
                 method,
-                uri.AbsolutePath,
+                uri.AbsoluteUri,
                 latency,
                 bytesRead,
                 bytesSent,
