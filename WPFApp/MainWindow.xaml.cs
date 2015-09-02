@@ -40,6 +40,10 @@ namespace WPFApp
             Crittercism.LeaveBreadcrumb(name);
         }
 
+        private void logNetworkRequestClick(object sender,RoutedEventArgs e) {
+            // TODO: Demo a call to Crittercism.LogNetworkRequest
+        }
+
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
             try {
                 ThrowException();
