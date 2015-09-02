@@ -26,106 +26,121 @@ namespace WindowsFormsApp {
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
+            this.setUsernameButton = new System.Windows.Forms.Button();
+            this.leaveBreadcrumbButton = new System.Windows.Forms.Button();
+            this.handledExceptionButton = new System.Windows.Forms.Button();
+            this.crashButton = new System.Windows.Forms.Button();
+            this.newWindowButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.logNetworkRequestButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
-            // button1
+            // setUsernameButton
             // 
-            this.button1.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.ForeColor = System.Drawing.Color.DarkGreen;
-            this.button1.Location = new System.Drawing.Point(75, 28);
-            this.button1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(230, 58);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "Set Username";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.setUsername_Click);
+            this.setUsernameButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.setUsernameButton.ForeColor = System.Drawing.Color.DarkGreen;
+            this.setUsernameButton.Location = new System.Drawing.Point(95, 35);
+            this.setUsernameButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.setUsernameButton.Name = "setUsernameButton";
+            this.setUsernameButton.Size = new System.Drawing.Size(345, 75);
+            this.setUsernameButton.TabIndex = 0;
+            this.setUsernameButton.Text = "Set Username";
+            this.setUsernameButton.UseVisualStyleBackColor = true;
+            this.setUsernameButton.Click += new System.EventHandler(this.setUsername_Click);
             // 
-            // button2
+            // leaveBreadcrumbButton
             // 
-            this.button2.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.ForeColor = System.Drawing.Color.DarkGreen;
-            this.button2.Location = new System.Drawing.Point(51, 136);
-            this.button2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(274, 58);
-            this.button2.TabIndex = 1;
-            this.button2.Text = "Leave Breadcrumb";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.leaveBreadcrumb_Click);
+            this.leaveBreadcrumbButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.leaveBreadcrumbButton.ForeColor = System.Drawing.Color.DarkGreen;
+            this.leaveBreadcrumbButton.Location = new System.Drawing.Point(95, 140);
+            this.leaveBreadcrumbButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.leaveBreadcrumbButton.Name = "leaveBreadcrumbButton";
+            this.leaveBreadcrumbButton.Size = new System.Drawing.Size(345, 75);
+            this.leaveBreadcrumbButton.TabIndex = 1;
+            this.leaveBreadcrumbButton.Text = "Leave Breadcrumb";
+            this.leaveBreadcrumbButton.UseVisualStyleBackColor = true;
+            this.leaveBreadcrumbButton.Click += new System.EventHandler(this.leaveBreadcrumb_Click);
             // 
-            // button3
+            // handledExceptionButton
             // 
-            this.button3.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.ForeColor = System.Drawing.Color.DarkGreen;
-            this.button3.Location = new System.Drawing.Point(51, 243);
-            this.button3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(274, 62);
-            this.button3.TabIndex = 2;
-            this.button3.Text = "Handled Exception";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.handledException_Click);
+            this.handledExceptionButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.handledExceptionButton.ForeColor = System.Drawing.Color.DarkGreen;
+            this.handledExceptionButton.Location = new System.Drawing.Point(95, 350);
+            this.handledExceptionButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.handledExceptionButton.Name = "handledExceptionButton";
+            this.handledExceptionButton.Size = new System.Drawing.Size(345, 75);
+            this.handledExceptionButton.TabIndex = 2;
+            this.handledExceptionButton.Text = "Handled Exception";
+            this.handledExceptionButton.UseVisualStyleBackColor = true;
+            this.handledExceptionButton.Click += new System.EventHandler(this.handledException_Click);
             // 
-            // button4
+            // crashButton
             // 
-            this.button4.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button4.ForeColor = System.Drawing.Color.DarkGreen;
-            this.button4.Location = new System.Drawing.Point(98, 348);
-            this.button4.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(184, 61);
-            this.button4.TabIndex = 3;
-            this.button4.Text = "Crash";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.testCrash_Click);
+            this.crashButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.crashButton.ForeColor = System.Drawing.Color.DarkGreen;
+            this.crashButton.Location = new System.Drawing.Point(95, 455);
+            this.crashButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.crashButton.Name = "crashButton";
+            this.crashButton.Size = new System.Drawing.Size(345, 75);
+            this.crashButton.TabIndex = 3;
+            this.crashButton.Text = "Crash";
+            this.crashButton.UseVisualStyleBackColor = true;
+            this.crashButton.Click += new System.EventHandler(this.crash_Click);
             // 
-            // button5
+            // newWindowButton
             // 
-            this.button5.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button5.ForeColor = System.Drawing.Color.DarkGreen;
-            this.button5.Location = new System.Drawing.Point(75, 451);
-            this.button5.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(230, 61);
-            this.button5.TabIndex = 4;
-            this.button5.Text = "New Window";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.testNewWindowClick);
+            this.newWindowButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.newWindowButton.ForeColor = System.Drawing.Color.DarkGreen;
+            this.newWindowButton.Location = new System.Drawing.Point(95, 560);
+            this.newWindowButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.newWindowButton.Name = "newWindowButton";
+            this.newWindowButton.Size = new System.Drawing.Size(345, 75);
+            this.newWindowButton.TabIndex = 4;
+            this.newWindowButton.Text = "New Window";
+            this.newWindowButton.UseVisualStyleBackColor = true;
+            this.newWindowButton.Click += new System.EventHandler(this.newWindow_Click);
             // 
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(310, 425);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.pictureBox1.Location = new System.Drawing.Point(460, 560);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(76, 111);
+            this.pictureBox1.Size = new System.Drawing.Size(85, 113);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 5;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
+            // logNetworkRequestButton
+            // 
+            this.logNetworkRequestButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.logNetworkRequestButton.ForeColor = System.Drawing.Color.DarkGreen;
+            this.logNetworkRequestButton.Location = new System.Drawing.Point(95, 245);
+            this.logNetworkRequestButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.logNetworkRequestButton.Name = "logNetworkRequestButton";
+            this.logNetworkRequestButton.Size = new System.Drawing.Size(345, 75);
+            this.logNetworkRequestButton.TabIndex = 6;
+            this.logNetworkRequestButton.Text = "LogNetworkRequest";
+            this.logNetworkRequestButton.UseVisualStyleBackColor = true;
+            this.logNetworkRequestButton.Click += new System.EventHandler(this.logNetworkRequest_Click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Honeydew;
-            this.ClientSize = new System.Drawing.Size(388, 546);
+            this.ClientSize = new System.Drawing.Size(545, 672);
+            this.Controls.Add(this.logNetworkRequestButton);
             this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.newWindowButton);
+            this.Controls.Add(this.crashButton);
+            this.Controls.Add(this.handledExceptionButton);
+            this.Controls.Add(this.leaveBreadcrumbButton);
+            this.Controls.Add(this.setUsernameButton);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Text = "WindowsFormsApp";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
@@ -136,12 +151,13 @@ namespace WindowsFormsApp {
 
         #endregion
 
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button setUsernameButton;
+        private System.Windows.Forms.Button leaveBreadcrumbButton;
+        private System.Windows.Forms.Button handledExceptionButton;
+        private System.Windows.Forms.Button crashButton;
+        private System.Windows.Forms.Button newWindowButton;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Button logNetworkRequestButton;
     }
 }
 
