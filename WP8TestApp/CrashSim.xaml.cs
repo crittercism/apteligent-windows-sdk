@@ -31,7 +31,7 @@ namespace WP8TestApp {
             Crittercism.LeaveBreadcrumb(name);
         }
 
-        string[] urls=new string[] {
+        private static string[] urls=new string[] {
             "http://www.hearst.com",
             "http://www.urbanoutfitters.com",
             "http://www.pinterest.com",
