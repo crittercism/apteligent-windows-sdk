@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -614,6 +615,29 @@ namespace CrittercismSDK {
             return answer;
         }
         #endregion Metadata
+
+        #region LogNetworkRequest
+        public static void LogNetworkRequest(
+            string method,
+            Uri uri,
+            long latency,      // milliseconds
+            long bytesRead,
+            long bytesSent,
+            HttpStatusCode statusCode,
+            WebExceptionStatus exceptionStatus
+        ) {
+            // TODO: Replace with real code.
+            Debug.WriteLine(
+                "LogNetworkRequest({0},{1},{2},{3},{4},{5},{6},{7})",
+                method,
+                uri.AbsolutePath,
+                latency,
+                bytesRead,
+                bytesSent,
+                statusCode,
+                exceptionStatus);
+        }
+        #endregion LogNetworkRequest
 
         #region MessageQueue
         /// <summary>
