@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -23,7 +24,6 @@ using Microsoft.Phone.Shell;
 using Microsoft.Phone.Net.NetworkInformation;
 #else
 using Microsoft.Win32;
-using System.Reflection;
 #endif // NETFX_CORE
 
 namespace CrittercismSDK {
@@ -57,6 +57,30 @@ namespace CrittercismSDK {
         internal static string AppVersion { get; private set; }
         internal static string DeviceId { get; private set; }
         internal static string DeviceModel { get; private set; }
+
+#if NETFX_CORE
+        internal static string Version=typeof(Crittercism).GetTypeInfo().Assembly.GetName().Version.ToString();
+#else
+        internal static string Version=Assembly.GetExecutingAssembly().GetName().Version.ToString();
+#endif
+
+#if WINDOWS_PHONE
+        internal static string Carrier=Microsoft.Phone.Net.NetworkInformation.
+            DeviceNetworkInformation.CellularMobileOperator;
+#else
+        internal static string Carrier="UNKNOWN";
+#endif
+
+        // NOTE: Appears platform won't allow "wp" to be replaced by "windows"
+        // carte blanche.  Doing so prevents handled exception reports from
+        // being accepted by platform.
+//#if WINDOWS_PHONE
+        internal static readonly string OSName="wp";
+//#else
+//        internal static readonly string OSName="windows";
+//#endif
+
+        internal static long SessionId { get; private set; }
 
         /// <summary>
         /// Gets or sets a queue of messages.
@@ -297,6 +321,38 @@ namespace CrittercismSDK {
         }
 
         /// <summary>
+        /// Retrieves the session id from storage.
+        /// 
+        /// If we don't have a session id, we create and store a new one.
+        /// </summary>
+        /// <returns>The session id is a positive integer.</returns>
+        private static long LoadSessionId() {
+            // API Protocol doesn't specify this, but 1 is consistent with iOS SDK's choice.
+            const long FIRST_SESSION_NUMBER=1;
+            long sessionId=FIRST_SESSION_NUMBER-1;
+            string path=Path.Combine(StorageHelper.CrittercismPath(),"SessionId.js");
+            try {
+                if (StorageHelper.FileExists(path)) {
+                    sessionId=(long)StorageHelper.Load(path,typeof(long));
+                }
+            } catch (Exception ie) {
+                LogInternalException(ie);
+            }
+            try {
+                if (sessionId<FIRST_SESSION_NUMBER) {
+                    sessionId=FIRST_SESSION_NUMBER;
+                } else {
+                    sessionId++;
+                }
+                StorageHelper.Save(sessionId,path);
+            } catch (Exception ie) {
+                LogInternalException(ie);
+            }
+            Debug.WriteLine("LoadSessionId --> "+sessionId);
+            return sessionId;
+        }
+
+        /// <summary>
         /// This method is invoked when the application starts or resumes
         /// </summary>
         /// <param name="appID">    Identifier for the application. </param>
@@ -328,6 +384,7 @@ namespace CrittercismSDK {
                     DeviceId=LoadDeviceId();
                     DeviceModel=LoadDeviceModel();
                     Metadata=LoadMetadata();
+                    SessionId=LoadSessionId();
                     appLocator=new AppLocator(appID);
                     QueueReader queueReader=new QueueReader(appLocator);
 #if NETFX_CORE

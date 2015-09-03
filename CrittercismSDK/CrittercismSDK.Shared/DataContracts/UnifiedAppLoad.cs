@@ -27,28 +27,15 @@ namespace CrittercismSDK {
         [DataMember]
         public string crPlatform = "windows";
         [DataMember]
-#if NETFX_CORE
-        public string crVersion=typeof(UnifiedAppLoadInner).GetTypeInfo().Assembly.GetName().Version.ToString();
-#else
-        public string crVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-#endif
+        public string crVersion=Crittercism.Version;
         [DataMember]
         public string deviceModel="PC";
         [DataMember]
-#if WINDOWS_PHONE
-        public string osName = "wp";
-#else
-        public string osName="windows";
-#endif
+        public string osName=Crittercism.OSName;
         [DataMember]
         public string osVersion=Crittercism.OSVersion;
         [DataMember]
-#if WINDOWS_PHONE
-        public string carrier = Microsoft.Phone.Net.NetworkInformation.
-            DeviceNetworkInformation.CellularMobileOperator;
-#else
-        public string carrier="UNKNOWN";
-#endif
+        public string carrier=Crittercism.Carrier;
         [DataMember]
         public string appVersion=Crittercism.AppVersion;
         [DataMember]
