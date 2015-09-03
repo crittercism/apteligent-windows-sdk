@@ -111,7 +111,7 @@ namespace CrittercismSDK {
         /// <summary> 
         /// The initial date
         /// </summary>
-        internal static DateTime initialDate = DateTime.Now;
+        internal static DateTime initialDate = DateTime.UtcNow;
 
         /// <summary>
         /// The thread for the reader
