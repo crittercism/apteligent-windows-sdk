@@ -23,6 +23,7 @@ namespace CrittercismSDK
         private long statusCode;
         private long errorTable;
         private long errorCode;
+
         internal APMEndpoint(
             string method,
             Uri uri,
@@ -43,7 +44,8 @@ namespace CrittercismSDK
             this.errorTable=ERROR_TABLE_CODE;
             this.errorCode=(long)exceptionStatus;
         }
-        internal Object[] ToArray() {
+
+        internal Object[] ToJsonArray() {
             Object[] answer=new Object[] {
                 method,
                 url,
@@ -57,6 +59,19 @@ namespace CrittercismSDK
                 errorCode
             };
             return answer;
+        }
+
+        internal APMEndpoint(Object[] jsonArray) {
+            this.method=(string)jsonArray[0];
+            this.url=(string)jsonArray[1];
+            this.timestamp=(string)jsonArray[2];
+            this.latency=(long)jsonArray[3];
+            this.activeNetwork=(long)jsonArray[4];
+            this.bytesRead=(long)jsonArray[5];
+            this.bytesSent=(long)jsonArray[6];
+            this.statusCode=(long)jsonArray[7];
+            this.errorTable=(long)jsonArray[8];
+            this.errorCode=(long)jsonArray[9];
         }
     }
 }
