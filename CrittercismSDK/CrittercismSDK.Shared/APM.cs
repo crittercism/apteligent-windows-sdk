@@ -1,14 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+//using System.Timers;
 
 namespace CrittercismSDK
 {
 
     internal class APM
     {
+        // TODO: SynchronizedQueue has its virtues, but we may want synchronization
+        // at the higher APM level instead.
+
+        // TODO: Different .NET frameworks have different Timer's?  May get complicated.
+        //Timer timer=new Timer(10000);
+
         // Collect APMEndpoint's
+        const int MAX_NETWORK_STATS=100;
         private static SynchronizedQueue<APMEndpoint> EndpointsQueue { get; set; }
+
+        internal static void Enqueue(APMEndpoint endpoint) {
+            while (EndpointsQueue.Count>=MAX_NETWORK_STATS) {
+                EndpointsQueue.Dequeue();
+            };
+            EndpointsQueue.Enqueue(endpoint);
+            // TODO: We'd like sendNetworkEndpoints triggered by an elapsed Timer
+            SendNetworkEndpoints();
+        }
 
         // App Identifiers Array
         private static Object[] AppIdentifiersArray() {
@@ -44,7 +62,19 @@ namespace CrittercismSDK
             return answer;
         }
 
-        internal void Init() {
+        internal static void SendNetworkEndpoints() {
+            // Sending in batches of 3 endpoints should let us P.O.C. before
+            // we are finished implementing Timer's 
+            if (EndpointsQueue.Count>=3) {
+                APMEndpoint[] endpoints=EndpointsQueue.ToArray();
+                EndpointsQueue.Clear();
+                APMReport apmReport=new APMReport(endpoints,AppIdentifiersArray(),DeviceStateArray());
+                // TODO: Send apmReport to platform.
+                Debug.WriteLine("SENDING APMReport");
+            }
+        }
+
+        internal static void Init() {
             EndpointsQueue=new SynchronizedQueue<APMEndpoint>(new Queue<APMEndpoint>());
         }
     }

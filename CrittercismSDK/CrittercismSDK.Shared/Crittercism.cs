@@ -379,6 +379,7 @@ namespace CrittercismSDK {
                     return;
                 };
                 lock (lockObject) {
+                    APM.Init();
                     MessageReport.Init();
                     AppVersion=LoadAppVersion();
                     DeviceId=LoadDeviceId();
@@ -683,7 +684,6 @@ namespace CrittercismSDK {
             HttpStatusCode statusCode,
             WebExceptionStatus exceptionStatus
         ) {
-            // TODO: Replace with real code.
             Debug.WriteLine(
                 "LogNetworkRequest({0},{1} ,{2},{3},{4},{5},{6})",
                 method,
@@ -693,6 +693,14 @@ namespace CrittercismSDK {
                 bytesSent,
                 statusCode,
                 exceptionStatus);
+            APMEndpoint endpoint=new APMEndpoint(method,
+                uri,
+                latency,
+                bytesRead,
+                bytesSent,
+                statusCode,
+                exceptionStatus);
+            APM.Enqueue(endpoint);
         }
         #endregion LogNetworkRequest
 
