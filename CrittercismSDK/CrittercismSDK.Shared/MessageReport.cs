@@ -155,6 +155,9 @@ namespace CrittercismSDK {
                     case "AppLoad":
                         message=(AppLoad)StorageHelper.Load(path,typeof(AppLoad));
                         break;
+                    case "APMReport":
+                        message=(APMReport)StorageHelper.Load(path,typeof(APMReport));
+                        break;
                     case "HandledException":
                         message=(HandledException)StorageHelper.Load(path,typeof(HandledException));
                         break;

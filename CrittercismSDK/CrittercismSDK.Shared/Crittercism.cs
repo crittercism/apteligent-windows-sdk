@@ -721,7 +721,7 @@ namespace CrittercismSDK {
         /// <summary>
         /// Adds message to queue
         /// </summary>
-        private static void AddMessageToQueue(MessageReport message) {
+        internal static void AddMessageToQueue(MessageReport message) {
             while (MessageQueue.Count>=MaxMessageQueueCount) {
                 // Sacrifice an oldMessage
                 MessageReport oldMessage=MessageQueue.Dequeue();
