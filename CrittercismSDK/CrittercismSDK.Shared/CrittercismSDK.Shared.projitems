@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)APM.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)APMEndpoint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppLocator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CRFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Crittercism.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\APMReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\AppLoad.cs" />
