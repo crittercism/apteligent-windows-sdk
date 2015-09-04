@@ -178,7 +178,8 @@ namespace CrittercismSDK
                 using (HttpWebResponse response=(HttpWebResponse)responseTask.Result) {
                     try {
                         Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
-                        if (response.StatusCode==HttpStatusCode.OK) {
+                        if ((((long)response.StatusCode)/100)==2) {
+                            // 2xx Success
                             sendCompleted=true;
                         }
                     } catch (WebException webEx) {
@@ -241,7 +242,8 @@ namespace CrittercismSDK
                                     try {
                                         using (HttpWebResponse response=(HttpWebResponse)request.EndGetResponse(asyncResponse)) {
                                             Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
-                                            if (response.StatusCode==HttpStatusCode.OK) {
+                                            if ((((long)response.StatusCode)/100)==2) {
+                                                // 2xx Success
                                                 sendCompleted=true;
                                             }
                                         }

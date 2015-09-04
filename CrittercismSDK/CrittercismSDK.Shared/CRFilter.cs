@@ -25,7 +25,7 @@ namespace CrittercismSDK
             return new CRFilter(value,comparisonType, null);
         }
 
-        public static CRFilter FilterRegex(Regex rgx) {
+        public static CRFilter FilterWithRegex(Regex rgx) {
             return new CRFilter(null, StringComparison.OrdinalIgnoreCase, rgx);
         }
 

@@ -6,7 +6,6 @@ using System.Text;
 
 namespace CrittercismSDK
 {
-
     internal class APM
     {
         // TODO: SynchronizedQueue has its virtues, but we may want synchronization
@@ -14,6 +13,9 @@ namespace CrittercismSDK
 
         // TODO: Different .NET frameworks have different Timer's?  May get complicated.
         //Timer timer=new Timer(10000);
+
+        // CRFilter's
+        private static List<CRFilter> Filters;
 
         // Collect APMEndpoint's
         const int MAX_NETWORK_STATS=100;
@@ -74,7 +76,27 @@ namespace CrittercismSDK
         }
 
         internal static void Init() {
+            Filters=new List<CRFilter>();
             EndpointsQueue=new SynchronizedQueue<APMEndpoint>(new Queue<APMEndpoint>());
+        }
+
+        internal static void AddFilter(CRFilter filter) {
+            Filters.Add(filter);
+        }
+
+        internal static void RemoveFilter(CRFilter filter) {
+            Filters.Remove(filter);
+        }
+
+        internal static bool IsFiltered(string value) {
+            bool answer=false;
+            foreach (CRFilter filter in Filters) {
+                answer=filter.IsMatch(value);
+                if (answer) {
+                    break;
+                }
+            }
+            return answer;
         }
     }
 }

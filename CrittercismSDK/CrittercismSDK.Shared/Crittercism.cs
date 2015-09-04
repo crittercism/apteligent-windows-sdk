@@ -684,25 +684,64 @@ namespace CrittercismSDK {
             HttpStatusCode statusCode,
             WebExceptionStatus exceptionStatus
         ) {
-            Debug.WriteLine(
-                "LogNetworkRequest({0},{1} ,{2},{3},{4},{5},{6})",
-                method,
-                uri.AbsoluteUri,
-                latency,
-                bytesRead,
-                bytesSent,
-                statusCode,
-                exceptionStatus);
-            APMEndpoint endpoint=new APMEndpoint(method,
-                uri,
-                latency,
-                bytesRead,
-                bytesSent,
-                statusCode,
-                exceptionStatus);
-            APM.Enqueue(endpoint);
+            if (GetOptOutStatus()) {
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+            } else {
+                try {
+                    Debug.WriteLine(
+                        "LogNetworkRequest({0},{1} ,{2},{3},{4},{5},{6})",
+                        method,
+                        uri.AbsoluteUri,
+                        latency,
+                        bytesRead,
+                        bytesSent,
+                        statusCode,
+                        exceptionStatus);
+                    if (!APM.IsFiltered(uri.AbsoluteUri)) {
+                        APMEndpoint endpoint=new APMEndpoint(method,
+                            uri,
+                            latency,
+                            bytesRead,
+                            bytesSent,
+                            statusCode,
+                            exceptionStatus);
+                        APM.Enqueue(endpoint);
+                    }
+                } catch (Exception ie) {
+                    LogInternalException(ie);
+                }
+            }
         }
         #endregion LogNetworkRequest
+
+        #region Filters
+        public static void AddFilter(CRFilter filter) {
+            if (GetOptOutStatus()) {
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+            } else {
+                try {
+                    APM.AddFilter(filter);
+                } catch (Exception ie) {
+                    LogInternalException(ie);
+                }
+            }
+        }
+
+        public static void RemoveFilter(CRFilter filter) {
+            if (GetOptOutStatus()) {
+            } else if (!initialized) {
+                Debug.WriteLine(errorNotInitialized);
+            } else {
+                try {
+                    APM.RemoveFilter(filter);
+                } catch (Exception ie) {
+                    LogInternalException(ie);
+                }
+            }
+        }
+        #endregion
 
         #region MessageQueue
         /// <summary>
