@@ -108,7 +108,7 @@ namespace CrittercismSDK
                                 postBody=JsonConvert.SerializeObject(message);
                                 break;
                             case "APMReport":
-                                Debug.WriteLine("SENDING APMReport");
+                                //Debug.WriteLine("SENDING APMReport");
                                 request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apmURL+"/api/apm/network",UriKind.Absolute));
                                 request.ContentType="application/json; charset=utf-8";
                                 postBody=JsonConvert.SerializeObject(message);

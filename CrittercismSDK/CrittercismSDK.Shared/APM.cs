@@ -68,9 +68,7 @@ namespace CrittercismSDK
             if (EndpointsQueue.Count>=3) {
                 APMEndpoint[] endpoints=EndpointsQueue.ToArray();
                 EndpointsQueue.Clear();
-                APMReport apmReport=new APMReport(endpoints,AppIdentifiersArray(),DeviceStateArray());
-                // TODO: Send apmReport to platform.
-                //Debug.WriteLine("SENDING APMReport");
+                APMReport apmReport=new APMReport(AppIdentifiersArray(),DeviceStateArray(),endpoints);
                 Crittercism.AddMessageToQueue(apmReport);
             }
         }

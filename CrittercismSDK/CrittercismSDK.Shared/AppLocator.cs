@@ -62,7 +62,6 @@ namespace CrittercismSDK
         }
 
         internal AppLocator(string appID) {
-
 #if MOCK
             string mockURL="http://mock.crittercism.com";
             apiURL=mockURL;

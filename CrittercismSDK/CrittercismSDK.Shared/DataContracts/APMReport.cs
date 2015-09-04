@@ -11,15 +11,15 @@ namespace CrittercismSDK
         [DataMember]
         public Object[]  d {
             get {
-                return new Object[] {EndpointsArray(),appIdentifiersArray,deviceStateArray};
+                return new Object[] { appIdentifiersArray,deviceStateArray,EndpointsArray()};
             }
             internal set {
             }
         }
 
-        private APMEndpoint[] endpoints;
         private Object[] appIdentifiersArray;
         private Object[] deviceStateArray;
+        private APMEndpoint[] endpoints;
 
         private Object[] EndpointsArray() {
             List<Object[]> list=new List<Object[]>();
@@ -29,10 +29,10 @@ namespace CrittercismSDK
             return list.ToArray();
         }
 
-        internal APMReport(APMEndpoint[] endpoints,Object[] appIdentifiersArray,Object[] deviceStateArray) {
-            this.endpoints=endpoints;
+        internal APMReport(Object[] appIdentifiersArray,Object[] deviceStateArray,APMEndpoint[] endpoints) {
             this.appIdentifiersArray=appIdentifiersArray;
             this.deviceStateArray=deviceStateArray;
+            this.endpoints=endpoints;
         }
     }
 }
