@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-//using System.Timers;
+#if NETFX_CORE || WINDOWS_PHONE
+using Windows.System.Threading;
+#else
+using System.Timers;
+#endif // NETFX_CORE
 
 namespace CrittercismSDK
 {
@@ -12,8 +16,18 @@ namespace CrittercismSDK
         // at the higher APM level instead.
         private static Object lockObject=new Object();
 
-        // TODO: Different .NET frameworks have different Timer's?  May get complicated.
-        //Timer timer=new Timer(10000);
+        // Different .NET frameworks get different timer's
+#if NETFX_CORE || WINDOWS_PHONE
+        ThreadPoolTimer timer=null;
+        private static void OnTimerElapsed(ThreadPoolTimer timer) {
+            SendNetworkEndpoints();
+        }
+#else
+        Timer timer=null;
+        private static void OnTimerElapsed(Object source, ElapsedEventArgs e) {
+            SendNetworkEndpoints();
+        }
+#endif // NETFX_CORE
 
         // CRFilter's
         private static List<CRFilter> Filters;
