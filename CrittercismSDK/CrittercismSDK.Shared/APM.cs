@@ -10,6 +10,7 @@ namespace CrittercismSDK
     {
         // TODO: SynchronizedQueue has its virtues, but we may want synchronization
         // at the higher APM level instead.
+        private static Object lockObject=new Object();
 
         // TODO: Different .NET frameworks have different Timer's?  May get complicated.
         //Timer timer=new Timer(10000);
@@ -22,12 +23,14 @@ namespace CrittercismSDK
         private static SynchronizedQueue<APMEndpoint> EndpointsQueue { get; set; }
 
         internal static void Enqueue(APMEndpoint endpoint) {
-            while (EndpointsQueue.Count>=MAX_NETWORK_STATS) {
-                EndpointsQueue.Dequeue();
-            };
-            EndpointsQueue.Enqueue(endpoint);
-            // TODO: We'd like sendNetworkEndpoints triggered by an elapsed Timer
-            SendNetworkEndpoints();
+            lock (lockObject) {
+                while (EndpointsQueue.Count>=MAX_NETWORK_STATS) {
+                    EndpointsQueue.Dequeue();
+                };
+                EndpointsQueue.Enqueue(endpoint);
+                // TODO: We'd like sendNetworkEndpoints triggered by an elapsed Timer
+                SendNetworkEndpoints();
+            }
         }
 
         // App Identifiers Array
@@ -64,7 +67,7 @@ namespace CrittercismSDK
             return answer;
         }
 
-        internal static void SendNetworkEndpoints() {
+        private static void SendNetworkEndpoints() {
             // Sending in batches of 3 endpoints should let us P.O.C. before
             // we are finished implementing Timer's 
             if (EndpointsQueue.Count>=3) {
@@ -76,24 +79,34 @@ namespace CrittercismSDK
         }
 
         internal static void Init() {
-            Filters=new List<CRFilter>();
-            EndpointsQueue=new SynchronizedQueue<APMEndpoint>(new Queue<APMEndpoint>());
+            lock (lockObject) {
+                // Crittercism.Init calling APM.Init should effectively make
+                // lock lockObject here pointless, but no real harm doing so.
+                Filters=new List<CRFilter>();
+                EndpointsQueue=new SynchronizedQueue<APMEndpoint>(new Queue<APMEndpoint>());
+            }
         }
 
         internal static void AddFilter(CRFilter filter) {
-            Filters.Add(filter);
+            lock (lockObject) {
+                Filters.Add(filter);
+            }
         }
 
         internal static void RemoveFilter(CRFilter filter) {
-            Filters.Remove(filter);
+            lock (lockObject) {
+                Filters.Remove(filter);
+            }
         }
 
         internal static bool IsFiltered(string value) {
             bool answer=false;
-            foreach (CRFilter filter in Filters) {
-                answer=filter.IsMatch(value);
-                if (answer) {
-                    break;
+            lock (lockObject) {
+                foreach (CRFilter filter in Filters) {
+                    answer=filter.IsMatch(value);
+                    if (answer) {
+                        break;
+                    }
                 }
             }
             return answer;
