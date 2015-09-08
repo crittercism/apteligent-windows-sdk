@@ -30,7 +30,7 @@ namespace CrittercismSDK
 #endif // NETFX_CORE
 
         // CRFilter's
-        private static List<CRFilter> Filters;
+        private static HashSet<CRFilter> Filters;
 
         // Collect APMEndpoint's
         const int MAX_NETWORK_STATS=100;
@@ -96,7 +96,7 @@ namespace CrittercismSDK
             lock (lockObject) {
                 // Crittercism.Init calling APM.Init should effectively make
                 // lock lockObject here pointless, but no real harm doing so.
-                Filters=new List<CRFilter>();
+                Filters=new HashSet<CRFilter>();
                 EndpointsQueue=new SynchronizedQueue<APMEndpoint>(new Queue<APMEndpoint>());
             }
         }
