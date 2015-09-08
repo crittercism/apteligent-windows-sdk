@@ -32,7 +32,7 @@ namespace CrittercismSDK
         internal bool IsMatch(string input) {
             bool answer=false;
             if (value is string) {
-                answer=(value.IndexOf(value,comparisonType)>=0);
+                answer=(input.IndexOf(value,comparisonType)>=0);
             } else if (rgx is Regex) {
                 answer=rgx.IsMatch(input);
             };

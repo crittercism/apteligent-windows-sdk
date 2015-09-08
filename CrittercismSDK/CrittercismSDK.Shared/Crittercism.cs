@@ -698,7 +698,9 @@ namespace CrittercismSDK {
                         bytesSent,
                         statusCode,
                         exceptionStatus);
-                    if (!APM.IsFiltered(uri.AbsoluteUri)) {
+                    if (APM.IsFiltered(uri.AbsoluteUri)) {
+                        Debug.WriteLine("APM FILTERED: "+uri.AbsoluteUri);
+                    } else {
                         APMEndpoint endpoint=new APMEndpoint(method,
                             uri,
                             latency,
