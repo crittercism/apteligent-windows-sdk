@@ -18,16 +18,24 @@ namespace CrittercismSDK
 
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
-        ThreadPoolTimer timer=null;
+        private static ThreadPoolTimer timer=null;
         private static void OnTimerElapsed(ThreadPoolTimer timer) {
-            SendNetworkEndpoints();
+            lock (lockObject) {
+                SendNetworkEndpoints();
+                timer=null;
+            }
         }
 #else
-        Timer timer=null;
+        private static Timer timer=null;
         private static void OnTimerElapsed(Object source, ElapsedEventArgs e) {
-            SendNetworkEndpoints();
+            lock (lockObject) {
+                SendNetworkEndpoints();
+                timer=null;
+            }
         }
 #endif // NETFX_CORE
+        // Batch additional network requests for 10 seconds before sending APMReport .
+        const int NETWORK_SEND_INTERVAL=10000;
 
         // CRFilter's
         private static HashSet<CRFilter> Filters;
@@ -42,8 +50,25 @@ namespace CrittercismSDK
                     EndpointsQueue.Dequeue();
                 };
                 EndpointsQueue.Enqueue(endpoint);
-                // TODO: We'd like sendNetworkEndpoints triggered by an elapsed Timer
-                SendNetworkEndpoints();
+#if NETFX_CORE || WINDOWS_PHONE
+                if (timer==null) {
+                    // Creates a single-use timer.
+                    // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
+                    timer=ThreadPoolTimer.CreateTimer(
+                        OnTimerElapsed,
+                        TimeSpan.FromMilliseconds(NETWORK_SEND_INTERVAL));
+                }
+#else
+                if (timer==null) {
+                    // Generates an event after a set interval
+                    // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
+                    timer = new Timer(NETWORK_SEND_INTERVAL);
+                    timer.Elapsed += OnTimerElapsed;
+                    // the Timer should raise the Elapsed event only once (false)
+                    timer.AutoReset = false;        // fire once
+                    timer.Enabled = true;           // Start the timer
+                }
+#endif // NETFX_CORE
             }
         }
 
@@ -82,9 +107,7 @@ namespace CrittercismSDK
         }
 
         private static void SendNetworkEndpoints() {
-            // Sending in batches of 3 endpoints should let us P.O.C. before
-            // we are finished implementing Timer's 
-            if (EndpointsQueue.Count>=3) {
+            if (EndpointsQueue.Count>0) {
                 APMEndpoint[] endpoints=EndpointsQueue.ToArray();
                 EndpointsQueue.Clear();
                 APMReport apmReport=new APMReport(AppIdentifiersArray(),DeviceStateArray(),endpoints);
