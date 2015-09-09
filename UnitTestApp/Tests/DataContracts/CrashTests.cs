@@ -63,7 +63,7 @@ namespace UnitTestApp.Tests.DataContracts {
             Assert.AreEqual(crash.crash.stack_trace[0], "   at UnitTestApp.Tests.DataContracts.CrashTests.GetCrashMessage()");
             Assert.IsNotNull(crash.platform.device_id);
             Assert.AreEqual(crash.platform.device_model, "XDeviceEmulator");
-            Assert.AreEqual(crash.platform.os_name, "wp");
+            Assert.AreEqual(crash.platform.os_name,Crittercism.OSName);
         }
     }
 }

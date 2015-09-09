@@ -32,8 +32,7 @@ namespace CrittercismSDK {
         public readonly string device_model = Crittercism.DeviceModel;
 
         [DataMember]
-        // TODO: Like to know if we could change this to "windows".
-        public readonly string os_name = "wp";
+        public readonly string os_name=Crittercism.OSName;
 
         [DataMember]
         public readonly string os_version=Crittercism.OSVersion;

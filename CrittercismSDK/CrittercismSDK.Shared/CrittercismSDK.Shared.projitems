@@ -9,8 +9,12 @@
     <Import_RootNamespace>CrittercismSDK</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)APM.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)APMEndpoint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppLocator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CRFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Crittercism.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\APMReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\AppLoad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\BreadcrumbMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Breadcrumbs.cs" />
@@ -20,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Platform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\UnifiedAppLoad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\MetadataReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DateUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueueReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StorageHelper.cs" />

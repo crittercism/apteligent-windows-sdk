@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define MOCK
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -61,11 +62,19 @@ namespace CrittercismSDK
         }
 
         internal AppLocator(string appID) {
+#if MOCK
+            string mockURL="http://mock.crittercism.com";
+            apiURL=mockURL;
+            apmURL=mockURL;
+            appLoadURL=mockURL;
+            txnURL=mockURL;
+#else
             string domain=GetDomainFromAppId(appID);
             apiURL=CritterBaseURLPrefix+domain;
             apmURL=NetDataBaseURLPrefix+domain;
             appLoadURL=AppLoadBaseURLPrefix+domain;
             txnURL=TxnBaseURLPrefix+domain;
+#endif
         }
     }
 }

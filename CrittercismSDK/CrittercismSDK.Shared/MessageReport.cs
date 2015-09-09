@@ -56,10 +56,6 @@ namespace CrittercismSDK {
             Saved=false;
         }
 
-        internal static string DateTimeString(DateTime dt) {
-            return dt.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssK", CultureInfo.InvariantCulture);
-        }
-
         protected Dictionary<string,object> ComputeAppState() {
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
             // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
@@ -81,7 +77,7 @@ namespace CrittercismSDK {
                 // skipping "name" for device name as it requires manifest approval
                 { "locale", CultureInfo.CurrentCulture.Name},
                 // all counters below in bytes
-                { "reported_at", DateTimeString(DateTime.Now) }
+                { "reported_at", DateUtils.GMTDateString(DateTime.Now) }
             };
         }
 
@@ -158,6 +154,9 @@ namespace CrittercismSDK {
                 switch (nameSplit[0]) {
                     case "AppLoad":
                         message=(AppLoad)StorageHelper.Load(path,typeof(AppLoad));
+                        break;
+                    case "APMReport":
+                        message=(APMReport)StorageHelper.Load(path,typeof(APMReport));
                         break;
                     case "HandledException":
                         message=(HandledException)StorageHelper.Load(path,typeof(HandledException));

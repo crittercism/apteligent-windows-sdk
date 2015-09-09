@@ -44,7 +44,7 @@ namespace CrittercismSDK
             if (message.Length>MaxBreadcrumbLength) {
                 message=message.Substring(0,MaxBreadcrumbLength);
             }
-            timestamp=MessageReport.DateTimeString(DateTime.Now);
+            timestamp=DateUtils.GMTDateString(DateTime.UtcNow);
         }
     }
 }

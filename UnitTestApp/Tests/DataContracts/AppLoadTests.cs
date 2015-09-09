@@ -44,7 +44,7 @@ namespace UnitTestApp.Tests.DataContracts {
 
             Assert.AreEqual(newMessageReport.count, 1);
             Assert.AreEqual(newMessageReport.current, true);
-            Assert.AreEqual(inner.osName, "wp");
+            Assert.AreEqual(inner.osName,Crittercism.OSName);
             Assert.AreEqual(inner.carrier, "Fake GSM Network");     // On emulator
         }
     }

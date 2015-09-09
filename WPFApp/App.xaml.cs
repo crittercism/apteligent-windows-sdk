@@ -20,6 +20,8 @@ namespace WPFApp
         {
             //// Call the Init of the unhandled managed class library "Crittercism"
             Crittercism.Init("537a4e738039805d82000002");
+            //CRFilter filter=CRFilter.FilterWithString("doYouLoveCrittercism");
+            //Crittercism.AddFilter(filter);
             Crittercism.LeaveBreadcrumb("Application_Startup");
         }
     }
