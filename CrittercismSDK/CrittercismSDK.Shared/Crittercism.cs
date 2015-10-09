@@ -353,20 +353,6 @@ namespace CrittercismSDK {
         }
 
         /// <summary>
-        /// This method is invoked when the application starts or resumes
-        /// </summary>
-        /// <param name="appID">    Identifier for the application. </param>
-        private static void StartApplication(string appID) {
-            // TODO: Why do we pass appID arg to this method?
-            AppID=appID;
-            OSVersion=LoadOSVersion();
-            PrivateBreadcrumbs=Breadcrumbs.SessionStart();
-            MessageQueue=new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
-            LoadQueue();
-            CreateAppLoadReport();
-        }
-
-        /// <summary>
         /// Initialises Crittercism.
         /// </summary>
         /// <param name="appID">  Identifier for the application. </param>
@@ -379,12 +365,14 @@ namespace CrittercismSDK {
                     return;
                 };
                 lock (lockObject) {
+                    AppID=appID;
                     APM.Init();
                     MessageReport.Init();
                     AppVersion=LoadAppVersion();
                     DeviceId=LoadDeviceId();
                     DeviceModel=LoadDeviceModel();
                     Metadata=LoadMetadata();
+                    OSVersion=LoadOSVersion();
                     SessionId=LoadSessionId();
                     appLocator=new AppLocator(appID);
                     QueueReader queueReader=new QueueReader(appLocator);
@@ -396,15 +384,6 @@ namespace CrittercismSDK {
                     readerThread=new Thread(threadStart);
                     readerThread.Name="Crittercism";
 #endif
-                    // NOTE: Put initialized=true before readerThread.Start() .
-                    // Later on, initialized may be reset back to false during shutdown,
-                    // and readerThread will see initialized==false as a message to exit.
-                    // Spares us from creating an additional "shuttingdown" flag.
-                    initialized=true;
-                    readerThread.Start();
-                    // NOTE: Since StartApplication will induce an AppLoad, it seems
-                    // best to put StartApplication after readerThread.Start() .
-                    StartApplication(appID);
                     // _autoRunQueueReader for unit test purposes
                     if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
 #if NETFX_CORE
@@ -425,8 +404,18 @@ namespace CrittercismSDK {
                         AppDomain.CurrentDomain.UnhandledException+=new UnhandledExceptionEventHandler(AppDomain_UnhandledException);
                         System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsFormsApplication_ThreadException);
 #endif
-                    }
-                }
+                    };
+                    PrivateBreadcrumbs=Breadcrumbs.SessionStart();
+                    MessageQueue=new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
+                    LoadQueue();
+                    // NOTE: Put initialized=true before readerThread.Start() .
+                    // Later on, initialized may be reset back to false during shutdown,
+                    // and readerThread will see initialized==false as a message to exit.
+                    // Spares us from creating an additional "shuttingdown" flag.
+                    initialized=true;
+                };
+                readerThread.Start();
+                CreateAppLoadReport();
             } catch (Exception) {
                 initialized=false;
             }
@@ -824,13 +813,32 @@ namespace CrittercismSDK {
         }
 
         static void PhoneApplicationService_Activated(object sender, ActivatedEventArgs e) {
+            ////////////////////////////////////////////////////////////////
+            // The Windows Phone execution model allows only one app to run in the
+            // foreground at a time. When the user navigates away from an app, the
+            // app is typically put in a dormant state. In a dormant state, the
+            // app's code no longer executes, but the app remains in memory. When
+            // the user presses the Back button to return to a dormant app, it resumes
+            // running and its state is automatically restored. It is possible,
+            // however, for an app to be tombstoned after the user navigates away.
+            // If the user navigates back to a tombstoned app, the app must restore
+            // its own state because it is no longer in memory.
+            // https://msdn.microsoft.com/en-us/library/windows/apps/ff967547(v=vs.105).aspx
+            ////////////////////////////////////////////////////////////////
             if (GetOptOutStatus()) {
                 return;
             }
             try {
-                BackgroundWorker backgroundWorker = new BackgroundWorker();
-                backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
-                backgroundWorker.RunWorkerAsync();
+                if (!e.IsApplicationInstancePreserved) {
+                    // App was tombstoned.  State lost.
+                    if (PhoneApplicationService.Current.State.ContainsKey("Crittercism.AppID")) {
+                        // Take this to mean that Crittercism was Init'd in this app prior to
+                        // a Deactivate.  Restart Crittercism asynchronously.
+                        BackgroundWorker backgroundWorker=new BackgroundWorker();
+                        backgroundWorker.DoWork+=new DoWorkEventHandler(BackgroundWorker_DoWork);
+                        backgroundWorker.RunWorkerAsync();
+                    }
+                }
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
@@ -838,11 +846,7 @@ namespace CrittercismSDK {
 
         static void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            try {
-                StartApplication((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
-            } catch (Exception ie) {
-                LogInternalException(ie);
-            }
+            Init((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
         }
 
         static void PhoneApplicationService_Deactivated(object sender, DeactivatedEventArgs e)
