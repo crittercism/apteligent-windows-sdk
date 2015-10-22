@@ -666,7 +666,7 @@ namespace CrittercismSDK {
         #region LogNetworkRequest
         public static void LogNetworkRequest(
             string method,
-            Uri uri,
+            string uriString,
             long latency,      // milliseconds
             long bytesRead,
             long bytesSent,
@@ -681,17 +681,17 @@ namespace CrittercismSDK {
                     Debug.WriteLine(
                         "LogNetworkRequest({0},{1} ,{2},{3},{4},{5},{6})",
                         method,
-                        uri.AbsoluteUri,
+                        uriString,
                         latency,
                         bytesRead,
                         bytesSent,
                         statusCode,
                         exceptionStatus);
-                    if (APM.IsFiltered(uri.AbsoluteUri)) {
-                        Debug.WriteLine("APM FILTERED: "+uri.AbsoluteUri);
+                    if (APM.IsFiltered(uriString)) {
+                        Debug.WriteLine("APM FILTERED: "+uriString);
                     } else {
                         APMEndpoint endpoint=new APMEndpoint(method,
-                            uri,
+                            uriString,
                             latency,
                             bytesRead,
                             bytesSent,

@@ -14,7 +14,7 @@ namespace CrittercismSDK
         const long ERROR_TABLE_CODE=5;
 
         private string method;
-        private string url;
+        private string uriString;
         private string timestamp;
         private long latency;
         private long activeNetwork;
@@ -26,7 +26,7 @@ namespace CrittercismSDK
 
         internal APMEndpoint(
             string method,
-            Uri uri,
+            string uriString,
             long latency,      // milliseconds
             long bytesRead,
             long bytesSent,
@@ -34,7 +34,7 @@ namespace CrittercismSDK
             WebExceptionStatus exceptionStatus
         ) {
             this.method=method;
-            this.url=uri.AbsoluteUri;
+            this.uriString=uriString;
             this.timestamp=DateUtils.ISO8601DateString(DateTime.UtcNow);
             this.latency=latency;
             this.activeNetwork=ACTIVE_NETWORK;
@@ -48,7 +48,7 @@ namespace CrittercismSDK
         internal Object[] ToJsonArray() {
             Object[] answer=new Object[] {
                 method,
-                url,
+                uriString,
                 timestamp,
                 latency,
                 activeNetwork,
@@ -63,7 +63,7 @@ namespace CrittercismSDK
 
         internal APMEndpoint(Object[] jsonArray) {
             this.method=(string)jsonArray[0];
-            this.url=(string)jsonArray[1];
+            this.uriString=(string)jsonArray[1];
             this.timestamp=(string)jsonArray[2];
             this.latency=(long)jsonArray[3];
             this.activeNetwork=(long)jsonArray[4];

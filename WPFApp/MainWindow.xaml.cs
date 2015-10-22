@@ -84,7 +84,7 @@ namespace WPFApp
             }
             Crittercism.LogNetworkRequest(
                 method,
-                new Uri(url),
+                url,
                 latency,
                 bytesRead,
                 bytesSent,

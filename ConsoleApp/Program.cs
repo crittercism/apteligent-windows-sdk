@@ -76,7 +76,7 @@ namespace ConsoleApp {
             Console.WriteLine("LogNetworkRequest: \""+url+"\"");
             Crittercism.LogNetworkRequest(
                 method,
-                new Uri(url),
+                url,
                 latency,
                 bytesRead,
                 bytesSent,

@@ -74,7 +74,7 @@ namespace WP8TestApp {
             }
             Crittercism.LogNetworkRequest(
                 method,
-                new Uri(url),
+                url,
                 latency,
                 bytesRead,
                 bytesSent,
