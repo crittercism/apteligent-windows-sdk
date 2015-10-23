@@ -87,9 +87,8 @@ namespace CrittercismSDK {
         /// </summary>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         public bool Save() {
-            // TODO(DA): On-disk serialization in JSON isn't type-preserving.
-            // This isn't intended for transmission or portability, so should use something more
-            // typesafe, even if it's C#-specific
+            // On-disk serialization in JSON alone isn't C# type-preserving.
+            // So, this.GetType().Name+"_" is prefixed to file Name .
             bool answer=false;
             try {
                 lock (this) {
@@ -119,6 +118,7 @@ namespace CrittercismSDK {
                         string path=Path.Combine(MessagesPath,this.Name);
                         if (StorageHelper.FileExists(path)) {
                             StorageHelper.DeleteFile(path);
+                            Saved=false;
                         }
                     }
                     answer=true;

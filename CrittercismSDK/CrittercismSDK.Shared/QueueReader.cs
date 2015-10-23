@@ -93,7 +93,7 @@ namespace CrittercismSDK
                 MessageReport message=Crittercism.MessageQueue.Peek();
                 Crittercism.MessageQueue.Dequeue();
                 message.Delete();
-                if (!Crittercism._enableCommunicationLayer) {
+                if (!Crittercism.enableSendMessage) {
                     // check if the communication layer is enable and if not return true.. this is used for unit testing.
                     sendCompleted=true;
                 } else if (NetworkInterface.GetIsNetworkAvailable()) {
@@ -142,7 +142,7 @@ namespace CrittercismSDK
                         }
                     } catch {
                         //Debug.WriteLine("SendMessage: catch");
-                        if (Crittercism._enableRaiseExceptionInCommunicationLayer) {
+                        if (Crittercism.enableExceptionInSendMessage) {
                             throw;
                         }
                     }
@@ -203,7 +203,7 @@ namespace CrittercismSDK
                         lastException=ex;
                     }
                 }
-                if (Crittercism._enableRaiseExceptionInCommunicationLayer&&lastException!=null) {
+                if (Crittercism.enableExceptionInSendMessage&&lastException!=null) {
                     throw lastException;
                 }
             } catch (Exception ie) {
@@ -288,7 +288,7 @@ namespace CrittercismSDK
                     Debug.WriteLine("SendMessage: TOTAL SECONDS == "+stopWatch.Elapsed.TotalSeconds);
 #endif
                 }
-                if (Crittercism._enableRaiseExceptionInCommunicationLayer&&lastException!=null) {
+                if (Crittercism.enableExceptionInSendMessage&&lastException!=null) {
                     throw lastException;
                 }
             } catch (Exception ie) {

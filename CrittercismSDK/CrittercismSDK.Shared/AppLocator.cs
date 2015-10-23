@@ -8,6 +8,9 @@ namespace CrittercismSDK
 {
     class AppLocator
     {
+        // Chosen POP domain
+        internal readonly string domain;
+
         // URL's needed by Crittercism SDK
         internal readonly string apiURL;
         internal readonly string apmURL;
@@ -41,21 +44,20 @@ namespace CrittercismSDK
             ////////////////////////////////////////////////////////////////'
             string pattern="^[0-9a-fA-F]+$";
             Regex hexRegex=new Regex(pattern,RegexOptions.IgnoreCase);
-            if (hexRegex.Matches(appId).Count!=1) {
-                return null;
-            }
-            if (appId.Length==24) {
-                return ProductionDomain;
-            } else if (appId.Length==40) {
-                string appLocatorSequence=appId.Substring(appId.Length-AppLocatorLength);
-                if (appLocatorSequence.Equals(US_WEST_1_PROD_DESIGNATOR)) {
+            if (hexRegex.Matches(appId).Count==1) {
+                if (appId.Length==24) {
                     return ProductionDomain;
-                } else if (appLocatorSequence.Equals(EU_CENTRAL_1_PROD_DESIGNATOR)) {
-                    return EuropeProductionDomain;
-                } else if (appLocatorSequence.Equals(US_WEST_2_CI_DESIGNATOR)) {
-                    return ContinuousIntegrationDomain;
-                } else if (appLocatorSequence.Equals(US_WEST_2_STAGING_DESIGNATOR)) {
-                    return StagingDomain;
+                } else if (appId.Length==40) {
+                    string appLocatorSequence=appId.Substring(appId.Length-AppLocatorLength);
+                    if (appLocatorSequence.Equals(US_WEST_1_PROD_DESIGNATOR)) {
+                        return ProductionDomain;
+                    } else if (appLocatorSequence.Equals(EU_CENTRAL_1_PROD_DESIGNATOR)) {
+                        return EuropeProductionDomain;
+                    } else if (appLocatorSequence.Equals(US_WEST_2_CI_DESIGNATOR)) {
+                        return ContinuousIntegrationDomain;
+                    } else if (appLocatorSequence.Equals(US_WEST_2_STAGING_DESIGNATOR)) {
+                        return StagingDomain;
+                    }
                 }
             }
             return null;
@@ -63,17 +65,19 @@ namespace CrittercismSDK
 
         internal AppLocator(string appID) {
 #if MOCK
-            string mockURL="http://mock.crittercism.com";
-            apiURL=mockURL;
-            apmURL=mockURL;
-            appLoadURL=mockURL;
-            txnURL=mockURL;
+            domain="mock.crittercism.com";
+            apiURL="http://"+domain;
+            apmURL=apiURL;
+            appLoadURL=apiURL;
+            txnURL=apiURL;
 #else
-            string domain=GetDomainFromAppId(appID);
-            apiURL=CritterBaseURLPrefix+domain;
-            apmURL=NetDataBaseURLPrefix+domain;
-            appLoadURL=AppLoadBaseURLPrefix+domain;
-            txnURL=TxnBaseURLPrefix+domain;
+            domain=GetDomainFromAppId(appID);
+            if (domain!=null) {
+                apiURL=CritterBaseURLPrefix+domain;
+                apmURL=NetDataBaseURLPrefix+domain;
+                appLoadURL=AppLoadBaseURLPrefix+domain;
+                txnURL=TxnBaseURLPrefix+domain;
+            }
 #endif
         }
     }

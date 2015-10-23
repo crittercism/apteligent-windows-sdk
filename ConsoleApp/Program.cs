@@ -62,7 +62,6 @@ namespace ConsoleApp {
             } else if (random.Next(0,2)==1) {
                 url=url+"?doYouLoveCrittercism=YES";
             }
-            Uri uri=new Uri(url);
             // latency in milliseconds
             long latency=(long)Math.Floor(4000.0*random.NextDouble());
             long bytesRead=random.Next(0,10000);

@@ -35,7 +35,7 @@ namespace CrittercismSDK
         }
 #endif // NETFX_CORE
         // Batch additional network requests for 10 seconds before sending APMReport .
-        const int NETWORK_SEND_INTERVAL=10000;
+        internal static int NETWORK_SEND_INTERVAL=10000;
 
         // CRFilter's
         private static HashSet<CRFilter> Filters;
