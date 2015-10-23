@@ -227,7 +227,7 @@ namespace CrittercismSDK {
             return Application.Current.GetType().Assembly.GetName().Version.ToString();
 #else
             // Should probably work in most cases.
-            return Assembly.GetCallingAssembly().GetName().Version.ToString();
+            return Assembly.GetEntryAssembly().GetName().Version.ToString();
 #endif
         }
 
