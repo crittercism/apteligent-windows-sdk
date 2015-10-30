@@ -42,17 +42,17 @@ namespace CrittercismSDK {
         /// <summary>
         /// The auto run queue reader
         /// </summary>
-        internal static bool _autoRunQueueReader = true;
+        internal static bool autoRunQueueReader = true;
 
         /// <summary>
-        /// The enable communication layer
+        /// Enable SendMessage
         /// </summary>
-        internal static bool _enableCommunicationLayer = true;
+        internal static bool enableSendMessage = true;
 
         /// <summary>
-        /// The enable raise exception in communication layer
+        /// Enable Exception in SendMessage
         /// </summary>
-        internal static bool _enableRaiseExceptionInCommunicationLayer = false;
+        internal static bool enableExceptionInSendMessage = false;
 
         internal static string AppVersion { get; private set; }
         internal static string DeviceId { get; private set; }
@@ -227,7 +227,7 @@ namespace CrittercismSDK {
             return Application.Current.GetType().Assembly.GetName().Version.ToString();
 #else
             // Should probably work in most cases.
-            return Assembly.GetCallingAssembly().GetName().Version.ToString();
+            return Assembly.GetEntryAssembly().GetName().Version.ToString();
 #endif
         }
 
@@ -365,6 +365,11 @@ namespace CrittercismSDK {
                     return;
                 };
                 lock (lockObject) {
+                    appLocator=new AppLocator(appID);
+                    if (appLocator.domain==null) {
+                        Debug.WriteLine("ERROR: Illegal Crittercism appID");
+                        return;
+                    }
                     AppID=appID;
                     APM.Init();
                     MessageReport.Init();
@@ -374,7 +379,6 @@ namespace CrittercismSDK {
                     Metadata=LoadMetadata();
                     OSVersion=LoadOSVersion();
                     SessionId=LoadSessionId();
-                    appLocator=new AppLocator(appID);
                     QueueReader queueReader=new QueueReader(appLocator);
 #if NETFX_CORE
                     Action threadStart=() => { queueReader.ReadQueue(); };
@@ -384,8 +388,8 @@ namespace CrittercismSDK {
                     readerThread=new Thread(threadStart);
                     readerThread.Name="Crittercism";
 #endif
-                    // _autoRunQueueReader for unit test purposes
-                    if (_autoRunQueueReader&&_enableCommunicationLayer&&!(_enableRaiseExceptionInCommunicationLayer)) {
+                    // autoRunQueueReader for unit test purposes
+                    if (autoRunQueueReader&&enableSendMessage&&!(enableExceptionInSendMessage)) {
 #if NETFX_CORE
                         Application.Current.UnhandledException+=Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged+=NetworkInformation_NetworkStatusChanged;
@@ -666,7 +670,7 @@ namespace CrittercismSDK {
         #region LogNetworkRequest
         public static void LogNetworkRequest(
             string method,
-            Uri uri,
+            string uriString,
             long latency,      // milliseconds
             long bytesRead,
             long bytesSent,
@@ -681,17 +685,17 @@ namespace CrittercismSDK {
                     Debug.WriteLine(
                         "LogNetworkRequest({0},{1} ,{2},{3},{4},{5},{6})",
                         method,
-                        uri.AbsoluteUri,
+                        uriString,
                         latency,
                         bytesRead,
                         bytesSent,
                         statusCode,
                         exceptionStatus);
-                    if (APM.IsFiltered(uri.AbsoluteUri)) {
-                        Debug.WriteLine("APM FILTERED: "+uri.AbsoluteUri);
+                    if (APM.IsFiltered(uriString)) {
+                        Debug.WriteLine("APM FILTERED: "+uriString);
                     } else {
                         APMEndpoint endpoint=new APMEndpoint(method,
-                            uri,
+                            uriString,
                             latency,
                             bytesRead,
                             bytesSent,
@@ -867,7 +871,7 @@ namespace CrittercismSDK {
             }
             try {
                 // This flag is for unit test
-                if (_autoRunQueueReader) {
+                if (autoRunQueueReader) {
                     switch (e.NotificationType) {
                         case NetworkNotificationType.InterfaceConnected:
                             if (NetworkInterface.GetIsNetworkAvailable()) {

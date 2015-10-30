@@ -35,5 +35,3 @@ using System.Resources;
 [assembly: AssemblyVersion("2.2.2")]
 [assembly: AssemblyFileVersion("2.2.2")]
 [assembly: NeutralResourcesLanguageAttribute("en-US")]
-
-[assembly: InternalsVisibleTo("UnitTestApp")]
