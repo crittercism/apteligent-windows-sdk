@@ -4,7 +4,7 @@ rd /s /q tmp
 del /q *.nupkg
 
 cd ..
-call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"
+call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat"
 ECHO ON
 
 msbuild /p:Configuration=Release /target:Clean
@@ -24,16 +24,16 @@ mkdir tmp\lib\net40
 mkdir tmp\lib\wpa81
 mkdir tmp\lib\windowsphone8
 
-copy ..\CrittercismSDK\CrittercismSDK.Windows\bin\Release\CrittercismSDK.dll tmp\lib\netcore451
+copy ..\CrittercismSDK\CrittercismSDK.netcore\bin\Release\CrittercismSDK.dll tmp\lib\netcore451
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-copy ..\CrittercismSDK\CrittercismSDK.WindowsDesktop\bin\Release\CrittercismSDK.dll tmp\lib\net40
+copy ..\CrittercismSDK\CrittercismSDK.net\bin\Release\CrittercismSDK.dll tmp\lib\net40
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-copy ..\CrittercismSDK\CrittercismSDK.WindowsPhone\bin\Release\CrittercismSDK.dll tmp\lib\wpa81
+copy ..\CrittercismSDK\CrittercismSDK.wpa\bin\Release\CrittercismSDK.dll tmp\lib\wpa81
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-copy ..\CrittercismSDK\CrittercismSDK.WindowsPhoneSilverlight\Bin\Release\CrittercismSDK.dll tmp\lib\windowsphone8
+copy ..\CrittercismSDK\CrittercismSDK.windowsphone\Bin\Release\CrittercismSDK.dll tmp\lib\windowsphone8
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 copy CrittercismSDK.nuspec tmp\CrittercismSDK.nuspec
