@@ -373,6 +373,7 @@ namespace CrittercismSDK {
                     AppID=appID;
                     APM.Init();
                     MessageReport.Init();
+                    TransactionReporter.Init();
                     AppVersion=LoadAppVersion();
                     DeviceId=LoadDeviceId();
                     DeviceModel=LoadDeviceModel();
@@ -666,6 +667,29 @@ namespace CrittercismSDK {
             return answer;
         }
         #endregion Metadata
+
+        #region Transactions
+        public static void BeginTransaction(string name) {
+            // NIY
+        }
+        public static void BeginTransaction(string name,int value) {
+            // NIY
+        }
+        public static void EndTransaction(string name) {
+            // NIY
+        }
+        public static void FailTransaction(string name) {
+            // NIY
+        }
+        public static int GetTransactionValue(string name) {
+            // NIY
+            return 0;
+        }
+        public static void SetTransactionValue(string name,int value) {
+            // NIY
+        }
+
+        #endregion
 
         #region LogNetworkRequest
         public static void LogNetworkRequest(

@@ -43,9 +43,12 @@ namespace CrittercismSDK
         private void crash() {
             // TODO: NIY
         }
+
         // Metadata
-        //- (void)setObject:(NSObject *)anObject forKey:(string *)aKey;
-        //- (NSObject *)objectForKey:(string *)aKey;
+        // An archaeological curiousity.  Original iOS/Android SDK
+        // transaction design called for transactions to allow metadata.
+        // Since then, Crittercism has not exposed API's in SDK's that
+        // make it available to users.
 
         // JSON
         private static Object[] toArray() {
