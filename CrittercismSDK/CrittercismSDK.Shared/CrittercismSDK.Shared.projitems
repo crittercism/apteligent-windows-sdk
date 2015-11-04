@@ -29,6 +29,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)QueueReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StorageHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SynchronizedQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Transaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TransactionState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UnifiedMessageReport.cs" />
   </ItemGroup>
 </Project>
