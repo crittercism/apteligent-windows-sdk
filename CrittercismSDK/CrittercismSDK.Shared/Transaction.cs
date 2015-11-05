@@ -22,25 +22,33 @@ namespace CrittercismSDK
         private string foregroundTimeString;
         private bool isForegrounded;
         //private NSTimer timer;
-        private Transaction(string name) {
+        internal Transaction(string name) {
             // TODO: NIY
         }
-        private Transaction(string name,int value) {
+        internal Transaction(string name,int value) {
             // TODO: NIY
         }
-        private Transaction(string name,long beginTime,long endTime) {
+        internal Transaction(string name,long beginTime,long endTime) {
             // TODO: NIY
         }
-        private void begin() {
+        internal int Value() {
+            // TODO: NIY
+            return value;
+        }
+        internal void SetValue(int newValue) {
+            // TODO: NIY
+            value = newValue;
+        }
+        internal void Begin() {
             // TODO: NIY
         }
-        private void end() {
+        internal void End() {
             // TODO: NIY
         }
-        private void fail() {
+        internal void Fail() {
             // TODO: NIY
         }
-        private void crash() {
+        internal void Crash() {
             // TODO: NIY
         }
 
@@ -51,26 +59,30 @@ namespace CrittercismSDK
         // make it available to users.
 
         // JSON
-        private static Object[] toArray() {
+        internal static Object[] ToArray() {
             // TODO: NIY
             return new Object[0];
         }
 
         // Persistence
-        private static Transaction[] allTransactions() {
+        internal static Transaction[] AllTransactions() {
             // TODO: NIY
             return new Transaction[0];
         }
-        private static Transaction transactionForId(int aTransactionId) {
+        internal static Transaction TransactionForId(int aTransactionId) {
             // TODO: NIY
             return null;
         }
 
-        private static Transaction transactionForName(string name) {
+        internal static Transaction TransactionForName(string name) {
             // TODO: NIY
             return null;
         }
 
         // void timerFired:(NSTimer *)timer;
+
+        internal void Interrupt() {
+            // NIY
+        }
     }
-    }
+}

@@ -6,16 +6,21 @@ namespace CrittercismSDK
 {
     internal class TransactionReporter
     {
+        #region Constants
+        internal const double MSEC_PER_SEC=1000.0;
+        internal const int MAX_TRANSACTION_COUNT=50;
+        #endregion
+
         private static Object lockObject = new object();
         private static Dictionary<string,Transaction> transactionsDictionary;
-        internal static int transactionCount() {
+        internal static int TransactionCount() {
             int answer = 0;
             lock (lockObject) {
                 answer=transactionsDictionary.Count;
             }
             return answer;
         }
-        internal static Transaction transactionForName(string name) {
+        internal static Transaction TransactionForName(string name) {
             Transaction answer = null;
             lock (lockObject) {
                 if (transactionsDictionary.ContainsKey(name)) {

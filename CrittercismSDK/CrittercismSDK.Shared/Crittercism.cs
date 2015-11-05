@@ -670,28 +670,115 @@ namespace CrittercismSDK {
 
         #region Transactions
         public static void BeginTransaction(string name) {
-            // NIY
+            // Init and begin a transaction with a default value.
+            try {
+                InterruptTransaction(name);
+                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
+                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
+#if NETFX_CORE || WINDOWS_PHONE
+#else
+                    Trace.WriteLine(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                                  + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                                  TransactionReporter.MAX_TRANSACTION_COUNT,name));
+#endif
+                    return;
+                }
+                (new Transaction(name)).Begin();
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
         }
         public static void BeginTransaction(string name,int value) {
-            // NIY
+            // Init and begin a transaction with an input value.
+            try {
+                InterruptTransaction(name);
+                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
+                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
+#if NETFX_CORE || WINDOWS_PHONE
+#else
+                    Trace.WriteLine(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                                  + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                                  TransactionReporter.MAX_TRANSACTION_COUNT,name));
+#endif
+                    return;
+                }
+                (new Transaction(name,value)).Begin();
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
         }
         public static void EndTransaction(string name) {
-            // NIY
+            // End an already begun transaction successfully.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction!=null) {
+                    transaction.End();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
         }
         public static void FailTransaction(string name) {
-            // NIY
+            // End an already begun transaction as a failure.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    transaction.Fail();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
         }
         public static int GetTransactionValue(string name) {
-            // NIY
-            return 0;
+            // Get the currency cents value of a transaction.
+            int answer = 0;
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    answer = transaction.Value();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+            return answer;
         }
         public static void SetTransactionValue(string name,int value) {
-            // NIY
+            // Set the currency cents value of a transaction.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    transaction.SetValue(value);
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+
+        internal static void InterruptTransaction(string name) {
+            Transaction transaction = Transaction.TransactionForName(name);
+            if (transaction!=null) {
+                transaction.Interrupt();
+            }
+        }
+
+        internal static void CantFindTransaction(string name) {
+#if NETFX_CORE || WINDOWS_PHONE
+#else
+            Trace.WriteLine(String.Format("Can't find transaction named \"{0}\"",name));
+#endif
         }
 
         #endregion
 
-        #region LogNetworkRequest
+        #region Network Requests
         public static void LogNetworkRequest(
             string method,
             string uriString,
@@ -732,9 +819,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion LogNetworkRequest
+#endregion LogNetworkRequest
 
-        #region Filters
+        #region Configuring Service Monitoring
         public static void AddFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
