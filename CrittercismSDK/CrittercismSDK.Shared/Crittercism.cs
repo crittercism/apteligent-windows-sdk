@@ -675,12 +675,9 @@ namespace CrittercismSDK {
                 InterruptTransaction(name);
                 // Do not begin a new transaction if the transaction count is at or has exceeded the max.
                 if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
-#if NETFX_CORE || WINDOWS_PHONE
-#else
-                    Trace.WriteLine(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
-                                                  + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
-                                                  TransactionReporter.MAX_TRANSACTION_COUNT,name));
-#endif
+                    LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                            + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                            TransactionReporter.MAX_TRANSACTION_COUNT,name));
                     return;
                 }
                 (new Transaction(name)).Begin();
@@ -694,12 +691,9 @@ namespace CrittercismSDK {
                 InterruptTransaction(name);
                 // Do not begin a new transaction if the transaction count is at or has exceeded the max.
                 if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
-#if NETFX_CORE || WINDOWS_PHONE
-#else
-                    Trace.WriteLine(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
-                                                  + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
-                                                  TransactionReporter.MAX_TRANSACTION_COUNT,name));
-#endif
+                    LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                            + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                            TransactionReporter.MAX_TRANSACTION_COUNT,name));
                     return;
                 }
                 (new Transaction(name,value)).Begin();
@@ -1034,5 +1028,14 @@ namespace CrittercismSDK {
 #endif
 
         #endregion // Event Handlers
+
+        #region Miscellaneous
+        internal static void LOG_ERROR(string message) {
+#if NETFX_CORE || WINDOWS_PHONE
+#else
+            Trace.WriteLine(message);
+#endif
+        }
+        #endregion
     }
 }

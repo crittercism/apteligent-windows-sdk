@@ -20,6 +20,17 @@ namespace CrittercismSDK
             }
             return answer;
         }
+        internal static Transaction[] AllTransactions() {
+            Transaction[] answer = null;
+            lock (lockObject) {
+                List<Transaction> list = new List<Transaction>();
+                foreach (Transaction transaction in transactionsDictionary.Values) {
+                    list.Add(transaction);
+                }
+                answer = list.ToArray();
+            }
+            return answer;
+        }
         internal static Transaction TransactionForName(string name) {
             Transaction answer = null;
             lock (lockObject) {
