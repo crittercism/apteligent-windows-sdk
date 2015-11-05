@@ -1036,6 +1036,17 @@ namespace CrittercismSDK {
             Trace.WriteLine(message);
 #endif
         }
+
+        internal static string TruncatedString(string s) {
+            // Truncate string s max allowed string length (255 characters, not including null character)
+            const int maxStringLength = 255;
+            string answer = s;
+            if (s.Length > maxStringLength) {
+                LOG_ERROR(String.Format("Truncating long string to 255 characters: \"{0}\"",s));
+                answer = s.Substring(0,maxStringLength);
+            }
+            return answer;
+        }
         #endregion
     }
 }

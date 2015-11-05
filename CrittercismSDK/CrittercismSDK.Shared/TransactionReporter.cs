@@ -9,7 +9,28 @@ namespace CrittercismSDK
         #region Constants
         internal const double MSEC_PER_SEC=1000.0;
         internal const int MAX_TRANSACTION_COUNT=50;
+        const long ONE_HOUR = 3600 * TimeSpan.TicksPerSecond;
         #endregion
+
+        #region Properties
+        private static long interval = 20 * TimeSpan.TicksPerSecond;
+        private static long defaultTimeout = ONE_HOUR;
+        #endregion
+
+        internal static long Interval() {
+            // TODO: NIY
+            return interval;
+        }
+
+        internal static long DefaultTimeout() {
+            // TODO: NIY
+            return defaultTimeout;
+        }
+
+        internal static bool IsForegrounded() {
+            // TODO: NIY
+            return true;
+        }
 
         private static Object lockObject = new object();
         private static Dictionary<string,Transaction> transactionsDictionary;
