@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -101,6 +101,9 @@ namespace WPFApp
                     Crittercism.BeginTransaction(transactionName);
                     button.Content = endTransactionLabel;
                 } else if (label == endTransactionLabel) {
+                    EndTransactionDialog dialog = new EndTransactionDialog();
+                    dialog.Owner = Window.GetWindow(this);
+                    dialog.ShowDialog();
                     Crittercism.EndTransaction(transactionName);
                     button.Content = beginTransactionLabel;
                 }
