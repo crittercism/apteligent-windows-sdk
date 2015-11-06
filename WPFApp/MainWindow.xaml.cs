@@ -104,8 +104,18 @@ namespace WPFApp
                     EndTransactionDialog dialog = new EndTransactionDialog();
                     dialog.Owner = Window.GetWindow(this);
                     dialog.ShowDialog();
-                    Crittercism.EndTransaction(transactionName);
-                    button.Content = beginTransactionLabel;
+                    Nullable<bool> dialogResult = dialog.DialogResult;
+                    if (dialogResult==true) {
+                        switch (dialog.Answer) {
+                            case "End Transaction":
+                                Crittercism.EndTransaction(transactionName);
+                                break;
+                            case "Fail Transaction":
+                                Crittercism.FailTransaction(transactionName);
+                                break;
+                        }
+                        button.Content = beginTransactionLabel;
+                    }
                 }
 
             }
