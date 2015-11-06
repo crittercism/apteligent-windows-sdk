@@ -94,7 +94,7 @@ namespace CrittercismSDK {
         /// <value> The breadcrumbs. </value>
         private static Breadcrumbs PrivateBreadcrumbs { get; set; }
 
-        private static Breadcrumbs CurrentBreadcrumbs() {
+        internal static Breadcrumbs CurrentBreadcrumbs() {
             // Copy of current PrivateBreadcrumbs
             return PrivateBreadcrumbs.Copy();
         }
