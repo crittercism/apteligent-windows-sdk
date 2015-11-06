@@ -101,7 +101,7 @@ namespace WPFApp
                     Crittercism.BeginTransaction(transactionName);
                     button.Content = endTransactionLabel;
                 } else if (label == endTransactionLabel) {
-                    Crittercism.BeginTransaction(transactionName);
+                    Crittercism.EndTransaction(transactionName);
                     button.Content = beginTransactionLabel;
                 }
 

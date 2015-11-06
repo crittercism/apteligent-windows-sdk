@@ -40,6 +40,44 @@ namespace CrittercismSDK
         }
 
         private static Object lockObject = new object();
+
+        #region Persistence
+        internal static void Save(Transaction transaction) {
+            // Persist transaction to correct directory
+            lock (lockObject) {
+                // TODO: "Aborted" transactions?
+                switch (transaction.State()) {
+                    case TransactionState.CREATED:
+                        // Make visible via persistence API methods.
+                        AddTransaction(transaction);
+                        break;
+                    case TransactionState.BEGUN:
+                        // Nothing extra to do.
+                        break;
+                    case TransactionState.CRASHED:
+                        RemoveTransaction(transaction);
+                        break;
+                    default:
+                        // Final state
+                        RemoveTransaction(transaction);
+                        Enqueue(transaction);
+                        break;
+                }
+            }
+        }
+        private static void AddTransaction(Transaction transaction) {
+            lock (lockObject) {
+                transactionsDictionary[transaction.Name()] = transaction;
+            }
+        }
+        private static void RemoveTransaction(Transaction transaction) {
+            lock (lockObject) {
+                transactionsDictionary.Remove(transaction.Name());
+            }
+        }
+        #endregion
+
+        #region Transaction Dictionary
         private static Dictionary<string,Transaction> transactionsDictionary;
         internal static int TransactionCount() {
             int answer = 0;
@@ -68,6 +106,7 @@ namespace CrittercismSDK
             }
             return answer;
         }
+        #endregion
 
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
@@ -135,15 +174,13 @@ namespace CrittercismSDK
                 Crittercism.AddMessageToQueue(transactionReport);
             }
         }
-
         internal static void Init() {
             lock (lockObject) {
                 // Crittercism.Init calling TransactionReporter.Init should effectively make
                 // lock lockObject here pointless, but no real harm doing so.
                 transactionsDictionary = new Dictionary<string,Transaction>();
+                TransactionsQueue = new SynchronizedQueue<Object[]>(new Queue<Object[]>());
             }
         }
-
-
     }
 }

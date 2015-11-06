@@ -30,6 +30,10 @@ namespace CrittercismSDK
         //private NSTimer timer;
 
         #region Properties
+        internal string Name() {
+            // The "name" is immutable.
+            return name;
+        }
         internal TransactionState State() {
             TransactionState answer;
             lock (this) {
@@ -62,6 +66,7 @@ namespace CrittercismSDK
                     }
                     break;
             }
+            TransactionReporter.Save(this);
         }
         private long ClampTimeout(long newTimeout) {
             long answer = newTimeout;
@@ -170,6 +175,7 @@ namespace CrittercismSDK
         }
         internal Transaction(string name) : this() {
             this.name = Crittercism.TruncatedString(name);
+            TransactionReporter.Save(this);
         }
         internal Transaction(string name,int value) : this(name) {
             this.value = value;
