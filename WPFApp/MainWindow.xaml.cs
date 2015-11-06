@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -90,7 +90,26 @@ namespace WPFApp
                 (HttpStatusCode)responseCode,
                 WebExceptionStatus.Success);
         }
+        private void transactionClick(object sender,RoutedEventArgs e) {
+            Button button = sender as Button;
+            if (button != null) {
+                const string transactionName = "Buy Critter Feed";
+                const string beginTransactionLabel = "Begin Transaction";
+                const string endTransactionLabel = "End Transaction";
+                String label = button.Content.ToString();
+                if (label == beginTransactionLabel) {
+                    Crittercism.BeginTransaction(transactionName);
+                    button.Content = endTransactionLabel;
+                } else if (label == endTransactionLabel) {
+                    EndTransactionDialog dialog = new EndTransactionDialog();
+                    dialog.Owner = Window.GetWindow(this);
+                    dialog.ShowDialog();
+                    Crittercism.EndTransaction(transactionName);
+                    button.Content = beginTransactionLabel;
+                }
 
+            }
+        }
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
             try {
                 ThrowException();

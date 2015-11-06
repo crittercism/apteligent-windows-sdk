@@ -22,6 +22,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\ExceptionObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\HandledException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Platform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\TransactionReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\UnifiedAppLoad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\MetadataReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DateUtils.cs" />
@@ -29,6 +30,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)QueueReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StorageHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SynchronizedQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Transaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TransactionReporter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TransactionState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UnifiedMessageReport.cs" />
   </ItemGroup>
 </Project>

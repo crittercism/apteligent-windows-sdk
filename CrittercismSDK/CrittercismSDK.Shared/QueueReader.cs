@@ -130,6 +130,17 @@ namespace CrittercismSDK
                                 MetadataReport metadataReport=message as MetadataReport;
                                 postBody=ComputeFormPostBody(metadataReport);
                                 break;
+                            case "TransactionReport":
+                                //Debug.WriteLine("SENDING TransactionReport");
+                                request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.txnURL + "/api/v1/transactions",UriKind.Absolute));
+                                request.ContentType = "application/json; charset=utf-8";
+                                postBody = JsonConvert.SerializeObject(message);
+#if NETFX_CORE || WINDOWS_PHONE
+#else
+                                // AGNT-1134 DEMO
+                                Trace.WriteLine(String.Format("SENDING TransactionReport\r\n{0}\r\n", postBody));
+#endif
+                                break;
                             default:
                                 // FIXME jbley maybe some logging here?
                                 // consider this message "consumed"

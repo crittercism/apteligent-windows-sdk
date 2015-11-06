@@ -60,7 +60,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EndTransactionDialog.xaml.cs">
+      <DependentUpon>EndTransactionDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Worker.cs" />
+    <Page Include="EndTransactionDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

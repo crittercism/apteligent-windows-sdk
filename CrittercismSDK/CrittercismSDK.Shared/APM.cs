@@ -21,7 +21,7 @@ namespace CrittercismSDK
         private static ThreadPoolTimer timer=null;
         private static void OnTimerElapsed(ThreadPoolTimer timer) {
             lock (lockObject) {
-                SendNetworkEndpoints();
+                SendAPMReport();
                 timer=null;
             }
         }
@@ -29,7 +29,7 @@ namespace CrittercismSDK
         private static Timer timer=null;
         private static void OnTimerElapsed(Object source, ElapsedEventArgs e) {
             lock (lockObject) {
-                SendNetworkEndpoints();
+                SendAPMReport();
                 timer=null;
             }
         }
@@ -106,7 +106,7 @@ namespace CrittercismSDK
             return answer;
         }
 
-        private static void SendNetworkEndpoints() {
+        private static void SendAPMReport() {
             if (EndpointsQueue.Count>0) {
                 APMEndpoint[] endpoints=EndpointsQueue.ToArray();
                 EndpointsQueue.Clear();

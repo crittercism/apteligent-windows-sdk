@@ -94,7 +94,7 @@ namespace CrittercismSDK {
         /// <value> The breadcrumbs. </value>
         private static Breadcrumbs PrivateBreadcrumbs { get; set; }
 
-        private static Breadcrumbs CurrentBreadcrumbs() {
+        internal static Breadcrumbs CurrentBreadcrumbs() {
             // Copy of current PrivateBreadcrumbs
             return PrivateBreadcrumbs.Copy();
         }
@@ -373,6 +373,7 @@ namespace CrittercismSDK {
                     AppID=appID;
                     APM.Init();
                     MessageReport.Init();
+                    TransactionReporter.Init();
                     AppVersion=LoadAppVersion();
                     DeviceId=LoadDeviceId();
                     DeviceModel=LoadDeviceModel();
@@ -667,7 +668,111 @@ namespace CrittercismSDK {
         }
         #endregion Metadata
 
-        #region LogNetworkRequest
+        #region Transactions
+        public static void BeginTransaction(string name) {
+            // Init and begin a transaction with a default value.
+            try {
+                InterruptTransaction(name);
+                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
+                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
+                    LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                            + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                            TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                    return;
+                }
+                (new Transaction(name)).Begin();
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static void BeginTransaction(string name,int value) {
+            // Init and begin a transaction with an input value.
+            try {
+                InterruptTransaction(name);
+                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
+                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
+                    LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                            + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                            TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                    return;
+                }
+                (new Transaction(name,value)).Begin();
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static void EndTransaction(string name) {
+            // End an already begun transaction successfully.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction!=null) {
+                    transaction.End();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static void FailTransaction(string name) {
+            // End an already begun transaction as a failure.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    transaction.Fail();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static int GetTransactionValue(string name) {
+            // Get the currency cents value of a transaction.
+            int answer = 0;
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    answer = transaction.Value();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+            return answer;
+        }
+        public static void SetTransactionValue(string name,int value) {
+            // Set the currency cents value of a transaction.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    transaction.SetValue(value);
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+
+        internal static void InterruptTransaction(string name) {
+            Transaction transaction = Transaction.TransactionForName(name);
+            if (transaction!=null) {
+                transaction.Interrupt();
+            }
+        }
+
+        internal static void CantFindTransaction(string name) {
+#if NETFX_CORE || WINDOWS_PHONE
+#else
+            Trace.WriteLine(String.Format("Can't find transaction named \"{0}\"",name));
+#endif
+        }
+
+        #endregion
+
+        #region Network Requests
         public static void LogNetworkRequest(
             string method,
             string uriString,
@@ -708,9 +813,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion LogNetworkRequest
+#endregion LogNetworkRequest
 
-        #region Filters
+        #region Configuring Service Monitoring
         public static void AddFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
@@ -923,5 +1028,25 @@ namespace CrittercismSDK {
 #endif
 
         #endregion // Event Handlers
+
+        #region Miscellaneous
+        internal static void LOG_ERROR(string message) {
+#if NETFX_CORE || WINDOWS_PHONE
+#else
+            Trace.WriteLine(message);
+#endif
+        }
+
+        internal static string TruncatedString(string s) {
+            // Truncate string s max allowed string length (255 characters, not including null character)
+            const int maxStringLength = 255;
+            string answer = s;
+            if (s.Length > maxStringLength) {
+                LOG_ERROR(String.Format("Truncating long string to 255 characters: \"{0}\"",s));
+                answer = s.Substring(0,maxStringLength);
+            }
+            return answer;
+        }
+        #endregion
     }
 }

@@ -56,7 +56,7 @@ namespace CrittercismSDK {
             Saved=false;
         }
 
-        protected Dictionary<string,object> ComputeAppState() {
+        public static Dictionary<string,object> ComputeAppState() {
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
             // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
 
