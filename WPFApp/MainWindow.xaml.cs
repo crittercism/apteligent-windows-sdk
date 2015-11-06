@@ -90,7 +90,23 @@ namespace WPFApp
                 (HttpStatusCode)responseCode,
                 WebExceptionStatus.Success);
         }
+        private void transactionClick(object sender,RoutedEventArgs e) {
+            Button button = sender as Button;
+            if (button != null) {
+                const string transactionName = "Buy Critter Feed";
+                const string beginTransactionLabel = "Begin Transaction";
+                const string endTransactionLabel = "End Transaction";
+                String label = button.Content.ToString();
+                if (label == beginTransactionLabel) {
+                    Crittercism.BeginTransaction(transactionName);
+                    button.Content = endTransactionLabel;
+                } else if (label == endTransactionLabel) {
+                    Crittercism.BeginTransaction(transactionName);
+                    button.Content = beginTransactionLabel;
+                }
 
+            }
+        }
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
             try {
                 ThrowException();
