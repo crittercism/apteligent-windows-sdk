@@ -1,7 +1,7 @@
 using CrittercismSDK;
 
 namespace WindowsFormsApp {
-    partial class Form1 {
+    partial class MainWindow {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -25,7 +25,7 @@ namespace WindowsFormsApp {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.setUsernameButton = new System.Windows.Forms.Button();
             this.leaveBreadcrumbButton = new System.Windows.Forms.Button();
             this.handledExceptionButton = new System.Windows.Forms.Button();
@@ -126,7 +126,7 @@ namespace WindowsFormsApp {
             this.logNetworkRequestButton.UseVisualStyleBackColor = true;
             this.logNetworkRequestButton.Click += new System.EventHandler(this.logNetworkRequest_Click);
             // 
-            // Form1
+            // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -141,9 +141,9 @@ namespace WindowsFormsApp {
             this.Controls.Add(this.setUsernameButton);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "Form1";
+            this.Name = "MainWindow";
             this.Text = "WindowsFormsApp";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainWindow_FormClosed);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
