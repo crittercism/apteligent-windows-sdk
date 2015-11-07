@@ -156,7 +156,32 @@ namespace WindowsFormsApp {
         }
 
         private void transactionButton_Click(object sender,EventArgs e) {
-            // TODO: NIY
+            Button button = sender as Button;
+            if (button != null) {
+                const string transactionName = "Buy Critter Feed";
+                const string beginTransactionLabel = "Begin Transaction";
+                const string endTransactionLabel = "End Transaction";
+                String label = button.Text;
+                if (label == beginTransactionLabel) {
+                    Crittercism.BeginTransaction(transactionName);
+                    button.Text = endTransactionLabel;
+                } else if (label == endTransactionLabel) {
+                    EndTransactionDialog dialog = new EndTransactionDialog();
+                    dialog.Owner = this;
+                    dialog.ShowDialog();
+                    if (dialog.DialogResult == DialogResult.Yes) {
+                        switch (dialog.Answer) {
+                            case "End Transaction":
+                                Crittercism.EndTransaction(transactionName);
+                                break;
+                            case "Fail Transaction":
+                                Crittercism.FailTransaction(transactionName);
+                                break;
+                        }
+                        button.Text = beginTransactionLabel;
+                    }
+                }
+            }
         }
     }
 }

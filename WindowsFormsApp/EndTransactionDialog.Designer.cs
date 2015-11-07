@@ -40,6 +40,7 @@ namespace WindowsFormsApp {
             this.successButton.TabIndex = 1;
             this.successButton.Text = "Success";
             this.successButton.UseVisualStyleBackColor = true;
+            this.successButton.Click += new System.EventHandler(this.successButton_Click);
             // 
             // failButton
             // 
@@ -52,6 +53,7 @@ namespace WindowsFormsApp {
             this.failButton.TabIndex = 2;
             this.failButton.Text = "Fail";
             this.failButton.UseVisualStyleBackColor = true;
+            this.failButton.Click += new System.EventHandler(this.failButton_Click);
             // 
             // cancelButton
             // 
@@ -64,6 +66,7 @@ namespace WindowsFormsApp {
             this.cancelButton.TabIndex = 3;
             this.cancelButton.Text = "Cancel";
             this.cancelButton.UseVisualStyleBackColor = true;
+            this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
             // EndTransactionDialog
             // 

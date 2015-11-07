@@ -117,7 +117,6 @@ namespace WPFApp
                         button.Content = beginTransactionLabel;
                     }
                 }
-
             }
         }
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
