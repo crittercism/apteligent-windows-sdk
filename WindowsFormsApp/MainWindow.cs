@@ -17,6 +17,7 @@ namespace WindowsFormsApp {
 
         public MainWindow() {
             InitializeComponent();
+
             ApplicationOpenFormsCount++;
         }
 
@@ -152,6 +153,10 @@ namespace WindowsFormsApp {
 
         private void newWindow_Click(object sender,EventArgs e) {
             (new MainWindow()).Show();
+        }
+
+        private void transactionButton_Click(object sender,EventArgs e) {
+            // TODO: NIY
         }
     }
 }
