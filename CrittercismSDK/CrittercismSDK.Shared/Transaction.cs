@@ -267,12 +267,11 @@ namespace CrittercismSDK
 
         #region JSON
         internal Object[] ToArray() {
-            // TODO: How do we get null to Newtonsoft.JSON ?
             Object[] answer = new Object[] {
                 name,
                 state,
                 timeout,
-                ((value==NULL_VALUE)?0:value),
+                ((value == NULL_VALUE) ? null : (Object)value),
                 metadata,
                 beginTimeString,
                 endTimeString,
