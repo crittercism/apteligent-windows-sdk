@@ -19,18 +19,18 @@ namespace CrittercismSDK
         #endregion
 
         #region Properties
+        private static Object lockObject = new object();
+        private static bool enabled = true;
         // Batch additional network requests for 20 seconds before sending TransactionReport .
         private static long interval = 20 * MSEC_PER_SEC;
         private static long defaultTimeout = ONE_HOUR;
-        #endregion
+        private static Dictionary<string,Object> thresholds = new Dictionary<string,Object>();
 
         internal static long Interval() {
-            // TODO: NIY
             return interval;
         }
 
         internal static long DefaultTimeout() {
-            // TODO: NIY
             return defaultTimeout;
         }
 
@@ -38,8 +38,19 @@ namespace CrittercismSDK
             // TODO: NIY
             return true;
         }
+        #endregion
 
-        private static Object lockObject = new object();
+        #region Life Cycle
+        internal static void Init() {
+            lock (lockObject) {
+                // Crittercism.Init calling TransactionReporter.Init should effectively make
+                // lock lockObject here pointless, but no real harm doing so.
+                // Initialize transactionsDictionary and TransactionsQueue
+                transactionsDictionary = new Dictionary<string,Transaction>();
+                TransactionsQueue = new SynchronizedQueue<Object[]>(new Queue<Object[]>());
+            }
+        }
+        #endregion
 
         #region Persistence
         internal static void Save(Transaction transaction) {
@@ -108,6 +119,7 @@ namespace CrittercismSDK
         }
         #endregion
 
+        #region Normal Delivery
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
         private static ThreadPoolTimer timer=null;
@@ -174,13 +186,23 @@ namespace CrittercismSDK
                 Crittercism.AddMessageToQueue(transactionReport);
             }
         }
-        internal static void Init() {
+        #endregion
+
+        #region Sampling Control
+        static void Enable(long interval,long defaultTimeout,Dictionary<string,Object> thresholds) {
             lock (lockObject) {
-                // Crittercism.Init calling TransactionReporter.Init should effectively make
-                // lock lockObject here pointless, but no real harm doing so.
-                transactionsDictionary = new Dictionary<string,Transaction>();
-                TransactionsQueue = new SynchronizedQueue<Object[]>(new Queue<Object[]>());
+                enabled = true;
+                TransactionReporter.interval = interval;
+                TransactionReporter.defaultTimeout = defaultTimeout;
+                TransactionReporter.thresholds = thresholds;
             }
         }
+
+        static void Disable() {
+            lock (lockObject) {
+                enabled = false;
+            }
+        }
+        #endregion
     }
 }
