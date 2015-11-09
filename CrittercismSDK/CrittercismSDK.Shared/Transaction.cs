@@ -199,6 +199,11 @@ namespace CrittercismSDK
                 Transition(TransactionState.BEGUN);
             }
         }
+        internal void Cancel() {
+            lock (this) {
+                Transition(TransactionState.CANCELLED);
+            }
+        }
         internal void End() {
             lock (this) {
                 Transition(TransactionState.ENDED);
@@ -234,33 +239,37 @@ namespace CrittercismSDK
 
         private void Transition(TransactionState newState) {
             // Transition a transaction from current state to newState .
-            switch (state) {
-                case TransactionState.CREATED:
-                    if (newState == TransactionState.BEGUN) {
-                        SetState(newState,DateTime.UtcNow.Ticks);
-                    } else {
-                        // Transaction being begun for the first time after create.
-                        // Crittercism spec says newState has to be
-                        // TransactionState.BEGUN in this case unless there is change
-                        // of opinion about immediately failing a transaction possibility.
-                        Crittercism.LOG_ERROR("Ending transaction that hasn't begun is forbidden.");
-                    }
-                    break;
-                case TransactionState.BEGUN:
-                    if (newState != TransactionState.BEGUN) {
-                        SetState(newState,DateTime.UtcNow.Ticks);
-                    } else {
-                        // Complain. Crittercism spec says you shouldn't begin transaction
-                        // more than once.
-                        Crittercism.LOG_ERROR("Beginning transaction more than once is forbidden.");
-                    }
-                    break;
-                default:
-                    if (newState != TransactionState.TIMEOUT) {
-                        // Already in final state
-                        Crittercism.LOG_ERROR("Ending transaction more than once is forbidden.");
-                    }
-                    break;
+            if (newState == TransactionState.CANCELLED) {
+                TransactionReporter.Cancel(name);
+            } else {
+                switch (state) {
+                    case TransactionState.CREATED:
+                        if (newState == TransactionState.BEGUN) {
+                            SetState(newState,DateTime.UtcNow.Ticks);
+                        } else {
+                            // Transaction being begun for the first time after create.
+                            // Crittercism spec says newState has to be
+                            // TransactionState.BEGUN in this case unless there is change
+                            // of opinion about immediately failing a transaction possibility.
+                            Crittercism.LOG_ERROR("Ending transaction that hasn't begun is forbidden.");
+                        }
+                        break;
+                    case TransactionState.BEGUN:
+                        if (newState != TransactionState.BEGUN) {
+                            SetState(newState,DateTime.UtcNow.Ticks);
+                        } else {
+                            // Complain. Crittercism spec says you shouldn't begin transaction
+                            // more than once.
+                            Crittercism.LOG_ERROR("Beginning transaction more than once is forbidden.");
+                        }
+                        break;
+                    default:
+                        if (newState != TransactionState.TIMEOUT) {
+                            // Already in final state
+                            Crittercism.LOG_ERROR("Ending transaction more than once is forbidden.");
+                        }
+                        break;
+                }
             }
         }
         #endregion

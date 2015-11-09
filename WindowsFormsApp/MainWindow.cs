@@ -177,6 +177,9 @@ namespace WindowsFormsApp {
                             case "Fail Transaction":
                                 Crittercism.FailTransaction(transactionName);
                                 break;
+                            case "Cancel Transaction":
+                                Crittercism.CancelTransaction(transactionName);
+                                break;
                         }
                         button.Text = beginTransactionLabel;
                     }

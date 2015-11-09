@@ -117,6 +117,15 @@ namespace CrittercismSDK
             }
             return answer;
         }
+        internal static void Cancel(string name) {
+            // Cancel a transaction as if it never was.
+            // TODO: Kill transaction's timer if it exists.
+            lock (lockObject) {
+                if (transactionsDictionary.ContainsKey(name)) {
+                    transactionsDictionary.Remove(name);
+                }
+            }
+        }
         #endregion
 
         #region Normal Delivery

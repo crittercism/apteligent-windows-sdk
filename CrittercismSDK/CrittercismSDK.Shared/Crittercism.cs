@@ -701,6 +701,19 @@ namespace CrittercismSDK {
                 Crittercism.LogInternalException(ie);
             }
         }
+        public static void CancelTransaction(string name) {
+            // Cancel a transaction as if it never was.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    transaction.Cancel();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
         public static void EndTransaction(string name) {
             // End an already begun transaction successfully.
             try {

@@ -58,7 +58,7 @@ namespace WindowsFormsApp {
             // cancelButton
             // 
             this.cancelButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.cancelButton.ForeColor = System.Drawing.Color.Crimson;
+            this.cancelButton.ForeColor = System.Drawing.Color.DarkGreen;
             this.cancelButton.Location = new System.Drawing.Point(41, 283);
             this.cancelButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cancelButton.Name = "cancelButton";

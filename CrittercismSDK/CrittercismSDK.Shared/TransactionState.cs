@@ -14,6 +14,7 @@ namespace CrittercismSDK
         TIMEOUT,
         CRASHED,
         ABORTED,
-        INTERRUPTED
+        INTERRUPTED,
+        CANCELLED
     }
 }

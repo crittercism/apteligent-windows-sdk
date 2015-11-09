@@ -33,8 +33,8 @@ namespace WindowsFormsApp {
 
         private void cancelButton_Click(object sender,EventArgs e) {
             // Set dialog return value
-            answer = "Cancel";
-            this.DialogResult = DialogResult.No;
+            answer = "Cancel Transaction";
+            this.DialogResult = DialogResult.Yes;
         }
     }
 }

@@ -41,6 +41,6 @@
                 Click="failTransactionClick"/>
         <Button Grid.Row="2" Grid.Column="0" Content="Cancel"
                 Style="{StaticResource CritterStyle}"
-                Click="cancelTransactionClick" Foreground="Crimson"/>
+                Click="cancelTransactionClick"/>
     </Grid>
 </Window>

@@ -43,8 +43,8 @@ namespace WPFApp
         }
         private void cancelTransactionClick(object sender,RoutedEventArgs e) {
             // Set dialog return value
-            answer = "Cancel";
-            this.DialogResult = false;
+            answer = "Cancel Transaction";
+            this.DialogResult = true;
         }
         private void Window_Closed(object sender,EventArgs e) {
         }
