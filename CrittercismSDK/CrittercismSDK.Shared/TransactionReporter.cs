@@ -56,7 +56,6 @@ namespace CrittercismSDK
         internal static void Save(Transaction transaction) {
             // Persist transaction to correct directory
             lock (lockObject) {
-                // TODO: "Aborted" transactions?
                 switch (transaction.State()) {
                     case TransactionState.CREATED:
                         // Make visible via persistence API methods.
