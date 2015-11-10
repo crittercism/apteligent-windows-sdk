@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace CrittercismSDK
 {
@@ -13,14 +14,27 @@ namespace CrittercismSDK
         // here.
         const int NULL_VALUE = Int32.MinValue;
 
+        ////////////////////////////////////////////////////////////////
+        // NOTE: Microsoft Time Measurements
+        // Not living in Steve Jobs' ideal world, we must contend with
+        // several different inconsistent ways that Microsoft prefers
+        // to measure time:
+        // * Precise moments are measured in ticks (tick == 10^-7 seconds)
+        // 0 corresponds to reference date of 
+        // 12:00:00 midnight, January 1, 0001
+        // (0:00:00 UTC on January 1, 0001, in the Gregorian calendar)
+        // https://msdn.microsoft.com/en-us/library/system.datetime.ticks(v=vs.110).aspx
+        // * Time outs are measured in milliseconds.  Applicable
+        // to timers and Thread.Sleep .
+        ////////////////////////////////////////////////////////////////
         private string name;
         private TransactionState state;
-        private long timeout;
+        private int timeout; // milliseconds
         private int value;
         private Dictionary<string,string> metadata;
-        private long beginTime;
-        private long endTime;
-        private long eyeTime;
+        private long beginTime; // ticks
+        private long endTime; // ticks
+        private long eyeTime; // ticks
 
         private string beginTimeString;
         private string endTimeString;
@@ -68,11 +82,20 @@ namespace CrittercismSDK
             }
             TransactionReporter.Save(this);
         }
-        private long ClampTimeout(long newTimeout) {
-            long answer = TransactionReporter.ClampTimeout(name,newTimeout);
+        private int ClampTimeout(int newTimeout) {
+            int answer = TransactionReporter.ClampTimeout(name,newTimeout);
             return answer;
         }
-        internal void SetTimeout(long newTimeout) {
+        internal int Timeout() {
+            // Transaction timeout in milliseconds
+            int answer;
+            lock (this) {
+                answer = timeout;
+            }
+            return answer;
+        }
+        internal void SetTimeout(int newTimeout) {
+            // Set new transaction timeout in milliseconds.
             lock (this) {
                 if (IsFinal()) {
                     // Complain
@@ -111,6 +134,7 @@ namespace CrittercismSDK
             return answer;
         }
         internal long BeginTime() {
+            // Begin time of transaction in ticks
             long answer;
             lock (this) {
                 answer = beginTime;
@@ -118,11 +142,20 @@ namespace CrittercismSDK
             return answer;
         }
         internal void SetBeginTime(long newBeginTime) {
+            // Set begin time of transaction in ticks.
             DateTime begin_date = (new DateTime(newBeginTime)).ToUniversalTime();
             beginTimeString = DateUtils.ISO8601DateString(begin_date);
             beginTime = newBeginTime;
         }
+        internal string BeginTimeString() {
+            string answer;
+            lock (this) {
+                answer = beginTimeString;
+            }
+            return answer;
+        }
         internal long EndTime() {
+            // End time of transaction in ticks.
             long answer;
             lock (this) {
                 answer = endTime;
@@ -130,13 +163,31 @@ namespace CrittercismSDK
             return answer;
         }
         internal void SetEndTime(long newEndTime) {
+            // Set end time of transaction in ticks.
             DateTime end_date = (new DateTime(newEndTime)).ToUniversalTime();
             endTimeString = DateUtils.ISO8601DateString(end_date);
             endTime = newEndTime;
         }
+        internal string EndTimeString() {
+            string answer;
+            lock (this) {
+                answer = endTimeString;
+            }
+            return answer;
+        }
+        internal long EyeTime() {
+            // The "eyeTime" of a transaction is the sum of the lengths of the
+            // [F B] intervals that appeared in the transaction's lifetime, in ticks.
+            // F = foreground time, B = background time .
+            long answer;
+            lock (this) {
+                answer = eyeTime;
+            }
+            return answer;
+        }
         internal long ForegroundTime() {
             // "Foreground time" == the latest Crittercism Init
-            // time or foreground time, whichever is later.
+            // time or foreground time, whichever is later, in ticks.
             long answer;
             lock (this) {
                 answer = foregroundTime;
@@ -145,10 +196,17 @@ namespace CrittercismSDK
         }
         internal void SetForegroundTime(long newForegroundTime) {
             // "Foreground time" == the latest Crittercism Init
-            // time or foreground time, whichever is later.
+            // time or foreground time, whichever is later, in ticks.
             DateTime foreground_date = (new DateTime(newForegroundTime)).ToUniversalTime();
             foregroundTimeString = DateUtils.ISO8601DateString(foreground_date);
             foregroundTime = newForegroundTime;
+        }
+        internal string ForegroundTimeString() {
+            string answer;
+            lock (this) {
+                answer = foregroundTimeString;
+            }
+            return answer;
         }
         #endregion
 
@@ -169,7 +227,7 @@ namespace CrittercismSDK
             SetEndTime(0);
             eyeTime = 0;
             SetForegroundTime(0);
-            timeout = ClampTimeout(Int64.MaxValue);
+            timeout = ClampTimeout(Int32.MaxValue);
         }
         internal Transaction(string name) : this() {
             this.name = Crittercism.TruncatedString(name);
@@ -180,6 +238,10 @@ namespace CrittercismSDK
         }
         internal Transaction(string name,long beginTime,long endTime) : this(name) {
             ////////////////////////////////////////////////////////////////
+            // Input:
+            //    name = transaction name
+            //    beginTime = transaction begin time in ticks
+            //    endTime = transaction end time in ticks
             // NOTE: Automatic transactions ("App Load", "App Foreground", "App Background")
             ////////////////////////////////////////////////////////////////
             state = TransactionState.ENDED;
@@ -235,7 +297,7 @@ namespace CrittercismSDK
             return answer;
         }
 
-        private void Transition(TransactionState newState) {
+        internal void Transition(TransactionState newState) {
             // Transition a transaction from current state to newState .
             if (newState == TransactionState.CANCELLED) {
                 TransactionReporter.Cancel(name);
@@ -285,6 +347,10 @@ namespace CrittercismSDK
                 eyeTime,
                 foregroundTimeString
             };
+            return answer;
+        }
+        internal string ToJSONString() {
+            string answer = JsonConvert.SerializeObject(ToArray());
             return answer;
         }
         #endregion

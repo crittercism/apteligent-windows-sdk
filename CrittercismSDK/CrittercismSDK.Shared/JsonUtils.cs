@@ -22,7 +22,15 @@ namespace CrittercismSDK
                 } else {
                     Debug.WriteLine("JSON {0} isn't extended real",x);
                 }
-            } else if ((x is Byte)
+            } else if (IsNumber(x)) {
+                answer = (Double)x;
+            } else {
+                Debug.WriteLine("JSON {0} isn't extended real",x);
+            }
+            return answer;
+        }
+        internal static bool IsNumber(Object x) {
+            bool answer = ((x is Byte)
                 || (x is Decimal)
                 || (x is Double)
                 || (x is Int16)
@@ -32,11 +40,7 @@ namespace CrittercismSDK
                 || (x is Single)
                 || (x is UInt16)
                 || (x is UInt32)
-                || (x is UInt64)) {
-                answer = (Double)x;
-            } else {
-                Debug.WriteLine("JSON {0} isn't extended real",x);
-            }
+                || (x is UInt64));
             return answer;
         }
     }

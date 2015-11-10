@@ -13,30 +13,38 @@ namespace CrittercismSDK
     internal class TransactionReporter
     {
         #region Constants
-        internal const long MSEC_PER_SEC = 1000;
+        internal const int MSEC_PER_SEC = 1000;
         internal const int MAX_TRANSACTION_COUNT=50;
-        const long ONE_HOUR = 3600 * TimeSpan.TicksPerSecond;
+        const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
         #endregion
 
         #region Properties
         private static Object lockObject = new object();
         private static bool enabled = true;
         // Batch additional network requests for 20 seconds before sending TransactionReport .
-        private static long interval = 20 * MSEC_PER_SEC; // ms
-        private static long defaultTimeout = ONE_HOUR; // ticks
+        private static int interval = 20 * MSEC_PER_SEC; // milliseconds
+        private static int defaultTimeout = ONE_HOUR; // milliseconds
         private static Dictionary<string,Object> thresholds = new Dictionary<string,Object>();
 
-        internal static long Interval() {
+        internal static int Interval() {
+            // Transaction batch reporting interval in milliseconds
             return interval;
         }
 
-        internal static long DefaultTimeout() {
+        internal static int DefaultTimeout() {
+            // Transaction default timeout in milliseconds
             return defaultTimeout;
         }
 
         internal static bool IsForegrounded() {
             // TODO: NIY
             return true;
+        }
+        internal static void Background() {
+            // TODO: NIY
+        }
+        internal static void Resume() {
+            // TODO: NIY
         }
         #endregion
 
@@ -197,14 +205,13 @@ namespace CrittercismSDK
         #endregion
 
         #region Sampling Control
-        internal static void Enable(long interval,long defaultTimeout,Dictionary<string,Object> thresholds) {
+        internal static void Enable(int interval,int defaultTimeout,Dictionary<string,Object> thresholds) {
             ////////////////////////////////////////////////////////////////
             // Input:
-            //     interval == ms (ms == 10^-3 seconds)
-            //     defaultTimeout == ticks (tick == 10^-7 seconds)
+            //     interval == milliseconds (millisecond == 10^-3 seconds)
+            //     defaultTimeout == milliseconds (millisecond == 10^-3 seconds)
             //     thresholds == as received from platform AppLoad response
             //                   (Dictionary mapping string names to times in seconds)
-            // TODO: ms, ticks, seconds all in one function?  Is that best?
             ////////////////////////////////////////////////////////////////
             lock (lockObject) {
                 enabled = true;
@@ -218,19 +225,18 @@ namespace CrittercismSDK
                 enabled = false;
             }
         }
-        internal static long ClampTimeout(string name,long newTimeout) {
+        internal static int ClampTimeout(string name,int newTimeout) {
             // Clamp newTimeout according to Wire+Protocol doc
             // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
             // details regarding txnConfig defaultTimeout and possible "timeout"
             // txnConfig transactions thresholds dictionaries.
-            long answer = newTimeout;
+            int answer = newTimeout;
             lock (lockObject) {
                 if (thresholds.ContainsKey(name)) {
-                    const int TICKS_PER_MS = 10000;
-                    // thresholdTimeout in ticks
-                    double thresholdTimeout = TICKS_PER_MS*JsonUtils.StringToExtendedReal(thresholds[name]);
+                    // thresholdTimeout in milliseconds
+                    double thresholdTimeout = JsonUtils.StringToExtendedReal(thresholds[name]);
                     if ((thresholdTimeout > 0.0) && (answer > thresholdTimeout)) {
-                        answer = (long)thresholdTimeout;
+                        answer = (int)thresholdTimeout;
                     }
                 } else {
                     ////////////////////////////////////////////////////////////////
