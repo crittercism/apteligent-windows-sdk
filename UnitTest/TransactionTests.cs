@@ -8,9 +8,6 @@ using Newtonsoft.Json;
 using CrittercismSDK;
 
 namespace UnitTest {
-    /// <summary>
-    /// Summary description for TransactionTests
-    /// </summary>
     [TestClass]
     public class TransactionTests {
         const string ExampleLongString =
@@ -52,7 +49,7 @@ namespace UnitTest {
         #region Transaction state property
         [TestMethod]
         public void TestStateProperty() {
-            // Check "state" is correct TransactionState after
+            // Check state is correct TransactionState after
             // various Transaction method calls.
             {
                 Transaction example1 = ExampleTransaction();
@@ -239,7 +236,7 @@ namespace UnitTest {
         }
         #endregion
 
-        #region Transaction init: method
+        #region Transaction(name) constructor
         [TestMethod]
         public void TestInit() {
             string name1 = "";
@@ -257,7 +254,7 @@ namespace UnitTest {
         }
         #endregion
 
-        #region Transaction init:withValue: method
+        #region Transaction(name,value) constructor
         [TestMethod]
         public void TestInitWithValue() {
             string name1 = "";
@@ -280,10 +277,10 @@ namespace UnitTest {
         }
         #endregion
 
-        #region Transaction begin: method
+        #region Transaction Begin() method
         [TestMethod]
         public void TestBegin() {
-            // Test "begin"'s resulting state is correct.
+            // Test "Begin"'s resulting state is correct.
             Transaction example = ExampleTransaction();
             example.Begin();
             Assert.IsTrue(example.State() == TransactionState.BEGUN,
@@ -291,10 +288,10 @@ namespace UnitTest {
         }
         #endregion
 
-        #region Transaction end: method
+        #region Transaction End() method
         [TestMethod]
         public void TestSuccess() {
-            // Test "end"'s resulting state is correct.  It's required to "begin" first.
+            // Test "End"'s resulting state is correct.  It's required to "Begin" first.
             Transaction example = ExampleTransaction();
             example.Begin();
             Assert.IsTrue(example.State() == TransactionState.BEGUN,
@@ -305,10 +302,10 @@ namespace UnitTest {
         }
         #endregion
 
-        #region Transaction fail: method
+        #region Transaction Fail method
         [TestMethod]
         public void TestFail() {
-            // Test "fail"'s resulting state is correct.  It's required to "begin" first.
+            // Test "Fail"'s resulting state is correct.  It's required to "begin" first.
             Transaction example = ExampleTransaction();
             example.Begin();
             Assert.IsTrue(example.State() == TransactionState.BEGUN,
@@ -319,7 +316,7 @@ namespace UnitTest {
         }
         #endregion
 
-        #region Transaction transition: method
+        #region Transaction Transition method
         [TestMethod]
         public void TestTransition() {
             {
@@ -518,9 +515,9 @@ namespace UnitTest {
         #region Transaction Static API
         [TestMethod]
         public void TestStaticAPIBeginTransaction() {
-            // Test "Static API" "beginTransaction:" method
+            // Test "Static API" "BeginTransaction(name)" method
             string exampleName = "Purchase Crittercism SDK";
-            // Resulting value of "beginTransaction:" is correct.
+            // Resulting value of "BeginTransaction(name)" is correct.
             Crittercism.BeginTransaction(exampleName);
             Assert.IsNotNull(Transaction.TransactionForName(exampleName),
                              "Confirm begun transaction is accessible");
@@ -533,10 +530,10 @@ namespace UnitTest {
 
         [TestMethod]
         public void TestStaticAPIBeginTransactionWithValue() {
-            // Test "Static API" "beginTransaction:withValue:" method
+            // Test "Static API" "BeginTransaction(name,value)" method
             string exampleName = "Purchase Crittercism SDK";
             int exampleValue = 12345678;
-            // Resulting value of "begin:withValue:" is correct.
+            // Resulting value of "BeginTransaction(name,value)" is correct.
             Crittercism.BeginTransaction(exampleName,exampleValue);
             Assert.IsTrue(Crittercism.GetTransactionValue(exampleName) == exampleValue,
                           String.Format("Confirm begin:withValue: changes value to{0} #2",
@@ -548,9 +545,9 @@ namespace UnitTest {
 
         [TestMethod]
         public void TestStaticAPIEndTransaction() {
-            // Test "Static API" "endTransaction:"
+            // Test "Static API" "EndTransaction"
             string exampleName = "Purchase Crittercism SDK";
-            // Resulting state of "endTransaction:" is correct.  It's required to "begin" first.
+            // Resulting state of "EndTransaction" is correct.  It's required to "Begin" first.
             Crittercism.BeginTransaction(exampleName);
             Assert.IsTrue(Transaction.TransactionForName(exampleName).State() == TransactionState.BEGUN,
                          "Confirm begin: changes state to TransactionState.BEGUN");
@@ -561,9 +558,9 @@ namespace UnitTest {
 
         [TestMethod]
         public void TestStaticAPIFailTransaction() {
-            // Test "Static API" "failTransaction:"
+            // Test "Static API" "FailTransaction"
             string exampleName = "Purchase Crittercism SDK";
-            // Resulting state of "failTransaction:" is correct.  It's required to "begin" first.
+            // Resulting state of "FailTransaction" is correct.  It's required to "Begin" first.
             Crittercism.BeginTransaction(exampleName);
             Assert.IsTrue(Transaction.TransactionForName(exampleName).State() == TransactionState.BEGUN,
                          "Confirm begin: changes state to TransactionState.BEGUN");
@@ -574,7 +571,7 @@ namespace UnitTest {
 
         [TestMethod]
         public void TestStaticAPITransactionValueProperty() {
-            // Test "Static API" "valueForTransaction:" and "setValue:forTransaction:"
+            // Test "Static API" "GetTransactionValue" and "SetTransactionValue"
             string exampleName = "Purchase Crittercism SDK";
             const int exampleValue = 12345678; // $123456.78
             const int value1 = 1234; // $12.34

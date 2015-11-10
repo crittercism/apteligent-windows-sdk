@@ -211,7 +211,7 @@ namespace CrittercismSDK
             //     interval == milliseconds (millisecond == 10^-3 seconds)
             //     defaultTimeout == milliseconds (millisecond == 10^-3 seconds)
             //     thresholds == as received from platform AppLoad response
-            //                   (Dictionary mapping string names to times in seconds)
+            //                   (Dictionary mapping string names to times in milliseconds)
             ////////////////////////////////////////////////////////////////
             lock (lockObject) {
                 enabled = true;
@@ -240,7 +240,7 @@ namespace CrittercismSDK
                     }
                 } else {
                     ////////////////////////////////////////////////////////////////
-                    // Don't go over global "defaultTimeout" ticks
+                    // Don't go over global "defaultTimeout" milliseconds
                     ////////////////////////////////////////////////////////////////
                     answer = Math.Min(answer,defaultTimeout);
                 }
