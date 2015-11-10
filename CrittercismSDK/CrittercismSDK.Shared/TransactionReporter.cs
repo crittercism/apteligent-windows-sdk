@@ -198,7 +198,7 @@ namespace CrittercismSDK
         #endregion
 
         #region Sampling Control
-        static void Enable(long interval,long defaultTimeout,Dictionary<string,Object> thresholds) {
+        internal static void Enable(long interval,long defaultTimeout,Dictionary<string,Object> thresholds) {
             ////////////////////////////////////////////////////////////////
             // Input:
             //     interval == ms (ms == 10^-3 seconds)
@@ -214,12 +214,16 @@ namespace CrittercismSDK
                 TransactionReporter.thresholds = thresholds;
             }
         }
-        static void Disable() {
+        internal static void Disable() {
             lock (lockObject) {
                 enabled = false;
             }
         }
-        static long ClampTimeout(string name,long newTimeout) {
+        internal static long ClampTimeout(string name,long newTimeout) {
+            // Clamp newTimeout according to Wire+Protocol doc
+            // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
+            // details regarding txnConfig defaultTimeout and possible "timeout"
+            // txnConfig transactions thresholds dictionaries.
             long answer = newTimeout;
             lock (lockObject) {
                 if (thresholds.ContainsKey(name)) {

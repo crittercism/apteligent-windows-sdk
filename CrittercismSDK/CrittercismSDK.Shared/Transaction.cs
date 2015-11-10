@@ -69,13 +69,7 @@ namespace CrittercismSDK
             TransactionReporter.Save(this);
         }
         private long ClampTimeout(long newTimeout) {
-            // Clamp newTimeout according to Wire+Protocol doc
-            // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
-            // details regarding txnConfig defaultTimeout and possible "timeout"
-            // txnConfig transactions thresholds dictionaries.
-            long answer = newTimeout;
-            // TODO: NIY (It's not this simple)
-            answer = Math.Min(answer,TransactionReporter.DefaultTimeout());
+            long answer = TransactionReporter.ClampTimeout(name,newTimeout);
             return answer;
         }
         internal void SetTimeout(long newTimeout) {
