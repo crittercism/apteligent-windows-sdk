@@ -22,8 +22,8 @@ namespace CrittercismSDK
         private static Object lockObject = new object();
         private static bool enabled = true;
         // Batch additional network requests for 20 seconds before sending TransactionReport .
-        private static long interval = 20 * MSEC_PER_SEC;
-        private static long defaultTimeout = ONE_HOUR;
+        private static long interval = 20 * MSEC_PER_SEC; // ms
+        private static long defaultTimeout = ONE_HOUR; // ticks
         private static Dictionary<string,Object> thresholds = new Dictionary<string,Object>();
 
         internal static long Interval() {
@@ -199,6 +199,14 @@ namespace CrittercismSDK
 
         #region Sampling Control
         static void Enable(long interval,long defaultTimeout,Dictionary<string,Object> thresholds) {
+            ////////////////////////////////////////////////////////////////
+            // Input:
+            //     interval == ms (ms == 10^-3 seconds)
+            //     defaultTimeout == ticks (tick == 10^-7 seconds)
+            //     thresholds == as received from platform AppLoad response
+            //                   (Dictionary mapping string names to times in seconds)
+            // TODO: ms, ticks, seconds all in one function?  Is that best?
+            ////////////////////////////////////////////////////////////////
             lock (lockObject) {
                 enabled = true;
                 TransactionReporter.interval = interval;
@@ -206,11 +214,29 @@ namespace CrittercismSDK
                 TransactionReporter.thresholds = thresholds;
             }
         }
-
         static void Disable() {
             lock (lockObject) {
                 enabled = false;
             }
+        }
+        static long ClampTimeout(string name,long newTimeout) {
+            long answer = newTimeout;
+            lock (lockObject) {
+                if (thresholds.ContainsKey(name)) {
+                    const int TICKS_PER_MS = 10000;
+                    // thresholdTimeout in ticks
+                    double thresholdTimeout = TICKS_PER_MS*JsonUtils.StringToExtendedReal(thresholds[name]);
+                    if ((thresholdTimeout > 0.0) && (answer > thresholdTimeout)) {
+                        answer = (long)thresholdTimeout;
+                    }
+                } else {
+                    ////////////////////////////////////////////////////////////////
+                    // Don't go over global "defaultTimeout" ticks
+                    ////////////////////////////////////////////////////////////////
+                    answer = Math.Min(answer,defaultTimeout);
+                }
+            }
+            return answer;
         }
         #endregion
     }
