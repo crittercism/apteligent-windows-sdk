@@ -69,13 +69,13 @@ namespace CrittercismSDK
                     SetBeginTime(nowTime);
                     if (isForegrounded) {
                         SetForegroundTime(nowTime);
-                        // TODO: Create expiration timer
+                        CreateTimer();
                     }
                     break;
                 default:
                     // Final state
                     SetEndTime(nowTime);
-                    // TODO: Remove expiration timer
+                    RemoveTimer();
                     if (isForegrounded) {
                         // Entering final state is effectively closing early ahead of
                         // the time when app may be backgrounded later.  The persisted
@@ -107,7 +107,9 @@ namespace CrittercismSDK
                     Crittercism.LOG_ERROR("Changing final state transaction is forbidden.");
                 } else {
                     timeout = ClampTimeout(newTimeout);
-                    // TODO: eye time management
+                    if (isForegrounded) {
+                        CreateTimer();
+                    }
                 }
             }
         }
