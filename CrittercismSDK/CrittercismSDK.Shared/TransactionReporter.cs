@@ -20,7 +20,10 @@ namespace CrittercismSDK
 
         #region Properties
         private static Object lockObject = new object();
+#pragma warning disable 0414
+        // TODO: Get enabled set via AppLoad response and Enable method.
         private static bool enabled = true;
+#pragma warning restore 0414
         // Batch additional network requests for 20 seconds before sending TransactionReport .
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
         private static int defaultTimeout = ONE_HOUR; // milliseconds

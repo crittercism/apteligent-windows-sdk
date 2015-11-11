@@ -2,6 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json;
+#if NETFX_CORE || WINDOWS_PHONE
+using Windows.System.Threading;
+#else
+using System.Timers;
+#endif // NETFX_CORE
 
 namespace CrittercismSDK
 {
@@ -20,7 +25,7 @@ namespace CrittercismSDK
         // several different inconsistent ways that Microsoft prefers
         // to measure time:
         // * Precise moments are measured in ticks (tick == 10^-7 seconds)
-        // 0 corresponds to reference date of 
+        // 0 ticks corresponds to reference date of
         // 12:00:00 midnight, January 1, 0001
         // (0:00:00 UTC on January 1, 0001, in the Gregorian calendar)
         // https://msdn.microsoft.com/en-us/library/system.datetime.ticks(v=vs.110).aspx
@@ -216,17 +221,18 @@ namespace CrittercismSDK
             state = TransactionState.CREATED;
             value = NULL_VALUE;
             metadata = new Dictionary<string,string>();
-            // 0 corresponds to reference date of 
+            // 0 ticks corresponds to reference date of
             // 12:00:00 midnight, January 1, 0001
             // (0:00:00 UTC on January 1, 0001, in the Gregorian calendar)
             // https://msdn.microsoft.com/en-us/library/system.datetime.ticks(v=vs.110).aspx
-            // And we are calling SetBeginTime and SetEndTime: here
+            // And we are calling SetBeginTime and SetEndTime here
             // so the strings beginTimeString and endTimeString
             // will get computed.
             SetBeginTime(0);
             SetEndTime(0);
             eyeTime = 0;
             SetForegroundTime(0);
+            // timeout in milliseconds
             timeout = ClampTimeout(Int32.MaxValue);
         }
         internal Transaction(string name) : this() {
@@ -373,8 +379,88 @@ namespace CrittercismSDK
         #endregion
 
         #region Timing
-        // void timerFired:(NSTimer *)timer;
-        #endregion
+#if NETFX_CORE || WINDOWS_PHONE
+        private static ThreadPoolTimer timer = null;
+#else
+        private static Timer timer=null;
+#endif // NETFX_CORE
 
+        internal void CreateTimer() {
+            // Called every assignment to "timeout" property.    Microsoft
+            // timers fire on thread pool threads (better than Objective-C!).
+            // Kill any existing timer
+            lock (this) {
+                RemoveTimer();
+                if (timeout == Int32.MaxValue) {
+                    // If the timeout is +infinity, don't create a new timer.
+                } else {
+                    // Create new timer based on "timeout" property and when we began
+                    // and now.
+                    const int TICKS_PER_MSEC = 10000;
+                    int milliseconds = timeout - (int)(eyeTime/TICKS_PER_MSEC);
+                    if (milliseconds <= 0) {
+                        // If remaining time is nonpositive, just timeout here
+                        Transition(TransactionState.TIMEOUT);
+                    } else {
+                        // Otherwise
+                        CreateTimerMilliseconds(milliseconds);
+                    }
+                }
+            }
+        }
+
+        private void CreateTimerMilliseconds(int milliseconds) {
+            // Create timer
+#if NETFX_CORE || WINDOWS_PHONE
+            if (timer == null) {
+                // Creates a single-use timer.
+                // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
+                timer = ThreadPoolTimer.CreateTimer(
+                    OnTimerElapsed,
+                    TimeSpan.FromMilliseconds(milliseconds));
+            }
+#else
+            if (timer==null) {
+                // Generates an event after a set interval
+                // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
+                timer = new Timer(milliseconds);
+                timer.Elapsed += OnTimerElapsed;
+                // the Timer should raise the Elapsed event only once (false)
+                timer.AutoReset = false;        // fire once
+                timer.Enabled = true;           // Start the timer
+            }
+#endif // NETFX_CORE
+        }
+
+#if NETFX_CORE || WINDOWS_PHONE
+        private void OnTimerElapsed(ThreadPoolTimer timer) {
+            // The transaction has timed out.
+            lock (this) {
+                Transition(TransactionState.TIMEOUT);
+            }
+        }
+#else
+        private void OnTimerElapsed(Object source, ElapsedEventArgs e) {
+            // The transaction has timed out.
+            lock (this) {
+                Transition(TransactionState.TIMEOUT);
+            }
+        }
+#endif // NETFX_CORE
+        private void RemoveTimer() {
+            // Call if we don't need the timer anymore.
+#if NETFX_CORE || WINDOWS_PHONE
+            if (timer != null) {
+                timer.Cancel();
+                timer = null;
+            }
+#else
+            if (timer!=null) {
+                timer.Stop();
+                timer = null;
+            }
+#endif // NETFX_CORE
+        }
+        #endregion
     }
 }
