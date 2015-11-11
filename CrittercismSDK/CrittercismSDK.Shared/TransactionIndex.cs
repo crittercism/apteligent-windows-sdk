@@ -14,8 +14,6 @@ namespace CrittercismSDK
         BeginTime,
         EndTime,
         EyeTime,
-        ForegroundTime,
-        IsForegrounded,
         COUNT
     }
 }

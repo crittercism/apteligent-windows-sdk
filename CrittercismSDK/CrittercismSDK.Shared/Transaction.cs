@@ -18,6 +18,7 @@ namespace CrittercismSDK
         // debits, so we use Int32.MinValue == -2^31 == -2147483648 == -$21,474,836.48
         // here.
         const int NULL_VALUE = Int32.MinValue;
+        const int TICKS_PER_MSEC = 10000;
 
         ////////////////////////////////////////////////////////////////
         // NOTE: Microsoft Time Measurements
@@ -35,7 +36,7 @@ namespace CrittercismSDK
         private string name;
         private TransactionState state;
         private int timeout; // milliseconds
-        private int value;
+        private int value; // pennies (http://www.usmint.gov/mint_programs/circulatingCoins/?action=circPenny)
         private Dictionary<string,string> metadata;
         private long beginTime; // ticks
         private long endTime; // ticks
@@ -43,10 +44,9 @@ namespace CrittercismSDK
 
         private string beginTimeString;
         private string endTimeString;
-        private long foregroundTime;
+        private long foregroundTime; // ticks
         private string foregroundTimeString;
         private bool isForegrounded;
-        //private NSTimer timer;
 
         #region Properties
         internal string Name() {
@@ -346,14 +346,13 @@ namespace CrittercismSDK
         internal Object[] ToArray() {
             Object[] answer = new Object[] {
                 name,
-                state,
+                (Int32)state,
                 timeout,
                 ((value == NULL_VALUE) ? null : (Object)value),
                 metadata,
-                beginTimeString,
-                endTimeString,
-                eyeTime,
-                foregroundTimeString
+                (String)beginTimeString,
+                (String)endTimeString,
+                eyeTime/TICKS_PER_MSEC
             };
             return answer;
         }
@@ -398,7 +397,6 @@ namespace CrittercismSDK
                 } else {
                     // Create new timer based on "timeout" property and when we began
                     // and now.
-                    const int TICKS_PER_MSEC = 10000;
                     int milliseconds = timeout - (int)(eyeTime/TICKS_PER_MSEC);
                     if (milliseconds <= 0) {
                         // If remaining time is nonpositive, just timeout here
