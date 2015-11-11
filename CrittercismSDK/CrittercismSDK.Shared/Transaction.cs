@@ -104,7 +104,7 @@ namespace CrittercismSDK
             lock (this) {
                 if (IsFinal()) {
                     // Complain
-                    Crittercism.LOG_ERROR("Changing final state transaction is forbidden.");
+                    DebugUtils.LOG_ERROR("Changing final state transaction is forbidden.");
                 } else {
                     timeout = ClampTimeout(newTimeout);
                     if (isForegrounded) {
@@ -124,10 +124,10 @@ namespace CrittercismSDK
             lock (this) {
                 if (IsFinal()) {
                     // Complain
-                    Crittercism.LOG_ERROR("Changing final state transaction is forbidden.");
+                    DebugUtils.LOG_ERROR("Changing final state transaction is forbidden.");
                 } else if (newValue < 0) {
                     // DESIGN: Decision by product team.
-                    Crittercism.LOG_ERROR("Cannot assign transaction a negative value");
+                    DebugUtils.LOG_ERROR("Cannot assign transaction a negative value");
                 } else {
                     value = newValue;
                 }
@@ -238,7 +238,7 @@ namespace CrittercismSDK
             timeout = ClampTimeout(Int32.MaxValue);
         }
         internal Transaction(string name) : this() {
-            this.name = Crittercism.TruncatedString(name);
+            this.name = StringUtils.TruncatedString(name);
             TransactionReporter.Save(this);
         }
         internal Transaction(string name,int value) : this(name) {
@@ -319,7 +319,7 @@ namespace CrittercismSDK
                             // Crittercism spec says newState has to be
                             // TransactionState.BEGUN in this case unless there is change
                             // of opinion about immediately failing a transaction possibility.
-                            Crittercism.LOG_ERROR("Ending transaction that hasn't begun is forbidden.");
+                            DebugUtils.LOG_ERROR("Ending transaction that hasn't begun is forbidden.");
                         }
                         break;
                     case TransactionState.BEGUN:
@@ -328,13 +328,13 @@ namespace CrittercismSDK
                         } else {
                             // Complain. Crittercism spec says you shouldn't begin transaction
                             // more than once.
-                            Crittercism.LOG_ERROR("Beginning transaction more than once is forbidden.");
+                            DebugUtils.LOG_ERROR("Beginning transaction more than once is forbidden.");
                         }
                         break;
                     default:
                         if (newState != TransactionState.TIMEOUT) {
                             // Already in final state
-                            Crittercism.LOG_ERROR("Ending transaction more than once is forbidden.");
+                            DebugUtils.LOG_ERROR("Ending transaction more than once is forbidden.");
                         }
                         break;
                 }

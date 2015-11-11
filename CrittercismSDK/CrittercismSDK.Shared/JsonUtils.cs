@@ -20,12 +20,12 @@ namespace CrittercismSDK
                 } else if (s.Equals("NAN",StringComparison.OrdinalIgnoreCase)) {
                     answer = double.NaN;
                 } else {
-                    Debug.WriteLine("JSON {0} isn't extended real",x);
+                    Debug.WriteLine(String.Format("JSON {0} isn't extended real",x));
                 }
             } else if (IsNumber(x)) {
                 answer = (Double)x;
             } else {
-                Debug.WriteLine("JSON {0} isn't extended real",x);
+                Debug.WriteLine(String.Format("JSON {0} isn't extended real",x));
             }
             return answer;
         }

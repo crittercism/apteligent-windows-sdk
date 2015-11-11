@@ -261,7 +261,7 @@ namespace UnitTest {
         [TestMethod]
         public void TestInitLongString() {
             Transaction example = new Transaction(ExampleLongString);
-            Debug.WriteLine("example.Name() == {0}",example.Name());
+            Debug.WriteLine("example.Name() == "+example.Name());
             Assert.IsTrue(example.Name() == ExampleTruncatedString,
                          "Confirm constructor sets name property.");
         }
@@ -348,7 +348,7 @@ namespace UnitTest {
             Object[] jsonArray = json as Object[];
             Assert.IsNotNull(jsonArray,"Expecting transaction jsonArray");
             if (jsonArray != null) {
-                Debug.WriteLine("jsonArray.Count=={0}",jsonArray.Length);
+                Debug.WriteLine("jsonArray.Count == "+jsonArray.Length);
                 Assert.IsTrue(jsonArray.Length == (int)TransactionIndex.COUNT,
                              "Expecting transaction jsonArray with correct count.");
                 Assert.IsTrue(jsonArray[(int)TransactionIndex.Name] is String,
@@ -406,17 +406,17 @@ namespace UnitTest {
                 Assert.IsNull(e,
                             "Expection a legal JSON string that parses correctly #1.");
                 if (e!=null) {
-                    Debug.WriteLine(String.Format("error == {0}",e.Message));
+                    Debug.WriteLine(String.Format("error == "+e.Message));
                 }
             }
             // The "json" should be an NSArray .
             Assert.IsNotNull(json,
                            "Expection a legal JSON string that parses correctly #2.");
-            Debug.WriteLine(String.Format("Converted jsonString's class == \"{0}\"",
-                                          json.GetType().FullName));
+            Debug.WriteLine(String.Format("Converted jsonString's class == "
+                                          +json.GetType().FullName));
             Assert.IsTrue(json is Object[],
                          "Expecting transaction JSON string representing JSON array.");
-            Debug.WriteLine(String.Format("json == {0}",json));
+            Debug.WriteLine(String.Format("json == "+json));
             // TODO: Following commented out test statement is still broken.
             // JsonConvert.DeserializeObject is doing some unwanted weird stuff.
             //CheckJSONArray(json);
@@ -493,8 +493,8 @@ namespace UnitTest {
             // And example2 is example1's identical twin
             Transaction example2 = ExampleTransaction();
             Debug.WriteLine("INITIALLY EQUAL");
-            Debug.WriteLine("example1 == {0}",example1.ToArray());
-            Debug.WriteLine("example2 == {0}",example2.ToArray());
+            Debug.WriteLine("example1 == "+example1.ToArray());
+            Debug.WriteLine("example2 == "+example2.ToArray());
             // Change example1
             example1.SetTimeout(example1.Timeout() + 100);
             example1.SetValue(example1.Value() + 10000);
@@ -504,14 +504,14 @@ namespace UnitTest {
             Assert.IsFalse(example1.Value() == firstValue,
                            "Not expecting example1.Value()==firstValue");
             Debug.WriteLine("NO LONGER EQUAL");
-            Debug.WriteLine("example1 == {0}",example1.ToArray());
-            Debug.WriteLine("example2 == {0}",example2.ToArray());
+            Debug.WriteLine("example1 == "+example1.ToArray());
+            Debug.WriteLine("example2 == "+example2.ToArray());
             // Change example1 back
             example1.SetTimeout(firstTimeout);
             example1.SetValue(firstValue);
             Debug.WriteLine("SHOULD BE EQUAL AGAIN");
-            Debug.WriteLine("example1 == {0}",example1.ToArray());
-            Debug.WriteLine("example2 == {0}",example2.ToArray());
+            Debug.WriteLine("example1 == "+example1.ToArray());
+            Debug.WriteLine("example2 == "+example2.ToArray());
             // Confirm members of example1 have been restored.
             Assert.IsTrue(example1.Name() == firstName,
                           "Expecting example1.Name()==firstName");

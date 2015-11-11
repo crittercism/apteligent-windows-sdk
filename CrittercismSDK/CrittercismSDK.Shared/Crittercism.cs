@@ -33,7 +33,7 @@ namespace CrittercismSDK {
     public class Crittercism {
         #region Constants
 
-        private const string errorNotInitialized="ERROR: Crittercism not initialized yet.";
+        private const string errorNotInitialized="Crittercism not initialized yet.";
 
         #endregion Constants
 
@@ -361,13 +361,13 @@ namespace CrittercismSDK {
                 if (GetOptOutStatus()) {
                     return;
                 } else if (initialized) {
-                    Debug.WriteLine("ERROR: Crittercism is already initialized");
+                    DebugUtils.LOG_ERROR("Crittercism is already initialized");
                     return;
                 };
                 lock (lockObject) {
                     appLocator=new AppLocator(appID);
                     if (appLocator.domain==null) {
-                        Debug.WriteLine("ERROR: Illegal Crittercism appID");
+                        DebugUtils.LOG_ERROR("Illegal Crittercism appID");
                         return;
                     }
                     AppID=appID;
@@ -553,7 +553,7 @@ namespace CrittercismSDK {
         public static void LogHandledException(Exception e) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     lock (lockObject) {
@@ -623,7 +623,7 @@ namespace CrittercismSDK {
         public static void SetValue(string key,string value) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     lock (lockObject) {
@@ -652,7 +652,7 @@ namespace CrittercismSDK {
             string answer=null;
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     lock (lockObject) {
@@ -675,9 +675,9 @@ namespace CrittercismSDK {
                 InterruptTransaction(name);
                 // Do not begin a new transaction if the transaction count is at or has exceeded the max.
                 if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
-                    LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
-                                            + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
-                                            TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                                       + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                                       TransactionReporter.MAX_TRANSACTION_COUNT,name));
                     return;
                 }
                 (new Transaction(name)).Begin();
@@ -691,9 +691,9 @@ namespace CrittercismSDK {
                 InterruptTransaction(name);
                 // Do not begin a new transaction if the transaction count is at or has exceeded the max.
                 if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
-                    LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
-                                            + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
-                                            TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                                       + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                                       TransactionReporter.MAX_TRANSACTION_COUNT,name));
                     return;
                 }
                 (new Transaction(name,value)).Begin();
@@ -797,7 +797,7 @@ namespace CrittercismSDK {
         ) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     Debug.WriteLine(
@@ -832,7 +832,7 @@ namespace CrittercismSDK {
         public static void AddFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     APM.AddFilter(filter);
@@ -845,7 +845,7 @@ namespace CrittercismSDK {
         public static void RemoveFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     APM.RemoveFilter(filter);
@@ -1041,25 +1041,5 @@ namespace CrittercismSDK {
 #endif
 
         #endregion // Event Handlers
-
-        #region Miscellaneous
-        internal static void LOG_ERROR(string message) {
-#if NETFX_CORE || WINDOWS_PHONE
-#else
-            Trace.WriteLine(message);
-#endif
-        }
-
-        internal static string TruncatedString(string s) {
-            // Truncate string s max allowed string length (255 characters, not including null character)
-            const int maxStringLength = 255;
-            string answer = s;
-            if (s.Length > maxStringLength) {
-                LOG_ERROR(String.Format("Truncating long string to 255 characters: \"{0}\"",s));
-                answer = s.Substring(0,maxStringLength);
-            }
-            return answer;
-        }
-        #endregion
     }
 }

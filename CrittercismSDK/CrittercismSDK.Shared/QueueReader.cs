@@ -69,7 +69,7 @@ namespace CrittercismSDK
                         // TODO: Use System.Timers.Timer to generate an event
                         // 5 minutes from now, wait for it, then proceed.
                         retry++;
-                        Debug.WriteLine("ReadStep: retry == {0}",retry);
+                        Debug.WriteLine("ReadStep: retry == "+retry);
                     }
                 };
                 // Opportune time to save Crittercism state.  Unable to make the MessageQueue
@@ -170,7 +170,7 @@ namespace CrittercismSDK
 
 #if WINDOWS_PHONE_APP
         private bool SendRequest(HttpWebRequest request,string postBody) {
-            //Debug.WriteLine("SendMessage: request.RequestUri == {0}", request.RequestUri);
+            //Debug.WriteLine("SendMessage: request.RequestUri == "+request.RequestUri);
             bool sendCompleted=false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
@@ -188,15 +188,15 @@ namespace CrittercismSDK
                 Task<WebResponse> responseTask=request.GetResponseAsync();
                 using (HttpWebResponse response=(HttpWebResponse)responseTask.Result) {
                     try {
-                        Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                        Debug.WriteLine("SendMessage: response.StatusCode == "+(int)response.StatusCode);
                         if ((((long)response.StatusCode)/100)==2) {
                             // 2xx Success
                             sendCompleted=true;
                         }
                     } catch (WebException webEx) {
-                        Debug.WriteLine("SendMessage: webEx == {0}",webEx);
+                        Debug.WriteLine("SendMessage: webEx == "+webEx);
                         if (webEx.Response!=null) {
-                            //Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                            //Debug.WriteLine("SendMessage: response.StatusCode == "+(int)response.StatusCode);
                             if (response.StatusCode==HttpStatusCode.BadRequest) {
                                 try {
                                     using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
@@ -210,7 +210,7 @@ namespace CrittercismSDK
                             }
                         }
                     } catch (Exception ex) {
-                        Debug.WriteLine("SendMessage: ex == {0}",ex.Message);
+                        Debug.WriteLine("SendMessage: ex == "+ex.Message);
                         lastException=ex;
                     }
                 }
@@ -225,7 +225,7 @@ namespace CrittercismSDK
         }
 #else
         private bool SendRequest(HttpWebRequest request,string postBody) {
-            //Debug.WriteLine("SendMessage: request.RequestUri == {0}", request.RequestUri);
+            //Debug.WriteLine("SendMessage: request.RequestUri == "+request.RequestUri);
             bool sendCompleted=false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
@@ -252,17 +252,17 @@ namespace CrittercismSDK
                                     //Debug.WriteLine("SendMessage: BeginGetResponse");
                                     try {
                                         using (HttpWebResponse response=(HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                                            Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                                            Debug.WriteLine("SendMessage: response.StatusCode == "+(int)response.StatusCode);
                                             if ((((long)response.StatusCode)/100)==2) {
                                                 // 2xx Success
                                                 sendCompleted=true;
                                             }
                                         }
                                     } catch (WebException webEx) {
-                                        Debug.WriteLine("SendMessage: webEx == {0}",webEx);
+                                        Debug.WriteLine("SendMessage: webEx == "+webEx);
                                         if (webEx.Response!=null) {
                                             using (HttpWebResponse response=(HttpWebResponse)webEx.Response) {
-                                                //Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                                                //Debug.WriteLine("SendMessage: response.StatusCode == "+(int)response.StatusCode);
                                                 if (response.StatusCode==HttpStatusCode.BadRequest) {
                                                     try {
                                                         using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
@@ -277,13 +277,13 @@ namespace CrittercismSDK
                                             }
                                         }
                                     } catch (Exception ex) {
-                                        //Debug.WriteLine("SendMessage: ex == {0}",ex);
+                                        //Debug.WriteLine("SendMessage: ex == "+ex);
                                         lastException=ex;
                                     }
                                     resetEvent.Set();
                                 },null);
                         } catch (Exception ex) {
-                            //Debug.WriteLine("SendMessage: ex#2 == {0}",ex);
+                            //Debug.WriteLine("SendMessage: ex#2 == "+ex);
                             lastException=ex;
                             resetEvent.Set();
                         }
