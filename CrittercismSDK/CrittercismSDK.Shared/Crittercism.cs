@@ -218,17 +218,22 @@ namespace CrittercismSDK {
         #region Init
 
         private static string LoadAppVersion() {
+            string answer = "UNKNOWN";
+            try {
 #if NETFX_CORE
-            PackageVersion version=Package.Current.Id.Version;
-            string answer=""+version.Major+"."+version.Minor+"."+version.Build+"."+version.Revision;
-            Debug.WriteLine("LoadAppVersion == "+answer);
-            return answer;
+                PackageVersion version = Package.Current.Id.Version;
+                answer = "" + version.Major + "." + version.Minor + "." + version.Build + "." + version.Revision;
 #elif WINDOWS_PHONE
-            return Application.Current.GetType().Assembly.GetName().Version.ToString();
+                answer = Application.Current.GetType().Assembly.GetName().Version.ToString();
 #else
-            // Should probably work in most cases.
-            return Assembly.GetEntryAssembly().GetName().Version.ToString();
+                // Should probably work in most cases.
+                answer = Assembly.GetEntryAssembly().GetName().Version.ToString();
 #endif
+            } catch (Exception) {
+                // The UnitTest throws an Exception .
+            };
+            Debug.WriteLine("LoadAppVersion == " + answer);
+            return answer;
         }
 
         /// <summary>
