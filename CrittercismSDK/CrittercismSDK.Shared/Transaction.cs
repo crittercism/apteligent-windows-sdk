@@ -60,7 +60,7 @@ namespace CrittercismSDK
             }
             return answer;
         }
-        internal void SetState(TransactionState newState,long nowTime) {
+        private void SetState(TransactionState newState,long nowTime) {
             // Establishes newState for transaction at nowTime .
             state = newState;
             isForegrounded = TransactionReporter.IsForegrounded();
@@ -148,7 +148,7 @@ namespace CrittercismSDK
             }
             return answer;
         }
-        internal void SetBeginTime(long newBeginTime) {
+        private void SetBeginTime(long newBeginTime) {
             // Set begin time of transaction in ticks.
             DateTime begin_date = (new DateTime(newBeginTime)).ToUniversalTime();
             beginTimeString = DateUtils.ISO8601DateString(begin_date);
@@ -169,7 +169,7 @@ namespace CrittercismSDK
             }
             return answer;
         }
-        internal void SetEndTime(long newEndTime) {
+        private void SetEndTime(long newEndTime) {
             // Set end time of transaction in ticks.
             DateTime end_date = (new DateTime(newEndTime)).ToUniversalTime();
             endTimeString = DateUtils.ISO8601DateString(end_date);
@@ -201,7 +201,7 @@ namespace CrittercismSDK
             }
             return answer;
         }
-        internal void SetForegroundTime(long newForegroundTime) {
+        private void SetForegroundTime(long newForegroundTime) {
             // "Foreground time" == the latest Crittercism Init
             // time or foreground time, whichever is later, in ticks.
             DateTime foreground_date = (new DateTime(newForegroundTime)).ToUniversalTime();

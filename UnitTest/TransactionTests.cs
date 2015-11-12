@@ -297,7 +297,7 @@ namespace UnitTest {
             Transaction example = ExampleTransaction();
             example.Begin();
             Assert.IsTrue(example.State() == TransactionState.BEGUN,
-                         "Confirm begin: changes state to TransactionState.BEGUN");
+                         "Confirm Begin changes state to TransactionState.BEGUN");
         }
         #endregion
 
@@ -308,10 +308,10 @@ namespace UnitTest {
             Transaction example = ExampleTransaction();
             example.Begin();
             Assert.IsTrue(example.State() == TransactionState.BEGUN,
-                         "Confirm begin: changes state to TransactionState.BEGUN");
+                         "Confirm Begin changes state to TransactionState.BEGUN");
             example.End();
             Assert.IsTrue(example.State() == TransactionState.ENDED,
-                         "Confirm end: changes state to TransactionState.ENDED");
+                         "Confirm End changes state to TransactionState.ENDED");
         }
         #endregion
 
@@ -322,10 +322,10 @@ namespace UnitTest {
             Transaction example = ExampleTransaction();
             example.Begin();
             Assert.IsTrue(example.State() == TransactionState.BEGUN,
-                         "Confirm begin: changes state to TransactionState.BEGUN");
+                         "Confirm Begin changes state to TransactionState.BEGUN");
             example.Fail();
             Assert.IsTrue(example.State() == TransactionState.FAILED,
-                         "Confirm fail: changes state to TransactionState.FAILED");
+                         "Confirm Fail changes state to TransactionState.FAILED");
         }
         #endregion
 
@@ -338,7 +338,7 @@ namespace UnitTest {
                 Transaction example = ExampleTransaction();
                 example.Transition(state1);
                 Assert.IsTrue(example.State() == state1,
-                             "Confirm transition: changes state to given state");
+                             "Confirm Transition changes state to given state");
             }
         }
         #endregion
@@ -352,34 +352,34 @@ namespace UnitTest {
                 Assert.IsTrue(jsonArray.Length == (int)TransactionIndex.COUNT,
                              "Expecting transaction jsonArray with correct count.");
                 Assert.IsTrue(jsonArray[(int)TransactionIndex.Name] is String,
-                              String.Format("Expecting objectAtIndex:{0} to be an String",
-                                            TransactionIndex.Name));
+                              String.Format("Expecting jsonArray[{0}] to be a String",
+                                            (int)TransactionIndex.Name));
                 Assert.IsTrue(JsonUtils.IsNumber(jsonArray[(int)TransactionIndex.State]),
-                              String.Format("Expecting objectAtIndex:{0} to be a Number",
-                                            TransactionIndex.State));
+                              String.Format("Expecting jsonArray[{0}] to be a Number",
+                                            (int)TransactionIndex.State));
                 // NOTE: Extended reals is the set of reals with +/-infinity included.  These are
                 // represented as NSNumber's whether finite or INFINITY .  However, JSON numbers are
                 // finite.  We indicate INFINITY to platform via JSON string "INFINITY".
                 // See ExtendedRealToJSONString and JsonStringToExtendedReal in JsonUtils.cs .
                 Assert.IsTrue((JsonUtils.IsNumber(jsonArray[(int)TransactionIndex.Timeout])
                               || (jsonArray[(int)TransactionIndex.Timeout] is String)),
-                              String.Format("Expecting objectAtIndex:{0} to be a Number or String",
-                                            TransactionIndex.Timeout));
+                              String.Format("Expecting jsonArray[{0}] to be a Number or String",
+                                            (int)TransactionIndex.Timeout));
                 Assert.IsTrue(JsonUtils.IsNumber(jsonArray[(int)TransactionIndex.Value]),
-                              String.Format("Expecting objectAtIndex:{0} to be a Number",
-                                            TransactionIndex.Value));
+                              String.Format("Expecting jsonArray[{0}] to be a Number",
+                                            (int)TransactionIndex.Value));
                 Assert.IsTrue(jsonArray[(int)TransactionIndex.Metadata] is IDictionary,
-                              String.Format("Expecting objectAtIndex:{0} to be a IDictionary",
-                                            TransactionIndex.Metadata));
+                              String.Format("Expecting jsonArray[{0}] to be an IDictionary",
+                                            (int)TransactionIndex.Metadata));
                 Assert.IsTrue(jsonArray[(int)TransactionIndex.BeginTime] is String,
-                              String.Format("Expecting objectAtIndex:{0} to be an String",
-                                            TransactionIndex.BeginTime));
+                              String.Format("Expecting jsonArray[{0}] to be a String",
+                                            (int)TransactionIndex.BeginTime));
                 Assert.IsTrue(jsonArray[(int)TransactionIndex.EndTime] is String,
-                              String.Format("Expecting objectAtIndex:{0} to be an String",
-                                            TransactionIndex.EndTime));
+                              String.Format("Expecting jsonArray[{0}] to be a String",
+                                            (int)TransactionIndex.EndTime));
                 Assert.IsTrue(JsonUtils.IsNumber(jsonArray[(int)TransactionIndex.EyeTime]),
-                              String.Format("Expecting objectAtIndex:{0} to be an Number",
-                                            TransactionIndex.EyeTime));
+                              String.Format("Expecting jsonArray[{0}] to be a Number",
+                                            (int)TransactionIndex.EyeTime));
                 Debug.WriteLine("");
             };
         }
@@ -532,7 +532,7 @@ namespace UnitTest {
             Assert.IsNotNull(Transaction.TransactionForName(exampleName),
                              "Confirm begun transaction is accessible");
             Assert.IsTrue(Transaction.TransactionForName(exampleName).State() == TransactionState.BEGUN,
-                          "Confirm begin: changes state to TransactionState.BEGUN");
+                          "Confirm BeginTransaction changes state to TransactionState.BEGUN");
             Crittercism.EndTransaction(exampleName);
             Assert.IsNull(Transaction.TransactionForName(exampleName),
                           "Confirm finished transaction no longer accessible");
@@ -546,7 +546,7 @@ namespace UnitTest {
             // Resulting value of "BeginTransaction(name,value)" is correct.
             Crittercism.BeginTransaction(exampleName,exampleValue);
             Assert.IsTrue(Crittercism.GetTransactionValue(exampleName) == exampleValue,
-                          String.Format("Confirm begin:withValue: changes value to{0} #2",
+                          String.Format("Confirm BeginTransaction changes value to {0} #2",
                                         exampleValue));
             Crittercism.EndTransaction(exampleName);
             Assert.IsNull(Transaction.TransactionForName(exampleName),
@@ -560,7 +560,7 @@ namespace UnitTest {
             // Resulting state of "EndTransaction" is correct.  It's required to "Begin" first.
             Crittercism.BeginTransaction(exampleName);
             Assert.IsTrue(Transaction.TransactionForName(exampleName).State() == TransactionState.BEGUN,
-                         "Confirm begin: changes state to TransactionState.BEGUN");
+                         "Confirm BeginTransaction changes state to TransactionState.BEGUN");
             Crittercism.EndTransaction(exampleName);
             Assert.IsNull(Transaction.TransactionForName(exampleName),
                         "Confirm finished transaction no longer accessible");
@@ -573,7 +573,7 @@ namespace UnitTest {
             // Resulting state of "FailTransaction" is correct.  It's required to "Begin" first.
             Crittercism.BeginTransaction(exampleName);
             Assert.IsTrue(Transaction.TransactionForName(exampleName).State() == TransactionState.BEGUN,
-                         "Confirm begin: changes state to TransactionState.BEGUN");
+                         "Confirm BeginTransaction changes state to TransactionState.BEGUN");
             Crittercism.FailTransaction(exampleName);
             Assert.IsNull(Transaction.TransactionForName(exampleName),
                         "Confirm finished transaction no longer accessible");
@@ -609,10 +609,10 @@ namespace UnitTest {
             Transaction secondTransaction = Transaction.TransactionForName(exampleName);
             // Confirm firstTransaction has been "Interrupt"ed.
             Assert.IsTrue(firstTransaction.State() == TransactionState.INTERRUPTED,
-                         "Confirm begin: changes state to TransactionState.INTERRUPTED");
+                         "Confirm BeginTransaction changes state to TransactionState.INTERRUPTED");
             // Confirm secondTransaction has begun
             Assert.IsTrue(secondTransaction.State() == TransactionState.BEGUN,
-                         "Confirm begin: changes state to TransactionState.BEGUN");
+                         "Confirm BeginTransaction changes state to TransactionState.BEGUN");
             // Finish up.
             Crittercism.EndTransaction(exampleName);
             Assert.IsNull(Transaction.TransactionForName(exampleName),
