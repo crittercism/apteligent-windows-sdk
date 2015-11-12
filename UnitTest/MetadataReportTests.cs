@@ -27,7 +27,7 @@ namespace UnitTest {
 
         [TestMethod]
         public void AddMetadataTwiceTest() {
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
+            TestHelpers.StartApp();
             Crittercism.SetUsername("hamster");
             Crittercism.SetUsername("robin");
             Crittercism.SetUsername("squirrel");

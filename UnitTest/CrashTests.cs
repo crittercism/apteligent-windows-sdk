@@ -13,7 +13,7 @@ namespace UnitTest {
     public class CrashTests {
         [TestMethod]
         public void CrashLoadAfterSaveTest() {
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
+            TestHelpers.StartApp();
             TestHelpers.LogUnhandledException();
             Crash crash=TestHelpers.DequeueMessageType(typeof(Crash)) as Crash;
             String expectedJson=JsonConvert.SerializeObject(crash);
@@ -29,7 +29,7 @@ namespace UnitTest {
 
         [TestMethod]
         public void CrashHasExpectedDataTest() {
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
+            TestHelpers.StartApp();
             TestHelpers.LogUnhandledException();
             Crash crash=TestHelpers.DequeueMessageType(typeof(Crash)) as Crash;
             Debug.WriteLine("crash.crash.name == "+crash.crash.name);

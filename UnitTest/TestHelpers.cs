@@ -63,11 +63,17 @@ namespace UnitTest {
             }
         }
 
-        public static void StartApp(string appId) {
-            Crittercism.autoRunQueueReader=false;
-            Crittercism.enableSendMessage=false;
-            Crittercism.enableExceptionInSendMessage=false;
-            Crittercism.Init(appId);
+        public static void StartApp(bool optOutStatus) {
+            // Convenient for the OptOutTest which must pass optOutStatus = true
+            Crittercism.SetOptOutStatus(optOutStatus);
+            Crittercism.autoRunQueueReader = false;
+            Crittercism.enableSendMessage = false;
+            Crittercism.enableExceptionInSendMessage = false;
+            Crittercism.Init(VALID_APPID);
+        }
+        public static void StartApp() {
+            // The preferred default is optOutStatus = false
+            StartApp(false);
         }
 
         public static void ThrowException() {

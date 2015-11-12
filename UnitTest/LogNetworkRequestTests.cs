@@ -16,7 +16,7 @@ namespace UnitTest {
         [TestMethod]
         public void LogNetworkRequestTest() {
             APM.NETWORK_SEND_INTERVAL=1;
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
+            TestHelpers.StartApp();
             string method="GET";
             string uriString="http://www.mrscritter.com";
             long latency=4000;

@@ -11,7 +11,7 @@ namespace UnitTest {
     public class HandledExceptionTests {
         [TestMethod]
         public void HandledExceptionTest() {
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
+            TestHelpers.StartApp();
             TestHelpers.LogHandledException();
             MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(HandledException));
             Assert.IsNotNull(messageReport,"Expected a HandledException message");

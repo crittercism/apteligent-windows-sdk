@@ -13,7 +13,7 @@ namespace UnitTest {
     public class AppLoadTests {
         [TestMethod]
         public void AppLoadTest() {
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
+            TestHelpers.StartApp();
             MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(AppLoad));
             Assert.IsNotNull(messageReport,"Expected an AppLoad message");
             TestHelpers.CheckCommonJsonFragments(JsonConvert.SerializeObject(messageReport));
