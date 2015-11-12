@@ -65,6 +65,10 @@ namespace CrittercismSDK
             state = newState;
             isForegrounded = TransactionReporter.IsForegrounded();
             switch (state) {
+                case TransactionState.CANCELLED:
+                    SetEndTime(nowTime);
+                    RemoveTimer();
+                    break;
                 case TransactionState.BEGUN:
                     SetBeginTime(nowTime);
                     if (isForegrounded) {
@@ -287,28 +291,15 @@ namespace CrittercismSDK
                 Transition(TransactionState.CRASHED);
             }
         }
-        internal void Abort() {
-            // DESIGN: Do we really need or want this?
-            lock (this) {
-                Transition(TransactionState.ABORTED);
-            }
-        }
-        internal void Interrupt() {
-            // DESIGN: Do we really need or want this?
-            lock (this) {
-                Transition(TransactionState.INTERRUPTED);
-            }
-        }
         private bool IsFinal() {
             // Transaction is in final state?
             bool answer= ((state != TransactionState.CREATED) && (state != TransactionState.BEGUN));
             return answer;
         }
-
         internal void Transition(TransactionState newState) {
             // Transition a transaction from current state to newState .
             if (newState == TransactionState.CANCELLED) {
-                TransactionReporter.Cancel(name);
+                SetState(newState,DateTime.UtcNow.Ticks);
             } else {
                 switch (state) {
                     case TransactionState.CREATED:

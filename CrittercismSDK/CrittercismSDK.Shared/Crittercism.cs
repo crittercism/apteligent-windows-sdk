@@ -677,7 +677,7 @@ namespace CrittercismSDK {
         public static void BeginTransaction(string name) {
             // Init and begin a transaction with a default value.
             try {
-                InterruptTransaction(name);
+                RemoveTransaction(name);
                 // Do not begin a new transaction if the transaction count is at or has exceeded the max.
                 if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
                     DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
@@ -693,7 +693,7 @@ namespace CrittercismSDK {
         public static void BeginTransaction(string name,int value) {
             // Init and begin a transaction with an input value.
             try {
-                InterruptTransaction(name);
+                RemoveTransaction(name);
                 // Do not begin a new transaction if the transaction count is at or has exceeded the max.
                 if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
                     DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
@@ -706,7 +706,7 @@ namespace CrittercismSDK {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void CancelTransaction(string name) {
+        public static void RemoveTransaction(string name) {
             // Cancel a transaction as if it never was.
             try {
                 Transaction transaction = Transaction.TransactionForName(name);
@@ -771,13 +771,6 @@ namespace CrittercismSDK {
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
-            }
-        }
-
-        internal static void InterruptTransaction(string name) {
-            Transaction transaction = Transaction.TransactionForName(name);
-            if (transaction!=null) {
-                transaction.Interrupt();
             }
         }
 

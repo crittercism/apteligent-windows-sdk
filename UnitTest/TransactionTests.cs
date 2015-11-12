@@ -608,8 +608,8 @@ namespace UnitTest {
             Crittercism.BeginTransaction(exampleName);
             Transaction secondTransaction = Transaction.TransactionForName(exampleName);
             // Confirm firstTransaction has been "Interrupt"ed.
-            Assert.IsTrue(firstTransaction.State() == TransactionState.INTERRUPTED,
-                         "Confirm BeginTransaction changes state to TransactionState.INTERRUPTED");
+            Assert.IsTrue(firstTransaction.State() == TransactionState.CANCELLED,
+                         "Confirm BeginTransaction changes state to TransactionState.CANCELLED");
             // Confirm secondTransaction has begun
             Assert.IsTrue(secondTransaction.State() == TransactionState.BEGUN,
                          "Confirm BeginTransaction changes state to TransactionState.BEGUN");

@@ -68,6 +68,9 @@ namespace CrittercismSDK
             // Persist transaction to correct directory
             lock (lockObject) {
                 switch (transaction.State()) {
+                    case TransactionState.CANCELLED:
+                        RemoveTransaction(transaction);
+                        break;
                     case TransactionState.CREATED:
                         // Make visible via persistence API methods.
                         AddTransaction(transaction);
@@ -126,15 +129,6 @@ namespace CrittercismSDK
                 }
             }
             return answer;
-        }
-        internal static void Cancel(string name) {
-            // Cancel a transaction as if it never was.
-            // TODO: Kill transaction's timer if it exists.
-            lock (lockObject) {
-                if (transactionsDictionary.ContainsKey(name)) {
-                    transactionsDictionary.Remove(name);
-                }
-            }
         }
         #endregion
 
