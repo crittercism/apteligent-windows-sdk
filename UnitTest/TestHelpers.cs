@@ -35,8 +35,8 @@ namespace UnitTest {
                 "\"locale\":",
             };
             foreach (string jsonFragment in jsonStrings) {
-                Debug.WriteLine("jsonFragment == "+jsonFragment);
-                Debug.WriteLine("json.Contains == "+json.Contains(jsonFragment));
+                Trace.WriteLine("jsonFragment == "+jsonFragment);
+                Trace.WriteLine("json.Contains == "+json.Contains(jsonFragment));
                 Assert.IsTrue(json.Contains(jsonFragment));
             };
             // Make sure DateTimes are stringified in the canonical way and not in this goofy default way

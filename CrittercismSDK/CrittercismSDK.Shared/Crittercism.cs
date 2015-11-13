@@ -226,10 +226,19 @@ namespace CrittercismSDK {
                 answer = Application.Current.GetType().Assembly.GetName().Version.ToString();
 #else
                 // Should probably work in most cases.
-                answer = Assembly.GetEntryAssembly().GetName().Version.ToString();
+                Assembly assembly = Assembly.GetEntryAssembly();
+                if (assembly != null) {
+                    AssemblyName assemblyName = assembly.GetName();
+                    if (assemblyName != null) {
+                        Version version = assemblyName.Version;
+                        if (version != null) {
+                            answer = version.ToString();
+                        }
+                    }
+                }
 #endif
             } catch (Exception) {
-                // The UnitTest throws an Exception .
+                // Return "UNKNOWN" if anything throws an Exception .
             };
             Debug.WriteLine("LoadAppVersion == " + answer);
             return answer;

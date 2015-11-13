@@ -44,7 +44,7 @@ namespace UnitTest {
             TestHelpers.StartApp(true);
             Assert.IsTrue(Crittercism.GetOptOutStatus());
             TestHelpers.LogHandledException();
-            Debug.WriteLine("Crittercism.MessageQueue == "+Crittercism.MessageQueue);
+            Trace.WriteLine("Crittercism.MessageQueue == "+Crittercism.MessageQueue);
             Assert.IsTrue((Crittercism.MessageQueue==null)||(Crittercism.MessageQueue.Count==0));
             // Opt back into Crittercism prior to Init
             TestHelpers.StartApp(false);

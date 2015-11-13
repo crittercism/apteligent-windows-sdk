@@ -38,7 +38,7 @@ namespace UnitTest {
                     bytesSent,
                     (HttpStatusCode)responseCode,
                     WebExceptionStatus.Success);
-                Debug.WriteLine("Crittercism.LogNetworkRequest returned");
+                Trace.WriteLine("Crittercism.LogNetworkRequest returned");
                 MessageReport messageReport = null;
                 for (int i = 1; i <= 10; i++) {
                     Thread.Sleep(100);
@@ -48,9 +48,9 @@ namespace UnitTest {
                     }
                 }
                 if (messageReport != null) {
-                    Debug.WriteLine("We found an APMReport (YAY)");
+                    Trace.WriteLine("We found an APMReport (YAY)");
                 } else {
-                    Debug.WriteLine("We didn't find an APMReport (BOO)");
+                    Trace.WriteLine("We didn't find an APMReport (BOO)");
                     Assert.IsNotNull(messageReport,"Expected an APMReport message");
                 };
                 String asJson = JsonConvert.SerializeObject(messageReport);
@@ -64,12 +64,12 @@ namespace UnitTest {
                     "200"
                 };
                 foreach (String jsonFragment in jsonStrings) {
-                    Debug.WriteLine("jsonFragment == " + jsonFragment);
-                    Debug.WriteLine("asJson.Contains(jsonFragment) == " + asJson.Contains(jsonFragment));
+                    Trace.WriteLine("jsonFragment == " + jsonFragment);
+                    Trace.WriteLine("asJson.Contains(jsonFragment) == " + asJson.Contains(jsonFragment));
                     Assert.IsTrue(asJson.Contains(jsonFragment));
                 };
             } catch (Exception e) {
-                Debug.WriteLine("ERROR: Unexpected Exception == " + e.Message);
+                Trace.WriteLine("ERROR: Unexpected Exception == " + e.Message);
                 Assert.IsNull(e,"ERROR: Unexpected Exception == " + e.Message);
             }
         }

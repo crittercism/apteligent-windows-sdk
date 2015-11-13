@@ -50,7 +50,7 @@ namespace UnitTest {
             Crittercism.Init("5350bb642bd1f1017c000002");
             Crittercism.SetUsername("harry");
             Crittercism.SetValue("surname", "hedwig");
-            Debug.WriteLine("surname == "+Crittercism.ValueFor("surname"));
+            Trace.WriteLine("surname == "+Crittercism.ValueFor("surname"));
             Assert.AreEqual(Crittercism.ValueFor("surname"),"hedwig");
             Assert.AreEqual(Crittercism.ValueFor("username"),"harry");
             Crittercism.SetUsername("hermione");
