@@ -72,10 +72,17 @@ namespace CrittercismSDK
                         Debug.WriteLine("ReadStep: retry == "+retry);
                     }
                 };
-                // Opportune time to save Crittercism state.  Unable to make the MessageQueue
-                // shorter either because SendMessage failed or MessageQueue has gone empty.
-                // The readerThread will be going into a do nothing wait state after this.
-                Crittercism.Save();
+                if (Crittercism.initialized) {
+                    // Opportune time to save Crittercism state.  Unable to make the MessageQueue
+                    // shorter either because SendMessage failed or MessageQueue has gone empty.
+                    // The readerThread will be going into a do nothing wait state after this.
+                    // (If Crittercism.initialized==false, we are shut down or shutting down, and
+                    // we must not call Crittercism.Save since this can lead to DEADLOCK.
+                    // Crittercism.Shutdown may have lock on Crittercism.lockObject, and is waiting
+                    // for our readerThread to exit.  Crittercism.Save would try to acquire
+                    // Crittercism.lockObject, but can't.)
+                    Crittercism.Save();
+                };
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
