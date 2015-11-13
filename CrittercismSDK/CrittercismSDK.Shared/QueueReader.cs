@@ -98,13 +98,13 @@ namespace CrittercismSDK
             bool sendCompleted = false;
             try {
                 if ((Crittercism.MessageQueue != null) && (Crittercism.MessageQueue.Count > 0)) {
-                    MessageReport message = Crittercism.MessageQueue.Peek();
-                    Crittercism.MessageQueue.Dequeue();
-                    message.Delete();
                     if (!Crittercism.enableSendMessage) {
-                        // check if the communication layer is enable and if not return true.. this is used for unit testing.
+                        // This case used by UnitTest .
                         sendCompleted = true;
                     } else if (NetworkInterface.GetIsNetworkAvailable()) {
+                        MessageReport message = Crittercism.MessageQueue.Peek();
+                        Crittercism.MessageQueue.Dequeue();
+                        message.Delete();
                         try {
                             // FIXME jbley many many things special-cased for MetadataReport - really need /v1 here
                             string postBody = null;
@@ -165,9 +165,9 @@ namespace CrittercismSDK
                                 throw;
                             }
                         }
-                    }
-                    if (!sendCompleted) {
-                        Crittercism.MessageQueue.Enqueue(message);
+                        if (!sendCompleted) {
+                            Crittercism.MessageQueue.Enqueue(message);
+                        }
                     }
                 };
             } catch (Exception ie) {

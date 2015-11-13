@@ -27,16 +27,21 @@ namespace UnitTest {
 
         [TestMethod]
         public void AddMetadataTwiceTest() {
-            TestHelpers.StartApp();
-            Crittercism.SetUsername("hamster");
-            Crittercism.SetUsername("robin");
-            Crittercism.SetUsername("squirrel");
-            TestHelpers.LogHandledException();
-            MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(HandledException));
-            String asJson=JsonConvert.SerializeObject(messageReport);
-            Assert.IsFalse(asJson.Contains("hamster"));
-            Assert.IsFalse(asJson.Contains("robin"));
-            Assert.IsTrue(asJson.Contains("squirrel"));
+            try {
+                TestHelpers.StartApp();
+                Crittercism.SetUsername("hamster");
+                Crittercism.SetUsername("robin");
+                Crittercism.SetUsername("squirrel");
+                TestHelpers.LogHandledException();
+                MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(HandledException));
+                String asJson = JsonConvert.SerializeObject(messageReport);
+                Assert.IsFalse(asJson.Contains("hamster"));
+                Assert.IsFalse(asJson.Contains("robin"));
+                Assert.IsTrue(asJson.Contains("squirrel"));
+            } finally {
+                Crittercism.Shutdown();
+                TestHelpers.Cleanup();
+            }
         }
 
         [TestMethod]

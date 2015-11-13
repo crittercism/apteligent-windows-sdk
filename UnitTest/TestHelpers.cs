@@ -14,7 +14,7 @@ namespace UnitTest {
 
         [AssemblyInitialize()]
         public static void AssemblyInit(TestContext context) {
-            CleanUp();
+            Cleanup();
         }
 
         [AssemblyCleanup()]
@@ -43,7 +43,7 @@ namespace UnitTest {
             Assert.IsFalse(json.Contains("Date("));
         }
 
-        public static void CleanUp() {
+        public static void Cleanup() {
             // This method is for clean all the possible variables that may be will used by another unit test
             Crittercism.autoRunQueueReader = true;
             Crittercism.enableSendMessage = false;
@@ -59,7 +59,7 @@ namespace UnitTest {
                     storage.DeleteFile(file);
                 }
             } catch (Exception ex) {
-                Console.WriteLine("CleanUp exception: "+ex);
+                Console.WriteLine("Cleanup exception: "+ex);
             }
         }
 

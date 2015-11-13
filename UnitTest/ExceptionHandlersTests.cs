@@ -11,13 +11,19 @@ using System.Threading.Tasks;
 namespace UnitTest {
     [TestClass]
     public class ExceptionHandlersTests {
+        [TestCleanup()]
+        public void TestCleanup() {
+            // Use TestCleanup to run code after each test has run
+            Crittercism.Shutdown();
+            TestHelpers.Cleanup();
+        }
         [TestMethod]
         public void LogHandledExceptionTest() {
             Crittercism.autoRunQueueReader = false;
             TestHelpers.StartApp();
             Crittercism.LeaveBreadcrumb("HandledExceptionBreadcrumb");
             Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");
-            TestHelpers.CleanUp(); // drop all previous messages
+            TestHelpers.Cleanup(); // drop all previous messages
             TestHelpers.LogHandledException();
             MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(HandledException));
             Assert.IsNotNull(messageReport,"Expected a HandledException message");

@@ -82,15 +82,18 @@ namespace CrittercismSDK
 
         #region Reporting
         internal static void Enqueue(APMEndpoint endpoint) {
+            Debug.WriteLine("APM Enqueue");
             lock (lockObject) {
                 while (EndpointsQueue.Count>=MAX_NETWORK_STATS) {
                     EndpointsQueue.Dequeue();
                 };
                 EndpointsQueue.Enqueue(endpoint);
+                Debug.WriteLine("APM NETWORK_SEND_INTERVAL == "+ NETWORK_SEND_INTERVAL);
 #if NETFX_CORE || WINDOWS_PHONE
                 if (timer==null) {
                     // Creates a single-use timer.
                     // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
+                    Debug.WriteLine("APM ThreadPoolTimer.CreateTimer");
                     timer=ThreadPoolTimer.CreateTimer(
                         OnTimerElapsed,
                         TimeSpan.FromMilliseconds(NETWORK_SEND_INTERVAL));
@@ -99,6 +102,7 @@ namespace CrittercismSDK
                 if (timer==null) {
                     // Generates an event after a set interval
                     // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
+                    Debug.WriteLine("APM new Timer");
                     timer = new Timer(NETWORK_SEND_INTERVAL);
                     timer.Elapsed += OnTimerElapsed;
                     // the Timer should raise the Elapsed event only once (false)
@@ -144,9 +148,11 @@ namespace CrittercismSDK
         }
 
         private static void SendAPMReport() {
+            Debug.WriteLine("SendAPMReport");
             if (EndpointsQueue.Count>0) {
                 APMEndpoint[] endpoints=EndpointsQueue.ToArray();
                 EndpointsQueue.Clear();
+                Debug.WriteLine("SendAPMReport new APMReport");
                 APMReport apmReport=new APMReport(AppIdentifiersArray(),DeviceStateArray(),endpoints);
                 Crittercism.AddMessageToQueue(apmReport);
             }

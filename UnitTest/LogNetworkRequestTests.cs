@@ -13,6 +13,12 @@ using System.Threading.Tasks;
 namespace UnitTest {
     [TestClass]
     public class LogNetworkRequestTests {
+        [TestCleanup()]
+        public void TestCleanup() {
+            // Use TestCleanup to run code after each test has run
+            Crittercism.Shutdown();
+            TestHelpers.Cleanup();
+        }
         [TestMethod]
         public void LogNetworkRequestTest() {
             try {

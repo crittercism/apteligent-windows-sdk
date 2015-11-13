@@ -11,6 +11,12 @@ using System.Threading.Tasks;
 namespace UnitTest {
     [TestClass]
     public class CrashTests {
+        [TestCleanup()]
+        public void TestCleanup() {
+            // Use TestCleanup to run code after each test has run
+            Crittercism.Shutdown();
+            TestHelpers.Cleanup();
+        }
         [TestMethod]
         public void CrashLoadAfterSaveTest() {
             TestHelpers.StartApp();
