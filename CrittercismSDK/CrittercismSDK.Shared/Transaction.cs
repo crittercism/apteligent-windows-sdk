@@ -360,6 +360,29 @@ namespace CrittercismSDK
         // make it available to users.
         // #endregion
 
+        #region Notifications
+        internal void Foreground(long foregroundTime) {
+            // Called by TransactionReporter's "Foreground" method when app foregrounds.
+            lock (this) {
+                if (state == TransactionState.BEGUN) {
+                    SetForegroundTime(foregroundTime);
+                    isForegrounded = true;
+                }
+            }
+        }
+        internal void Background(long backgroundTime) {
+            // Called by TransactionReporter's "Background" method when app backgrounds.
+            lock (this) {
+                if (state == TransactionState.BEGUN) {
+                    RemoveTimer();
+                    eyeTime = (eyeTime + backgroundTime - foregroundTime);
+                    isForegrounded = false;
+                }
+            }
+        }
+        #endregion
+
+
         #region Persistence
         internal static Transaction[] AllTransactions() {
             return TransactionReporter.AllTransactions();

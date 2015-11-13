@@ -215,8 +215,7 @@ namespace CrittercismSDK {
 
         #endregion OptOutStatus
 
-        #region Init
-
+        #region Life Cycle
         private static string LoadAppVersion() {
             string answer = "UNKNOWN";
             try {
@@ -435,9 +434,7 @@ namespace CrittercismSDK {
                 Debug.WriteLine("Crittercism did not initialize.");
             }
         }
-        #endregion Init
 
-        #region ShutDown
         internal static void Save() {
             // Save current Crittercism state
             try {
@@ -465,6 +462,9 @@ namespace CrittercismSDK {
                     lock (lockObject) {
                         if (initialized) {
                             initialized=false;
+                            // Stop the producers
+                            APM.Shutdown();
+                            TransactionReporter.Shutdown();
                             // Get the readerThread to exit.
                             readerEvent.Set();
 #if NETFX_CORE

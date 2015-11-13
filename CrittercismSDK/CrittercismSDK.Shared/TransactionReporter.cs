@@ -20,6 +20,7 @@ namespace CrittercismSDK
 
         #region Properties
         private static Object lockObject = new object();
+        private static SynchronizedQueue<Object[]> TransactionsQueue { get; set; }
 #pragma warning disable 0414
         // TODO: Get enabled set via AppLoad response and Enable method.
         private static bool enabled = true;
@@ -44,10 +45,22 @@ namespace CrittercismSDK
             return true;
         }
         internal static void Background() {
-            // TODO: NIY
+            lock (lockObject) {
+                long backgroundTime = DateTime.UtcNow.Ticks;
+                foreach (Transaction transaction in transactionsDictionary.Values) {
+                    transaction.Background(backgroundTime);
+                };
+                RemoveTimer();
+            }
         }
         internal static void Resume() {
-            // TODO: NIY
+            lock (lockObject) {
+                long foregroundTime = DateTime.UtcNow.Ticks;
+                foreach (Transaction transaction in transactionsDictionary.Values) {
+                    transaction.Foreground(foregroundTime);
+                };
+                // TODO: Timer.  Entire Resume method needs more work.
+            }
         }
         #endregion
 
@@ -59,6 +72,12 @@ namespace CrittercismSDK
                 // Initialize transactionsDictionary and TransactionsQueue
                 transactionsDictionary = new Dictionary<string,Transaction>();
                 TransactionsQueue = new SynchronizedQueue<Object[]>(new Queue<Object[]>());
+            }
+        }
+        internal static void Shutdown() {
+            lock (lockObject) {
+                // Crittercism.Shutdown calls TransactionReporter.Shutdown
+                Background();
             }
         }
         #endregion
@@ -132,7 +151,7 @@ namespace CrittercismSDK
         }
         #endregion
 
-        #region Normal Delivery
+        #region Timing
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
         private static ThreadPoolTimer timer=null;
@@ -151,8 +170,23 @@ namespace CrittercismSDK
             }
         }
 #endif // NETFX_CORE
-        private static SynchronizedQueue<Object[]> TransactionsQueue { get; set; }
+        private static void RemoveTimer() {
+            // Call if we don't need the timer anymore.
+#if NETFX_CORE || WINDOWS_PHONE
+            if (timer != null) {
+                timer.Cancel();
+                timer = null;
+            }
+#else
+            if (timer!=null) {
+                timer.Stop();
+                timer = null;
+            }
+#endif // NETFX_CORE
+        }
+        #endregion
 
+        #region Reporting
         internal static void Enqueue(Transaction transaction) {
             lock (lockObject) {
                 while (TransactionsQueue.Count>= MAX_TRANSACTION_COUNT) {

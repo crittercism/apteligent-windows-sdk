@@ -12,10 +12,40 @@ namespace CrittercismSDK
 {
     internal class APM
     {
+        #region Constants
+        // Collect APMEndpoint's
+        const int MAX_NETWORK_STATS = 100;
+        #endregion
+
+        #region Properties
+        private static Object lockObject = new Object();
         // TODO: SynchronizedQueue has its virtues, but we may want synchronization
         // at the higher APM level instead.
-        private static Object lockObject=new Object();
+        private static SynchronizedQueue<APMEndpoint> EndpointsQueue { get; set; }
+        // Batch additional network requests for 10 seconds before sending APMReport .
+        internal static int NETWORK_SEND_INTERVAL = 10000;
+        // CRFilter's
+        private static HashSet<CRFilter> Filters;
+        #endregion
 
+        #region Life Cycle
+        internal static void Init() {
+            lock (lockObject) {
+                // Crittercism.Init calling APM.Init should effectively make
+                // lock lockObject here pointless, but no real harm doing so.
+                Filters = new HashSet<CRFilter>();
+                EndpointsQueue = new SynchronizedQueue<APMEndpoint>(new Queue<APMEndpoint>());
+            }
+        }
+        internal static void Shutdown() {
+            lock (lockObject) {
+                // Crittercism.Shutdown calls APM.Shutdown
+                RemoveTimer();
+            }
+        }
+        #endregion
+
+        #region Timing
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
         private static ThreadPoolTimer timer=null;
@@ -34,16 +64,23 @@ namespace CrittercismSDK
             }
         }
 #endif // NETFX_CORE
-        // Batch additional network requests for 10 seconds before sending APMReport .
-        internal static int NETWORK_SEND_INTERVAL=10000;
+        private static void RemoveTimer() {
+            // Call if we don't need the timer anymore.
+#if NETFX_CORE || WINDOWS_PHONE
+            if (timer != null) {
+                timer.Cancel();
+                timer = null;
+            }
+#else
+            if (timer!=null) {
+                timer.Stop();
+                timer = null;
+            }
+#endif // NETFX_CORE
+        }
+        #endregion
 
-        // CRFilter's
-        private static HashSet<CRFilter> Filters;
-
-        // Collect APMEndpoint's
-        const int MAX_NETWORK_STATS=100;
-        private static SynchronizedQueue<APMEndpoint> EndpointsQueue { get; set; }
-
+        #region Reporting
         internal static void Enqueue(APMEndpoint endpoint) {
             lock (lockObject) {
                 while (EndpointsQueue.Count>=MAX_NETWORK_STATS) {
@@ -114,16 +151,9 @@ namespace CrittercismSDK
                 Crittercism.AddMessageToQueue(apmReport);
             }
         }
+        #endregion
 
-        internal static void Init() {
-            lock (lockObject) {
-                // Crittercism.Init calling APM.Init should effectively make
-                // lock lockObject here pointless, but no real harm doing so.
-                Filters=new HashSet<CRFilter>();
-                EndpointsQueue=new SynchronizedQueue<APMEndpoint>(new Queue<APMEndpoint>());
-            }
-        }
-
+        #region Filters
         internal static void AddFilter(CRFilter filter) {
             lock (lockObject) {
                 Filters.Add(filter);
@@ -148,5 +178,6 @@ namespace CrittercismSDK
             }
             return answer;
         }
+        #endregion
     }
 }
