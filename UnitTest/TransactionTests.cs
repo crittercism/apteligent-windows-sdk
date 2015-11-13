@@ -53,10 +53,10 @@ namespace UnitTest {
             TransactionReporter.Init();
         }
 
-        // [TestCleanup()]
+        [TestCleanup()]
         public void TestCleanup() {
             // Use TestCleanup to run code after each test has run
-            // TODO: Kill any running transaction timers
+            TransactionReporter.Shutdown();
         }
 
         #region Transaction state property

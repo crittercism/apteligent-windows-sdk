@@ -88,79 +88,81 @@ namespace CrittercismSDK
         /// <returns>   true if it succeeds, false if it fails. </returns>
         private bool SendMessage() {
             //Debug.WriteLine("SendMessage: ENTER");
-            bool sendCompleted=false;
+            bool sendCompleted = false;
             try {
-                MessageReport message=Crittercism.MessageQueue.Peek();
-                Crittercism.MessageQueue.Dequeue();
-                message.Delete();
-                if (!Crittercism.enableSendMessage) {
-                    // check if the communication layer is enable and if not return true.. this is used for unit testing.
-                    sendCompleted=true;
-                } else if (NetworkInterface.GetIsNetworkAvailable()) {
-                    try {
-                        // FIXME jbley many many things special-cased for MetadataReport - really need /v1 here
-                        string postBody=null;
-                        HttpWebRequest request=null;
-                        switch (message.GetType().Name) {
-                            case "AppLoad":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/loads",UriKind.Absolute));
-                                request.ContentType="application/json; charset=utf-8";
-                                postBody=JsonConvert.SerializeObject(message);
-                                break;
-                            case "APMReport":
-                                //Debug.WriteLine("SENDING APMReport");
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apmURL+"/api/apm/network",UriKind.Absolute));
-                                request.ContentType="application/json; charset=utf-8";
-                                postBody=JsonConvert.SerializeObject(message);
-                                break;
-                            case "HandledException":
-                                // FIXME jbley fix up the URI here
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/errors",UriKind.Absolute));
-                                request.ContentType="application/json; charset=utf-8";
-                                postBody=JsonConvert.SerializeObject(message);
-                                break;
-                            case "Crash":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/crashes",UriKind.Absolute));
-                                request.ContentType="application/json; charset=utf-8";
-                                postBody=JsonConvert.SerializeObject(message);
-                                break;
-                            case "MetadataReport":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/feedback/update_user_metadata",UriKind.Absolute));
-                                request.ContentType="application/x-www-form-urlencoded";
-                                MetadataReport metadataReport=message as MetadataReport;
-                                postBody=ComputeFormPostBody(metadataReport);
-                                break;
-                            case "TransactionReport":
-                                //Debug.WriteLine("SENDING TransactionReport");
-                                request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.txnURL + "/api/v1/transactions",UriKind.Absolute));
-                                request.ContentType = "application/json; charset=utf-8";
-                                postBody = JsonConvert.SerializeObject(message);
+                if ((Crittercism.MessageQueue != null) && (Crittercism.MessageQueue.Count > 0)) {
+                    MessageReport message = Crittercism.MessageQueue.Peek();
+                    Crittercism.MessageQueue.Dequeue();
+                    message.Delete();
+                    if (!Crittercism.enableSendMessage) {
+                        // check if the communication layer is enable and if not return true.. this is used for unit testing.
+                        sendCompleted = true;
+                    } else if (NetworkInterface.GetIsNetworkAvailable()) {
+                        try {
+                            // FIXME jbley many many things special-cased for MetadataReport - really need /v1 here
+                            string postBody = null;
+                            HttpWebRequest request = null;
+                            switch (message.GetType().Name) {
+                                case "AppLoad":
+                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/v1/loads",UriKind.Absolute));
+                                    request.ContentType = "application/json; charset=utf-8";
+                                    postBody = JsonConvert.SerializeObject(message);
+                                    break;
+                                case "APMReport":
+                                    //Debug.WriteLine("SENDING APMReport");
+                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apmURL + "/api/apm/network",UriKind.Absolute));
+                                    request.ContentType = "application/json; charset=utf-8";
+                                    postBody = JsonConvert.SerializeObject(message);
+                                    break;
+                                case "HandledException":
+                                    // FIXME jbley fix up the URI here
+                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/v1/errors",UriKind.Absolute));
+                                    request.ContentType = "application/json; charset=utf-8";
+                                    postBody = JsonConvert.SerializeObject(message);
+                                    break;
+                                case "Crash":
+                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/v1/crashes",UriKind.Absolute));
+                                    request.ContentType = "application/json; charset=utf-8";
+                                    postBody = JsonConvert.SerializeObject(message);
+                                    break;
+                                case "MetadataReport":
+                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/feedback/update_user_metadata",UriKind.Absolute));
+                                    request.ContentType = "application/x-www-form-urlencoded";
+                                    MetadataReport metadataReport = message as MetadataReport;
+                                    postBody = ComputeFormPostBody(metadataReport);
+                                    break;
+                                case "TransactionReport":
+                                    //Debug.WriteLine("SENDING TransactionReport");
+                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.txnURL + "/api/v1/transactions",UriKind.Absolute));
+                                    request.ContentType = "application/json; charset=utf-8";
+                                    postBody = JsonConvert.SerializeObject(message);
 #if NETFX_CORE || WINDOWS_PHONE
 #else
-                                // AGNT-1134 DEMO
-                                Trace.WriteLine(String.Format("SENDING TransactionReport\r\n{0}\r\n", postBody));
+                                    // AGNT-1134 DEMO
+                                    Trace.WriteLine(String.Format("SENDING TransactionReport\r\n{0}\r\n", postBody));
 #endif
-                                break;
-                            default:
-                                // FIXME jbley maybe some logging here?
-                                // consider this message "consumed"
-                                sendCompleted=true;
-                                break;
-                        }
-                        if (!sendCompleted) {
-                            request.Method="POST";
-                            sendCompleted=SendRequest(request,postBody);
-                        }
-                    } catch {
-                        //Debug.WriteLine("SendMessage: catch");
-                        if (Crittercism.enableExceptionInSendMessage) {
-                            throw;
+                                    break;
+                                default:
+                                    // FIXME jbley maybe some logging here?
+                                    // consider this message "consumed"
+                                    sendCompleted = true;
+                                    break;
+                            }
+                            if (!sendCompleted) {
+                                request.Method = "POST";
+                                sendCompleted = SendRequest(request,postBody);
+                            }
+                        } catch {
+                            //Debug.WriteLine("SendMessage: catch");
+                            if (Crittercism.enableExceptionInSendMessage) {
+                                throw;
+                            }
                         }
                     }
-                }
-                if (!sendCompleted) {
-                    Crittercism.MessageQueue.Enqueue(message);
-                }
+                    if (!sendCompleted) {
+                        Crittercism.MessageQueue.Enqueue(message);
+                    }
+                };
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
