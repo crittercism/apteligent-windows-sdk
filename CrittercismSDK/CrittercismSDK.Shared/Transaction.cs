@@ -305,6 +305,8 @@ namespace CrittercismSDK
                     case TransactionState.CREATED:
                         if (newState == TransactionState.BEGUN) {
                             SetState(newState,DateTime.UtcNow.Ticks);
+                        } else if (newState==TransactionState.CRASHED) {
+                            // NOP. Leave transaction in CREATED state.
                         } else {
                             // Transaction being begun for the first time after create.
                             // Crittercism spec says newState has to be

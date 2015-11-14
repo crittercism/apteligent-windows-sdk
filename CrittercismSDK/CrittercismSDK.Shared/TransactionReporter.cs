@@ -64,6 +64,29 @@ namespace CrittercismSDK
         }
         #endregion
 
+        #region Multithreading Remarks
+        ////////////////////////////////////////////////////////////////
+        // MULTITHREADING Transaction AND TransactionReporter REMARKS
+        // * lock "Lock Ordering"
+        //    The deadlock prevention technique of establishing a global ordering
+        //    on resources which may be locked is known as "Lock Ordering"
+        //    Lock ordering is a simple yet effective deadlock prevention mechanism.
+        //    http://tutorials.jenkov.com/java-concurrency/deadlock-prevention.html#ordering
+        // Transaction code sometimes needs to lock both a transaction and
+        // the reporter simultaneously.  Our lock deadlock prevention
+        // policy is to always obtain lock on transaction first and lock
+        // on reporter second whenever this is necessary.  Effectively:
+        //    lock (transaction) {
+        //      lock (TransactionReporter.lockObject) {
+        //        ...
+        //      }
+        //    }
+        // though possibly spread out on the stack trace, not necessarily
+        // all in one function or class.
+        // * Changing properties of transactions is done synchronously.
+        ////////////////////////////////////////////////////////////////
+        #endregion
+
         #region Life Cycle
         internal static void Init() {
             lock (lockObject) {
@@ -232,6 +255,24 @@ namespace CrittercismSDK
                     endpoints);
                 Crittercism.AddMessageToQueue(transactionReport);
             }
+        }
+        internal static Object[] CrashTransactions() {
+            // Remove BEGUN Transaction's to CRASHED state.
+            // The code takes care to avoid deadlocks by not locking
+            // the reporter and then locking a Transaction (wrong order).
+            Transaction[] allTransactions = AllTransactions();
+            // Compute crashed Transaction's .
+            List<Object[]> list = new List<Object[]>();
+            foreach (Transaction transaction in allTransactions) {
+                // Request transaction to Crash.
+                transaction.Crash();
+                if (transaction.State() == TransactionState.CRASHED) {
+                    // The transaction crashed.
+                    list.Add(transaction.ToArray());
+                };
+            };
+            Object[] answer = list.ToArray();
+            return answer;
         }
         #endregion
 
