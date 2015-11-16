@@ -168,7 +168,6 @@ namespace CrittercismSDK
             bool sendCompleted=false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                Exception lastException=null;
                 Task<Stream> writerTask=request.GetRequestStreamAsync();
                 using (Stream writer=writerTask.Result) {
                     // NOTE: SendMessage caller's request.ContentType=="application/json; charset=utf-8"
@@ -196,16 +195,13 @@ namespace CrittercismSDK
                                     using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
                                         string errorMessage=errorReader.ReadToEnd();
                                         Debug.WriteLine("SendMessage: "+errorMessage);
-                                        lastException=new Exception(errorMessage,webEx);
                                     }
-                                } catch (Exception ex) {
-                                    lastException=ex;
+                                } catch {
                                 }
                             }
                         }
                     } catch (Exception ex) {
                         Debug.WriteLine("SendMessage: ex == "+ex.Message);
-                        lastException=ex;
                     }
                 }
             } catch (Exception ie) {
@@ -220,7 +216,6 @@ namespace CrittercismSDK
             bool sendCompleted=false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                Exception lastException=null;
                 ManualResetEvent resetEvent=new ManualResetEvent(false);
                 request.BeginGetRequestStream(
                     (result) => {
@@ -259,23 +254,17 @@ namespace CrittercismSDK
                                                         using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
                                                             string errorMessage=errorReader.ReadToEnd();
                                                             Debug.WriteLine(errorMessage);
-                                                            lastException=new Exception(errorMessage,webEx);
                                                         }
-                                                    } catch (Exception ex) {
-                                                        lastException=ex;
+                                                    } catch {
                                                     }
                                                 }
                                             }
                                         }
-                                    } catch (Exception ex) {
-                                        //Debug.WriteLine("SendMessage: ex == "+ex);
-                                        lastException=ex;
+                                    } catch {
                                     }
                                     resetEvent.Set();
                                 },null);
-                        } catch (Exception ex) {
-                            //Debug.WriteLine("SendMessage: ex#2 == "+ex);
-                            lastException=ex;
+                        } catch {
                             resetEvent.Set();
                         }
                     },null);
