@@ -24,13 +24,6 @@ namespace CrittercismSDK
 {
     internal class QueueReader
     {
-        private AppLocator appLocator;
-        internal QueueReader(AppLocator appLocator) {
-            // No support for APM nor TXNs yet.  appLocator.apiURL is
-            // all we currently care about.
-            this.appLocator=appLocator;
-        }
-
         /// <summary>
         /// Reads the queue.
         /// </summary>
@@ -106,47 +99,9 @@ namespace CrittercismSDK
                         Crittercism.MessageQueue.Dequeue();
                         message.Delete();
                         try {
-                            string postBody = null;
-                            HttpWebRequest request = null;
-                            switch (message.GetType().Name) {
-                                case "AppLoad":
-                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/v1/loads",UriKind.Absolute));
-                                    request.ContentType = "application/json; charset=utf-8";
-                                    postBody = JsonConvert.SerializeObject(message);
-                                    break;
-                                case "APMReport":
-                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apmURL + "/api/apm/network",UriKind.Absolute));
-                                    request.ContentType = "application/json; charset=utf-8";
-                                    postBody = JsonConvert.SerializeObject(message);
-                                    break;
-                                case "HandledException":
-                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/v1/errors",UriKind.Absolute));
-                                    request.ContentType = "application/json; charset=utf-8";
-                                    postBody = JsonConvert.SerializeObject(message);
-                                    break;
-                                case "Crash":
-                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/v1/crashes",UriKind.Absolute));
-                                    request.ContentType = "application/json; charset=utf-8";
-                                    postBody = JsonConvert.SerializeObject(message);
-                                    break;
-                                case "MetadataReport":
-                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/feedback/update_user_metadata",UriKind.Absolute));
-                                    request.ContentType = "application/x-www-form-urlencoded";
-                                    MetadataReport metadataReport = message as MetadataReport;
-                                    postBody = ComputeFormPostBody(metadataReport);
-                                    break;
-                                case "TransactionReport":
-                                    request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.txnURL + "/api/v1/transactions",UriKind.Absolute));
-                                    request.ContentType = "application/json; charset=utf-8";
-                                    postBody = JsonConvert.SerializeObject(message);
-                                    break;
-                                default:
-                                    sendCompleted = true;
-                                    break;
-                            }
-                            if (!sendCompleted) {
-                                request.Method = "POST";
-                                sendCompleted = SendRequest(request,postBody);
+                            HttpWebRequest request = message.WebRequest();
+                            if (request!=null) {
+                                sendCompleted = SendRequest(request,message.PostBody());
                             }
                         } catch {
                         }
@@ -287,7 +242,7 @@ namespace CrittercismSDK
         }
 #endif // WINDOWS_PHONE_APP
 
-        public static string ComputeFormPostBody(MetadataReport metadataReport) {
+        internal static string ComputeFormPostBody(MetadataReport metadataReport) {
             string postBody="";
             postBody+="did="+metadataReport.platform.device_id+"&";
             postBody+="app_id="+metadataReport.app_id+"&";

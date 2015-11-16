@@ -388,7 +388,7 @@ namespace CrittercismSDK {
                     Metadata=LoadMetadata();
                     OSVersion=LoadOSVersion();
                     SessionId=LoadSessionId();
-                    QueueReader queueReader=new QueueReader(appLocator);
+                    QueueReader queueReader=new QueueReader();
 #if NETFX_CORE
                     Action threadStart=() => { queueReader.ReadQueue(); };
                     readerThread=new Task(threadStart);

@@ -1,8 +1,15 @@
 ﻿//#define MOCK
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+#if NETFX_CORE
+using Windows.UI.Xaml;
+#elif WINDOWS_PHONE
+#else
+using System.Web;
+#endif
 
 namespace CrittercismSDK
 {
@@ -36,7 +43,8 @@ namespace CrittercismSDK
         private const string ContinuousIntegrationDomain="crit-ci.com";
         private const string StagingDomain="crit-staging.com";
 
-        private static string GetDomainFromAppId(string appId) {
+        #region Constructor
+        private string GetDomainFromAppId(string appId) {
             ////////////////////////////////////////////////////////////////
             // Check if the server is specified in the appId.
             // It is important we make sure to validate this fact because
@@ -62,7 +70,6 @@ namespace CrittercismSDK
             }
             return null;
         }
-
         internal AppLocator(string appID) {
 #if MOCK
             domain="mock.crittercism.com";
@@ -80,5 +87,33 @@ namespace CrittercismSDK
             }
 #endif
         }
+        #endregion
+
+        #region GetUri
+        internal HttpWebRequest GetWebRequest(Type t) {
+            HttpWebRequest answer = null;
+            switch (t.Name) {
+                case "AppLoad":
+                    answer = (HttpWebRequest)WebRequest.Create(new Uri(apiURL + "/v1/loads",UriKind.Absolute));
+                    break;
+                case "APMReport":
+                    answer = (HttpWebRequest)WebRequest.Create(new Uri(apmURL + "/api/apm/network",UriKind.Absolute));
+                    break;
+                case "HandledException":
+                    answer = (HttpWebRequest)WebRequest.Create(new Uri(apiURL + "/v1/errors",UriKind.Absolute));
+                    break;
+                case "Crash":
+                    answer = (HttpWebRequest)WebRequest.Create(new Uri(apiURL + "/v1/crashes",UriKind.Absolute));
+                    break;
+                case "MetadataReport":
+                    answer = (HttpWebRequest)WebRequest.Create(new Uri(apiURL + "/feedback/update_user_metadata",UriKind.Absolute));
+                    break;
+                case "TransactionReport":
+                    answer = (HttpWebRequest)WebRequest.Create(new Uri(txnURL + "/api/v1/transactions",UriKind.Absolute));
+                    break;
+            }
+            return answer;
+        }
+        #endregion
     }
 }
