@@ -106,7 +106,6 @@ namespace CrittercismSDK
                         Crittercism.MessageQueue.Dequeue();
                         message.Delete();
                         try {
-                            // FIXME jbley many many things special-cased for MetadataReport - really need /v1 here
                             string postBody = null;
                             HttpWebRequest request = null;
                             switch (message.GetType().Name) {
@@ -116,13 +115,11 @@ namespace CrittercismSDK
                                     postBody = JsonConvert.SerializeObject(message);
                                     break;
                                 case "APMReport":
-                                    //Debug.WriteLine("SENDING APMReport");
                                     request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apmURL + "/api/apm/network",UriKind.Absolute));
                                     request.ContentType = "application/json; charset=utf-8";
                                     postBody = JsonConvert.SerializeObject(message);
                                     break;
                                 case "HandledException":
-                                    // FIXME jbley fix up the URI here
                                     request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL + "/v1/errors",UriKind.Absolute));
                                     request.ContentType = "application/json; charset=utf-8";
                                     postBody = JsonConvert.SerializeObject(message);
@@ -139,19 +136,11 @@ namespace CrittercismSDK
                                     postBody = ComputeFormPostBody(metadataReport);
                                     break;
                                 case "TransactionReport":
-                                    //Debug.WriteLine("SENDING TransactionReport");
                                     request = (HttpWebRequest)WebRequest.Create(new Uri(appLocator.txnURL + "/api/v1/transactions",UriKind.Absolute));
                                     request.ContentType = "application/json; charset=utf-8";
                                     postBody = JsonConvert.SerializeObject(message);
-#if NETFX_CORE || WINDOWS_PHONE
-#else
-                                    // AGNT-1134 DEMO
-                                    Trace.WriteLine(String.Format("SENDING TransactionReport\r\n{0}\r\n", postBody));
-#endif
                                     break;
                                 default:
-                                    // FIXME jbley maybe some logging here?
-                                    // consider this message "consumed"
                                     sendCompleted = true;
                                     break;
                             }
