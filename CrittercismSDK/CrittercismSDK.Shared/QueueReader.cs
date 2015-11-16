@@ -160,10 +160,6 @@ namespace CrittercismSDK
                                 sendCompleted = SendRequest(request,postBody);
                             }
                         } catch {
-                            //Debug.WriteLine("SendMessage: catch");
-                            if (Crittercism.enableExceptionInSendMessage) {
-                                throw;
-                            }
                         }
                         if (!sendCompleted) {
                             Crittercism.MessageQueue.Enqueue(message);
@@ -222,9 +218,6 @@ namespace CrittercismSDK
                         Debug.WriteLine("SendMessage: ex == "+ex.Message);
                         lastException=ex;
                     }
-                }
-                if (Crittercism.enableExceptionInSendMessage&&lastException!=null) {
-                    throw lastException;
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -307,9 +300,6 @@ namespace CrittercismSDK
                     stopWatch.Stop();
                     Debug.WriteLine("SendMessage: TOTAL SECONDS == "+stopWatch.Elapsed.TotalSeconds);
 #endif
-                }
-                if (Crittercism.enableExceptionInSendMessage&&lastException!=null) {
-                    throw lastException;
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);

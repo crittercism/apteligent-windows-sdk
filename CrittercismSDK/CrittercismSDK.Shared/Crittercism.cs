@@ -49,11 +49,6 @@ namespace CrittercismSDK {
         /// </summary>
         internal static bool enableSendMessage = true;
 
-        /// <summary>
-        /// Enable Exception in SendMessage
-        /// </summary>
-        internal static bool enableExceptionInSendMessage = false;
-
         internal static string AppVersion { get; private set; }
         internal static string DeviceId { get; private set; }
         internal static string DeviceModel { get; private set; }
@@ -403,7 +398,7 @@ namespace CrittercismSDK {
                     readerThread.Name="Crittercism";
 #endif
                     // autoRunQueueReader for unit test purposes
-                    if (autoRunQueueReader&&enableSendMessage&&!(enableExceptionInSendMessage)) {
+                    if (autoRunQueueReader&&enableSendMessage) {
 #if NETFX_CORE
                         Application.Current.UnhandledException+=Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged+=NetworkInformation_NetworkStatusChanged;

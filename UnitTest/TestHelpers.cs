@@ -47,7 +47,6 @@ namespace UnitTest {
             // This method is for clean all the possible variables that may be will used by another unit test
             Crittercism.autoRunQueueReader = true;
             Crittercism.enableSendMessage = false;
-            Crittercism.enableExceptionInSendMessage = false;
             Crittercism.SetOptOutStatus(false);
             if (Crittercism.MessageQueue!=null) {
                 Crittercism.MessageQueue.Clear();
@@ -68,7 +67,6 @@ namespace UnitTest {
             Crittercism.SetOptOutStatus(optOutStatus);
             Crittercism.autoRunQueueReader = false;
             Crittercism.enableSendMessage = false;
-            Crittercism.enableExceptionInSendMessage = false;
             Crittercism.Init(VALID_APPID);
         }
         public static void StartApp() {
