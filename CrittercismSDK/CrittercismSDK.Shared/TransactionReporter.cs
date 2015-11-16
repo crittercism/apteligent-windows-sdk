@@ -111,7 +111,7 @@ namespace CrittercismSDK
             lock (lockObject) {
                 switch (transaction.State()) {
                     case TransactionState.CANCELLED:
-                        RemoveTransaction(transaction);
+                        CancelTransaction(transaction);
                         break;
                     case TransactionState.CREATED:
                         // Make visible via persistence API methods.
@@ -121,11 +121,11 @@ namespace CrittercismSDK
                         // Nothing extra to do.
                         break;
                     case TransactionState.CRASHED:
-                        RemoveTransaction(transaction);
+                        CancelTransaction(transaction);
                         break;
                     default:
                         // Final state
-                        RemoveTransaction(transaction);
+                        CancelTransaction(transaction);
                         Enqueue(transaction);
                         break;
                 }
@@ -136,7 +136,7 @@ namespace CrittercismSDK
                 transactionsDictionary[transaction.Name()] = transaction;
             }
         }
-        private static void RemoveTransaction(Transaction transaction) {
+        private static void CancelTransaction(Transaction transaction) {
             lock (lockObject) {
                 transactionsDictionary.Remove(transaction.Name());
             }

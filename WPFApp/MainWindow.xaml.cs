@@ -114,7 +114,7 @@ namespace WPFApp
                                 Crittercism.FailTransaction(transactionName);
                                 break;
                             case "Cancel Transaction":
-                                Crittercism.RemoveTransaction(transactionName);
+                                Crittercism.CancelTransaction(transactionName);
                                 break;
                         }
                         button.Content = beginTransactionLabel;
