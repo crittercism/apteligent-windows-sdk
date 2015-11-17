@@ -46,7 +46,6 @@ namespace UnitTest {
 
         [TestMethod]
         public void MetadataPersistenceTest() {
-            Crittercism.autoRunQueueReader = false;
             Crittercism.Init("5350bb642bd1f1017c000002");
             Crittercism.SetUsername("harry");
             Crittercism.SetValue("surname", "hedwig");

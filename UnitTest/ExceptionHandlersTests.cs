@@ -19,7 +19,6 @@ namespace UnitTest {
         }
         [TestMethod]
         public void LogHandledExceptionTest() {
-            Crittercism.autoRunQueueReader = false;
             TestHelpers.StartApp();
             Crittercism.LeaveBreadcrumb("HandledExceptionBreadcrumb");
             Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");

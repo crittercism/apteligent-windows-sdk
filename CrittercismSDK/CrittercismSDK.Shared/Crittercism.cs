@@ -38,12 +38,6 @@ namespace CrittercismSDK {
         #endregion Constants
 
         #region Properties
-
-        /// <summary>
-        /// The auto run queue reader
-        /// </summary>
-        internal static bool autoRunQueueReader = true;
-
         /// <summary>
         /// Enable SendMessage
         /// </summary>
@@ -397,8 +391,8 @@ namespace CrittercismSDK {
                     readerThread=new Thread(threadStart);
                     readerThread.Name="Crittercism";
 #endif
-                    // autoRunQueueReader for unit test purposes
-                    if (autoRunQueueReader&&enableSendMessage) {
+                    // enableSendMessage for unit test purposes
+                    if (enableSendMessage) {
 #if NETFX_CORE
                         Application.Current.UnhandledException+=Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged+=NetworkInformation_NetworkStatusChanged;
@@ -990,17 +984,14 @@ namespace CrittercismSDK {
                 return;
             }
             try {
-                // This flag is for unit test
-                if (autoRunQueueReader) {
-                    switch (e.NotificationType) {
-                        case NetworkNotificationType.InterfaceConnected:
-                            if (NetworkInterface.GetIsNetworkAvailable()) {
-                                if (MessageQueue!=null&&MessageQueue.Count>0) {
-                                    readerEvent.Set();
-                                }
+                switch (e.NotificationType) {
+                    case NetworkNotificationType.InterfaceConnected:
+                        if (NetworkInterface.GetIsNetworkAvailable()) {
+                            if (MessageQueue!=null&&MessageQueue.Count>0) {
+                                readerEvent.Set();
                             }
-                            break;
-                    }
+                        }
+                        break;
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);
