@@ -33,26 +33,15 @@ namespace CrittercismSDK {
     public class Crittercism {
         #region Constants
 
-        private const string errorNotInitialized="ERROR: Crittercism not initialized yet.";
+        private const string errorNotInitialized="Crittercism not initialized yet.";
 
         #endregion Constants
 
         #region Properties
-
-        /// <summary>
-        /// The auto run queue reader
-        /// </summary>
-        internal static bool autoRunQueueReader = true;
-
         /// <summary>
         /// Enable SendMessage
         /// </summary>
         internal static bool enableSendMessage = true;
-
-        /// <summary>
-        /// Enable Exception in SendMessage
-        /// </summary>
-        internal static bool enableExceptionInSendMessage = false;
 
         internal static string AppVersion { get; private set; }
         internal static string DeviceId { get; private set; }
@@ -94,7 +83,7 @@ namespace CrittercismSDK {
         /// <value> The breadcrumbs. </value>
         private static Breadcrumbs PrivateBreadcrumbs { get; set; }
 
-        private static Breadcrumbs CurrentBreadcrumbs() {
+        internal static Breadcrumbs CurrentBreadcrumbs() {
             // Copy of current PrivateBreadcrumbs
             return PrivateBreadcrumbs.Copy();
         }
@@ -215,20 +204,33 @@ namespace CrittercismSDK {
 
         #endregion OptOutStatus
 
-        #region Init
-
+        #region Life Cycle
         private static string LoadAppVersion() {
+            string answer = "UNKNOWN";
+            try {
 #if NETFX_CORE
-            PackageVersion version=Package.Current.Id.Version;
-            string answer=""+version.Major+"."+version.Minor+"."+version.Build+"."+version.Revision;
-            Debug.WriteLine("LoadAppVersion == "+answer);
-            return answer;
+                PackageVersion version = Package.Current.Id.Version;
+                answer = "" + version.Major + "." + version.Minor + "." + version.Build + "." + version.Revision;
 #elif WINDOWS_PHONE
-            return Application.Current.GetType().Assembly.GetName().Version.ToString();
+                answer = Application.Current.GetType().Assembly.GetName().Version.ToString();
 #else
-            // Should probably work in most cases.
-            return Assembly.GetEntryAssembly().GetName().Version.ToString();
+                // Should probably work in most cases.
+                Assembly assembly = Assembly.GetEntryAssembly();
+                if (assembly != null) {
+                    AssemblyName assemblyName = assembly.GetName();
+                    if (assemblyName != null) {
+                        Version version = assemblyName.Version;
+                        if (version != null) {
+                            answer = version.ToString();
+                        }
+                    }
+                }
 #endif
+            } catch (Exception) {
+                // Return "UNKNOWN" if anything throws an Exception .
+            };
+            Debug.WriteLine("LoadAppVersion == " + answer);
+            return answer;
         }
 
         /// <summary>
@@ -361,25 +363,26 @@ namespace CrittercismSDK {
                 if (GetOptOutStatus()) {
                     return;
                 } else if (initialized) {
-                    Debug.WriteLine("ERROR: Crittercism is already initialized");
+                    DebugUtils.LOG_ERROR("Crittercism is already initialized");
                     return;
                 };
                 lock (lockObject) {
                     appLocator=new AppLocator(appID);
                     if (appLocator.domain==null) {
-                        Debug.WriteLine("ERROR: Illegal Crittercism appID");
+                        DebugUtils.LOG_ERROR("Illegal Crittercism appID");
                         return;
                     }
                     AppID=appID;
                     APM.Init();
                     MessageReport.Init();
+                    TransactionReporter.Init();
                     AppVersion=LoadAppVersion();
                     DeviceId=LoadDeviceId();
                     DeviceModel=LoadDeviceModel();
                     Metadata=LoadMetadata();
                     OSVersion=LoadOSVersion();
                     SessionId=LoadSessionId();
-                    QueueReader queueReader=new QueueReader(appLocator);
+                    QueueReader queueReader=new QueueReader();
 #if NETFX_CORE
                     Action threadStart=() => { queueReader.ReadQueue(); };
                     readerThread=new Task(threadStart);
@@ -388,8 +391,8 @@ namespace CrittercismSDK {
                     readerThread=new Thread(threadStart);
                     readerThread.Name="Crittercism";
 #endif
-                    // autoRunQueueReader for unit test purposes
-                    if (autoRunQueueReader&&enableSendMessage&&!(enableExceptionInSendMessage)) {
+                    // enableSendMessage for unit test purposes
+                    if (enableSendMessage) {
 #if NETFX_CORE
                         Application.Current.UnhandledException+=Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged+=NetworkInformation_NetworkStatusChanged;
@@ -429,9 +432,7 @@ namespace CrittercismSDK {
                 Debug.WriteLine("Crittercism did not initialize.");
             }
         }
-        #endregion Init
 
-        #region ShutDown
         internal static void Save() {
             // Save current Crittercism state
             try {
@@ -459,6 +460,9 @@ namespace CrittercismSDK {
                     lock (lockObject) {
                         if (initialized) {
                             initialized=false;
+                            // Stop the producers
+                            APM.Shutdown();
+                            TransactionReporter.Shutdown();
                             // Get the readerThread to exit.
                             readerEvent.Set();
 #if NETFX_CORE
@@ -552,7 +556,7 @@ namespace CrittercismSDK {
         public static void LogHandledException(Exception e) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     lock (lockObject) {
@@ -622,7 +626,7 @@ namespace CrittercismSDK {
         public static void SetValue(string key,string value) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     lock (lockObject) {
@@ -651,7 +655,7 @@ namespace CrittercismSDK {
             string answer=null;
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     lock (lockObject) {
@@ -667,7 +671,117 @@ namespace CrittercismSDK {
         }
         #endregion Metadata
 
-        #region LogNetworkRequest
+        #region Transactions
+        public static void BeginTransaction(string name) {
+            // Init and begin a transaction with a default value.
+            try {
+                CancelTransaction(name);
+                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
+                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                                       + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                                       TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                    return;
+                }
+                (new Transaction(name)).Begin();
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static void BeginTransaction(string name,int value) {
+            // Init and begin a transaction with an input value.
+            try {
+                CancelTransaction(name);
+                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
+                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
+                                                       + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
+                                                       TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                    return;
+                }
+                (new Transaction(name,value)).Begin();
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static void CancelTransaction(string name) {
+            // Cancel a transaction as if it never was.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    transaction.Cancel();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static void EndTransaction(string name) {
+            // End an already begun transaction successfully.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction!=null) {
+                    transaction.End();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static void FailTransaction(string name) {
+            // End an already begun transaction as a failure.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    transaction.Fail();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        public static int GetTransactionValue(string name) {
+            // Get the currency cents value of a transaction.
+            int answer = 0;
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    answer = transaction.Value();
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+            return answer;
+        }
+        public static void SetTransactionValue(string name,int value) {
+            // Set the currency cents value of a transaction.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    transaction.SetValue(value);
+                } else {
+                    CantFindTransaction(name);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+
+        internal static void CantFindTransaction(string name) {
+#if NETFX_CORE || WINDOWS_PHONE
+#else
+            Trace.WriteLine(String.Format("Can't find transaction named \"{0}\"",name));
+#endif
+        }
+
+        #endregion
+
+        #region Network Requests
         public static void LogNetworkRequest(
             string method,
             string uriString,
@@ -679,7 +793,7 @@ namespace CrittercismSDK {
         ) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     Debug.WriteLine(
@@ -708,13 +822,13 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion LogNetworkRequest
+#endregion LogNetworkRequest
 
-        #region Filters
+        #region Configuring Service Monitoring
         public static void AddFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     APM.AddFilter(filter);
@@ -727,7 +841,7 @@ namespace CrittercismSDK {
         public static void RemoveFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
-                Debug.WriteLine(errorNotInitialized);
+                DebugUtils.LOG_ERROR(errorNotInitialized);
             } else {
                 try {
                     APM.RemoveFilter(filter);
@@ -870,17 +984,14 @@ namespace CrittercismSDK {
                 return;
             }
             try {
-                // This flag is for unit test
-                if (autoRunQueueReader) {
-                    switch (e.NotificationType) {
-                        case NetworkNotificationType.InterfaceConnected:
-                            if (NetworkInterface.GetIsNetworkAvailable()) {
-                                if (MessageQueue!=null&&MessageQueue.Count>0) {
-                                    readerEvent.Set();
-                                }
+                switch (e.NotificationType) {
+                    case NetworkNotificationType.InterfaceConnected:
+                        if (NetworkInterface.GetIsNetworkAvailable()) {
+                            if (MessageQueue!=null&&MessageQueue.Count>0) {
+                                readerEvent.Set();
                             }
-                            break;
-                    }
+                        }
+                        break;
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);

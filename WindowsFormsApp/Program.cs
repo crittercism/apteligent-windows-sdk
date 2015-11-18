@@ -15,7 +15,7 @@ namespace WindowsFormsApp {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Crittercism.Init("537a4e738039805d82000002");
-            (new Form1()).Show();
+            (new MainWindow()).Show();
             Application.Run();
         }
     }

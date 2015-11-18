@@ -1,11 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.Serialization;
+using Newtonsoft.Json;
+#if NETFX_CORE
+//using System.Threading.Tasks;
+//using Windows.UI.Xaml;
+#elif WINDOWS_PHONE
+#else
+using System.Web;
+#endif
 
 namespace CrittercismSDK
 {
-    // FIXME jbley note that this class will not be serialized in the standard way.
-
     /// <summary>
     /// Application load.
     /// </summary>
@@ -43,6 +50,27 @@ namespace CrittercismSDK
             } else {
                 throw new Exception("Crittercism requires an application_id to properly initialize itself.");
             }
+        }
+        internal override string ContentType() {
+            // MetadataReport ContentType is an exceptional override.
+            return "application/x-www-form-urlencoded";
+        }
+        internal override string PostBody() {
+            // MetadataReport PostBody is an exceptional override.
+            string answer = "";
+            answer += "did=" + platform.device_id + "&";
+            answer += "app_id=" + app_id + "&";
+            string metadataJson = JsonConvert.SerializeObject(metadata);
+#if NETFX_CORE
+            answer+="metadata="+WebUtility.UrlEncode(metadataJson)+"&";
+            answer+="device_name="+WebUtility.UrlEncode(platform.device_model);
+#else
+            // Only .NETFramework 4.5 has WebUtility.UrlEncode, earlier version
+            // .NETFramework 4.0 has HttpUtility.UrlEncode
+            answer += "metadata=" + HttpUtility.UrlEncode(metadataJson) + "&";
+            answer += "device_name=" + HttpUtility.UrlEncode(platform.device_model);
+#endif
+            return answer;
         }
     }
 }

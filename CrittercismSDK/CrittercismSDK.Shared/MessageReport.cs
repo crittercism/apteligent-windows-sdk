@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Reflection;
 #if WINDOWS_PHONE
 using Microsoft.Phone.Info;
@@ -47,8 +48,7 @@ namespace CrittercismSDK {
 
         #endregion
 
-        #region Methods
-
+        #region Instance Methods
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -56,7 +56,7 @@ namespace CrittercismSDK {
             Saved=false;
         }
 
-        protected Dictionary<string,object> ComputeAppState() {
+        public static Dictionary<string,object> ComputeAppState() {
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
             // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
 
@@ -128,7 +128,27 @@ namespace CrittercismSDK {
             };
             return answer;
         }
+        internal virtual string ContentType() {
+            // Most MessageReport's are POST'd via JSON .
+            // The exceptional legacy MetadataReport overrides this method. 
+            return "application/json; charset=utf-8";
+        }
+        internal HttpWebRequest WebRequest() {
+            HttpWebRequest answer = Crittercism.appLocator.GetWebRequest(GetType());
+            if (answer != null) {
+                answer.Method = "POST";
+                answer.ContentType = ContentType();
+            };
+            return answer;
+        }
+        internal virtual string PostBody() {
+            // Most MessageReport's are POST'd via JSON .
+            // The exceptional legacy MetadataReport overrides this method. 
+            return JsonConvert.SerializeObject(this);
+        }
+        #endregion
 
+        #region Static Methods
         internal static List<MessageReport> LoadMessages() {
             List<MessageReport> messages=new List<MessageReport>();
             if (StorageHelper.FolderExists(MessagesPath)) {
@@ -143,7 +163,6 @@ namespace CrittercismSDK {
             }
             return messages;
         }
-
         internal static MessageReport LoadMessage(string name) {
             // name is wrt MessagesPath "Crittercism\Messages", e.g "Crash_<guid>"
             // path is Crittercism\Messages\name

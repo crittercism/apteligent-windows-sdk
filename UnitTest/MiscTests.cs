@@ -11,9 +11,15 @@ using System.Threading.Tasks;
 namespace UnitTest {
     [TestClass]
     public class MiscTests {
+        [TestCleanup()]
+        public void TestCleanup() {
+            // Use TestCleanup to run code after each test has run
+            Crittercism.Shutdown();
+            TestHelpers.Cleanup();
+        }
         [TestMethod]
         public void TruncatedBreadcrumbTest() {
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
+            TestHelpers.StartApp();
             // start breadcrumb with sentinel to ensure we don't left-truncate
             string breadcrumb = "raaaaaaaaa";
             for (int x = 0; x < 13; x++) {
@@ -34,18 +40,15 @@ namespace UnitTest {
 
         [TestMethod]
         public void OptOutTest() {
-            Crittercism.enableExceptionInSendMessage = true;
-            Crittercism.SetOptOutStatus(true);
+            // Opt out of Crittercism prior to Init .
+            TestHelpers.StartApp(true);
             Assert.IsTrue(Crittercism.GetOptOutStatus());
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
             TestHelpers.LogHandledException();
-            Debug.WriteLine("Crittercism.MessageQueue == "+Crittercism.MessageQueue);
-            Assert.IsTrue(Crittercism.MessageQueue==null);
-            //Assert.IsTrue(Crittercism.MessageQueue.Count==0);
-            // Now turn it back on
-            Crittercism.SetOptOutStatus(false);
+            Trace.WriteLine("Crittercism.MessageQueue == "+Crittercism.MessageQueue);
+            Assert.IsTrue((Crittercism.MessageQueue==null)||(Crittercism.MessageQueue.Count==0));
+            // Opt back into Crittercism prior to Init
+            TestHelpers.StartApp(false);
             Assert.IsFalse(Crittercism.GetOptOutStatus());
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
             TestHelpers.LogHandledException();
             Assert.IsTrue(Crittercism.MessageQueue!=null);
             Assert.IsTrue(Crittercism.MessageQueue.Count>0);

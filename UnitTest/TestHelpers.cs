@@ -14,7 +14,7 @@ namespace UnitTest {
 
         [AssemblyInitialize()]
         public static void AssemblyInit(TestContext context) {
-            CleanUp();
+            Cleanup();
         }
 
         [AssemblyCleanup()]
@@ -35,19 +35,17 @@ namespace UnitTest {
                 "\"locale\":",
             };
             foreach (string jsonFragment in jsonStrings) {
-                Debug.WriteLine("jsonFragment == "+jsonFragment);
-                Debug.WriteLine("json.Contains == "+json.Contains(jsonFragment));
+                Trace.WriteLine("jsonFragment == "+jsonFragment);
+                Trace.WriteLine("json.Contains == "+json.Contains(jsonFragment));
                 Assert.IsTrue(json.Contains(jsonFragment));
             };
             // Make sure DateTimes are stringified in the canonical way and not in this goofy default way
             Assert.IsFalse(json.Contains("Date("));
         }
 
-        public static void CleanUp() {
+        public static void Cleanup() {
             // This method is for clean all the possible variables that may be will used by another unit test
-            Crittercism.autoRunQueueReader = true;
             Crittercism.enableSendMessage = false;
-            Crittercism.enableExceptionInSendMessage = false;
             Crittercism.SetOptOutStatus(false);
             if (Crittercism.MessageQueue!=null) {
                 Crittercism.MessageQueue.Clear();
@@ -59,15 +57,19 @@ namespace UnitTest {
                     storage.DeleteFile(file);
                 }
             } catch (Exception ex) {
-                Console.WriteLine("CleanUp exception: "+ex);
+                Console.WriteLine("Cleanup exception: "+ex);
             }
         }
 
-        public static void StartApp(string appId) {
-            Crittercism.autoRunQueueReader=false;
-            Crittercism.enableSendMessage=false;
-            Crittercism.enableExceptionInSendMessage=false;
-            Crittercism.Init(appId);
+        public static void StartApp(bool optOutStatus) {
+            // Convenient for the OptOutTest which must pass optOutStatus = true
+            Crittercism.SetOptOutStatus(optOutStatus);
+            Crittercism.enableSendMessage = false;
+            Crittercism.Init(VALID_APPID);
+        }
+        public static void StartApp() {
+            // The preferred default is optOutStatus = false
+            StartApp(false);
         }
 
         public static void ThrowException() {

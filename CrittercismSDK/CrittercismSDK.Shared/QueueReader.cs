@@ -24,13 +24,6 @@ namespace CrittercismSDK
 {
     internal class QueueReader
     {
-        private AppLocator appLocator;
-        internal QueueReader(AppLocator appLocator) {
-            // No support for APM nor TXNs yet.  appLocator.apiURL is
-            // all we currently care about.
-            this.appLocator=appLocator;
-        }
-
         /// <summary>
         /// Reads the queue.
         /// </summary>
@@ -69,13 +62,20 @@ namespace CrittercismSDK
                         // TODO: Use System.Timers.Timer to generate an event
                         // 5 minutes from now, wait for it, then proceed.
                         retry++;
-                        Debug.WriteLine("ReadStep: retry == {0}",retry);
+                        Debug.WriteLine("ReadStep: retry == "+retry);
                     }
                 };
-                // Opportune time to save Crittercism state.  Unable to make the MessageQueue
-                // shorter either because SendMessage failed or MessageQueue has gone empty.
-                // The readerThread will be going into a do nothing wait state after this.
-                Crittercism.Save();
+                if (Crittercism.initialized) {
+                    // Opportune time to save Crittercism state.  Unable to make the MessageQueue
+                    // shorter either because SendMessage failed or MessageQueue has gone empty.
+                    // The readerThread will be going into a do nothing wait state after this.
+                    // (If Crittercism.initialized==false, we are shut down or shutting down, and
+                    // we must not call Crittercism.Save since this can lead to DEADLOCK.
+                    // Crittercism.Shutdown may have lock on Crittercism.lockObject, and is waiting
+                    // for our readerThread to exit.  Crittercism.Save would try to acquire
+                    // Crittercism.lockObject, but can't.)
+                    Crittercism.Save();
+                };
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
@@ -88,68 +88,28 @@ namespace CrittercismSDK
         /// <returns>   true if it succeeds, false if it fails. </returns>
         private bool SendMessage() {
             //Debug.WriteLine("SendMessage: ENTER");
-            bool sendCompleted=false;
+            bool sendCompleted = false;
             try {
-                MessageReport message=Crittercism.MessageQueue.Peek();
-                Crittercism.MessageQueue.Dequeue();
-                message.Delete();
-                if (!Crittercism.enableSendMessage) {
-                    // check if the communication layer is enable and if not return true.. this is used for unit testing.
-                    sendCompleted=true;
-                } else if (NetworkInterface.GetIsNetworkAvailable()) {
-                    try {
-                        // FIXME jbley many many things special-cased for MetadataReport - really need /v1 here
-                        string postBody=null;
-                        HttpWebRequest request=null;
-                        switch (message.GetType().Name) {
-                            case "AppLoad":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/loads",UriKind.Absolute));
-                                request.ContentType="application/json; charset=utf-8";
-                                postBody=JsonConvert.SerializeObject(message);
-                                break;
-                            case "APMReport":
-                                //Debug.WriteLine("SENDING APMReport");
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apmURL+"/api/apm/network",UriKind.Absolute));
-                                request.ContentType="application/json; charset=utf-8";
-                                postBody=JsonConvert.SerializeObject(message);
-                                break;
-                            case "HandledException":
-                                // FIXME jbley fix up the URI here
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/errors",UriKind.Absolute));
-                                request.ContentType="application/json; charset=utf-8";
-                                postBody=JsonConvert.SerializeObject(message);
-                                break;
-                            case "Crash":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/v1/crashes",UriKind.Absolute));
-                                request.ContentType="application/json; charset=utf-8";
-                                postBody=JsonConvert.SerializeObject(message);
-                                break;
-                            case "MetadataReport":
-                                request=(HttpWebRequest)WebRequest.Create(new Uri(appLocator.apiURL+"/feedback/update_user_metadata",UriKind.Absolute));
-                                request.ContentType="application/x-www-form-urlencoded";
-                                MetadataReport metadataReport=message as MetadataReport;
-                                postBody=ComputeFormPostBody(metadataReport);
-                                break;
-                            default:
-                                // FIXME jbley maybe some logging here?
-                                // consider this message "consumed"
-                                sendCompleted=true;
-                                break;
+                if ((Crittercism.MessageQueue != null) && (Crittercism.MessageQueue.Count > 0)) {
+                    if (!Crittercism.enableSendMessage) {
+                        // This case used by UnitTest .
+                        sendCompleted = true;
+                    } else if (NetworkInterface.GetIsNetworkAvailable()) {
+                        MessageReport message = Crittercism.MessageQueue.Peek();
+                        Crittercism.MessageQueue.Dequeue();
+                        message.Delete();
+                        try {
+                            HttpWebRequest request = message.WebRequest();
+                            if (request!=null) {
+                                sendCompleted = SendRequest(request,message.PostBody());
+                            }
+                        } catch {
                         }
                         if (!sendCompleted) {
-                            request.Method="POST";
-                            sendCompleted=SendRequest(request,postBody);
-                        }
-                    } catch {
-                        //Debug.WriteLine("SendMessage: catch");
-                        if (Crittercism.enableExceptionInSendMessage) {
-                            throw;
+                            Crittercism.MessageQueue.Enqueue(message);
                         }
                     }
-                }
-                if (!sendCompleted) {
-                    Crittercism.MessageQueue.Enqueue(message);
-                }
+                };
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
@@ -159,11 +119,10 @@ namespace CrittercismSDK
 
 #if WINDOWS_PHONE_APP
         private bool SendRequest(HttpWebRequest request,string postBody) {
-            //Debug.WriteLine("SendMessage: request.RequestUri == {0}", request.RequestUri);
+            //Debug.WriteLine("SendMessage: request.RequestUri == "+request.RequestUri);
             bool sendCompleted=false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                Exception lastException=null;
                 Task<Stream> writerTask=request.GetRequestStreamAsync();
                 using (Stream writer=writerTask.Result) {
                     // NOTE: SendMessage caller's request.ContentType=="application/json; charset=utf-8"
@@ -177,34 +136,28 @@ namespace CrittercismSDK
                 Task<WebResponse> responseTask=request.GetResponseAsync();
                 using (HttpWebResponse response=(HttpWebResponse)responseTask.Result) {
                     try {
-                        Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                        Debug.WriteLine("SendMessage: response.StatusCode == "+(int)response.StatusCode);
                         if ((((long)response.StatusCode)/100)==2) {
                             // 2xx Success
                             sendCompleted=true;
                         }
                     } catch (WebException webEx) {
-                        Debug.WriteLine("SendMessage: webEx == {0}",webEx);
+                        Debug.WriteLine("SendMessage: webEx == "+webEx);
                         if (webEx.Response!=null) {
-                            //Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                            //Debug.WriteLine("SendMessage: response.StatusCode == "+(int)response.StatusCode);
                             if (response.StatusCode==HttpStatusCode.BadRequest) {
                                 try {
                                     using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
                                         string errorMessage=errorReader.ReadToEnd();
                                         Debug.WriteLine("SendMessage: "+errorMessage);
-                                        lastException=new Exception(errorMessage,webEx);
                                     }
-                                } catch (Exception ex) {
-                                    lastException=ex;
+                                } catch {
                                 }
                             }
                         }
                     } catch (Exception ex) {
-                        Debug.WriteLine("SendMessage: ex == {0}",ex.Message);
-                        lastException=ex;
+                        Debug.WriteLine("SendMessage: ex == "+ex.Message);
                     }
-                }
-                if (Crittercism.enableExceptionInSendMessage&&lastException!=null) {
-                    throw lastException;
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -214,11 +167,10 @@ namespace CrittercismSDK
         }
 #else
         private bool SendRequest(HttpWebRequest request,string postBody) {
-            //Debug.WriteLine("SendMessage: request.RequestUri == {0}", request.RequestUri);
+            //Debug.WriteLine("SendMessage: request.RequestUri == "+request.RequestUri);
             bool sendCompleted=false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                Exception lastException=null;
                 ManualResetEvent resetEvent=new ManualResetEvent(false);
                 request.BeginGetRequestStream(
                     (result) => {
@@ -241,39 +193,33 @@ namespace CrittercismSDK
                                     //Debug.WriteLine("SendMessage: BeginGetResponse");
                                     try {
                                         using (HttpWebResponse response=(HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                                            Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                                            Debug.WriteLine("SendMessage: response.StatusCode == "+(int)response.StatusCode);
                                             if ((((long)response.StatusCode)/100)==2) {
                                                 // 2xx Success
                                                 sendCompleted=true;
                                             }
                                         }
                                     } catch (WebException webEx) {
-                                        Debug.WriteLine("SendMessage: webEx == {0}",webEx);
+                                        Debug.WriteLine("SendMessage: webEx == "+webEx);
                                         if (webEx.Response!=null) {
                                             using (HttpWebResponse response=(HttpWebResponse)webEx.Response) {
-                                                //Debug.WriteLine("SendMessage: response.StatusCode == {0}",(int)response.StatusCode);
+                                                //Debug.WriteLine("SendMessage: response.StatusCode == "+(int)response.StatusCode);
                                                 if (response.StatusCode==HttpStatusCode.BadRequest) {
                                                     try {
                                                         using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
                                                             string errorMessage=errorReader.ReadToEnd();
                                                             Debug.WriteLine(errorMessage);
-                                                            lastException=new Exception(errorMessage,webEx);
                                                         }
-                                                    } catch (Exception ex) {
-                                                        lastException=ex;
+                                                    } catch {
                                                     }
                                                 }
                                             }
                                         }
-                                    } catch (Exception ex) {
-                                        //Debug.WriteLine("SendMessage: ex == {0}",ex);
-                                        lastException=ex;
+                                    } catch {
                                     }
                                     resetEvent.Set();
                                 },null);
-                        } catch (Exception ex) {
-                            //Debug.WriteLine("SendMessage: ex#2 == {0}",ex);
-                            lastException=ex;
+                        } catch {
                             resetEvent.Set();
                         }
                     },null);
@@ -288,9 +234,6 @@ namespace CrittercismSDK
                     Debug.WriteLine("SendMessage: TOTAL SECONDS == "+stopWatch.Elapsed.TotalSeconds);
 #endif
                 }
-                if (Crittercism.enableExceptionInSendMessage&&lastException!=null) {
-                    throw lastException;
-                }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
@@ -299,7 +242,7 @@ namespace CrittercismSDK
         }
 #endif // WINDOWS_PHONE_APP
 
-        public static string ComputeFormPostBody(MetadataReport metadataReport) {
+        internal static string ComputeFormPostBody(MetadataReport metadataReport) {
             string postBody="";
             postBody+="did="+metadataReport.platform.device_id+"&";
             postBody+="app_id="+metadataReport.app_id+"&";

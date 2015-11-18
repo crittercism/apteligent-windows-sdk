@@ -12,11 +12,12 @@ using System.Windows.Forms;
 using CrittercismSDK;
 
 namespace WindowsFormsApp {
-    public partial class Form1 : Form {
+    public partial class MainWindow : Form {
         private static int ApplicationOpenFormsCount = 0;
 
-        public Form1() {
+        public MainWindow() {
             InitializeComponent();
+
             ApplicationOpenFormsCount++;
         }
 
@@ -140,7 +141,7 @@ namespace WindowsFormsApp {
             Crittercism.LeaveBreadcrumb(username+" "+response);
         }
 
-        private void Form1_FormClosed(object sender,FormClosedEventArgs e) {
+        private void MainWindow_FormClosed(object sender,FormClosedEventArgs e) {
             Crittercism.LeaveBreadcrumb("FormClosed");
             ApplicationOpenFormsCount--;
             if (ApplicationOpenFormsCount==0) {
@@ -151,7 +152,39 @@ namespace WindowsFormsApp {
         }
 
         private void newWindow_Click(object sender,EventArgs e) {
-            (new Form1()).Show();
+            (new MainWindow()).Show();
+        }
+
+        private void transactionButton_Click(object sender,EventArgs e) {
+            Button button = sender as Button;
+            if (button != null) {
+                const string transactionName = "Buy Critter Feed";
+                const string beginTransactionLabel = "Begin Transaction";
+                const string endTransactionLabel = "End Transaction";
+                String label = button.Text;
+                if (label == beginTransactionLabel) {
+                    Crittercism.BeginTransaction(transactionName);
+                    button.Text = endTransactionLabel;
+                } else if (label == endTransactionLabel) {
+                    EndTransactionDialog dialog = new EndTransactionDialog();
+                    dialog.Owner = this;
+                    dialog.ShowDialog();
+                    if (dialog.DialogResult == DialogResult.Yes) {
+                        switch (dialog.Answer) {
+                            case "End Transaction":
+                                Crittercism.EndTransaction(transactionName);
+                                break;
+                            case "Fail Transaction":
+                                Crittercism.FailTransaction(transactionName);
+                                break;
+                            case "Cancel Transaction":
+                                Crittercism.CancelTransaction(transactionName);
+                                break;
+                        }
+                        button.Text = beginTransactionLabel;
+                    }
+                }
+            }
         }
     }
 }

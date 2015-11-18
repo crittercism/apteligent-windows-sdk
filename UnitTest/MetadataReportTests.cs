@@ -27,25 +27,29 @@ namespace UnitTest {
 
         [TestMethod]
         public void AddMetadataTwiceTest() {
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
-            Crittercism.SetUsername("hamster");
-            Crittercism.SetUsername("robin");
-            Crittercism.SetUsername("squirrel");
-            TestHelpers.LogHandledException();
-            MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(HandledException));
-            String asJson=JsonConvert.SerializeObject(messageReport);
-            Assert.IsFalse(asJson.Contains("hamster"));
-            Assert.IsFalse(asJson.Contains("robin"));
-            Assert.IsTrue(asJson.Contains("squirrel"));
+            try {
+                TestHelpers.StartApp();
+                Crittercism.SetUsername("hamster");
+                Crittercism.SetUsername("robin");
+                Crittercism.SetUsername("squirrel");
+                TestHelpers.LogHandledException();
+                MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(HandledException));
+                String asJson = JsonConvert.SerializeObject(messageReport);
+                Assert.IsFalse(asJson.Contains("hamster"));
+                Assert.IsFalse(asJson.Contains("robin"));
+                Assert.IsTrue(asJson.Contains("squirrel"));
+            } finally {
+                Crittercism.Shutdown();
+                TestHelpers.Cleanup();
+            }
         }
 
         [TestMethod]
         public void MetadataPersistenceTest() {
-            Crittercism.autoRunQueueReader = false;
             Crittercism.Init("5350bb642bd1f1017c000002");
             Crittercism.SetUsername("harry");
             Crittercism.SetValue("surname", "hedwig");
-            Debug.WriteLine("surname == "+Crittercism.ValueFor("surname"));
+            Trace.WriteLine("surname == "+Crittercism.ValueFor("surname"));
             Assert.AreEqual(Crittercism.ValueFor("surname"),"hedwig");
             Assert.AreEqual(Crittercism.ValueFor("username"),"harry");
             Crittercism.SetUsername("hermione");
