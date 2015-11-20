@@ -32,12 +32,15 @@ namespace CrittercismSDK
         [DataMember]
         public Dictionary<string, object> app_state { get; internal set; }
 
-        /// <summary>
-        /// Gets or sets the breadcrumbs.
-        /// </summary>
-        /// <value> The breadcrumbs. </value>
         [DataMember]
         public Breadcrumbs breadcrumbs { get; internal set; }
+
+        [DataMember]
+        public Breadcrumbs systemBreadcrumbs { get; internal set; }
+
+        [DataMember]
+        public List<Endpoint> endpoints { get; internal set; }
+
 
         [DataMember]
         public Dictionary<string, string> metadata { get; internal set; }
@@ -68,12 +71,20 @@ namespace CrittercismSDK
         /// <param name="appId">Identifier for the application.</param>
         /// <param name="currentBreadcrumbs">The current breadcrumbs.</param>
         /// <param name="exception">The exception.</param>
-        public Crash(string appId, Dictionary<string,string> currentMetadata, Breadcrumbs currentBreadcrumbs, ExceptionObject exception)
+        public Crash(
+            string appId,
+            Dictionary<string,string> metadata,
+            Breadcrumbs breadcrumbs,
+            Breadcrumbs systemBreadcrumbs,
+            List<Endpoint> endpoints,
+            ExceptionObject exception)
         {
             app_id = appId;
             app_state = ComputeAppState();
-            metadata = currentMetadata;
-            breadcrumbs = currentBreadcrumbs;
+            this.metadata = metadata;
+            this.breadcrumbs = breadcrumbs;
+            this.systemBreadcrumbs = systemBreadcrumbs;
+            this.endpoints = endpoints;
             crash = exception;
             platform = new Platform();
         }

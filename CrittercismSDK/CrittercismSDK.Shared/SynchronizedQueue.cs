@@ -81,6 +81,15 @@ namespace CrittercismSDK {
             lock (this._q)
                 return this._q.ToArray();
         }
+        public List<T> ToList() {
+            ////////////////////////////////////////////////////////////////
+            // NOTE: MSDN doc excerpt re Queue<T>.ToList Method 
+            // "Creates a List<T> from an IEnumerable<T>.(Defined by Enumerable.)"
+            // https://msdn.microsoft.com/en-us/library/0d49dexz(v=vs.110).aspx
+            ////////////////////////////////////////////////////////////////
+            lock (this._q)
+                return this._q.ToList();
+        }
         public T Last() {
             lock (this._q)
                 return this._q.Last();

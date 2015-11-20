@@ -237,16 +237,33 @@ namespace CrittercismSDK
 #endif // NETFX_CORE
             }
         }
+        private static long BeginTime(Object[] transactions) {
+            // Earliest BeginTime amongst these transactions
+            long answer = long.MaxValue;
+            foreach (Object[] transaction in transactions) {
+                answer = Math.Min(answer,(long)transaction[(int)TransactionIndex.BeginTime]);
+            }
+            return answer;
+        }
+        private static long EndTime(Object[] transactions) {
+            // Latest EndTime amongst these transactions
+            long answer = long.MinValue;
+            foreach (Object[] transaction in transactions) {
+                answer = Math.Max(answer,(long)transaction[(int)TransactionIndex.EndTime]);
+            }
+            return answer;
+        }
         private static void SendTransactionReport() {
             if (TransactionsQueue.Count>0) {
                 Object[] transactions = TransactionsQueue.ToArray();
                 TransactionsQueue.Clear();
+                long beginTime = BeginTime(transactions);
+                long endTime = EndTime(transactions);
+                //RecentBreadcrumbs(beginTime,endTime)
                 Dictionary<string,object> appState = MessageReport.ComputeAppState();
-                Breadcrumbs breadcrumbs = Crittercism.CurrentBreadcrumbs();
-                // TODO: systemBreadcrumbs
-                Object[] systemBreadcrumbs = new Object[] { };
-                // TODO: endpoints
-                Object[] endpoints = new Object[] { };
+                List<Breadcrumb> breadcrumbs = Breadcrumbs.UserBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
+                List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
+                List<Endpoint> endpoints = Breadcrumbs.ExtractEndpoints(beginTime,endTime);
                 TransactionReport transactionReport = new TransactionReport(
                     appState,
                     transactions,

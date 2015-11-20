@@ -23,28 +23,28 @@ namespace CrittercismSDK
 
         private Object[] appIdentifiersArray;
         private Object[] deviceStateArray;
-        private APMEndpoint[] endpoints;
+        private Endpoint[] endpoints;
 
         private Object[] EndpointsToJsonArray() {
             // Serialize enddpoints into JSON .
             List<Object[]> list=new List<Object[]>();
-            foreach (APMEndpoint endpoint in endpoints) {
+            foreach (Endpoint endpoint in endpoints) {
                 list.Add(endpoint.ToJsonArray());
             };
             return list.ToArray();
         }
 
-        private APMEndpoint[] JsonArrayToEndpoints(Object[] json) {
-            // Deserialize JSON into APMEndpoint[] endpoints.
-            // json is an array of jsonArray's each representing an APMEndpoint .
-            List<APMEndpoint> list=new List<APMEndpoint>();
+        private Endpoint[] JsonArrayToEndpoints(Object[] json) {
+            // Deserialize JSON into Endpoint[] endpoints.
+            // json is an array of jsonArray's each representing an Endpoint .
+            List<Endpoint> list=new List<Endpoint>();
             foreach (Object[] jsonArray in json) {
-                list.Add(new APMEndpoint(jsonArray));
+                list.Add(new Endpoint(jsonArray));
             };
             return list.ToArray();
         }
 
-        internal APMReport(Object[] appIdentifiersArray,Object[] deviceStateArray,APMEndpoint[] endpoints) {
+        internal APMReport(Object[] appIdentifiersArray,Object[] deviceStateArray,Endpoint[] endpoints) {
             this.appIdentifiersArray=appIdentifiersArray;
             this.deviceStateArray=deviceStateArray;
             this.endpoints=endpoints;

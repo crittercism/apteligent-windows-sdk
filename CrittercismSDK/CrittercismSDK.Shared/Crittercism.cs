@@ -77,17 +77,6 @@ namespace CrittercismSDK {
         /// <value> A SynchronizedQueue of messages. </value>
         internal static SynchronizedQueue<MessageReport> MessageQueue { get; set; }
 
-        /// <summary>
-        /// Gets or sets the current breadcrumbs.
-        /// </summary>
-        /// <value> The breadcrumbs. </value>
-        private static Breadcrumbs PrivateBreadcrumbs { get; set; }
-
-        internal static Breadcrumbs CurrentBreadcrumbs() {
-            // Copy of current PrivateBreadcrumbs
-            return PrivateBreadcrumbs.Copy();
-        }
-
         internal static object lockObject=new Object();
         internal static volatile bool initialized=false;
 
@@ -412,7 +401,7 @@ namespace CrittercismSDK {
                         System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsFormsApplication_ThreadException);
 #endif
                     };
-                    PrivateBreadcrumbs=Breadcrumbs.SessionStart();
+                    Breadcrumbs.UserBreadcrumbs();
                     MessageQueue=new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
                     LoadQueue();
                     // NOTE: Put initialized=true before readerThread.Start() .
@@ -438,7 +427,7 @@ namespace CrittercismSDK {
             try {
                 lock (lockObject) {
                     Debug.WriteLine("Save: SAVE STATE");
-                    PrivateBreadcrumbs.Save();
+                    Breadcrumbs.SaveAll();
                     SaveMetadata();
                     foreach (MessageReport message in MessageQueue) {
                         message.Save();
@@ -505,7 +494,7 @@ namespace CrittercismSDK {
                 Debug.WriteLine(errorNotInitialized);
             } else {
                 try {
-                    PrivateBreadcrumbs.LeaveBreadcrumb(breadcrumb);
+                    Breadcrumbs.LeaveUserBreadcrumb(breadcrumb,BreadcrumbTextType.Normal);
                 } catch (Exception ie) {
                     LogInternalException(ie);
                 }
@@ -561,10 +550,12 @@ namespace CrittercismSDK {
                 try {
                     lock (lockObject) {
                         Dictionary<string,string> metadata=CurrentMetadata();
-                        Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
-                        string stacktrace=StackTrace(e);
+                        Breadcrumbs breadcrumbs = Breadcrumbs.UserBreadcrumbs().Copy();
+                        Breadcrumbs systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().Copy();
+                        List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
+                        string stacktrace =StackTrace(e);
                         ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                        HandledException he=new HandledException(AppID,metadata,breadcrumbs,exception);
+                        HandledException he=new HandledException(AppID,metadata,breadcrumbs,systemBreadcrumbs,endpoints,exception);
                         AddMessageToQueue(he);
                     }
                 } catch (Exception ie) {
@@ -584,10 +575,12 @@ namespace CrittercismSDK {
                 // reporting the first one in a given session.  This is why
                 // we're checking "initialized".
                 Dictionary<string,string> metadata=CurrentMetadata();
-                Breadcrumbs breadcrumbs=CurrentBreadcrumbs();
+                Breadcrumbs breadcrumbs=Breadcrumbs.UserBreadcrumbs().Copy();
+                Breadcrumbs systemBreadcrumbs =Breadcrumbs.SystemBreadcrumbs().Copy();
+                List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                 string stacktrace=StackTrace(e);
                 ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                Crash crash=new Crash(AppID,metadata,breadcrumbs,exception);
+                Crash crash=new Crash(AppID,metadata,breadcrumbs,systemBreadcrumbs,endpoints,exception);
                 // Add crash to message queue and save state .
                 Shutdown();
                 AddMessageToQueue(crash);
@@ -808,7 +801,7 @@ namespace CrittercismSDK {
                     if (APM.IsFiltered(uriString)) {
                         Debug.WriteLine("APM FILTERED: "+uriString);
                     } else {
-                        APMEndpoint endpoint=new APMEndpoint(method,
+                        Endpoint endpoint=new Endpoint(method,
                             uriString,
                             latency,
                             bytesRead,
@@ -816,6 +809,7 @@ namespace CrittercismSDK {
                             statusCode,
                             exceptionStatus);
                         APM.Enqueue(endpoint);
+                        Breadcrumbs.LeaveNetworkBreadcrumb(endpoint);
                     }
                 } catch (Exception ie) {
                     LogInternalException(ie);

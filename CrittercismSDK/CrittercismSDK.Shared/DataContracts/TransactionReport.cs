@@ -19,20 +19,20 @@ namespace CrittercismSDK
         [DataMember]
         public Object[] transactions { get; internal set; }
         [DataMember]
-        public Breadcrumbs breadcrumbs { get; internal set; }
+        public List<Breadcrumb> breadcrumbs { get; internal set; }
         [DataMember]
-        public Object[] systemBreadcrumbs { get; internal set; }
+        public List<Breadcrumb> systemBreadcrumbs { get; internal set; }
         [DataMember]
-        public Object[] endpoints { get; internal set; }
+        public List<Endpoint> endpoints { get; internal set; }
         private TransactionReport()
         {
         }
         public TransactionReport(
             Dictionary<string,object> appState,
             Object[] transactions,
-            Breadcrumbs breadcrumbs,
-            Object[] systemBreadcrumbs,
-            Object[] endpoints)
+            List<Breadcrumb> breadcrumbs,
+            List<Breadcrumb> systemBreadcrumbs,
+            List<Endpoint> endpoints)
         {
             this.appState = appState;
             this.transactions = transactions;

@@ -13,7 +13,7 @@ namespace CrittercismSDK
     internal class APM
     {
         #region Constants
-        // Collect APMEndpoint's
+        // Collect Endpoint's
         const int MAX_NETWORK_STATS = 100;
         #endregion
 
@@ -21,7 +21,7 @@ namespace CrittercismSDK
         private static Object lockObject = new Object();
         // TODO: SynchronizedQueue has its virtues, but we may want synchronization
         // at the higher APM level instead.
-        private static SynchronizedQueue<APMEndpoint> EndpointsQueue { get; set; }
+        private static SynchronizedQueue<Endpoint> EndpointsQueue { get; set; }
         // Batch additional network requests for 10 seconds before sending APMReport .
         internal static int NETWORK_SEND_INTERVAL = 10000;
         // CRFilter's
@@ -34,7 +34,7 @@ namespace CrittercismSDK
                 // Crittercism.Init calling APM.Init should effectively make
                 // lock lockObject here pointless, but no real harm doing so.
                 Filters = new HashSet<CRFilter>();
-                EndpointsQueue = new SynchronizedQueue<APMEndpoint>(new Queue<APMEndpoint>());
+                EndpointsQueue = new SynchronizedQueue<Endpoint>(new Queue<Endpoint>());
             }
         }
         internal static void Shutdown() {
@@ -81,7 +81,7 @@ namespace CrittercismSDK
         #endregion
 
         #region Reporting
-        internal static void Enqueue(APMEndpoint endpoint) {
+        internal static void Enqueue(Endpoint endpoint) {
             Debug.WriteLine("APM Enqueue");
             lock (lockObject) {
                 while (EndpointsQueue.Count>=MAX_NETWORK_STATS) {
@@ -150,7 +150,7 @@ namespace CrittercismSDK
         private static void SendAPMReport() {
             Debug.WriteLine("SendAPMReport");
             if (EndpointsQueue.Count>0) {
-                APMEndpoint[] endpoints=EndpointsQueue.ToArray();
+                Endpoint[] endpoints=EndpointsQueue.ToArray();
                 EndpointsQueue.Clear();
                 Debug.WriteLine("SendAPMReport new APMReport");
                 APMReport apmReport=new APMReport(AppIdentifiersArray(),DeviceStateArray(),endpoints);

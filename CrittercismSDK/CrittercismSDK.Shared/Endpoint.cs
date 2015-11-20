@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CrittercismSDK
 {
-    class APMEndpoint {
+    class Endpoint {
         // (CRUnknownNetwork)
         const long ACTIVE_NETWORK=2;
         // System.Net.WebExceptionStatus
@@ -24,7 +24,7 @@ namespace CrittercismSDK
         private long errorTable;
         private long errorCode;
 
-        internal APMEndpoint(
+        internal Endpoint(
             string method,
             string uriString,
             long latency,      // milliseconds
@@ -61,7 +61,7 @@ namespace CrittercismSDK
             return answer;
         }
 
-        internal APMEndpoint(Object[] jsonArray) {
+        internal Endpoint(Object[] jsonArray) {
             this.method=(string)jsonArray[0];
             this.uriString=(string)jsonArray[1];
             this.timestamp=(string)jsonArray[2];

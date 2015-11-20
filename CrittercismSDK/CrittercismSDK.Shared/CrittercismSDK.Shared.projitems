@@ -10,13 +10,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)APM.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)APMEndpoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Endpoint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppLocator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumb.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BreadcrumbReachabilityType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BreadcrumbTextType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BreadcrumbType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BreadcrumbViewType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CRFilter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Crittercism.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\APMReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\AppLoad.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\BreadcrumbMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Breadcrumbs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Crash.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\ExceptionObject.cs" />
