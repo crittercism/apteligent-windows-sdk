@@ -61,6 +61,7 @@
     <Compile Include="CrittercismTests.cs" />
     <Compile Include="ExceptionHandlersTests.cs" />
     <Compile Include="HandledExceptionTests.cs" />
+    <Compile Include="JsonTests.cs" />
     <Compile Include="MetadataReportTests.cs" />
     <Compile Include="MiscTests.cs" />
     <Compile Include="TestHelpers.cs" />
