@@ -1,5 +1,9 @@
-﻿using System;
+﻿using CrittercismSDK;
+using System;
+using System.Diagnostics;
+using System.Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace UnitTest {
@@ -161,6 +165,34 @@ namespace UnitTest {
                 Assert.IsTrue(v.ToObject<string>() == "MrsCritter");
                 Assert.IsTrue(token.ToObject<string>() == "MrsCritter");
             }
+        }
+        [TestMethod]
+        public void EndpointJsonTest() {
+            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            Endpoint endpoint1 = new Endpoint(
+                "POST",
+                "http://www.mrscritter.com?doYouLoveCrittercism=YES",
+                timestamp,
+                433,
+                3213,
+                2478,
+                HttpStatusCode.OK,
+                WebExceptionStatus.Success);
+            // Testing EndpointConverter WriteJson
+            string json1 = JsonConvert.SerializeObject(endpoint1);
+            Debug.WriteLine(json1);
+            // NOTE: VS editor syntax colors embedded URL, but the C# syntax is correct.
+            Assert.IsTrue(json1.StartsWith("[\"POST\",\"http://www.mrscritter.com?doYouLoveCrittercism=YES\","));
+            Assert.IsTrue(json1.EndsWith(",433,2,3213,2478,200,5,0]"));
+            string json2 = JsonConvert.SerializeObject(endpoint1,Formatting.None,new EndpointConverter());
+            Assert.AreEqual(json1,json2);
+            // Testing EndpointConverter ReadJson
+            Endpoint endpoint2 = JsonConvert.DeserializeObject(json1,typeof(Endpoint)) as Endpoint;
+            Assert.IsNotNull(endpoint2);
+            string json3 = JsonConvert.SerializeObject(endpoint2);
+            Debug.WriteLine("json1 == " + json1);
+            Debug.WriteLine("json3 == " + json3);
+            Assert.AreEqual(json1,json3);
         }
     }
 }

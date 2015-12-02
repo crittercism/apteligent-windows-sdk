@@ -7,11 +7,12 @@ using System.Text;
 
 namespace CrittercismSDK
 {
-    class Endpoint {
+    [JsonConverter(typeof(EndpointConverter))]
+    internal class Endpoint {
         // (CRUnknownNetwork)
-        const long ACTIVE_NETWORK=2;
+        internal const long ACTIVE_NETWORK=2;
         // System.Net.WebExceptionStatus
-        const long ERROR_TABLE_CODE=5;
+        internal const long ERROR_TABLE_CODE=5;
 
         private string method;
         private string uriString;
@@ -27,6 +28,7 @@ namespace CrittercismSDK
         internal Endpoint(
             string method,
             string uriString,
+            string timestamp,
             long latency,      // milliseconds
             long bytesRead,
             long bytesSent,
@@ -35,7 +37,7 @@ namespace CrittercismSDK
         ) {
             this.method=method;
             this.uriString=uriString;
-            this.timestamp=DateUtils.ISO8601DateString(DateTime.UtcNow);
+            this.timestamp=timestamp;
             this.latency=latency;
             this.activeNetwork=ACTIVE_NETWORK;
             this.bytesRead=bytesRead;

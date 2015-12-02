@@ -31,6 +31,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\MetadataReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DateUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DebugUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EndpointConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EndpointIndex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)JsonUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessageReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QueueReader.cs" />
