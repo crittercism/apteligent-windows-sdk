@@ -10,7 +10,7 @@ namespace CrittercismSDK {
     internal class EndpointConverter : JsonConverter {
         public override void WriteJson(JsonWriter writer,object value,JsonSerializer serializer) {
             Endpoint endpoint = (Endpoint)value;
-            JArray a = new JArray(endpoint.ToJsonArray());
+            JArray a = new JArray(endpoint.ToArray());
             a.WriteTo(writer);
         }
         public override object ReadJson(JsonReader reader,Type objectType,object existingValue,JsonSerializer serializer) {
@@ -18,7 +18,6 @@ namespace CrittercismSDK {
             // Load JArray from stream .  For better or worse, probably a bit of the latter,
             // Newtonsoft.Json deserializes a persisted timestamp string as a JTokenType.Date .
             JArray a = JArray.Load(reader);
-            Debug.WriteLine("Latency: " + (a[(int)EndpointIndex.Latency].Type == JTokenType.Integer));
             if ((a!=null)
                 && (a.Count == (int)EndpointIndex.COUNT)
                 && (a[(int)EndpointIndex.Method].Type == JTokenType.String)

@@ -17,8 +17,9 @@ namespace CrittercismSDK
         // It's conceivable some apps might want modest negative values for
         // debits, so we use Int32.MinValue == -2^31 == -2147483648 == -$21,474,836.48
         // here.
-        const int NULL_VALUE = Int32.MinValue;
-        const int TICKS_PER_MSEC = 10000;
+        private const int NULL_VALUE = Int32.MinValue;
+        private const int TICKS_PER_MSEC = 10000;
+        internal const int TICKS_PER_SEC = 1000*TICKS_PER_MSEC;
 
         ////////////////////////////////////////////////////////////////
         // NOTE: Microsoft Time Measurements
@@ -262,6 +263,26 @@ namespace CrittercismSDK
             SetEndTime(endTime);
             eyeTime = endTime - beginTime;
             SetForegroundTime(beginTime);
+        }
+        internal Transaction(
+            string name,
+            TransactionState state,
+            int timeout,
+            int value,
+            Dictionary<string,string> metadata,
+            long beginTime,
+            long endTime,
+            long eyeTime) {
+            // This constructor only used by TransactionConvert ReadJson for finished
+            // Transaction's appearing in either a TransactionReport or a Crash report.
+            this.name = name;
+            this.state = state;
+            this.timeout = timeout;
+            this.value = value;
+            this.metadata = metadata;
+            this.beginTime = beginTime;
+            this.endTime = endTime;
+            this.eyeTime = eyeTime;
         }
         #endregion
 

@@ -47,7 +47,7 @@ namespace CrittercismSDK
             this.errorCode=(long)exceptionStatus;
         }
 
-        internal Object[] ToJsonArray() {
+        internal Object[] ToArray() {
             Object[] answer=new Object[] {
                 method,
                 uriString,

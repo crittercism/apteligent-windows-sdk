@@ -40,6 +40,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)StringUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SynchronizedQueue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transaction.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TransactionConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransactionIndex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransactionReporter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransactionState.cs" />

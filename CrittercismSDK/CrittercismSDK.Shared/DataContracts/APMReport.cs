@@ -11,7 +11,7 @@ namespace CrittercismSDK
         [DataMember]
         public Object[]  d {
             get {
-                return new Object[] { appIdentifiersArray,deviceStateArray,EndpointsToJsonArray() };
+                return new Object[] { appIdentifiersArray,deviceStateArray,EndpointsToArray() };
             }
             internal set {
                 Object[] dvalue=(Object[])value;
@@ -25,11 +25,11 @@ namespace CrittercismSDK
         private Object[] deviceStateArray;
         private Endpoint[] endpoints;
 
-        private Object[] EndpointsToJsonArray() {
+        private Object[] EndpointsToArray() {
             // Serialize enddpoints into JSON .
             List<Object[]> list=new List<Object[]>();
             foreach (Endpoint endpoint in endpoints) {
-                list.Add(endpoint.ToJsonArray());
+                list.Add(endpoint.ToArray());
             };
             return list.ToArray();
         }
