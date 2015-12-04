@@ -225,6 +225,7 @@ namespace UnitTest {
         }
         [TestMethod]
         public void NetworkBreadcrumbJsonTest() {
+            // Network,         // 2 - network breadcrumb    ; [verb,url,...,statusCode,errorCode]
             string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
             Endpoint endpoint1 = new Endpoint(
                 "POST",
@@ -239,8 +240,34 @@ namespace UnitTest {
             // Testing BreadcrumbConverter WriteJson
             string json1 = JsonConvert.SerializeObject(breadcrumb1);
             // NOTE: VS editor syntax colors embedded URL, but the C# syntax is correct.
-            Assert.IsTrue(json1.IndexOf(",2,[\"POST\",\"http://www.mrscritter.com?doYouLoveCrittercism=YES\"")>0);
-            Assert.IsTrue(json1.IndexOf(",433,2,3213,2478,200,5,0]]")>0);
+            Assert.IsTrue(json1.IndexOf(",2,[\"POST\",\"http://www.mrscritter.com?doYouLoveCrittercism=YES\"")>=0);
+            Assert.IsTrue(json1.IndexOf(",433,2,3213,2478,200,5,0]]")>=0);
+            string json2 = JsonConvert.SerializeObject(breadcrumb1,Formatting.None,new BreadcrumbConverter());
+            Debug.WriteLine("json1 == " + json1);
+            Debug.WriteLine("json2 == " + json2);
+            Assert.AreEqual(json1,json2);
+            // Testing BreadcrumbConverter ReadJson
+            Breadcrumb breadcrumb2 = JsonConvert.DeserializeObject(json1,typeof(Breadcrumb)) as Breadcrumb;
+            Assert.IsNotNull(breadcrumb2);
+            string json3 = JsonConvert.SerializeObject(breadcrumb2);
+            Debug.WriteLine("json3 == " + json3);
+            Assert.AreEqual(json1,json3);
+        }
+        [TestMethod]
+        public void UserBreadcrumbJsonTest() {
+            // Text,            // 1 - user breadcrumb       ; {text:,level:}
+            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            Dictionary<string,Object> data1 = new Dictionary<string,Object>();
+            data1["text"] = "Critter Bowl is Empty!";
+            data1["level"] = (int)BreadcrumbTextType.Urgent;
+            Breadcrumb breadcrumb1 = new Breadcrumb(timestamp,BreadcrumbType.Text,data1);
+            // Testing BreadcrumbConverter WriteJson
+            string json1 = JsonConvert.SerializeObject(breadcrumb1);
+            // We don't assume Dictionary key-value pairs appear in any particular order.
+            Assert.IsTrue(json1.IndexOf("\"text\":\"Critter Bowl is Empty!\"") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"level\":1") >= 0);
+            Assert.IsTrue(json1.IndexOf(",1,{") >= 0);
+            Assert.IsTrue(json1.IndexOf("}]") >= 0);
             string json2 = JsonConvert.SerializeObject(breadcrumb1,Formatting.None,new BreadcrumbConverter());
             Debug.WriteLine("json1 == " + json1);
             Debug.WriteLine("json2 == " + json2);
