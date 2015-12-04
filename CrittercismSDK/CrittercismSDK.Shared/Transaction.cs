@@ -360,24 +360,7 @@ namespace CrittercismSDK
         }
         #endregion
 
-#region JSON
-#if true
-        // TODO: Junking ToArray() now we have ToJArray() ?
-        internal Object[] ToArray() {
-            Object[] answer = new Object[] {
-                name,
-                (Int32)state,
-                timeout,
-                ((value == NULL_VALUE) ? null : (Object)value),
-                metadata,
-                (String)beginTimeString,
-                (String)endTimeString,
-                eyeTime/TICKS_PER_MSEC
-            };
-            Debug.WriteLine("ToArray: "+answer);
-            return answer;
-        }
-#endif
+        #region JSON
         internal JArray ToJArray() {
             // Per "Transactions Wire Protocol - v1", timeout and eyeTime are returned in seconds.
             List<JToken> list = new List<JToken>();
@@ -401,7 +384,10 @@ namespace CrittercismSDK
             string answer = JsonConvert.SerializeObject(ToJArray());
             return answer;
         }
-#endregion
+        public override string ToString() {
+            return JsonConvert.SerializeObject(this);
+        }
+        #endregion
 
         // #region Metadata
         // An archaeological curiousity.  Original iOS/Android SDK
@@ -410,7 +396,7 @@ namespace CrittercismSDK
         // make it available to users.
         // #endregion
 
-#region Notifications
+        #region Notifications
         internal void Foreground(long foregroundTime) {
             // Called by TransactionReporter's "Foreground" method when app foregrounds.
             lock (this) {

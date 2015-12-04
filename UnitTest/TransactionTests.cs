@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using CrittercismSDK;
 
 namespace UnitTest {
@@ -387,7 +388,7 @@ namespace UnitTest {
         [TestMethod]
         public void TestTransactionToArray() {
             Transaction example1 = ExampleTransaction();
-            Object[] jsonArray = example1.ToArray();
+            JArray jsonArray = example1.ToJArray();
             CheckJSONArray(jsonArray);
         }
         #endregion
@@ -493,8 +494,9 @@ namespace UnitTest {
             // And example2 is example1's identical twin
             Transaction example2 = ExampleTransaction();
             Trace.WriteLine("INITIALLY EQUAL");
-            Trace.WriteLine("example1 == "+example1.ToArray());
-            Trace.WriteLine("example2 == "+example2.ToArray());
+            //JsonConvert.SerializeObject(example1)
+            Trace.WriteLine("example1 == "+example1);
+            Trace.WriteLine("example2 == "+example2);
             // Change example1
             example1.SetTimeout(example1.Timeout() + 100);
             example1.SetValue(example1.Value() + 10000);
@@ -504,14 +506,14 @@ namespace UnitTest {
             Assert.IsFalse(example1.Value() == firstValue,
                            "Not expecting example1.Value()==firstValue");
             Trace.WriteLine("NO LONGER EQUAL");
-            Trace.WriteLine("example1 == "+example1.ToArray());
-            Trace.WriteLine("example2 == "+example2.ToArray());
+            Trace.WriteLine("example1 == "+example1);
+            Trace.WriteLine("example2 == "+example2);
             // Change example1 back
             example1.SetTimeout(firstTimeout);
             example1.SetValue(firstValue);
             Trace.WriteLine("SHOULD BE EQUAL AGAIN");
-            Trace.WriteLine("example1 == "+example1.ToArray());
-            Trace.WriteLine("example2 == "+example2.ToArray());
+            Trace.WriteLine("example1 == "+example1);
+            Trace.WriteLine("example2 == "+example2);
             // Confirm members of example1 have been restored.
             Assert.IsTrue(example1.Name() == firstName,
                           "Expecting example1.Name()==firstName");

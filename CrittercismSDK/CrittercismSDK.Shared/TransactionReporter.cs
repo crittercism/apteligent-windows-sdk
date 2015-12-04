@@ -273,22 +273,21 @@ namespace CrittercismSDK
                 Crittercism.AddMessageToQueue(transactionReport);
             }
         }
-        internal static Object[] CrashTransactions() {
+        internal static List<Transaction> CrashTransactions() {
             // Remove BEGUN Transaction's to CRASHED state.
             // The code takes care to avoid deadlocks by not locking
             // the reporter and then locking a Transaction (wrong order).
             Transaction[] allTransactions = AllTransactions();
             // Compute crashed Transaction's .
-            List<Object[]> list = new List<Object[]>();
+            List<Transaction> answer = new List<Transaction>();
             foreach (Transaction transaction in allTransactions) {
                 // Request transaction to Crash.
                 transaction.Crash();
                 if (transaction.State() == TransactionState.CRASHED) {
                     // The transaction crashed.
-                    list.Add(transaction.ToArray());
+                    answer.Add(transaction);
                 };
             };
-            Object[] answer = list.ToArray();
             return answer;
         }
         #endregion

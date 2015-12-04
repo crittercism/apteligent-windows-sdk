@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)APM.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BreadcrumbConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)BreadcrumbIndex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Endpoint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppLocator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Breadcrumb.cs" />
