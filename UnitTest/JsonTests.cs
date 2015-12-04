@@ -181,11 +181,12 @@ namespace UnitTest {
                 WebExceptionStatus.Success);
             // Testing EndpointConverter WriteJson
             string json1 = JsonConvert.SerializeObject(endpoint1);
-            Debug.WriteLine(json1);
             // NOTE: VS editor syntax colors embedded URL, but the C# syntax is correct.
             Assert.IsTrue(json1.StartsWith("[\"POST\",\"http://www.mrscritter.com?doYouLoveCrittercism=YES\","));
             Assert.IsTrue(json1.EndsWith(",433,2,3213,2478,200,5,0]"));
             string json2 = JsonConvert.SerializeObject(endpoint1,Formatting.None,new EndpointConverter());
+            Debug.WriteLine("json1 == " + json1);
+            Debug.WriteLine("json2 == " + json2);
             Assert.AreEqual(json1,json2);
             // Testing EndpointConverter ReadJson
             Endpoint endpoint2 = JsonConvert.DeserializeObject(json1,typeof(Endpoint)) as Endpoint;
@@ -219,6 +220,35 @@ namespace UnitTest {
             Transaction transaction2 = JsonConvert.DeserializeObject(json1,typeof(Transaction)) as Transaction;
             Assert.IsNotNull(transaction2);
             string json3 = JsonConvert.SerializeObject(transaction2);
+            Debug.WriteLine("json3 == " + json3);
+            Assert.AreEqual(json1,json3);
+        }
+        [TestMethod]
+        public void NetworkBreadcrumbJsonTest() {
+            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            Endpoint endpoint1 = new Endpoint(
+                "POST",
+                "http://www.mrscritter.com?doYouLoveCrittercism=YES",
+                timestamp,
+                433,
+                3213,
+                2478,
+                HttpStatusCode.OK,
+                WebExceptionStatus.Success);
+            Breadcrumb breadcrumb1 = new Breadcrumb(timestamp,BreadcrumbType.Network,endpoint1);
+            // Testing BreadcrumbConverter WriteJson
+            string json1 = JsonConvert.SerializeObject(breadcrumb1);
+            // NOTE: VS editor syntax colors embedded URL, but the C# syntax is correct.
+            Assert.IsTrue(json1.IndexOf(",2,[\"POST\",\"http://www.mrscritter.com?doYouLoveCrittercism=YES\"")>0);
+            Assert.IsTrue(json1.IndexOf(",433,2,3213,2478,200,5,0]]")>0);
+            string json2 = JsonConvert.SerializeObject(breadcrumb1,Formatting.None,new BreadcrumbConverter());
+            Debug.WriteLine("json1 == " + json1);
+            Debug.WriteLine("json2 == " + json2);
+            Assert.AreEqual(json1,json2);
+            // Testing BreadcrumbConverter ReadJson
+            Breadcrumb breadcrumb2 = JsonConvert.DeserializeObject(json1,typeof(Breadcrumb)) as Breadcrumb;
+            Assert.IsNotNull(breadcrumb2);
+            string json3 = JsonConvert.SerializeObject(breadcrumb2);
             Debug.WriteLine("json3 == " + json3);
             Assert.AreEqual(json1,json3);
         }

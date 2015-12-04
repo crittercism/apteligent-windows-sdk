@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace CrittercismSDK
 {
+    [JsonConverter(typeof(BreadcrumbConverter))]
     internal class Breadcrumb
     {
         ////////////////////////////////////////////////////////////////////////
