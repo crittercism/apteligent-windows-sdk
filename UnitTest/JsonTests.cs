@@ -1,5 +1,6 @@
 ﻿using CrittercismSDK;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -191,6 +192,33 @@ namespace UnitTest {
             Assert.IsNotNull(endpoint2);
             string json3 = JsonConvert.SerializeObject(endpoint2);
             Debug.WriteLine("json1 == " + json1);
+            Debug.WriteLine("json3 == " + json3);
+            Assert.AreEqual(json1,json3);
+        }
+        [TestMethod]
+        public void TransactionJsonTest() {
+            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            Transaction transaction1 = new Transaction(
+                "Buy Critter Feed",
+                TransactionState.ENDED,
+                3600000,
+                10000,//-2147483648,
+                new Dictionary<string,string>(),
+                635847638748307732L,
+                635847638922943221L,
+                174635489L);
+            // Testing TransactionConverter WriteJson
+            string json1 = JsonConvert.SerializeObject(transaction1);
+            Debug.WriteLine(json1);
+            Assert.AreEqual(json1,"[\"Buy Critter Feed\",2,360.0,10000,{},\"2015-12-03T18:24:34.830Z\",\"2015-12-03T18:24:52.294Z\",1.74635489]");
+            string json2 = JsonConvert.SerializeObject(transaction1,Formatting.None,new TransactionConverter());
+            Debug.WriteLine("json1 == " + json1);
+            Debug.WriteLine("json2 == " + json2);
+            Assert.AreEqual(json1,json2);
+            // Testing TransactionConverter ReadJson
+            Transaction transaction2 = JsonConvert.DeserializeObject(json1,typeof(Transaction)) as Transaction;
+            Assert.IsNotNull(transaction2);
+            string json3 = JsonConvert.SerializeObject(transaction2);
             Debug.WriteLine("json3 == " + json3);
             Assert.AreEqual(json1,json3);
         }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 #if NETFX_CORE || WINDOWS_PHONE
 using Windows.System.Threading;
 #else
@@ -10,6 +12,7 @@ using System.Timers;
 
 namespace CrittercismSDK
 {
+    [JsonConverter(typeof(TransactionConverter))]
     internal class Transaction
     {
         // Use Int32.MinValue pennies to represent Wire+Protocol doc's "null"
@@ -19,7 +22,8 @@ namespace CrittercismSDK
         // here.
         private const int NULL_VALUE = Int32.MinValue;
         private const int TICKS_PER_MSEC = 10000;
-        internal const int TICKS_PER_SEC = 1000*TICKS_PER_MSEC;
+        internal const int MSEC_PER_SEC = 10000;
+        internal const int TICKS_PER_SEC = MSEC_PER_SEC * TICKS_PER_MSEC;
 
         ////////////////////////////////////////////////////////////////
         // NOTE: Microsoft Time Measurements
@@ -155,7 +159,7 @@ namespace CrittercismSDK
         }
         private void SetBeginTime(long newBeginTime) {
             // Set begin time of transaction in ticks.
-            DateTime begin_date = (new DateTime(newBeginTime)).ToUniversalTime();
+            DateTime begin_date = (new DateTime(newBeginTime,DateTimeKind.Utc));
             beginTimeString = DateUtils.ISO8601DateString(begin_date);
             beginTime = newBeginTime;
         }
@@ -176,7 +180,7 @@ namespace CrittercismSDK
         }
         private void SetEndTime(long newEndTime) {
             // Set end time of transaction in ticks.
-            DateTime end_date = (new DateTime(newEndTime)).ToUniversalTime();
+            DateTime end_date = (new DateTime(newEndTime,DateTimeKind.Utc));
             endTimeString = DateUtils.ISO8601DateString(end_date);
             endTime = newEndTime;
         }
@@ -209,7 +213,7 @@ namespace CrittercismSDK
         private void SetForegroundTime(long newForegroundTime) {
             // "Foreground time" == the latest Crittercism Init
             // time or foreground time, whichever is later, in ticks.
-            DateTime foreground_date = (new DateTime(newForegroundTime)).ToUniversalTime();
+            DateTime foreground_date = (new DateTime(newForegroundTime,DateTimeKind.Utc));
             foregroundTimeString = DateUtils.ISO8601DateString(foreground_date);
             foregroundTime = newForegroundTime;
         }
@@ -277,12 +281,12 @@ namespace CrittercismSDK
             // Transaction's appearing in either a TransactionReport or a Crash report.
             this.name = name;
             this.state = state;
-            this.timeout = timeout;
+            this.timeout = timeout;  // milliseconds
             this.value = value;
             this.metadata = metadata;
-            this.beginTime = beginTime;
-            this.endTime = endTime;
-            this.eyeTime = eyeTime;
+            SetBeginTime(beginTime);  // ticks
+            SetEndTime(endTime);  // ticks
+            this.eyeTime = eyeTime;  // ticks
         }
         #endregion
 
@@ -356,7 +360,9 @@ namespace CrittercismSDK
         }
         #endregion
 
-        #region JSON
+#region JSON
+#if true
+        // TODO: Junking ToArray() now we have ToJArray() ?
         internal Object[] ToArray() {
             Object[] answer = new Object[] {
                 name,
@@ -368,13 +374,34 @@ namespace CrittercismSDK
                 (String)endTimeString,
                 eyeTime/TICKS_PER_MSEC
             };
+            Debug.WriteLine("ToArray: "+answer);
+            return answer;
+        }
+#endif
+        internal JArray ToJArray() {
+            // Per "Transactions Wire Protocol - v1", timeout and eyeTime are returned in seconds.
+            List<JToken> list = new List<JToken>();
+            list.Add(name);
+            list.Add((int)state);
+            list.Add(timeout/(double)MSEC_PER_SEC);  // seconds
+            if (value == NULL_VALUE) {
+                list.Add(null);
+            } else {
+                list.Add(value);
+            };
+            list.Add(new JObject());
+            list.Add(beginTimeString);
+            list.Add(endTimeString);
+            list.Add(eyeTime/(double)TICKS_PER_SEC);  // seconds
+            JArray answer = new JArray(list);
+            Debug.WriteLine("ToJArray: " + answer);
             return answer;
         }
         internal string ToJSONString() {
-            string answer = JsonConvert.SerializeObject(ToArray());
+            string answer = JsonConvert.SerializeObject(ToJArray());
             return answer;
         }
-        #endregion
+#endregion
 
         // #region Metadata
         // An archaeological curiousity.  Original iOS/Android SDK
@@ -383,7 +410,7 @@ namespace CrittercismSDK
         // make it available to users.
         // #endregion
 
-        #region Notifications
+#region Notifications
         internal void Foreground(long foregroundTime) {
             // Called by TransactionReporter's "Foreground" method when app foregrounds.
             lock (this) {
@@ -403,10 +430,10 @@ namespace CrittercismSDK
                 }
             }
         }
-        #endregion
+#endregion
 
 
-        #region Persistence
+#region Persistence
         internal static Transaction[] AllTransactions() {
             return TransactionReporter.AllTransactions();
         }
@@ -414,9 +441,9 @@ namespace CrittercismSDK
         internal static Transaction TransactionForName(string name) {
             return TransactionReporter.TransactionForName(name);
         }
-        #endregion
+#endregion
 
-        #region Timing
+#region Timing
 #if NETFX_CORE || WINDOWS_PHONE
         private static ThreadPoolTimer timer = null;
 #else
@@ -498,6 +525,6 @@ namespace CrittercismSDK
             }
 #endif // NETFX_CORE
         }
-        #endregion
+#endregion
     }
 }

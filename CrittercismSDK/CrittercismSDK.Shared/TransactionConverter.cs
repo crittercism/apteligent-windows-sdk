@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
@@ -10,7 +11,7 @@ namespace CrittercismSDK {
     internal class TransactionConverter : JsonConverter {
         public override void WriteJson(JsonWriter writer,object value,JsonSerializer serializer) {
             Transaction transaction = (Transaction)value;
-            JArray a = new JArray(transaction.ToArray());
+            JArray a = transaction.ToJArray();
             a.WriteTo(writer);
         }
         public override object ReadJson(JsonReader reader,Type objectType,object existingValue,JsonSerializer serializer) {
@@ -22,7 +23,8 @@ namespace CrittercismSDK {
                 && (a.Count == (int)TransactionIndex.COUNT)
                 && (a[(int)TransactionIndex.Name].Type == JTokenType.String)
                 && (a[(int)TransactionIndex.State].Type == JTokenType.Integer)
-                && (a[(int)TransactionIndex.Timeout].Type == JTokenType.Integer)
+                && ((a[(int)TransactionIndex.Timeout].Type == JTokenType.Integer)
+                    || (a[(int)TransactionIndex.Timeout].Type == JTokenType.Float))
                 && (a[(int)TransactionIndex.Value].Type == JTokenType.Integer)
                 && (a[(int)TransactionIndex.Metadata].Type == JTokenType.Object)
                 && (a[(int)TransactionIndex.BeginTime].Type == JTokenType.Date)
@@ -32,10 +34,10 @@ namespace CrittercismSDK {
                 // Extract values from "JArray a" .  This is all according to the
                 // Crittercism "Transactions Wire Protocol - v1" in Confluence.
                 string name = (string)((JValue)(a[(int)TransactionIndex.Name])).Value;
-                TransactionState state = (TransactionState)(int)((JValue)(a[(int)TransactionIndex.State])).Value;
-                int timeoutSeconds = (int)((JValue)(a[(int)TransactionIndex.Timeout])).Value;  // seconds (!!!)
-                int timeout = timeoutSeconds*Transaction.TICKS_PER_SEC;  // ticks
-                int value = (int)((JValue)(a[(int)TransactionIndex.Value])).Value;
+                TransactionState state = (TransactionState)(long)((JValue)(a[(int)TransactionIndex.State])).Value;
+                double timeoutSeconds = Convert.ToDouble(((JValue)(a[(int)TransactionIndex.Timeout])).Value);  // seconds (!!!)
+                int timeout = (int)Convert.ToDouble(timeoutSeconds*Transaction.MSEC_PER_SEC);  // milliseconds
+                int value = Convert.ToInt32(((JValue)(a[(int)TransactionIndex.Value])).Value);
 #if DEBUG
                 {
                     // NOTE: Transaction metadata skeleton in the closet.  Tossed around
@@ -46,10 +48,10 @@ namespace CrittercismSDK {
                 }
 #endif
                 Dictionary<string,string> metadata = new Dictionary<string,string>();
-                long beginTime = (long)((JValue)(a[(int)TransactionIndex.BeginTime])).Value;
-                long endTime = (long)((JValue)(a[(int)TransactionIndex.EndTime])).Value;
-                double eyeTimeSeconds = (double)((JValue)(a[(int)TransactionIndex.EyeTime])).Value;  // seconds (!!!)
-                long eyeTime = (long)(timeoutSeconds*Transaction.TICKS_PER_SEC);  // ticks
+                long beginTime = ((DateTime)((JValue)(a[(int)TransactionIndex.BeginTime])).Value).ToUniversalTime().Ticks;  // ticks
+                long endTime = ((DateTime)((JValue)(a[(int)TransactionIndex.EndTime])).Value).ToUniversalTime().Ticks;  // ticks
+                double eyeTimeSeconds = Convert.ToDouble(((JValue)(a[(int)TransactionIndex.EyeTime])).Value);  // seconds (!!!)
+                long eyeTime = (long)(eyeTimeSeconds*Transaction.TICKS_PER_SEC);  // ticks
                 // Call Transaction constructor.
                 transaction = new Transaction(
                     name,
