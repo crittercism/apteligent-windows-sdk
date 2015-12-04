@@ -20,7 +20,7 @@ namespace CrittercismSDK
 
         #region Properties
         private static Object lockObject = new object();
-        private static SynchronizedQueue<Object[]> TransactionsQueue { get; set; }
+        private static SynchronizedQueue<Transaction> TransactionsQueue { get; set; }
 #pragma warning disable 0414
         // TODO: Get enabled set via AppLoad response and Enable method.
         private static bool enabled = true;
@@ -94,7 +94,7 @@ namespace CrittercismSDK
                 // lock lockObject here pointless, but no real harm doing so.
                 // Initialize transactionsDictionary and TransactionsQueue
                 transactionsDictionary = new Dictionary<string,Transaction>();
-                TransactionsQueue = new SynchronizedQueue<Object[]>(new Queue<Object[]>());
+                TransactionsQueue = new SynchronizedQueue<Transaction>(new Queue<Transaction>());
             }
         }
         internal static void Shutdown() {
@@ -215,7 +215,7 @@ namespace CrittercismSDK
                 while (TransactionsQueue.Count>= MAX_TRANSACTION_COUNT) {
                     TransactionsQueue.Dequeue();
                 };
-                TransactionsQueue.Enqueue(transaction.ToArray());
+                TransactionsQueue.Enqueue(transaction);
 #if NETFX_CORE || WINDOWS_PHONE
                 if (timer==null) {
                     // Creates a single-use timer.
@@ -237,25 +237,25 @@ namespace CrittercismSDK
 #endif // NETFX_CORE
             }
         }
-        private static long BeginTime(Object[] transactions) {
+        private static long BeginTime(List<Transaction> transactions) {
             // Earliest BeginTime amongst these transactions
             long answer = long.MaxValue;
-            foreach (Object[] transaction in transactions) {
-                answer = Math.Min(answer,(long)transaction[(int)TransactionIndex.BeginTime]);
+            foreach (Transaction transaction in transactions) {
+                answer = Math.Min(answer,transaction.BeginTime());
             }
             return answer;
         }
-        private static long EndTime(Object[] transactions) {
+        private static long EndTime(List<Transaction> transactions) {
             // Latest EndTime amongst these transactions
             long answer = long.MinValue;
-            foreach (Object[] transaction in transactions) {
-                answer = Math.Max(answer,(long)transaction[(int)TransactionIndex.EndTime]);
+            foreach (Transaction transaction in transactions) {
+                answer = Math.Max(answer,transaction.EndTime());
             }
             return answer;
         }
         private static void SendTransactionReport() {
             if (TransactionsQueue.Count>0) {
-                Object[] transactions = TransactionsQueue.ToArray();
+                List<Transaction> transactions = TransactionsQueue.ToList();
                 TransactionsQueue.Clear();
                 long beginTime = BeginTime(transactions);
                 long endTime = EndTime(transactions);
