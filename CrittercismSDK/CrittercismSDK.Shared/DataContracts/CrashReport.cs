@@ -41,6 +41,8 @@ namespace CrittercismSDK
         [DataMember]
         public List<Endpoint> endpoints { get; internal set; }
 
+        [DataMember]
+        public List<Transaction> transactions { get; internal set; }
 
         [DataMember]
         public Dictionary<string, string> metadata { get; internal set; }
@@ -77,6 +79,7 @@ namespace CrittercismSDK
             Breadcrumbs breadcrumbs,
             Breadcrumbs systemBreadcrumbs,
             List<Endpoint> endpoints,
+            List<Transaction> transactions,
             ExceptionObject exception)
         {
             app_id = appId;
@@ -85,6 +88,7 @@ namespace CrittercismSDK
             this.breadcrumbs = breadcrumbs;
             this.systemBreadcrumbs = systemBreadcrumbs;
             this.endpoints = endpoints;
+            this.transactions = transactions;
             crash = exception;
             platform = new Platform();
         }

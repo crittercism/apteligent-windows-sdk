@@ -578,9 +578,10 @@ namespace CrittercismSDK {
                 Breadcrumbs breadcrumbs=Breadcrumbs.UserBreadcrumbs().Copy();
                 Breadcrumbs systemBreadcrumbs =Breadcrumbs.SystemBreadcrumbs().Copy();
                 List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
+                List<Transaction> transactions = TransactionReporter.CrashTransactions();
                 string stacktrace=StackTrace(e);
                 ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                CrashReport crashReport =new CrashReport(AppID,metadata,breadcrumbs,systemBreadcrumbs,endpoints,exception);
+                CrashReport crashReport =new CrashReport(AppID,metadata,breadcrumbs,systemBreadcrumbs,endpoints,transactions,exception);
                 // Add crash to message queue and save state .
                 Shutdown();
                 AddMessageToQueue(crashReport);
