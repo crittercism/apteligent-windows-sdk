@@ -21,41 +21,41 @@ namespace UnitTest {
         public void CrashLoadAfterSaveTest() {
             TestHelpers.StartApp();
             TestHelpers.LogUnhandledException();
-            Crash crash=TestHelpers.DequeueMessageType(typeof(Crash)) as Crash;
-            String expectedJson=JsonConvert.SerializeObject(crash);
-            crash.Save();
-            Crash loadedCrash=(Crash)MessageReport.LoadMessage(crash.Name);
+            CrashReport crashReport =TestHelpers.DequeueMessageType(typeof(CrashReport)) as CrashReport;
+            String expectedJson=JsonConvert.SerializeObject(crashReport);
+            crashReport.Save();
+            CrashReport loadedCrash =(CrashReport)MessageReport.LoadMessage(crashReport.Name);
             var loadedJson=JsonConvert.SerializeObject(loadedCrash);
             Assert.AreEqual(loadedJson,expectedJson);
             // Since crash and loadedCrash have same Name , this Delete
             // deletes the persisted record of both objects.
             loadedCrash.Delete();
-            Assert.IsNull(MessageReport.LoadMessage(crash.Name));
+            Assert.IsNull(MessageReport.LoadMessage(crashReport.Name));
         }
 
         [TestMethod]
         public void CrashHasExpectedDataTest() {
             TestHelpers.StartApp();
             TestHelpers.LogUnhandledException();
-            Crash crash=TestHelpers.DequeueMessageType(typeof(Crash)) as Crash;
-            Trace.WriteLine("crash.crash.name == "+crash.crash.name);
-            Trace.WriteLine("crash.crash.reason == "+crash.crash.reason);
-            Trace.WriteLine("crash.crash.stack_trace.Count == "+crash.crash.stack_trace.Count);
-            Trace.WriteLine("crash.crash.stack_trace[0] == "+crash.crash.stack_trace[0]);
-            Trace.WriteLine("crash.platform.device_id == "+crash.platform.device_id);
-            Trace.WriteLine("crash.platform.device_model == "+crash.platform.device_model);
-            Trace.WriteLine("crash.platform.os_name == "+crash.platform.os_name);
-            Assert.AreEqual(crash.app_id,TestHelpers.VALID_APPID);
-            Assert.AreEqual(crash.crash.name,"System.DivideByZeroException");
-            Assert.AreEqual(crash.crash.reason,"Attempted to divide by zero.");
-            // NOTE: crash.crash.stack_trace.Count is smaller in "Release" build.
-            Assert.IsTrue(crash.crash.stack_trace.Count<=3);
-            Assert.IsTrue(crash.crash.stack_trace.Count>=2);
-            Assert.IsTrue(crash.crash.stack_trace[0].IndexOf("System.DivideByZeroException")>=0);
-            Assert.IsTrue(crash.crash.stack_trace[0].IndexOf("Attempted to divide by zero.")>=0);
-            Assert.IsNotNull(crash.platform.device_id);
-            Assert.AreEqual(crash.platform.device_model,"Windows PC");
-            Assert.AreEqual(crash.platform.os_name,Crittercism.OSName);
+            CrashReport crashReport=TestHelpers.DequeueMessageType(typeof(CrashReport)) as CrashReport;
+            Trace.WriteLine("crashReport.crash.name == "+crashReport.crash.name);
+            Trace.WriteLine("crashReport.crash.reason == "+crashReport.crash.reason);
+            Trace.WriteLine("crashReport.crash.stack_trace.Count == "+crashReport.crash.stack_trace.Count);
+            Trace.WriteLine("crashReport.crash.stack_trace[0] == "+crashReport.crash.stack_trace[0]);
+            Trace.WriteLine("crashReport.platform.device_id == "+crashReport.platform.device_id);
+            Trace.WriteLine("crashReport.platform.device_model == "+crashReport.platform.device_model);
+            Trace.WriteLine("crashReport.platform.os_name == "+crashReport.platform.os_name);
+            Assert.AreEqual(crashReport.app_id,TestHelpers.VALID_APPID);
+            Assert.AreEqual(crashReport.crash.name,"System.DivideByZeroException");
+            Assert.AreEqual(crashReport.crash.reason,"Attempted to divide by zero.");
+            // NOTE: crashReport.crash.stack_trace.Count is smaller in "Release" build.
+            Assert.IsTrue(crashReport.crash.stack_trace.Count<=3);
+            Assert.IsTrue(crashReport.crash.stack_trace.Count>=2);
+            Assert.IsTrue(crashReport.crash.stack_trace[0].IndexOf("System.DivideByZeroException")>=0);
+            Assert.IsTrue(crashReport.crash.stack_trace[0].IndexOf("Attempted to divide by zero.")>=0);
+            Assert.IsNotNull(crashReport.platform.device_id);
+            Assert.AreEqual(crashReport.platform.device_model,"Windows PC");
+            Assert.AreEqual(crashReport.platform.os_name,Crittercism.OSName);
         }
     }
 }

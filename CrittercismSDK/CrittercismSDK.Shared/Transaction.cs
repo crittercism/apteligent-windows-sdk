@@ -377,7 +377,6 @@ namespace CrittercismSDK
             list.Add(endTimeString);
             list.Add(eyeTime/(double)TICKS_PER_SEC);  // seconds
             JArray answer = new JArray(list);
-            Debug.WriteLine("ToJArray: " + answer);
             return answer;
         }
         internal string ToJSONString() {

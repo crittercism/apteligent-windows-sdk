@@ -580,10 +580,10 @@ namespace CrittercismSDK {
                 List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                 string stacktrace=StackTrace(e);
                 ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                Crash crash=new Crash(AppID,metadata,breadcrumbs,systemBreadcrumbs,endpoints,exception);
+                CrashReport crashReport =new CrashReport(AppID,metadata,breadcrumbs,systemBreadcrumbs,endpoints,exception);
                 // Add crash to message queue and save state .
                 Shutdown();
-                AddMessageToQueue(crash);
+                AddMessageToQueue(crashReport);
                 Save();
                 // App is probably going to crash now, because we choose not
                 // to handle the unhandled exception ourselves and typically

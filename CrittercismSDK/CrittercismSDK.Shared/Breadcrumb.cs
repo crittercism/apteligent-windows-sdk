@@ -57,7 +57,6 @@ namespace CrittercismSDK
                 list.Add(dataObject);
             }
             JArray answer = new JArray(list);
-            Debug.WriteLine("ToJArray: " + answer);
             return answer;
         }
         public override string ToString() {

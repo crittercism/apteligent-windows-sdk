@@ -24,7 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\APMReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\AppLoad.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Breadcrumbs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Crash.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\CrashReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\ExceptionObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\HandledException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Platform.cs" />

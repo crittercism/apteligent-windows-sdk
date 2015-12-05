@@ -180,8 +180,8 @@ namespace CrittercismSDK {
                     case "HandledException":
                         message=(HandledException)StorageHelper.Load(path,typeof(HandledException));
                         break;
-                    case "Crash":
-                        message=(Crash)StorageHelper.Load(path,typeof(Crash));
+                    case "CrashReport":
+                        message=(CrashReport)StorageHelper.Load(path,typeof(CrashReport));
                         break;
                     case "MetadataReport":
                         message=(MetadataReport)StorageHelper.Load(path,typeof(MetadataReport));
