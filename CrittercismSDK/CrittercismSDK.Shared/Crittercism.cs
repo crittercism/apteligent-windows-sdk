@@ -669,7 +669,7 @@ namespace CrittercismSDK {
         public static void BeginTransaction(string name) {
             // Init and begin a transaction with a default value.
             try {
-                CancelTransaction(name);
+                AbortTransaction(name);
                 // Do not begin a new transaction if the transaction count is at or has exceeded the max.
                 if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
                     DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
@@ -685,7 +685,7 @@ namespace CrittercismSDK {
         public static void BeginTransaction(string name,int value) {
             // Init and begin a transaction with an input value.
             try {
-                CancelTransaction(name);
+                AbortTransaction(name);
                 // Do not begin a new transaction if the transaction count is at or has exceeded the max.
                 if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
                     DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
@@ -694,6 +694,18 @@ namespace CrittercismSDK {
                     return;
                 }
                 (new Transaction(name,value)).Begin();
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        private static void AbortTransaction(string name) {
+            // Cancel a transaction with this name if one exists, otherwise be quiet.
+            try {
+                Transaction transaction = Transaction.TransactionForName(name);
+                if (transaction != null) {
+                    DebugUtils.LOG_WARN(String.Format("Cancelling unfinished identically named transaction {0}.",name));
+                    transaction.Cancel();
+                }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }

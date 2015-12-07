@@ -155,14 +155,17 @@ namespace WindowsFormsApp {
             (new MainWindow()).Show();
         }
 
+        private string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private string transactionName;
         private void transactionButton_Click(object sender,EventArgs e) {
             Button button = sender as Button;
             if (button != null) {
-                const string transactionName = "Buy Critter Feed";
                 const string beginTransactionLabel = "Begin Transaction";
                 const string endTransactionLabel = "End Transaction";
                 String label = button.Text;
                 if (label == beginTransactionLabel) {
+                    Random random = new Random();
+                    transactionName = transactionNames[random.Next(0,transactionNames.Length)];
                     Crittercism.BeginTransaction(transactionName);
                     button.Text = endTransactionLabel;
                 } else if (label == endTransactionLabel) {
