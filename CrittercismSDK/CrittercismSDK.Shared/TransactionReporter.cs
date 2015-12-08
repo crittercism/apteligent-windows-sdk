@@ -261,7 +261,7 @@ namespace CrittercismSDK
                 long endTime = EndTime(transactions);
                 //RecentBreadcrumbs(beginTime,endTime)
                 Dictionary<string,object> appState = MessageReport.ComputeAppState();
-                List<Breadcrumb> breadcrumbs = Breadcrumbs.UserBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
+                List<UserBreadcrumb> breadcrumbs = Breadcrumbs.ExtractUserBreadcrumbsFrom(beginTime,endTime);
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
                 List<Endpoint> endpoints = Breadcrumbs.ExtractEndpoints(beginTime,endTime);
                 TransactionReport transactionReport = new TransactionReport(

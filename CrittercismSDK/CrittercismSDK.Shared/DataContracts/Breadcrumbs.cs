@@ -141,6 +141,35 @@ namespace CrittercismSDK
         #endregion
 
         #region Extracting Breadcrumbs
+        private Breadcrumb CurrentSessionStartBreadcrumb() {
+            Breadcrumb answer = null;
+            if (current_session.Count>0) {
+                answer = current_session[0];
+            }
+            return answer;
+        }
+        private static List<UserBreadcrumb> ConvertToUserBreadcrumbs(List<Breadcrumb> breadcrumbs) {
+            List<UserBreadcrumb> answer = new List<UserBreadcrumb>();
+            foreach (Breadcrumb breadcrumb in breadcrumbs) {
+                UserBreadcrumb userBreadcrumb = new UserBreadcrumb(breadcrumb);
+                answer.Add(userBreadcrumb);
+            }
+            return answer;
+        }
+        internal static List<UserBreadcrumb> ExtractUserBreadcrumbsFrom(long beginTime,long endTime) {
+            List<Breadcrumb> list = userBreadcrumbs.RecentBreadcrumbs(beginTime,endTime);
+            Breadcrumb sessionStartBreadcrumb = userBreadcrumbs.CurrentSessionStartBreadcrumb();
+            if ((sessionStartBreadcrumb!=null)
+                &&(list.IndexOf(sessionStartBreadcrumb)<0)) {
+                // Add session start breadcrumb at the begining, this if statement should always be true
+                // In case we didn't log session start breadcrumb, we don't want to send an empty breadcrumb
+                // and bread the server
+                list.Insert(0,sessionStartBreadcrumb);
+            }
+            // TODO: [CRBreadcrumbsArchive convertArrayToUserBreadcrumbFormat:breadcrumbs]  Ouch...
+            List<UserBreadcrumb> answer = ConvertToUserBreadcrumbs(list);
+            return answer;
+        }
         private List<Breadcrumb> RecentBreadcrumbs() {
             // Copy of current state of current_session .
             return new List<Breadcrumb>(current_session);

@@ -47,5 +47,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)TransactionReporter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransactionState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UnifiedMessageReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UserBreadcrumb.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UserBreadcrumbConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UserBreadcrumbIndex.cs" />
   </ItemGroup>
 </Project>

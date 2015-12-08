@@ -19,7 +19,7 @@ namespace CrittercismSDK
         [DataMember]
         public List<Transaction> transactions { get; internal set; }
         [DataMember]
-        public List<Breadcrumb> breadcrumbs { get; internal set; }
+        public List<UserBreadcrumb> breadcrumbs { get; internal set; }
         [DataMember]
         public List<Breadcrumb> systemBreadcrumbs { get; internal set; }
         [DataMember]
@@ -30,7 +30,7 @@ namespace CrittercismSDK
         public TransactionReport(
             Dictionary<string,object> appState,
             List<Transaction> transactions,
-            List<Breadcrumb> breadcrumbs,
+            List<UserBreadcrumb> breadcrumbs,
             List<Breadcrumb> systemBreadcrumbs,
             List<Endpoint> endpoints)
         {
