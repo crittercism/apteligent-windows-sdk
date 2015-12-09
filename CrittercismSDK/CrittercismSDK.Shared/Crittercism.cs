@@ -788,6 +788,15 @@ namespace CrittercismSDK {
         #endregion
 
         #region Network Requests
+        private static string RemoveQueryString(string uriString) {
+            // String obtained by removing query string portion of uriString .
+            string answer = uriString;
+            int p = uriString.IndexOf('?');
+            if (p>=0) {
+                answer = uriString.Substring(0,p);
+            };
+            return answer;
+        }
         public static void LogNetworkRequest(
             string method,
             string uriString,
@@ -816,7 +825,7 @@ namespace CrittercismSDK {
                     } else {
                         string timestamp=DateUtils.ISO8601DateString(DateTime.UtcNow);
                         Endpoint endpoint=new Endpoint(method,
-                            uriString,
+                            RemoveQueryString(uriString),
                             timestamp,
                             latency,
                             bytesRead,
