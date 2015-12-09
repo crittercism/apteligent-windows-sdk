@@ -150,7 +150,7 @@ namespace CrittercismSDK
         private static void SendAPMReport() {
             Debug.WriteLine("SendAPMReport");
             if (EndpointsQueue.Count>0) {
-                Endpoint[] endpoints=EndpointsQueue.ToArray();
+                List<Endpoint> endpoints=EndpointsQueue.ToList();
                 EndpointsQueue.Clear();
                 Debug.WriteLine("SendAPMReport new APMReport");
                 APMReport apmReport=new APMReport(AppIdentifiersArray(),DeviceStateArray(),endpoints);

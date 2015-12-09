@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -47,39 +48,27 @@ namespace CrittercismSDK
             this.errorTable=ERROR_TABLE_CODE;
             this.errorCode=(long)exceptionStatus;
         }
-        internal Endpoint(Object[] jsonArray) {
-            this.method=(string)jsonArray[0];
-            this.uriString=(string)jsonArray[1];
-            this.timestamp=(string)jsonArray[2];
-            this.latency=(long)jsonArray[3];
-            this.activeNetwork=(long)jsonArray[4];
-            this.bytesRead=(long)jsonArray[5];
-            this.bytesSent=(long)jsonArray[6];
-            this.statusCode=(long)jsonArray[7];
-            this.errorTable=(long)jsonArray[8];
-            this.errorCode=(long)jsonArray[9];
-        }
         #endregion
 
         #region JSON
-        internal Object[] ToArray() {
-            Object[] answer = new Object[] {
-                method,
-                uriString,
-                timestamp,
-                latency,
-                activeNetwork,
-                bytesRead,
-                bytesSent,
-                statusCode,
-                errorTable,
-                errorCode
-            };
+        internal JArray ToJArray() {
+            List<JToken> list = new List<JToken>();
+            list.Add(method);
+            list.Add(uriString);
+            list.Add(timestamp);
+            list.Add(latency);
+            list.Add(activeNetwork);
+            list.Add(bytesRead);
+            list.Add(bytesSent);
+            list.Add(statusCode);
+            list.Add(errorTable);
+            list.Add(errorCode);
+            JArray answer = new JArray(list);
             return answer;
         }
         public override string ToString() {
             return JsonConvert.SerializeObject(this);
         }
-        #endregion
+#endregion
     }
 }
