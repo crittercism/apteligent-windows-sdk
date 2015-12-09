@@ -13,17 +13,21 @@ namespace CrittercismSDK {
             JArray a = new JArray(breadcrumb.ToJArray());
             a.WriteTo(writer);
         }
+        internal static bool IsBreadcrumbJson(JArray a) {
+            bool answer = (a != null);
+            answer = answer && (a.Count <= (int)BreadcrumbIndex.COUNT);
+            answer = answer && JsonUtils.IsJsonDate(a[(int)BreadcrumbIndex.Timestamp]);
+            answer = answer && (a[(int)BreadcrumbIndex.Type].Type == JTokenType.Integer);
+            return answer;
+        }
         public override object ReadJson(JsonReader reader,Type objectType,object existingValue,JsonSerializer serializer) {
             Breadcrumb breadcrumb = null;
             // Load JArray from stream .  For better or worse, probably a bit of the latter,
             // Newtonsoft.Json deserializes a persisted timestamp string as a JTokenType.Date .
             JArray a = JArray.Load(reader);
-            if ((a!=null)
-                && (a.Count <= (int)BreadcrumbIndex.COUNT)
-                && (a[(int)BreadcrumbIndex.Timestamp].Type == JTokenType.Date)
-                && (a[(int)BreadcrumbIndex.Type].Type == JTokenType.Integer)) {
+            if (IsBreadcrumbJson(a)) {
                 // Extract values from "JArray a" .
-                string timestamp = DateUtils.ISO8601DateString((DateTime)((JValue)(a[(int)BreadcrumbIndex.Timestamp])).Value);
+                string timestamp = JsonUtils.JsonDateToISO8601DateString(a[(int)BreadcrumbIndex.Timestamp]);
                 BreadcrumbType breadcrumbType = (BreadcrumbType)(long)((JValue)(a[(int)BreadcrumbIndex.Type])).Value;
                 Object data = null;
                 // Launch = 0,      // 0 - session launched      ; --
