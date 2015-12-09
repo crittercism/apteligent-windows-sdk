@@ -14,23 +14,27 @@ namespace CrittercismSDK {
             JArray a = transaction.ToJArray();
             a.WriteTo(writer);
         }
+        internal static bool IsTransactionJson(JArray a) {
+            bool answer = (a != null);
+            answer = answer && (a.Count == (int)TransactionIndex.COUNT);
+            answer = answer && (a[(int)TransactionIndex.Name].Type == JTokenType.String);
+            answer = answer && (a[(int)TransactionIndex.State].Type == JTokenType.Integer);
+            answer = answer && ((a[(int)TransactionIndex.Timeout].Type == JTokenType.Integer)
+                                || (a[(int)TransactionIndex.Timeout].Type == JTokenType.Float));
+            answer = answer && (a[(int)TransactionIndex.Value].Type == JTokenType.Integer);
+            answer = answer && (a[(int)TransactionIndex.Metadata].Type == JTokenType.Object);
+            answer = answer && JsonUtils.IsJsonDate(a[(int)TransactionIndex.BeginTime]);
+            answer = answer && JsonUtils.IsJsonDate(a[(int)TransactionIndex.EndTime]);
+            answer = answer && ((a[(int)TransactionIndex.EyeTime].Type == JTokenType.Integer)
+                                || (a[(int)TransactionIndex.EyeTime].Type == JTokenType.Float));
+            return answer;
+        }
         public override object ReadJson(JsonReader reader,Type objectType,object existingValue,JsonSerializer serializer) {
             Transaction transaction = null;
             // Load JArray from stream .  For better or worse, probably a bit of the latter,
             // Newtonsoft.Json deserializes a persisted timestamp string as a JTokenType.Date .
             JArray a = JArray.Load(reader);
-            if ((a!=null)
-                && (a.Count == (int)TransactionIndex.COUNT)
-                && (a[(int)TransactionIndex.Name].Type == JTokenType.String)
-                && (a[(int)TransactionIndex.State].Type == JTokenType.Integer)
-                && ((a[(int)TransactionIndex.Timeout].Type == JTokenType.Integer)
-                    || (a[(int)TransactionIndex.Timeout].Type == JTokenType.Float))
-                && (a[(int)TransactionIndex.Value].Type == JTokenType.Integer)
-                && (a[(int)TransactionIndex.Metadata].Type == JTokenType.Object)
-                && (a[(int)TransactionIndex.BeginTime].Type == JTokenType.Date)
-                && (a[(int)TransactionIndex.EndTime].Type == JTokenType.Date)
-                && ((a[(int)TransactionIndex.EyeTime].Type == JTokenType.Integer)
-                    ||(a[(int)TransactionIndex.EyeTime].Type == JTokenType.Float))) {
+            if (IsTransactionJson(a)) {
                 // Extract values from "JArray a" .  This is all according to the
                 // Crittercism "Transactions Wire Protocol - v1" in Confluence.
                 string name = (string)((JValue)(a[(int)TransactionIndex.Name])).Value;
@@ -48,8 +52,8 @@ namespace CrittercismSDK {
                 }
 #endif
                 Dictionary<string,string> metadata = new Dictionary<string,string>();
-                long beginTime = ((DateTime)((JValue)(a[(int)TransactionIndex.BeginTime])).Value).ToUniversalTime().Ticks;  // ticks
-                long endTime = ((DateTime)((JValue)(a[(int)TransactionIndex.EndTime])).Value).ToUniversalTime().Ticks;  // ticks
+                long beginTime = JsonUtils.JsonDateToTicks(a[(int)TransactionIndex.BeginTime]);  // ticks
+                long endTime = JsonUtils.JsonDateToTicks(a[(int)TransactionIndex.EndTime]);  // ticks
                 double eyeTimeSeconds = Convert.ToDouble(((JValue)(a[(int)TransactionIndex.EyeTime])).Value);  // seconds (!!!)
                 long eyeTime = (long)(eyeTimeSeconds*Transaction.TICKS_PER_SEC);  // ticks
                 // Call Transaction constructor.

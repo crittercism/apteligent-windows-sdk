@@ -46,13 +46,13 @@ namespace CrittercismSDK
         private int timeout; // milliseconds
         private int value; // pennies (http://www.usmint.gov/mint_programs/circulatingCoins/?action=circPenny)
         private Dictionary<string,string> metadata;
-        private long beginTime; // ticks
-        private long endTime; // ticks
-        private long eyeTime; // ticks
+        private long beginTime; // ticks (absolute)
+        private long endTime; // ticks (absolute)
+        private long eyeTime; // ticks (relative interval)
 
         private string beginTimeString;
         private string endTimeString;
-        private long foregroundTime; // ticks
+        private long foregroundTime; // ticks (absolute)
         private string foregroundTimeString;
         private bool isForegrounded;
 
@@ -239,13 +239,13 @@ namespace CrittercismSDK
             // 12:00:00 midnight, January 1, 0001
             // (0:00:00 UTC on January 1, 0001, in the Gregorian calendar)
             // https://msdn.microsoft.com/en-us/library/system.datetime.ticks(v=vs.110).aspx
-            // And we are calling SetBeginTime and SetEndTime here
-            // so the strings beginTimeString and endTimeString
-            // will get computed.
-            SetBeginTime(0);
-            SetEndTime(0);
+            // And we are calling SetBeginTime and SetEndTime here so the strings
+            // beginTimeString and endTimeString will get computed.
+            const long referenceTime = 0;
+            SetBeginTime(referenceTime);
+            SetEndTime(referenceTime);
             eyeTime = 0;
-            SetForegroundTime(0);
+            SetForegroundTime(referenceTime);
             // timeout in milliseconds
             timeout = ClampTimeout(Int32.MaxValue);
         }
@@ -380,10 +380,6 @@ namespace CrittercismSDK
             list.Add(endTimeString);
             list.Add(eyeTime/(double)TICKS_PER_SEC);  // seconds
             JArray answer = new JArray(list);
-            return answer;
-        }
-        internal string ToJSONString() {
-            string answer = JsonConvert.SerializeObject(ToJArray());
             return answer;
         }
         public override string ToString() {

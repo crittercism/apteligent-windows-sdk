@@ -345,51 +345,11 @@ namespace UnitTest {
         #endregion
 
         #region Transaction ToArray method
-        public void CheckJSONArray(Object json) {
-            Object[] jsonArray = json as Object[];
-            Assert.IsNotNull(jsonArray,"Expecting transaction jsonArray");
-            if (jsonArray != null) {
-                Trace.WriteLine("jsonArray.Count == "+jsonArray.Length);
-                Assert.IsTrue(jsonArray.Length == (int)TransactionIndex.COUNT,
-                             "Expecting transaction jsonArray with correct count.");
-                Assert.IsTrue(jsonArray[(int)TransactionIndex.Name] is String,
-                              String.Format("Expecting jsonArray[{0}] to be a String",
-                                            (int)TransactionIndex.Name));
-                Assert.IsTrue(JsonUtils.IsNumber(jsonArray[(int)TransactionIndex.State]),
-                              String.Format("Expecting jsonArray[{0}] to be a Number",
-                                            (int)TransactionIndex.State));
-                // NOTE: Extended reals is the set of reals with +/-infinity included.  These are
-                // represented as NSNumber's whether finite or INFINITY .  However, JSON numbers are
-                // finite.  We indicate INFINITY to platform via JSON string "INFINITY".
-                // See ExtendedRealToJSONString and JsonStringToExtendedReal in JsonUtils.cs .
-                Assert.IsTrue((JsonUtils.IsNumber(jsonArray[(int)TransactionIndex.Timeout])
-                              || (jsonArray[(int)TransactionIndex.Timeout] is String)),
-                              String.Format("Expecting jsonArray[{0}] to be a Number or String",
-                                            (int)TransactionIndex.Timeout));
-                Assert.IsTrue(JsonUtils.IsNumber(jsonArray[(int)TransactionIndex.Value]),
-                              String.Format("Expecting jsonArray[{0}] to be a Number",
-                                            (int)TransactionIndex.Value));
-                Assert.IsTrue(jsonArray[(int)TransactionIndex.Metadata] is IDictionary,
-                              String.Format("Expecting jsonArray[{0}] to be an IDictionary",
-                                            (int)TransactionIndex.Metadata));
-                Assert.IsTrue(jsonArray[(int)TransactionIndex.BeginTime] is String,
-                              String.Format("Expecting jsonArray[{0}] to be a String",
-                                            (int)TransactionIndex.BeginTime));
-                Assert.IsTrue(jsonArray[(int)TransactionIndex.EndTime] is String,
-                              String.Format("Expecting jsonArray[{0}] to be a String",
-                                            (int)TransactionIndex.EndTime));
-                Assert.IsTrue(JsonUtils.IsNumber(jsonArray[(int)TransactionIndex.EyeTime]),
-                              String.Format("Expecting jsonArray[{0}] to be a Number",
-                                            (int)TransactionIndex.EyeTime));
-                Trace.WriteLine("");
-            };
-        }
-
         [TestMethod]
-        public void TestTransactionToArray() {
+        public void TestTransactionToJArray() {
             Transaction example1 = ExampleTransaction();
-            JArray jsonArray = example1.ToJArray();
-            CheckJSONArray(jsonArray);
+            JArray json = example1.ToJArray();
+            Assert.IsTrue(TransactionConverter.IsTransactionJson(json));
         }
         #endregion
 
@@ -420,14 +380,14 @@ namespace UnitTest {
             Trace.WriteLine(String.Format("json == "+json));
             // TODO: Following commented out test statement is still broken.
             // JsonConvert.DeserializeObject is doing some unwanted weird stuff.
-            //CheckJSONArray(json);
+            //Assert.IsTrue(TransactionConverter.IsTransactionJson(json));
         }
 
         [TestMethod]
-        public void TestTransactionToJSONString() {
-            // Confirm ToJSONString's return value parses as plausible JSON .
+        public void TestTransactionToString() {
+            // Confirm ToString's return value parses as plausible JSON .
             Transaction example1 = ExampleTransaction();
-            CheckJSONString(example1.ToJSONString());
+            CheckJSONString(example1.ToString());
         }
         #endregion
 
