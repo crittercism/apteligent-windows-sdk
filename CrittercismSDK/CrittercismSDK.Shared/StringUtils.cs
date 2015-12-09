@@ -5,13 +5,12 @@ using System.Text;
 namespace CrittercismSDK
 {
     internal class StringUtils {
-        internal static string TruncatedString(string s) {
-            // Truncate string s max allowed string length (255 characters, not including null character)
-            const int maxStringLength = 255;
+        internal static string TruncateString(string s,int maxLength) {
+            // Truncate string s max allowed string length (maxLength characters, not including null character)
             string answer = s;
-            if (s.Length > maxStringLength) {
-                DebugUtils.LOG_WARN(String.Format("Truncating long string to 255 characters: \"{0}\"",s));
-                answer = s.Substring(0,maxStringLength);
+            if (s.Length > maxLength) {
+                DebugUtils.LOG_WARN(String.Format("Truncating long string to {0} characters: \"{1}\"",maxLength,s));
+                answer = s.Substring(0,maxLength);
             }
             return answer;
         }

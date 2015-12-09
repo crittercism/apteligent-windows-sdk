@@ -20,13 +20,18 @@ namespace UnitTest {
         [TestMethod]
         public void TruncatedBreadcrumbTest() {
             TestHelpers.StartApp();
-            // start breadcrumb with sentinel to ensure we don't left-truncate
-            string breadcrumb = "raaaaaaaaa";
-            for (int x = 0; x < 13; x++) {
-                breadcrumb += "aaaaaaaaaa";
-            }
-            // end breadcrumb with "illegal" chars and check for their presence
-            breadcrumb += "zzzzzzzzzz";
+            string breadcrumb;
+            {
+                StringBuilder builder = new StringBuilder();
+                // start breadcrumb with sentinel to ensure we don't left-truncate
+                builder.Append("r");
+                for (int i=1;i<Breadcrumbs.MAX_TEXT_LENGTH;i++) {
+                    builder.Append("a");
+                };
+                // end breadcrumb with "illegal" chars and check for their presence
+                builder.Append("zzzzzzzzzz");
+                breadcrumb = builder.ToString();
+            };
             Crittercism.LeaveBreadcrumb(breadcrumb);
             TestHelpers.LogHandledException();
             MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(HandledException));

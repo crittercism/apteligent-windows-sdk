@@ -13,6 +13,10 @@ namespace CrittercismSDK
     [DataContract]
     internal class Breadcrumbs
     {
+        #region Constants
+        internal const int MAX_TEXT_LENGTH = 140;
+        #endregion
+
         #region Properties
         private static Object lockObject = new Object();
         private static Breadcrumbs userBreadcrumbs = null;
@@ -120,7 +124,7 @@ namespace CrittercismSDK
         }
         internal static void LeaveUserBreadcrumb(string text,BreadcrumbTextType priority) {
             Dictionary<string,Object> data = new Dictionary<string,Object>();
-            data["text"] = text;
+            data["text"] = StringUtils.TruncateString(text,MAX_TEXT_LENGTH);
             data["level"] = (int)priority;
             UserBreadcrumbs().AddBreadcrumb(BreadcrumbType.Text,data);
         }

@@ -15,6 +15,8 @@ namespace CrittercismSDK
     [JsonConverter(typeof(TransactionConverter))]
     internal class Transaction
     {
+        #region Constants
+        internal const int MAX_NAME_LENGTH = 255;
         // Use Int32.MinValue pennies to represent Wire+Protocol doc's "null"
         // transaction value.  (We would prefer to not have "null" at all.)
         // It's conceivable some apps might want modest negative values for
@@ -24,6 +26,7 @@ namespace CrittercismSDK
         private const int TICKS_PER_MSEC = 10000;
         internal const int MSEC_PER_SEC = 10000;
         internal const int TICKS_PER_SEC = MSEC_PER_SEC * TICKS_PER_MSEC;
+        #endregion
 
         ////////////////////////////////////////////////////////////////
         // NOTE: Microsoft Time Measurements
@@ -247,7 +250,7 @@ namespace CrittercismSDK
             timeout = ClampTimeout(Int32.MaxValue);
         }
         internal Transaction(string name) : this() {
-            this.name = StringUtils.TruncatedString(name);
+            this.name = StringUtils.TruncateString(name,MAX_NAME_LENGTH);
             TransactionReporter.Save(this);
         }
         internal Transaction(string name,int value) : this(name) {
