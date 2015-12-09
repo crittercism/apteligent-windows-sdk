@@ -13,9 +13,6 @@ namespace CrittercismSDK
     [DataContract]
     internal class Breadcrumbs
     {
-        #region Constants
-        #endregion
-
         #region Properties
         private static Object lockObject = new Object();
         private static Breadcrumbs userBreadcrumbs = null;
@@ -23,10 +20,10 @@ namespace CrittercismSDK
         private static Breadcrumbs systemBreadcrumbs = null;
         private string name;
         private int maxCount;
-        // The breadcrumbs of the crashed session.
+        // The breadcrumbs of the previous session.
         [DataMember]
         private List<Breadcrumb> previous_session;
-        // The breadcrumbs of the current session. </value>
+        // The breadcrumbs of the current session
         [DataMember]
         private List<Breadcrumb> current_session;
         private bool saved { get; set; }
@@ -141,54 +138,48 @@ namespace CrittercismSDK
         #endregion
 
         #region Extracting Breadcrumbs
-        private Breadcrumb CurrentSessionStartBreadcrumb() {
-            Breadcrumb answer = null;
-            if (current_session.Count>0) {
-                answer = current_session[0];
+        private static UserBreadcrumb CurrentSessionStartBreadcrumb(List<Breadcrumb> session) {
+            // First Breadcrumb in session (Launch Breadcrumb equivalent to "session_start").
+            UserBreadcrumb answer = null;
+            if (session.Count>0) {
+                answer = new UserBreadcrumb(session[0]);
             }
             return answer;
         }
-        private static List<UserBreadcrumb> ConvertToUserBreadcrumbs(List<Breadcrumb> breadcrumbs) {
+        internal static List<UserBreadcrumb> ConvertToUserBreadcrumbs(List<Breadcrumb> session) {
+            // Convert List<Breadcrumb> to List<UserBreadcrumb> .
             List<UserBreadcrumb> answer = new List<UserBreadcrumb>();
-            foreach (Breadcrumb breadcrumb in breadcrumbs) {
+            foreach (Breadcrumb breadcrumb in session) {
                 UserBreadcrumb userBreadcrumb = new UserBreadcrumb(breadcrumb);
                 answer.Add(userBreadcrumb);
             }
-            return answer;
-        }
-        internal static List<UserBreadcrumb> ExtractUserBreadcrumbsFrom(long beginTime,long endTime) {
-            List<Breadcrumb> list = userBreadcrumbs.RecentBreadcrumbs(beginTime,endTime);
-            Breadcrumb sessionStartBreadcrumb = userBreadcrumbs.CurrentSessionStartBreadcrumb();
-            if ((sessionStartBreadcrumb!=null)
-                &&(list.IndexOf(sessionStartBreadcrumb)<0)) {
-                // Add session start breadcrumb at the begining, this if statement should always be true
-                // In case we didn't log session start breadcrumb, we don't want to send an empty breadcrumb
-                // and bread the server
-                list.Insert(0,sessionStartBreadcrumb);
-            }
-            // TODO: [CRBreadcrumbsArchive convertArrayToUserBreadcrumbFormat:breadcrumbs]  Ouch...
-            List<UserBreadcrumb> answer = ConvertToUserBreadcrumbs(list);
-            return answer;
-        }
-        private List<Breadcrumb> RecentBreadcrumbs() {
-            // Copy of current state of current_session .
-            return new List<Breadcrumb>(current_session);
-        }
-        internal List<Breadcrumb> RecentBreadcrumbs(long beginTime,long endTime) {
-            // Recent breadcrumbs filtered by time .
-            List<Breadcrumb> answer = new List<Breadcrumb>();
-            foreach (Breadcrumb breadcrumb in current_session) {
-                long breadcrumbTime = DateUtils.StringToTicks(breadcrumb.GetTimestamp());
-                bool afterBeginTime = (beginTime <= breadcrumbTime);
-                bool beforeEndTime = (breadcrumbTime <= endTime);
-                if (afterBeginTime && beforeEndTime) {
-                    answer.Add(breadcrumb);
+            {
+                UserBreadcrumb sessionStartBreadcrumb = CurrentSessionStartBreadcrumb(session);
+                if ((sessionStartBreadcrumb != null)
+                    && (answer.IndexOf(sessionStartBreadcrumb) < 0)) {
+                    // Add session start breadcrumb at the begining, this if statement should always be true
+                    // In case we didn't log session start breadcrumb, we don't want to send an empty breadcrumb
+                    // and bread the server
+                    answer.Insert(0,sessionStartBreadcrumb);
                 }
             }
             return answer;
         }
+        internal static List<UserBreadcrumb> ExtractUserBreadcrumbs(long beginTime,long endTime) {
+            // Extract UserBreadcrumb's from converted userBreadcrumb's filtered by time. (TransactionReport "breadcrumbs")
+            List<Breadcrumb> list = userBreadcrumbs.RecentBreadcrumbs(beginTime,endTime);
+            List<UserBreadcrumb> answer = ConvertToUserBreadcrumbs(list);
+            return answer;
+        }
+        internal static UserBreadcrumbs GetAllSessionsBreadcrumbs() {
+            // Extract legacy UserBreadcrumbs object from userBreadcrumbs. (CrashReport "breadcrumbs".)
+            List<UserBreadcrumb> previous = ConvertToUserBreadcrumbs(userBreadcrumbs.previous_session);
+            List<UserBreadcrumb> current = ConvertToUserBreadcrumbs(userBreadcrumbs.current_session);
+            UserBreadcrumbs answer = new CrittercismSDK.UserBreadcrumbs(previous,current);
+            return answer;
+        }
         private static List<Endpoint> ExtractEndpointsFromBreadcrumbs(List<Breadcrumb> breadcrumbs) {
-            // Input = list of network breadcrumbs
+            // Called by ExtractAllEndpoints and ExtractEndpoints .
             List<Endpoint> answer = new List<Endpoint>();
             foreach (Breadcrumb breadcrumb in breadcrumbs) {
                 Endpoint endpoint = breadcrumb.GetData() as Endpoint;
@@ -200,12 +191,31 @@ namespace CrittercismSDK
             return answer;
         }
         internal static List<Endpoint> ExtractAllEndpoints() {
+            // Extract Endpoint's from all Network Breadcrumb's. (CrashReport "endpoints".)
             List<Breadcrumb> breadcrumbs = NetworkBreadcrumbs().RecentBreadcrumbs();
             return ExtractEndpointsFromBreadcrumbs(breadcrumbs);
         }
         internal static List<Endpoint> ExtractEndpoints(long beginTime,long endTime) {
+            // Extract Endpoint's from all Network Breadcrumb's filtered by time. (TransactionReport "endpoints".)
             List<Breadcrumb> breadcrumbs = NetworkBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
             return ExtractEndpointsFromBreadcrumbs(breadcrumbs);
+        }
+        internal List<Breadcrumb> RecentBreadcrumbs() {
+            // Copy of current_session Breadcrumb's. (CrashReport "systemBreadcrumbs".)
+            return new List<Breadcrumb>(current_session);
+        }
+        internal List<Breadcrumb> RecentBreadcrumbs(long beginTime,long endTime) {
+            // Recent Breadcrumb's filtered by time . (TransactionReport "systemBreadcrumbs".)
+            List<Breadcrumb> answer = new List<Breadcrumb>();
+            foreach (Breadcrumb breadcrumb in current_session) {
+                long breadcrumbTime = DateUtils.StringToTicks(breadcrumb.GetTimestamp());
+                bool afterBeginTime = (beginTime <= breadcrumbTime);
+                bool beforeEndTime = (breadcrumbTime <= endTime);
+                if (afterBeginTime && beforeEndTime) {
+                    answer.Add(breadcrumb);
+                }
+            }
+            return answer;
         }
         #endregion
 

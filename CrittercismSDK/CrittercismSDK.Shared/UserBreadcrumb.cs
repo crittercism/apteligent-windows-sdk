@@ -8,11 +8,13 @@ using System.Text;
 
 namespace CrittercismSDK
 {
-    [JsonConverter(typeof(UserBreadcrumbConverter))]
+    [DataContract]
     internal class UserBreadcrumb
     {
         #region Properties
+        [DataMember]
         private string timestamp;
+        [DataMember]
         private string message;
         #endregion
 

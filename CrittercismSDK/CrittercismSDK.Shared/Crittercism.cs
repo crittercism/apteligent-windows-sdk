@@ -550,12 +550,10 @@ namespace CrittercismSDK {
                 try {
                     lock (lockObject) {
                         Dictionary<string,string> metadata=CurrentMetadata();
-                        Breadcrumbs breadcrumbs = Breadcrumbs.UserBreadcrumbs().Copy();
-                        Breadcrumbs systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().Copy();
-                        List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
-                        string stacktrace =StackTrace(e);
-                        ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                        HandledException he=new HandledException(AppID,metadata,breadcrumbs,systemBreadcrumbs,endpoints,exception);
+                        UserBreadcrumbs breadcrumbs = Breadcrumbs.GetAllSessionsBreadcrumbs();
+                        string stacktrace = StackTrace(e);
+                        ExceptionObject exception = new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+                        HandledException he = new HandledException(AppID,metadata,breadcrumbs,exception);
                         AddMessageToQueue(he);
                     }
                 } catch (Exception ie) {
@@ -575,8 +573,8 @@ namespace CrittercismSDK {
                 // reporting the first one in a given session.  This is why
                 // we're checking "initialized".
                 Dictionary<string,string> metadata=CurrentMetadata();
-                Breadcrumbs breadcrumbs=Breadcrumbs.UserBreadcrumbs().Copy();
-                Breadcrumbs systemBreadcrumbs =Breadcrumbs.SystemBreadcrumbs().Copy();
+                UserBreadcrumbs breadcrumbs=Breadcrumbs.GetAllSessionsBreadcrumbs();
+                List<Breadcrumb> systemBreadcrumbs =Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
                 List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                 List<Transaction> transactions = TransactionReporter.CrashTransactions();
                 string stacktrace=StackTrace(e);

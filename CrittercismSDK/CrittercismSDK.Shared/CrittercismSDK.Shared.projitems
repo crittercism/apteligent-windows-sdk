@@ -48,7 +48,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)TransactionState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UnifiedMessageReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UserBreadcrumb.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UserBreadcrumbConverter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UserBreadcrumbIndex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UserBreadcrumbs.cs" />
   </ItemGroup>
 </Project>

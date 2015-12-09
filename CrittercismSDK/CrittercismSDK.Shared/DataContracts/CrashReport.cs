@@ -33,10 +33,10 @@ namespace CrittercismSDK
         public Dictionary<string, object> app_state { get; internal set; }
 
         [DataMember]
-        public Breadcrumbs breadcrumbs { get; internal set; }
+        public UserBreadcrumbs breadcrumbs { get; internal set; }
 
         [DataMember]
-        public Breadcrumbs systemBreadcrumbs { get; internal set; }
+        public List<Breadcrumb> systemBreadcrumbs { get; internal set; }
 
         [DataMember]
         public List<Endpoint> endpoints { get; internal set; }
@@ -76,8 +76,8 @@ namespace CrittercismSDK
         public CrashReport(
             string appId,
             Dictionary<string,string> metadata,
-            Breadcrumbs breadcrumbs,
-            Breadcrumbs systemBreadcrumbs,
+            UserBreadcrumbs breadcrumbs,
+            List<Breadcrumb> systemBreadcrumbs,
             List<Endpoint> endpoints,
             List<Transaction> transactions,
             ExceptionObject exception)
