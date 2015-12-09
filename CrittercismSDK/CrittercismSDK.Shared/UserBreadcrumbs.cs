@@ -7,6 +7,7 @@ using System.Text;
 
 namespace CrittercismSDK
 {
+    [DataContract]
     internal class UserBreadcrumbs {
         #region Properties
         // The breadcrumbs of the previous session.
