@@ -551,9 +551,11 @@ namespace CrittercismSDK {
                     lock (lockObject) {
                         Dictionary<string,string> metadata=CurrentMetadata();
                         UserBreadcrumbs breadcrumbs = Breadcrumbs.GetAllSessionsBreadcrumbs();
+                        List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
+                        List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
                         string stacktrace = StackTrace(e);
                         ExceptionObject exception = new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                        HandledException he = new HandledException(AppID,metadata,breadcrumbs,exception);
+                        HandledException he = new HandledException(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,exception);
                         AddMessageToQueue(he);
                     }
                 } catch (Exception ie) {
@@ -574,12 +576,12 @@ namespace CrittercismSDK {
                 // we're checking "initialized".
                 Dictionary<string,string> metadata=CurrentMetadata();
                 UserBreadcrumbs breadcrumbs=Breadcrumbs.GetAllSessionsBreadcrumbs();
-                List<Breadcrumb> systemBreadcrumbs =Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
                 List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
+                List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
                 List<Transaction> transactions = TransactionReporter.CrashTransactions();
                 string stacktrace=StackTrace(e);
                 ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                CrashReport crashReport =new CrashReport(AppID,metadata,breadcrumbs,systemBreadcrumbs,endpoints,transactions,exception);
+                CrashReport crashReport =new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,transactions,exception);
                 // Add crash to message queue and save state .
                 Shutdown();
                 AddMessageToQueue(crashReport);
