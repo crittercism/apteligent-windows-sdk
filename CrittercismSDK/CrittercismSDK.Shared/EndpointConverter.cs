@@ -10,7 +10,7 @@ namespace CrittercismSDK {
     internal class EndpointConverter : JsonConverter {
         public override void WriteJson(JsonWriter writer,object value,JsonSerializer serializer) {
             Endpoint endpoint = (Endpoint)value;
-            JArray a = new JArray(endpoint.ToJArray());
+            JArray a = endpoint.ToJArray();
             a.WriteTo(writer);
         }
         internal static bool IsEndpointJson(JArray a) {

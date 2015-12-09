@@ -8,13 +8,11 @@ using System.Text;
 
 namespace CrittercismSDK
 {
-    [DataContract]
+    [JsonConverter(typeof(UserBreadcrumbConverter))]
     internal class UserBreadcrumb
     {
         #region Properties
-        [DataMember]
         private string timestamp;
-        [DataMember]
         private string message;
         #endregion
 
@@ -44,11 +42,10 @@ namespace CrittercismSDK
         #endregion
 
         #region JSON
-        internal JArray ToJArray() {
-            List<JToken> list = new List<JToken>();
-            list.Add(message);
-            list.Add(timestamp);
-            JArray answer = new JArray(list);
+        internal JObject ToJObject() {
+            JObject answer = new JObject();
+            answer["timestamp"] = timestamp;
+            answer["message"] = message;
             return answer;
         }
         #endregion
