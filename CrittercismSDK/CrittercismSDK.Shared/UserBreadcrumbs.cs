@@ -20,11 +20,15 @@ namespace CrittercismSDK
         private List<UserBreadcrumb> current_session;
         #endregion
 
-        #region Constructor
+        #region Constructors
         internal UserBreadcrumbs(List<UserBreadcrumb> previous_session,List<UserBreadcrumb> current_session) {
             this.previous_session = previous_session;
             this.current_session = current_session;
-            Debug.WriteLine("UserBreadcrumbs: " + this);
+        }
+        internal UserBreadcrumbs() {
+            // Newtonsoft.Json requires "class should either have a default constructor,
+            // one constructor with arguments or a constructor marked with the JsonConstructor
+            // attribute" in order to serialize UserBreadcrumbs .
         }
         #endregion
 

@@ -18,6 +18,42 @@ namespace UnitTest {
             TestHelpers.Cleanup();
         }
         [TestMethod]
+        public void CrashReportJsonTest() {
+            TestHelpers.StartApp();
+            // This is a simple test that just creates a CrashReport in memory
+            // and tries to serialize and deserialize it completely independently
+            // of the MessageQueue code.
+            // Create crashReport .
+            string appId = TestHelpers.VALID_APPID;
+            Dictionary<string,string> metadata = new Dictionary<string,string>();
+            List<UserBreadcrumb> previous_session = new List<UserBreadcrumb>();
+            List<UserBreadcrumb> current_session = new List<UserBreadcrumb>();
+            UserBreadcrumbs breadcrumbs = new UserBreadcrumbs(previous_session,current_session);
+            List<Endpoint> endpoints = new List<Endpoint>();
+            List<Breadcrumb> systemBreadcrumbs = new List<Breadcrumb>();
+            List<Transaction> transactions = new List<Transaction>();
+            ExceptionObject exception = new ExceptionObject("name","reason","stackframe1\r\nstackframe2");
+            CrashReport crashReport1 = new CrashReport(appId,metadata,breadcrumbs,endpoints,systemBreadcrumbs,transactions,exception);
+            // Testing EndpointConverter WriteJson
+            string json1 = JsonConvert.SerializeObject(crashReport1);
+            Assert.IsTrue(json1.IndexOf("\"app_id\":") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"app_state\":") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"breadcrumbs\":{\"previous_session\":[],\"current_session\":[]},") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"endpoints\":[],") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"systemBreadcrumbs\":[],") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"transactions\":[],") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"metadata\":{},") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"crash\":{\"name\":\"name\",\"reason\":\"reason\",\"stack_trace\":[\"stackframe1\",\"stackframe2\"]},") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"platform\":") >= 0);
+            // Testing CrashReportConverter ReadJson
+            CrashReport crashReport2 = JsonConvert.DeserializeObject(json1,typeof(CrashReport)) as CrashReport;
+            Assert.IsNotNull(crashReport2);
+            string json2 = JsonConvert.SerializeObject(crashReport2);
+            Debug.WriteLine("json1 == " + json1);
+            Debug.WriteLine("json2 == " + json2);
+            Assert.AreEqual(json1,json2);
+        }
+        [TestMethod]
         public void CrashLoadAfterSaveTest() {
             TestHelpers.StartApp();
             TestHelpers.LogUnhandledException();
