@@ -38,12 +38,12 @@ namespace UnitTest {
             string json1 = JsonConvert.SerializeObject(crashReport1);
             Assert.IsTrue(json1.IndexOf("\"app_id\":") >= 0);
             Assert.IsTrue(json1.IndexOf("\"app_state\":") >= 0);
-            Assert.IsTrue(json1.IndexOf("\"breadcrumbs\":{\"previous_session\":[],\"current_session\":[]},") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"breadcrumbs\":{") >= 0);
             Assert.IsTrue(json1.IndexOf("\"endpoints\":[],") >= 0);
             Assert.IsTrue(json1.IndexOf("\"systemBreadcrumbs\":[],") >= 0);
             Assert.IsTrue(json1.IndexOf("\"transactions\":[],") >= 0);
             Assert.IsTrue(json1.IndexOf("\"metadata\":{},") >= 0);
-            Assert.IsTrue(json1.IndexOf("\"crash\":{\"name\":\"name\",\"reason\":\"reason\",\"stack_trace\":[\"stackframe1\",\"stackframe2\"]},") >= 0);
+            Assert.IsTrue(json1.IndexOf("\"crash\":{") >= 0);
             Assert.IsTrue(json1.IndexOf("\"platform\":") >= 0);
             // Testing CrashReportConverter ReadJson
             CrashReport crashReport2 = JsonConvert.DeserializeObject(json1,typeof(CrashReport)) as CrashReport;
