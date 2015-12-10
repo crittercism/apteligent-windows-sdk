@@ -104,7 +104,8 @@ namespace CrittercismSDK
                                 Debug.WriteLine("SendMessage: "+message.GetType().Name);
                                 sendCompleted = SendRequest(request,message.PostBody());
                             }
-                        } catch {
+                        } catch (Exception ie) {
+                            Crittercism.LogInternalException(ie);
                         }
                         if (!sendCompleted) {
                             Crittercism.MessageQueue.Enqueue(message);

@@ -102,7 +102,7 @@ namespace CrittercismSDK
                 case "HandledException":
                     answer = (HttpWebRequest)WebRequest.Create(new Uri(apiURL + "/v1/errors",UriKind.Absolute));
                     break;
-                case "Crash":
+                case "CrashReport":
                     answer = (HttpWebRequest)WebRequest.Create(new Uri(apiURL + "/v1/crashes",UriKind.Absolute));
                     break;
                 case "MetadataReport":

@@ -36,7 +36,7 @@ namespace CrittercismSDK
             JObject o = JObject.Load(reader);
             if (IsUserBreadcrumbJson(o)) {
                 // Extract values from "JObject o" .
-                string timestamp = JsonUtils.JsonDateToISO8601DateString(o["timestamp"]);
+                string timestamp = JsonUtils.JsonDateToGMTDateString(o["timestamp"]);
                 string message = (string)((JValue)(o["message"])).Value;
                 // Call UserBreadcrumb constructor.
                 userBreadcrumb = new UserBreadcrumb(

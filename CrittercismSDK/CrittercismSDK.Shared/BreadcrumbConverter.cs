@@ -27,7 +27,7 @@ namespace CrittercismSDK {
             JArray a = JArray.Load(reader);
             if (IsBreadcrumbJson(a)) {
                 // Extract values from "JArray a" .
-                string timestamp = JsonUtils.JsonDateToISO8601DateString(a[(int)BreadcrumbIndex.Timestamp]);
+                string timestamp = JsonUtils.JsonDateToGMTDateString(a[(int)BreadcrumbIndex.Timestamp]);
                 BreadcrumbType breadcrumbType = (BreadcrumbType)(long)((JValue)(a[(int)BreadcrumbIndex.Type])).Value;
                 Object data = null;
                 // Launch = 0,      // 0 - session launched      ; --
