@@ -31,7 +31,8 @@ namespace UnitTest {
             TestHelpers.CheckCommonJsonFragments(asJson);
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
-                "\"current_session\":[{\"message\":\"session_start\"",
+                "\"current_session\":",
+                "\"message\":\"session_start\"",
                 "\"metadata\":{",
                 "\"favoriteFood\":\"Texas Sheet Cake\""
             };

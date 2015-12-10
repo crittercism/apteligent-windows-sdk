@@ -142,11 +142,11 @@ namespace CrittercismSDK
         #endregion
 
         #region Extracting Breadcrumbs
-        private static UserBreadcrumb CurrentSessionStartBreadcrumb(List<Breadcrumb> session) {
+        private static Breadcrumb SessionStartBreadcrumb(List<Breadcrumb> session) {
             // First Breadcrumb in session (Launch Breadcrumb equivalent to "session_start").
-            UserBreadcrumb answer = null;
+            Breadcrumb answer = null;
             if (session.Count>0) {
-                answer = new UserBreadcrumb(session[0]);
+                answer = session[0];
             }
             return answer;
         }
@@ -157,21 +157,21 @@ namespace CrittercismSDK
                 UserBreadcrumb userBreadcrumb = new UserBreadcrumb(breadcrumb);
                 answer.Add(userBreadcrumb);
             }
-            {
-                UserBreadcrumb sessionStartBreadcrumb = CurrentSessionStartBreadcrumb(session);
-                if ((sessionStartBreadcrumb != null)
-                    && (answer.IndexOf(sessionStartBreadcrumb) < 0)) {
-                    // Add session start breadcrumb at the begining, this if statement should always be true
-                    // In case we didn't log session start breadcrumb, we don't want to send an empty breadcrumb
-                    // and bread the server
-                    answer.Insert(0,sessionStartBreadcrumb);
-                }
-            }
             return answer;
         }
         internal static List<UserBreadcrumb> ExtractUserBreadcrumbs(long beginTime,long endTime) {
             // Extract UserBreadcrumb's from converted userBreadcrumb's filtered by time. (TransactionReport "breadcrumbs")
             List<Breadcrumb> list = userBreadcrumbs.RecentBreadcrumbs(beginTime,endTime);
+            {
+                Breadcrumb sessionStartBreadcrumb = SessionStartBreadcrumb(userBreadcrumbs.current_session);
+                if ((sessionStartBreadcrumb != null)
+                    && (list.IndexOf(sessionStartBreadcrumb) < 0)) {
+                    // Add session start breadcrumb at the begining, this if statement should always be true
+                    // In case we didn't log session start breadcrumb, we don't want to send an empty breadcrumb
+                    // and bread the server
+                    list.Insert(0,sessionStartBreadcrumb);
+                }
+            }
             List<UserBreadcrumb> answer = ConvertToUserBreadcrumbs(list);
             return answer;
         }

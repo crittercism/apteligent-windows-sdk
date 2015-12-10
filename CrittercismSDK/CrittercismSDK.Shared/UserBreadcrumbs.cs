@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -22,6 +24,13 @@ namespace CrittercismSDK
         internal UserBreadcrumbs(List<UserBreadcrumb> previous_session,List<UserBreadcrumb> current_session) {
             this.previous_session = previous_session;
             this.current_session = current_session;
+            Debug.WriteLine("UserBreadcrumbs: " + this);
+        }
+        #endregion
+
+        #region JSON
+        public override string ToString() {
+            return JsonConvert.SerializeObject(this);
         }
         #endregion
     }
