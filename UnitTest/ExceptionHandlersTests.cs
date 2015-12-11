@@ -21,13 +21,13 @@ namespace UnitTest {
         public void LogHandledExceptionTest() {
             TestHelpers.StartApp();
             Crittercism.LeaveBreadcrumb("HandledExceptionBreadcrumb");
-            Crittercism.SetValue("favoriteFood", "Texas Sheet Cake");
+            Crittercism.SetValue("favoriteFood","Texas Sheet Cake");
             TestHelpers.Cleanup(); // drop all previous messages
             TestHelpers.LogHandledException();
-            MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(HandledException));
+            MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(HandledException));
             Assert.IsNotNull(messageReport,"Expected a HandledException message");
-            String asJson=JsonConvert.SerializeObject(messageReport);
-            Trace.WriteLine("asJson == "+asJson);
+            String asJson = JsonConvert.SerializeObject(messageReport);
+            Trace.WriteLine("asJson == " + asJson);
             TestHelpers.CheckCommonJsonFragments(asJson);
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
@@ -37,18 +37,17 @@ namespace UnitTest {
                 "\"favoriteFood\":\"Texas Sheet Cake\""
             };
             foreach (String jsonFragment in jsonStrings) {
-                Trace.WriteLine("jsonFragment == "+jsonFragment);
-                Trace.WriteLine("asJson.Contains(jsonFragment) == "+asJson.Contains(jsonFragment));
+                Trace.WriteLine("jsonFragment == " + jsonFragment);
+                Trace.WriteLine("asJson.Contains(jsonFragment) == " + asJson.Contains(jsonFragment));
                 Assert.IsTrue(asJson.Contains(jsonFragment));
             };
         }
 
         [TestMethod]
-        public void HandledUnthrownExceptionTest()
-        {
+        public void HandledUnthrownExceptionTest() {
             try {
                 Exception exception = new Exception("description");
-                exception.Data.Add("MethodName", "methodName");
+                exception.Data.Add("MethodName","methodName");
                 Crittercism.LogHandledException(exception);
             } catch (Exception) {
                 // logHandledException should not throw its own exception

@@ -8,13 +8,11 @@ using Windows.System.Threading;
 using System.Timers;
 #endif // NETFX_CORE
 
-namespace CrittercismSDK
-{
-    internal class TransactionReporter
-    {
+namespace CrittercismSDK {
+    internal class TransactionReporter {
         #region Constants
         internal const int MSEC_PER_SEC = 1000;
-        internal const int MAX_TRANSACTION_COUNT=50;
+        internal const int MAX_TRANSACTION_COUNT = 50;
         const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
         #endregion
 
@@ -148,7 +146,7 @@ namespace CrittercismSDK
         internal static int TransactionCount() {
             int answer = 0;
             lock (lockObject) {
-                answer=transactionsDictionary.Count;
+                answer = transactionsDictionary.Count;
             }
             return answer;
         }
@@ -177,11 +175,11 @@ namespace CrittercismSDK
         #region Timing
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
-        private static ThreadPoolTimer timer=null;
+        private static ThreadPoolTimer timer = null;
         private static void OnTimerElapsed(ThreadPoolTimer timer) {
             lock (lockObject) {
                 SendTransactionReport();
-                timer=null;
+                timer = null;
             }
         }
 #else
@@ -212,15 +210,15 @@ namespace CrittercismSDK
         #region Reporting
         internal static void Enqueue(Transaction transaction) {
             lock (lockObject) {
-                while (TransactionsQueue.Count>= MAX_TRANSACTION_COUNT) {
+                while (TransactionsQueue.Count >= MAX_TRANSACTION_COUNT) {
                     TransactionsQueue.Dequeue();
                 };
                 TransactionsQueue.Enqueue(transaction);
 #if NETFX_CORE || WINDOWS_PHONE
-                if (timer==null) {
+                if (timer == null) {
                     // Creates a single-use timer.
                     // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
-                    timer=ThreadPoolTimer.CreateTimer(
+                    timer = ThreadPoolTimer.CreateTimer(
                         OnTimerElapsed,
                         TimeSpan.FromMilliseconds(Interval()));
                 }
@@ -254,7 +252,7 @@ namespace CrittercismSDK
             return answer;
         }
         private static void SendTransactionReport() {
-            if (TransactionsQueue.Count>0) {
+            if (TransactionsQueue.Count > 0) {
                 List<Transaction> transactions = TransactionsQueue.ToList();
                 TransactionsQueue.Clear();
                 long beginTime = BeginTime(transactions);

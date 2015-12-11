@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     internal class StringUtils {
         internal static string TruncateString(string s,int maxLength) {
             // Truncate string s max allowed string length (maxLength characters, not including null character)

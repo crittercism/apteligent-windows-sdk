@@ -241,8 +241,8 @@ namespace UnitTest {
             // Testing BreadcrumbConverter WriteJson
             string json1 = JsonConvert.SerializeObject(breadcrumb1);
             // NOTE: VS editor syntax colors embedded URL, but the C# syntax is correct.
-            Assert.IsTrue(json1.IndexOf(",2,[\"POST\",\"http://www.mrscritter.com")>=0);
-            Assert.IsTrue(json1.IndexOf(",433,2,3213,2478,200,5,0]]")>=0);
+            Assert.IsTrue(json1.IndexOf(",2,[\"POST\",\"http://www.mrscritter.com") >= 0);
+            Assert.IsTrue(json1.IndexOf(",433,2,3213,2478,200,5,0]]") >= 0);
             string json2 = JsonConvert.SerializeObject(breadcrumb1,Formatting.None,new BreadcrumbConverter());
             Debug.WriteLine("json1 == " + json1);
             Debug.WriteLine("json2 == " + json2);

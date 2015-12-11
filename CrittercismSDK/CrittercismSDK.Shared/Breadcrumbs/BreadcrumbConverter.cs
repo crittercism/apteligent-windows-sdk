@@ -38,7 +38,7 @@ namespace CrittercismSDK {
                 // View,            // 5 - uiview change / load  ; {event:,viewName:}
                 // Error,           // 6 - handled exception     ; {name:,reason:}
                 // Crash,           // 7 - crash                 ; {name:,reason:}
-                if (breadcrumbType==BreadcrumbType.Launch) {
+                if (breadcrumbType == BreadcrumbType.Launch) {
                     // SPEC: "[Session launched] is special in that it will only have a timestamp
                     // and breadcrumb type field".
                 } else {

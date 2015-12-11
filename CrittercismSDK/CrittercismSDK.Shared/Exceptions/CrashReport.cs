@@ -10,14 +10,12 @@ using Windows.Graphics.Display;
 using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     /// <summary>
     /// Crash (Unhandled Exception).
     /// </summary>
     [DataContract]
-    internal class CrashReport : MessageReport
-    {
+    internal class CrashReport : MessageReport {
         /// <summary>
         /// Gets or sets the identifier of the application.
         /// </summary>
@@ -30,7 +28,7 @@ namespace CrittercismSDK
         /// </summary>
         /// <value> The application state. </value>
         [DataMember]
-        public Dictionary<string, object> app_state { get; internal set; }
+        public Dictionary<string,object> app_state { get; internal set; }
 
         [DataMember]
         public UserBreadcrumbs breadcrumbs { get; internal set; }
@@ -45,7 +43,7 @@ namespace CrittercismSDK
         public List<Transaction> transactions { get; internal set; }
 
         [DataMember]
-        public Dictionary<string, string> metadata { get; internal set; }
+        public Dictionary<string,string> metadata { get; internal set; }
 
         /// <summary>
         /// Gets or sets the crash
@@ -59,12 +57,11 @@ namespace CrittercismSDK
         /// <value> The platform. </value>
         [DataMember]
         public Platform platform { get; internal set; }
-        
+
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public CrashReport()
-        {
+        public CrashReport() {
         }
 
         /// <summary>
@@ -80,8 +77,7 @@ namespace CrittercismSDK
             List<Endpoint> endpoints,
             List<Breadcrumb> systemBreadcrumbs,
             List<Transaction> transactions,
-            ExceptionObject exception)
-        {
+            ExceptionObject exception) {
             app_id = appId;
             app_state = ComputeAppState();
             this.metadata = metadata;

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     internal class DebugUtils {
         internal static void LOG_ERROR(string message) {
             // "Release" error message visible to developers.

@@ -17,8 +17,7 @@ using System.IO.IsolatedStorage;
 using System.Reflection;
 #endif
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     /// <summary>
     /// Storage helper.
     /// </summary>
@@ -31,16 +30,16 @@ namespace CrittercismSDK
         // for debugging.
         ////////////////////////////////////////////////////////////////
 
-        private static object lockObject=new Object();
+        private static object lockObject = new Object();
 
         #region CrittercismPath
 
-        private static volatile bool PrivateCrittercismPathCreated=false;
+        private static volatile bool PrivateCrittercismPathCreated = false;
 
         internal static string CrittercismPath() {
             // Ensure CrittercismPath folder gets created if it doesn't already
             // exist as a side effect.
-            const string relativePath="Crittercism";
+            const string relativePath = "Crittercism";
             if (!PrivateCrittercismPathCreated) {
                 lock (lockObject) {
                     if (!PrivateCrittercismPathCreated) {
@@ -48,7 +47,7 @@ namespace CrittercismSDK
                         if (!FolderExists(relativePath)) {
                             CreateFolder(relativePath);
                         };
-                        PrivateCrittercismPathCreated=true;
+                        PrivateCrittercismPathCreated = true;
                     };
                 };
             };
@@ -60,8 +59,8 @@ namespace CrittercismSDK
 
         #region StoragePath
 
-        private static volatile bool PrivateStoragePathComputed=false;
-        private static string PrivateStoragePath="";
+        private static volatile bool PrivateStoragePathComputed = false;
+        private static string PrivateStoragePath = "";
 
         private static string StoragePath() {
             // Get PrivateStoragePath == app's storage folder, used for debugging.
@@ -73,7 +72,7 @@ namespace CrittercismSDK
                         // Check flag again inside lock in case our thread loses race.
 #if DEBUG
 #if NETFX_CORE
-                        PrivateStoragePath=GetStore().Path;
+                        PrivateStoragePath = GetStore().Path;
 #else
                         {
                             IsolatedStorageFile storage=GetStore();
@@ -89,7 +88,7 @@ namespace CrittercismSDK
 #endif // WINDOWS_PHONE
                         }
 #endif // NETFX_CORE
-                        Debug.WriteLine("STORAGE PATH: "+PrivateStoragePath);
+                        Debug.WriteLine("STORAGE PATH: " + PrivateStoragePath);
                         Debug.WriteLine("");
 #endif // DEBUG
                     }
@@ -132,10 +131,10 @@ namespace CrittercismSDK
         /// <param name="dataType"> Type of the data. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         internal static object Load(Type dataType) {
-            object data=null;
+            object data = null;
             try {
-                string path=Path.Combine(CrittercismPath(),dataType.Name+".js");
-                data=Load(path,dataType);
+                string path = Path.Combine(CrittercismPath(),dataType.Name + ".js");
+                data = Load(path,dataType);
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             };
@@ -148,19 +147,19 @@ namespace CrittercismSDK
         /// <param name="dataType"> Type of the data. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         internal static object Load(string path,Type dataType) {
-            object data=null;
+            object data = null;
             try {
-                Debug.WriteLine("Load: "+Path.Combine(StoragePath(),path));
+                Debug.WriteLine("Load: " + Path.Combine(StoragePath(),path));
                 if (FileExists(path)) {
-                    string dataString=LoadString(path);
-                    if (dataString==null) {
+                    string dataString = LoadString(path);
+                    if (dataString == null) {
                         // Unable to read file.  Maybe something is still writing
                         // it?  Return null in this case.  Will try again later.
                     } else {
                         try {
-                            data=JsonConvert.DeserializeObject(dataString,dataType);
+                            data = JsonConvert.DeserializeObject(dataString,dataType);
                         } catch (Exception) {
-                            Debug.WriteLine("Load: Unable to parse "+path);
+                            Debug.WriteLine("Load: Unable to parse " + path);
                             // Try to DeleteFile anything we can't parse.  It might be
                             // a partly written file terminated by an earlier crash.
                             try {
@@ -170,7 +169,7 @@ namespace CrittercismSDK
                         }
                     }
                 } else {
-                    Debug.WriteLine("Load: File doesn't exist "+path);
+                    Debug.WriteLine("Load: File doesn't exist " + path);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -179,18 +178,18 @@ namespace CrittercismSDK
         }
 
         private static string LoadString(string path) {
-            string dataString=null;
+            string dataString = null;
             try {
 #if NETFX_CORE
                 {
-                    StorageFile file=WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
+                    StorageFile file = WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
                         GetStore().GetFileAsync(path),
                         CancellationToken.None
                     ).Result;
-                    dataString=(string)WindowsRuntimeSystemExtensions.AsTask(
+                    dataString = (string)WindowsRuntimeSystemExtensions.AsTask(
                         FileIO.ReadTextAsync(file)
                     ).Result;
-                    Debug.WriteLine("LoadString: "+dataString);
+                    Debug.WriteLine("LoadString: " + dataString);
                 }
 #else
                 {
@@ -215,10 +214,10 @@ namespace CrittercismSDK
         /// <param name="Data"> The data. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         internal static bool Save(object data) {
-            bool answer=false;
+            bool answer = false;
             try {
-                string path=Path.Combine(CrittercismPath(),data.GetType().Name+".js");
-                answer=Save(data,path);
+                string path = Path.Combine(CrittercismPath(),data.GetType().Name + ".js");
+                answer = Save(data,path);
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             };
@@ -231,14 +230,14 @@ namespace CrittercismSDK
         /// <param name="Data"> The data. </param>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         internal static bool Save(object data,string path) {
-            bool answer=false;
+            bool answer = false;
             try {
-                Debug.WriteLine("Save: "+Path.Combine(StoragePath(),path));
-                string dataString=JsonConvert.SerializeObject(data);
+                Debug.WriteLine("Save: " + Path.Combine(StoragePath(),path));
+                string dataString = JsonConvert.SerializeObject(data);
                 Debug.WriteLine("JSON:");
                 Debug.WriteLine(dataString);
                 SaveString(path,dataString);
-                answer=true;
+                answer = true;
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             };
@@ -248,7 +247,7 @@ namespace CrittercismSDK
 #if NETFX_CORE
         private static StorageFile TryGetFile(string path) {
             //Debug.WriteLine("TryGetFile: "+path);
-            StorageFile answer=null;
+            StorageFile answer = null;
 #if WINDOWS_APP
             {
                 IStorageItem item=WindowsRuntimeSystemExtensions.AsTask<IStorageItem>(
@@ -272,17 +271,17 @@ namespace CrittercismSDK
                 // avoids this, is good enough for MSDN blogger to consider it, and
                 // we like to think the Crittercism SDK actually will not be calling
                 // this method very much.
-                String directoryName=Path.GetDirectoryName(path);
-                StorageFolder store=TryGetFolder(directoryName);
-                if (store!=null) {
-                    String fileName=Path.GetFileName(path);
-                    IReadOnlyList<StorageFile> files=WindowsRuntimeSystemExtensions.AsTask<IReadOnlyList<StorageFile>>(
+                String directoryName = Path.GetDirectoryName(path);
+                StorageFolder store = TryGetFolder(directoryName);
+                if (store != null) {
+                    String fileName = Path.GetFileName(path);
+                    IReadOnlyList<StorageFile> files = WindowsRuntimeSystemExtensions.AsTask<IReadOnlyList<StorageFile>>(
                          store.GetFilesAsync(),
                          CancellationToken.None
                     ).Result;
                     foreach (StorageFile file in files) {
                         if (file.Name.Equals(fileName,StringComparison.OrdinalIgnoreCase)) {
-                            answer=file;
+                            answer = file;
                             break;
                         }
                     }
@@ -296,7 +295,7 @@ namespace CrittercismSDK
 
 #if NETFX_CORE
         private static StorageFolder TryGetFolder(string path) {
-            StorageFolder answer=null;
+            StorageFolder answer = null;
 #if WINDOWS_APP
             {
                 IStorageItem item=WindowsRuntimeSystemExtensions.AsTask<IStorageItem>(
@@ -311,22 +310,22 @@ namespace CrittercismSDK
             {
                 // WindowsPhoneApp StorageFolder doesn't have TryGetItemAsync .
                 // Navigate to the end of the path.
-                answer=GetStore();
+                answer = GetStore();
                 if (!path.Equals("")) {
-                    String directoryName=Path.GetDirectoryName(path);
+                    String directoryName = Path.GetDirectoryName(path);
                     if (!directoryName.Equals("")) {
-                        answer=TryGetFolder(directoryName);
+                        answer = TryGetFolder(directoryName);
                     }
-                    String fileName=Path.GetFileName(path);
+                    String fileName = Path.GetFileName(path);
                     if (!fileName.Equals("")) {
-                        IReadOnlyList<StorageFolder> folders=WindowsRuntimeSystemExtensions.AsTask<IReadOnlyList<StorageFolder>>(
+                        IReadOnlyList<StorageFolder> folders = WindowsRuntimeSystemExtensions.AsTask<IReadOnlyList<StorageFolder>>(
                              answer.GetFoldersAsync(),
                              CancellationToken.None
                         ).Result;
-                        answer=null;
+                        answer = null;
                         foreach (StorageFolder folder in folders) {
                             if (folder.Name.Equals(fileName,StringComparison.OrdinalIgnoreCase)) {
-                                answer=folder;
+                                answer = folder;
                                 break;
                             }
                         }
@@ -342,9 +341,9 @@ namespace CrittercismSDK
 #if NETFX_CORE
         private static StorageFile SaveFile(string path) {
             // file = fopen(path,"w");
-            StorageFile file=TryGetFile(path);
-            if (file==null) {
-                file=WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
+            StorageFile file = TryGetFile(path);
+            if (file == null) {
+                file = WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
                     GetStore().CreateFileAsync(path),
                     CancellationToken.None
                 ).Result;
@@ -356,8 +355,8 @@ namespace CrittercismSDK
         private static void SaveString(string path,string dataString) {
 #if NETFX_CORE
             {
-                StorageFile file=SaveFile(path);
-                Debug.WriteLine("SaveString: "+dataString);
+                StorageFile file = SaveFile(path);
+                Debug.WriteLine("SaveString: " + dataString);
                 WindowsRuntimeSystemExtensions.AsTask(
                     FileIO.WriteTextAsync(file,dataString)
                 ).Wait();
@@ -378,7 +377,7 @@ namespace CrittercismSDK
         internal static void DeleteFile(string path) {
 #if NETFX_CORE
             {
-                StorageFile file=WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
+                StorageFile file = WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
                     GetStore().GetFileAsync(path),
                     CancellationToken.None
                 ).Result;
@@ -393,13 +392,13 @@ namespace CrittercismSDK
 
         internal static bool FileExists(string path) {
             //Debug.WriteLine("FileExists: "+path);
-            bool answer=false;
+            bool answer = false;
 #if NETFX_CORE
             try {
-                StorageFile file=TryGetFile(path);
-                if (file!=null) {
+                StorageFile file = TryGetFile(path);
+                if (file != null) {
                     //Debug.WriteLine("FileExists: answer=true");
-                    answer=true;
+                    answer = true;
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -413,13 +412,13 @@ namespace CrittercismSDK
 
         internal static bool FolderExists(string path) {
             //Debug.WriteLine("FolderExists: "+path);
-            bool answer=false;
+            bool answer = false;
 #if NETFX_CORE
             try {
-                StorageFolder folder=TryGetFolder(path);
-                if (folder!=null) {
+                StorageFolder folder = TryGetFolder(path);
+                if (folder != null) {
                     //Debug.WriteLine("FolderExists: answer=true");
-                    answer=true;
+                    answer = true;
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -433,7 +432,7 @@ namespace CrittercismSDK
 
 #if NETFX_CORE
         internal static StorageFolder GetStore() {
-            StorageFolder storage=ApplicationData.Current.LocalFolder;
+            StorageFolder storage = ApplicationData.Current.LocalFolder;
             return storage;
         }
 #else
@@ -450,7 +449,7 @@ namespace CrittercismSDK
         internal static DateTimeOffset GetCreationTime(string path) {
 #if NETFX_CORE
             {
-                StorageFile file=WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
+                StorageFile file = WindowsRuntimeSystemExtensions.AsTask<StorageFile>(
                     GetStore().GetFileAsync(path),
                     CancellationToken.None
                 ).Result;
@@ -465,15 +464,15 @@ namespace CrittercismSDK
             // path == path to folder
 #if NETFX_CORE
             {
-                StorageFolder folder=WindowsRuntimeSystemExtensions.AsTask<StorageFolder>(
+                StorageFolder folder = WindowsRuntimeSystemExtensions.AsTask<StorageFolder>(
                      GetStore().GetFolderAsync(path),
                      CancellationToken.None
                 ).Result;
-                IReadOnlyList<StorageFile> files=WindowsRuntimeSystemExtensions.AsTask<IReadOnlyList<StorageFile>>(
+                IReadOnlyList<StorageFile> files = WindowsRuntimeSystemExtensions.AsTask<IReadOnlyList<StorageFile>>(
                      folder.GetFilesAsync(),
                      CancellationToken.None
                 ).Result;
-                List<string> list=new List<string>();
+                List<string> list = new List<string>();
                 foreach (StorageFile file in files) {
                     list.Add(file.Name);
                 }

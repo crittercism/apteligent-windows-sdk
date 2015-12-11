@@ -5,14 +5,12 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     /// <summary>
     /// Breadcrumbs.
     /// </summary>
     [DataContract]
-    internal class Breadcrumbs
-    {
+    internal class Breadcrumbs {
         #region Constants
         internal const int MAX_TEXT_LENGTH = 140;
         #endregion
@@ -36,7 +34,7 @@ namespace CrittercismSDK
         #region Static Methods
         internal static Breadcrumbs UserBreadcrumbs() {
             lock (lockObject) {
-                if (userBreadcrumbs==null) {
+                if (userBreadcrumbs == null) {
                     const int maxUserBreadcrumbsCount = 100;
                     userBreadcrumbs = SessionStart("UserBreadcrumbs",maxUserBreadcrumbsCount);
                 }
@@ -96,9 +94,9 @@ namespace CrittercismSDK
         private Breadcrumbs(string name,int maxCount) {
             this.name = name;
             this.maxCount = maxCount;
-            previous_session=new List<Breadcrumb>();
-            current_session=new List<Breadcrumb>();
-            saved=false;
+            previous_session = new List<Breadcrumb>();
+            current_session = new List<Breadcrumb>();
+            saved = false;
         }
         #endregion
 
@@ -145,7 +143,7 @@ namespace CrittercismSDK
         private static Breadcrumb SessionStartBreadcrumb(List<Breadcrumb> session) {
             // First Breadcrumb in session (Launch Breadcrumb equivalent to "session_start").
             Breadcrumb answer = null;
-            if (session.Count>0) {
+            if (session.Count > 0) {
                 answer = session[0];
             }
             return answer;
@@ -225,10 +223,10 @@ namespace CrittercismSDK
 
         #region Instance Methods
         internal Breadcrumbs Copy() {
-            Breadcrumbs answer=new Breadcrumbs(name,maxCount);
+            Breadcrumbs answer = new Breadcrumbs(name,maxCount);
             lock (this) {
-                answer.current_session=new List<Breadcrumb>(current_session);
-                answer.previous_session=new List<Breadcrumb>(previous_session);
+                answer.current_session = new List<Breadcrumb>(current_session);
+                answer.previous_session = new List<Breadcrumb>(previous_session);
             }
             return answer;
         }
@@ -238,12 +236,12 @@ namespace CrittercismSDK
         /// </summary>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         private bool Save() {
-            bool answer=false;
+            bool answer = false;
             try {
                 lock (this) {
                     if (!saved) {
-                        answer=StorageHelper.Save(this);
-                        saved=true;
+                        answer = StorageHelper.Save(this);
+                        saved = true;
                     }
                 }
             } catch (Exception ie) {

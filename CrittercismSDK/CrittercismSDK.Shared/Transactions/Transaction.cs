@@ -10,11 +10,9 @@ using Windows.System.Threading;
 using System.Timers;
 #endif // NETFX_CORE
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     [JsonConverter(typeof(TransactionConverter))]
-    internal class Transaction
-    {
+    internal class Transaction {
         #region Constants
         internal const int MAX_NAME_LENGTH = 255;
         // Use Int32.MinValue pennies to represent Wire+Protocol doc's "null"
@@ -321,7 +319,7 @@ namespace CrittercismSDK
         }
         private bool IsFinal() {
             // Transaction is in final state?
-            bool answer= ((state != TransactionState.CREATED) && (state != TransactionState.BEGUN));
+            bool answer = ((state != TransactionState.CREATED) && (state != TransactionState.BEGUN));
             return answer;
         }
         internal void Transition(TransactionState newState) {
@@ -333,7 +331,7 @@ namespace CrittercismSDK
                     case TransactionState.CREATED:
                         if (newState == TransactionState.BEGUN) {
                             SetState(newState,DateTime.UtcNow.Ticks);
-                        } else if (newState==TransactionState.CRASHED) {
+                        } else if (newState == TransactionState.CRASHED) {
                             // NOP. Leave transaction in CREATED state.
                         } else {
                             // Transaction being begun for the first time after create.
@@ -369,7 +367,7 @@ namespace CrittercismSDK
             List<JToken> list = new List<JToken>();
             list.Add(name);
             list.Add((int)state);
-            list.Add(timeout/(double)MSEC_PER_SEC);  // seconds
+            list.Add(timeout / (double)MSEC_PER_SEC);  // seconds
             if (value == NULL_VALUE) {
                 list.Add(null);
             } else {
@@ -378,7 +376,7 @@ namespace CrittercismSDK
             list.Add(new JObject());
             list.Add(beginTimeString);
             list.Add(endTimeString);
-            list.Add(eyeTime/(double)TICKS_PER_SEC);  // seconds
+            list.Add(eyeTime / (double)TICKS_PER_SEC);  // seconds
             JArray answer = new JArray(list);
             return answer;
         }
@@ -414,10 +412,10 @@ namespace CrittercismSDK
                 }
             }
         }
-#endregion
+        #endregion
 
 
-#region Persistence
+        #region Persistence
         internal static Transaction[] AllTransactions() {
             return TransactionReporter.AllTransactions();
         }
@@ -425,9 +423,9 @@ namespace CrittercismSDK
         internal static Transaction TransactionForName(string name) {
             return TransactionReporter.TransactionForName(name);
         }
-#endregion
+        #endregion
 
-#region Timing
+        #region Timing
 #if NETFX_CORE || WINDOWS_PHONE
         private static ThreadPoolTimer timer = null;
 #else
@@ -445,7 +443,7 @@ namespace CrittercismSDK
                 } else {
                     // Create new timer based on "timeout" property and when we began
                     // and now.
-                    int milliseconds = timeout - (int)(eyeTime/TICKS_PER_MSEC);
+                    int milliseconds = timeout - (int)(eyeTime / TICKS_PER_MSEC);
                     if (milliseconds <= 0) {
                         // If remaining time is nonpositive, just timeout here
                         Transition(TransactionState.TIMEOUT);
@@ -509,6 +507,6 @@ namespace CrittercismSDK
             }
 #endif // NETFX_CORE
         }
-#endregion
+        #endregion
     }
 }

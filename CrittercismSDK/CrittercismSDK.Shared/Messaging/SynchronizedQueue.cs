@@ -22,7 +22,7 @@ namespace CrittercismSDK {
             }
         }
         internal SynchronizedQueue(Queue<T> q) {
-            this._q=q;
+            this._q = q;
         }
         public void Clear() {
             lock (this._q)

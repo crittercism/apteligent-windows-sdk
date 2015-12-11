@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     internal class JsonUtils {
         internal static double StringToExtendedReal(Object x) {
             double answer = 0.0;

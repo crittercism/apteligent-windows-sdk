@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CrittercismSDK
-{
-    internal enum BreadcrumbType
-    {
+namespace CrittercismSDK {
+    internal enum BreadcrumbType {
         Launch = 0,      // 0 - session launched      ; --
         Text,            // 1 - user breadcrumb       ; {text:,level:}
         Network,         // 2 - network breadcrumb    ; [verb,url,...,statusCode,errorCode]

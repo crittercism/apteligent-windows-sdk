@@ -9,13 +9,11 @@ using Windows.Graphics.Display;
 using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     [DataContract]
-    internal class TransactionReport : MessageReport
-    {
+    internal class TransactionReport : MessageReport {
         [DataMember]
-        public Dictionary<string, object> appState { get; internal set; }
+        public Dictionary<string,object> appState { get; internal set; }
         [DataMember]
         public List<Transaction> transactions { get; internal set; }
         [DataMember]
@@ -24,16 +22,14 @@ namespace CrittercismSDK
         public List<Breadcrumb> systemBreadcrumbs { get; internal set; }
         [DataMember]
         public List<Endpoint> endpoints { get; internal set; }
-        private TransactionReport()
-        {
+        private TransactionReport() {
         }
         public TransactionReport(
             Dictionary<string,object> appState,
             List<Transaction> transactions,
             List<UserBreadcrumb> breadcrumbs,
             List<Breadcrumb> systemBreadcrumbs,
-            List<Endpoint> endpoints)
-        {
+            List<Endpoint> endpoints) {
             this.appState = appState;
             this.transactions = transactions;
             this.breadcrumbs = breadcrumbs;

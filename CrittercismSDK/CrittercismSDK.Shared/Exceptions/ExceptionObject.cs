@@ -4,14 +4,12 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     /// <summary>
     /// Exception object.
     /// </summary>
     [DataContract]
-    internal class ExceptionObject
-    {
+    internal class ExceptionObject {
         /// <summary>
         /// Gets or sets the name of the exception.
         /// </summary>
@@ -36,8 +34,7 @@ namespace CrittercismSDK
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public ExceptionObject()
-        {
+        public ExceptionObject() {
         }
 
         /// <summary>
@@ -46,11 +43,10 @@ namespace CrittercismSDK
         /// <param name="exceptionName">    Name of the exception. </param>
         /// <param name="exceptionReason">  The exception reason. </param>
         /// <param name="stacktrace">       The stacktrace. </param>
-        public ExceptionObject(string exceptionName, string exceptionReason, string stacktrace)
-        {
+        public ExceptionObject(string exceptionName,string exceptionReason,string stacktrace) {
             name = exceptionName;
             reason = exceptionReason;
-            stack_trace = stacktrace.Split(new string[] {"\r\n"},  StringSplitOptions.RemoveEmptyEntries).ToList();
+            stack_trace = stacktrace.Split(new string[] { "\r\n" },StringSplitOptions.RemoveEmptyEntries).ToList();
         }
     }
 }

@@ -262,7 +262,7 @@ namespace UnitTest {
         [TestMethod]
         public void TestInitLongString() {
             Transaction example = new Transaction(ExampleLongString);
-            Trace.WriteLine("example.Name() == "+example.Name());
+            Trace.WriteLine("example.Name() == " + example.Name());
             Assert.IsTrue(example.Name() == ExampleTruncatedString,
                          "Confirm constructor sets name property.");
         }
@@ -366,18 +366,18 @@ namespace UnitTest {
                 // There should be no "error" .
                 Assert.IsNull(e,
                             "Expection a legal JSON string that parses correctly #1.");
-                if (e!=null) {
-                    Trace.WriteLine(String.Format("error == "+e.Message));
+                if (e != null) {
+                    Trace.WriteLine(String.Format("error == " + e.Message));
                 }
             }
             // The "json" should be an NSArray .
             Assert.IsNotNull(json,
                            "Expection a legal JSON string that parses correctly #2.");
             Trace.WriteLine(String.Format("Converted jsonString's class == "
-                                          +json.GetType().FullName));
+                                          + json.GetType().FullName));
             Assert.IsTrue(json is Object[],
                          "Expecting transaction JSON string representing JSON array.");
-            Trace.WriteLine(String.Format("json == "+json));
+            Trace.WriteLine(String.Format("json == " + json));
             // TODO: Following commented out test statement is still broken.
             // JsonConvert.DeserializeObject is doing some unwanted weird stuff.
             //Assert.IsTrue(TransactionConverter.IsTransactionJson(json));
@@ -455,8 +455,8 @@ namespace UnitTest {
             Transaction example2 = ExampleTransaction();
             Trace.WriteLine("INITIALLY EQUAL");
             //JsonConvert.SerializeObject(example1)
-            Trace.WriteLine("example1 == "+example1);
-            Trace.WriteLine("example2 == "+example2);
+            Trace.WriteLine("example1 == " + example1);
+            Trace.WriteLine("example2 == " + example2);
             // Change example1
             example1.SetTimeout(example1.Timeout() + 100);
             example1.SetValue(example1.Value() + 10000);
@@ -466,14 +466,14 @@ namespace UnitTest {
             Assert.IsFalse(example1.Value() == firstValue,
                            "Not expecting example1.Value()==firstValue");
             Trace.WriteLine("NO LONGER EQUAL");
-            Trace.WriteLine("example1 == "+example1);
-            Trace.WriteLine("example2 == "+example2);
+            Trace.WriteLine("example1 == " + example1);
+            Trace.WriteLine("example2 == " + example2);
             // Change example1 back
             example1.SetTimeout(firstTimeout);
             example1.SetValue(firstValue);
             Trace.WriteLine("SHOULD BE EQUAL AGAIN");
-            Trace.WriteLine("example1 == "+example1);
-            Trace.WriteLine("example2 == "+example2);
+            Trace.WriteLine("example1 == " + example1);
+            Trace.WriteLine("example2 == " + example2);
             // Confirm members of example1 have been restored.
             Assert.IsTrue(example1.Name() == firstName,
                           "Expecting example1.Name()==firstName");

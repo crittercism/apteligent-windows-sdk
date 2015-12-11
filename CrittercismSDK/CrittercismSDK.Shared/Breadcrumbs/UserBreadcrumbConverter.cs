@@ -6,8 +6,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     internal class UserBreadcrumbConverter : JsonConverter {
         public override void WriteJson(JsonWriter writer,object value,JsonSerializer serializer) {
             UserBreadcrumb userBreadcrumb = (UserBreadcrumb)value;

@@ -32,10 +32,10 @@ namespace CrittercismSDK {
         public readonly string device_model = Crittercism.DeviceModel;
 
         [DataMember]
-        public readonly string os_name=Crittercism.OSName;
+        public readonly string os_name = Crittercism.OSName;
 
         [DataMember]
-        public readonly string os_version=Crittercism.OSVersion;
+        public readonly string os_version = Crittercism.OSVersion;
 
         public Platform() {
             this.device_id = Crittercism.DeviceId;

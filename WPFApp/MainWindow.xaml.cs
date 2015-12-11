@@ -15,35 +15,32 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using CrittercismSDK;
 
-namespace WPFApp
-{
+namespace WPFApp {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
-    {
+    public partial class MainWindow : Window {
         private static Random random = new Random();
 
-        public MainWindow()
-        {
+        public MainWindow() {
             InitializeComponent();
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
-            Random random=new Random();
-            string[] names= { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
-            string name=names[random.Next(0,names.Length)];
-            Crittercism.SetUsername("Critter "+name);
+            Random random = new Random();
+            string[] names = { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
+            string name = names[random.Next(0,names.Length)];
+            Crittercism.SetUsername("Critter " + name);
         }
 
         private void leaveBreadcrumbClick(object sender,RoutedEventArgs e) {
-            Random random=new Random();
-            string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
-            string name=names[random.Next(0,names.Length)];
+            Random random = new Random();
+            string[] names = { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
+            string name = names[random.Next(0,names.Length)];
             Crittercism.LeaveBreadcrumb(name);
         }
 
-        private static string[] urls=new string[] {
+        private static string[] urls = new string[] {
             "http://www.hearst.com",
             "http://www.urbanoutfitters.com",
             "http://www.pinterest.com",
@@ -66,22 +63,22 @@ namespace WPFApp
             "http://www.crittercism.com/customers/"
         };
         private void logNetworkRequestClick(object sender,RoutedEventArgs e) {
-            Random random=new Random();
-            string[] methods=new string[] { "GET","POST","HEAD","PUT" };
-            string method=methods[random.Next(0,methods.Length)];
-            string url=urls[random.Next(0,urls.Length)];
-            if (random.Next(0,2)==1) {
-                url=url+"?doYouLoveCrittercism=YES";
+            Random random = new Random();
+            string[] methods = new string[] { "GET","POST","HEAD","PUT" };
+            string method = methods[random.Next(0,methods.Length)];
+            string url = urls[random.Next(0,urls.Length)];
+            if (random.Next(0,2) == 1) {
+                url = url + "?doYouLoveCrittercism=YES";
             }
             // latency in milliseconds
-            long latency=(long)Math.Floor(4000.0*random.NextDouble());
-            long bytesRead=random.Next(0,10000);
-            long bytesSent=random.Next(0,10000);
-            long responseCode=200;
-            if (random.Next(0,5)==0) {
+            long latency = (long)Math.Floor(4000.0 * random.NextDouble());
+            long bytesRead = random.Next(0,10000);
+            long bytesSent = random.Next(0,10000);
+            long responseCode = 200;
+            if (random.Next(0,5) == 0) {
                 // Some common response other than 200 == OK .
-                long[] responseCodes=new long[] { 301,308,400,401,402,403,404,405,408,500,502,503 };
-                responseCode=responseCodes[random.Next(0,responseCodes.Length)];
+                long[] responseCodes = new long[] { 301,308,400,401,402,403,404,405,408,500,502,503 };
+                responseCode = responseCodes[random.Next(0,responseCodes.Length)];
             }
             Crittercism.LogNetworkRequest(
                 method,
@@ -109,7 +106,7 @@ namespace WPFApp
                     dialog.Owner = Window.GetWindow(this);
                     dialog.ShowDialog();
                     Nullable<bool> dialogResult = dialog.DialogResult;
-                    if (dialogResult==true) {
+                    if (dialogResult == true) {
                         switch (dialog.Answer) {
                             case "End Transaction":
                                 Crittercism.EndTransaction(transactionName);
@@ -133,9 +130,9 @@ namespace WPFApp
                 Crittercism.LogHandledException(ex);
             }
         }
-        
+
         private void handledUnthrownExceptionClick(object sender,RoutedEventArgs e) {
-            Exception exception=new Exception("description");
+            Exception exception = new Exception("description");
             exception.Data.Add("MethodName","methodName");
             Crittercism.LogHandledException(exception);
         }
@@ -163,9 +160,9 @@ namespace WPFApp
                 throw new Exception("Outer Exception",ie);
             }
         }
-        
+
         private void testMultithreadClick(object sender,RoutedEventArgs e) {
-            Thread thread=new Thread(new ThreadStart(Worker.Work));
+            Thread thread = new Thread(new ThreadStart(Worker.Work));
             thread.Start();
         }
 
@@ -174,26 +171,26 @@ namespace WPFApp
         }
 
         private void critterClick(object sender,RoutedEventArgs e) {
-            string username=Crittercism.Username();
-            if (username==null) {
-                username="User";
+            string username = Crittercism.Username();
+            if (username == null) {
+                username = "User";
             }
-            string response="";
-            MessageBoxResult result=MessageBox.Show("Do you love Crittercism?","WPFApp",MessageBoxButton.YesNo);
+            string response = "";
+            MessageBoxResult result = MessageBox.Show("Do you love Crittercism?","WPFApp",MessageBoxButton.YesNo);
             switch (result) {
                 case MessageBoxResult.Yes:
-                    response="loves Crittercism.";
+                    response = "loves Crittercism.";
                     break;
                 case MessageBoxResult.No:
-                    response="doesn't love Crittercism.";
+                    response = "doesn't love Crittercism.";
                     break;
             }
-            Crittercism.LeaveBreadcrumb(username+" "+response);
+            Crittercism.LeaveBreadcrumb(username + " " + response);
         }
 
         private void Window_Closed(object sender,EventArgs e) {
             Crittercism.LeaveBreadcrumb("Closed");
-            if (Application.Current.Windows.Count==0) {
+            if (Application.Current.Windows.Count == 0) {
                 // Last window is closing.
                 Crittercism.Shutdown();
                 Application.Current.Shutdown();

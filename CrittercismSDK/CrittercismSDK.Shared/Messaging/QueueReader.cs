@@ -20,10 +20,8 @@ using Windows.UI.Xaml;
 using System.Web;
 #endif
 
-namespace CrittercismSDK
-{
-    internal class QueueReader
-    {
+namespace CrittercismSDK {
+    internal class QueueReader {
         /// <summary>
         /// Reads the queue.
         /// </summary>
@@ -37,7 +35,7 @@ namespace CrittercismSDK
                     // even without prompting.  Useful if last SendMessage failed and
                     // it seems time to try again despite no new messages have poured
                     // into the MessageQueue which would have "Set" the readerEvent.
-                    const int READQUEUE_MILLISECONDS_TIMEOUT=300000;
+                    const int READQUEUE_MILLISECONDS_TIMEOUT = 300000;
                     Crittercism.readerEvent.WaitOne(READQUEUE_MILLISECONDS_TIMEOUT);
                     Debug.WriteLine("ReadQueue: WAKE");
                 };
@@ -50,19 +48,19 @@ namespace CrittercismSDK
         private void ReadStep() {
             Debug.WriteLine("ReadStep: ENTER");
             try {
-                int retry=0;
+                int retry = 0;
                 while (Crittercism.initialized
-                    &&(Crittercism.MessageQueue!=null)
-                    &&(Crittercism.MessageQueue.Count>0)
-                    &&(NetworkInterface.GetIsNetworkAvailable())
-                    &&(retry<3)) {
+                    && (Crittercism.MessageQueue != null)
+                    && (Crittercism.MessageQueue.Count > 0)
+                    && (NetworkInterface.GetIsNetworkAvailable())
+                    && (retry < 3)) {
                     if (SendMessage()) {
-                        retry=0;
+                        retry = 0;
                     } else {
                         // TODO: Use System.Timers.Timer to generate an event
                         // 5 minutes from now, wait for it, then proceed.
                         retry++;
-                        Debug.WriteLine("ReadStep: retry == "+retry);
+                        Debug.WriteLine("ReadStep: retry == " + retry);
                     }
                 };
                 if (Crittercism.initialized) {
@@ -100,8 +98,8 @@ namespace CrittercismSDK
                         message.Delete();
                         try {
                             HttpWebRequest request = message.WebRequest();
-                            if (request!=null) {
-                                Debug.WriteLine("SendMessage: "+message.GetType().Name);
+                            if (request != null) {
+                                Debug.WriteLine("SendMessage: " + message.GetType().Name);
                                 sendCompleted = SendRequest(request,message.PostBody());
                             }
                         } catch (Exception ie) {
@@ -122,35 +120,35 @@ namespace CrittercismSDK
 #if WINDOWS_PHONE_APP
         private bool SendRequest(HttpWebRequest request,string postBody) {
             //Debug.WriteLine("SendRequest: request.RequestUri == "+request.RequestUri);
-            bool sendCompleted =false;
+            bool sendCompleted = false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                Task<Stream> writerTask=request.GetRequestStreamAsync();
-                using (Stream writer=writerTask.Result) {
+                Task<Stream> writerTask = request.GetRequestStreamAsync();
+                using (Stream writer = writerTask.Result) {
                     // NOTE: SendRequest caller's request.ContentType=="application/json; charset=utf-8"
                     // or request.ContentType=="application/x-www-form-urlencoded"
                     Debug.WriteLine("SendRequest: POST BODY:");
                     Debug.WriteLine(postBody);
-                    byte[] postBytes=Encoding.UTF8.GetBytes(postBody);
+                    byte[] postBytes = Encoding.UTF8.GetBytes(postBody);
                     writer.Write(postBytes,0,postBytes.Length);
                     writer.Flush();
                 }
-                Task<WebResponse> responseTask=request.GetResponseAsync();
-                using (HttpWebResponse response=(HttpWebResponse)responseTask.Result) {
+                Task<WebResponse> responseTask = request.GetResponseAsync();
+                using (HttpWebResponse response = (HttpWebResponse)responseTask.Result) {
                     try {
                         Debug.WriteLine("SendRequest: response.StatusCode == " + (int)response.StatusCode);
-                        if ((((long)response.StatusCode)/100)==2) {
+                        if ((((long)response.StatusCode) / 100) == 2) {
                             // 2xx Success
-                            sendCompleted=true;
+                            sendCompleted = true;
                         }
                     } catch (WebException webEx) {
                         Debug.WriteLine("SendRequest: webEx == " + webEx);
-                        if (webEx.Response!=null) {
+                        if (webEx.Response != null) {
                             //Debug.WriteLine("SendRequest: response.StatusCode == "+(int)response.StatusCode);
-                            if (response.StatusCode==HttpStatusCode.BadRequest) {
+                            if (response.StatusCode == HttpStatusCode.BadRequest) {
                                 try {
-                                    using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
-                                        string errorMessage=errorReader.ReadToEnd();
+                                    using (StreamReader errorReader = (new StreamReader(webEx.Response.GetResponseStream()))) {
+                                        string errorMessage = errorReader.ReadToEnd();
                                         Debug.WriteLine("SendRequest: " + errorMessage);
                                     }
                                 } catch {
@@ -164,7 +162,7 @@ namespace CrittercismSDK
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
-            Debug.WriteLine("SendRequest: EXIT ---> "+sendCompleted);
+            Debug.WriteLine("SendRequest: EXIT ---> " + sendCompleted);
             return sendCompleted;
         }
 #else
@@ -245,13 +243,13 @@ namespace CrittercismSDK
 #endif // WINDOWS_PHONE_APP
 
         internal static string ComputeFormPostBody(MetadataReport metadataReport) {
-            string postBody="";
-            postBody+="did="+metadataReport.platform.device_id+"&";
-            postBody+="app_id="+metadataReport.app_id+"&";
-            string metadataJson=JsonConvert.SerializeObject(metadataReport.metadata);
+            string postBody = "";
+            postBody += "did=" + metadataReport.platform.device_id + "&";
+            postBody += "app_id=" + metadataReport.app_id + "&";
+            string metadataJson = JsonConvert.SerializeObject(metadataReport.metadata);
 #if NETFX_CORE
-            postBody+="metadata="+WebUtility.UrlEncode(metadataJson)+"&";
-            postBody+="device_name="+WebUtility.UrlEncode(metadataReport.platform.device_model);
+            postBody += "metadata=" + WebUtility.UrlEncode(metadataJson) + "&";
+            postBody += "device_name=" + WebUtility.UrlEncode(metadataReport.platform.device_model);
 #else
             // Only .NETFramework 4.5 has WebUtility.UrlEncode, earlier version
             // .NETFramework 4.0 has HttpUtility.UrlEncode

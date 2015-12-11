@@ -11,14 +11,12 @@ using Newtonsoft.Json;
 using System.Web;
 #endif
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     /// <summary>
     /// Application load.
     /// </summary>
     [DataContract]
-    internal class MetadataReport : MessageReport
-    {
+    internal class MetadataReport : MessageReport {
         /// <summary>
         /// Crittercism-issued Application identification string
         /// </summary>
@@ -26,7 +24,7 @@ namespace CrittercismSDK
         public string app_id { get; internal set; }
 
         [DataMember]
-        public Dictionary<string, string> metadata { get; internal set; }
+        public Dictionary<string,string> metadata { get; internal set; }
 
         /// <summary>
         /// Execution platform on which the app runs
@@ -44,9 +42,9 @@ namespace CrittercismSDK
         /// </summary>
         public MetadataReport(string _appId,Dictionary<string,string> userMetadata) {
             if (!String.IsNullOrEmpty(_appId)) {
-                app_id=_appId;
-                metadata=userMetadata;
-                platform=new Platform();
+                app_id = _appId;
+                metadata = userMetadata;
+                platform = new Platform();
             } else {
                 throw new Exception("Crittercism requires an application_id to properly initialize itself.");
             }
@@ -62,8 +60,8 @@ namespace CrittercismSDK
             answer += "app_id=" + app_id + "&";
             string metadataJson = JsonConvert.SerializeObject(metadata);
 #if NETFX_CORE
-            answer+="metadata="+WebUtility.UrlEncode(metadataJson)+"&";
-            answer+="device_name="+WebUtility.UrlEncode(platform.device_model);
+            answer += "metadata=" + WebUtility.UrlEncode(metadataJson) + "&";
+            answer += "device_name=" + WebUtility.UrlEncode(platform.device_model);
 #else
             // Only .NETFramework 4.5 has WebUtility.UrlEncode, earlier version
             // .NETFramework 4.0 has HttpUtility.UrlEncode

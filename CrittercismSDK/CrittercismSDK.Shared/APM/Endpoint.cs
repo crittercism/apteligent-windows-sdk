@@ -6,14 +6,13 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     [JsonConverter(typeof(EndpointConverter))]
     internal class Endpoint {
         // (CRUnknownNetwork)
-        internal const long ACTIVE_NETWORK=2;
+        internal const long ACTIVE_NETWORK = 2;
         // System.Net.WebExceptionStatus
-        internal const long ERROR_TABLE_CODE=5;
+        internal const long ERROR_TABLE_CODE = 5;
 
         private string method;
         private string uriString;
@@ -37,16 +36,16 @@ namespace CrittercismSDK
             HttpStatusCode statusCode,
             WebExceptionStatus exceptionStatus
         ) {
-            this.method=method;
-            this.uriString=uriString;
-            this.timestamp=timestamp;
-            this.latency=latency;
-            this.activeNetwork=ACTIVE_NETWORK;
-            this.bytesRead=bytesRead;
-            this.bytesSent=bytesSent;
-            this.statusCode=(long)statusCode;
-            this.errorTable=ERROR_TABLE_CODE;
-            this.errorCode=(long)exceptionStatus;
+            this.method = method;
+            this.uriString = uriString;
+            this.timestamp = timestamp;
+            this.latency = latency;
+            this.activeNetwork = ACTIVE_NETWORK;
+            this.bytesRead = bytesRead;
+            this.bytesSent = bytesSent;
+            this.statusCode = (long)statusCode;
+            this.errorTable = ERROR_TABLE_CODE;
+            this.errorCode = (long)exceptionStatus;
         }
         #endregion
 
@@ -69,6 +68,6 @@ namespace CrittercismSDK
         public override string ToString() {
             return JsonConvert.SerializeObject(this);
         }
-#endregion
+        #endregion
     }
 }

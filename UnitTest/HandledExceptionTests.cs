@@ -19,7 +19,7 @@ namespace UnitTest {
         public void HandledExceptionTest() {
             TestHelpers.StartApp();
             TestHelpers.LogHandledException();
-            MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(HandledException));
+            MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(HandledException));
             Assert.IsNotNull(messageReport,"Expected a HandledException message");
         }
     }

@@ -8,10 +8,8 @@ using Windows.System.Threading;
 using System.Timers;
 #endif // NETFX_CORE
 
-namespace CrittercismSDK
-{
-    internal class APM
-    {
+namespace CrittercismSDK {
+    internal class APM {
         #region Constants
         // Collect Endpoint's
         const int MAX_NETWORK_STATS = 100;
@@ -48,11 +46,11 @@ namespace CrittercismSDK
         #region Timing
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
-        private static ThreadPoolTimer timer=null;
+        private static ThreadPoolTimer timer = null;
         private static void OnTimerElapsed(ThreadPoolTimer timer) {
             lock (lockObject) {
                 SendAPMReport();
-                timer=null;
+                timer = null;
             }
         }
 #else
@@ -84,17 +82,17 @@ namespace CrittercismSDK
         internal static void Enqueue(Endpoint endpoint) {
             Debug.WriteLine("APM Enqueue");
             lock (lockObject) {
-                while (EndpointsQueue.Count>=MAX_NETWORK_STATS) {
+                while (EndpointsQueue.Count >= MAX_NETWORK_STATS) {
                     EndpointsQueue.Dequeue();
                 };
                 EndpointsQueue.Enqueue(endpoint);
-                Debug.WriteLine("APM NETWORK_SEND_INTERVAL == "+ NETWORK_SEND_INTERVAL);
+                Debug.WriteLine("APM NETWORK_SEND_INTERVAL == " + NETWORK_SEND_INTERVAL);
 #if NETFX_CORE || WINDOWS_PHONE
-                if (timer==null) {
+                if (timer == null) {
                     // Creates a single-use timer.
                     // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
                     Debug.WriteLine("APM ThreadPoolTimer.CreateTimer");
-                    timer=ThreadPoolTimer.CreateTimer(
+                    timer = ThreadPoolTimer.CreateTimer(
                         OnTimerElapsed,
                         TimeSpan.FromMilliseconds(NETWORK_SEND_INTERVAL));
                 }
@@ -116,7 +114,7 @@ namespace CrittercismSDK
         // App Identifiers Array
         private static Object[] AppIdentifiersArray() {
             // [<app_id>, <app_version>, <device_id>, <cr_version>, <session_id>]
-            Object[] answer=new Object[] {
+            Object[] answer = new Object[] {
                 Crittercism.AppID,
                 Crittercism.AppVersion,
                 Crittercism.DeviceId,
@@ -137,7 +135,7 @@ namespace CrittercismSDK
             //   <mobile_country_code>,        // optional
             //   <mobile_network_code>         // optional
             //   ]
-            Object[] answer=new Object[] {
+            Object[] answer = new Object[] {
                 DateUtils.ISO8601DateString(DateTime.UtcNow),
                 Crittercism.Carrier,
                 Crittercism.DeviceModel,
@@ -149,11 +147,11 @@ namespace CrittercismSDK
 
         private static void SendAPMReport() {
             Debug.WriteLine("SendAPMReport");
-            if (EndpointsQueue.Count>0) {
-                List<Endpoint> endpoints=EndpointsQueue.ToList();
+            if (EndpointsQueue.Count > 0) {
+                List<Endpoint> endpoints = EndpointsQueue.ToList();
                 EndpointsQueue.Clear();
                 Debug.WriteLine("SendAPMReport new APMReport");
-                APMReport apmReport=new APMReport(AppIdentifiersArray(),DeviceStateArray(),endpoints);
+                APMReport apmReport = new APMReport(AppIdentifiersArray(),DeviceStateArray(),endpoints);
                 Crittercism.AddMessageToQueue(apmReport);
             }
         }
@@ -173,10 +171,10 @@ namespace CrittercismSDK
         }
 
         internal static bool IsFiltered(string value) {
-            bool answer=false;
+            bool answer = false;
             lock (lockObject) {
                 foreach (CRFilter filter in Filters) {
-                    answer=filter.IsMatch(value);
+                    answer = filter.IsMatch(value);
                     if (answer) {
                         break;
                     }

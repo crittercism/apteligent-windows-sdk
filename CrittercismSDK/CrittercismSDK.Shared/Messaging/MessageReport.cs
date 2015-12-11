@@ -40,7 +40,7 @@ namespace CrittercismSDK {
         private static string MessagesPath;
 
         internal static void Init() {
-            MessagesPath=Path.Combine(StorageHelper.CrittercismPath(),"Messages");
+            MessagesPath = Path.Combine(StorageHelper.CrittercismPath(),"Messages");
             if (!StorageHelper.FolderExists(MessagesPath)) {
                 StorageHelper.CreateFolder(MessagesPath);
             }
@@ -53,14 +53,14 @@ namespace CrittercismSDK {
         /// Default constructor.
         /// </summary>
         public MessageReport() {
-            Saved=false;
+            Saved = false;
         }
 
         public static Dictionary<string,object> ComputeAppState() {
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
             // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
 
-            return new Dictionary<string, object> {
+            return new Dictionary<string,object> {
                 { "app_version", Crittercism.AppVersion },
                 // RemainingChargePercent returns an integer in [0,100]
 #if WINDOWS_PHONE
@@ -89,15 +89,15 @@ namespace CrittercismSDK {
         public bool Save() {
             // On-disk serialization in JSON alone isn't C# type-preserving.
             // So, this.GetType().Name+"_" is prefixed to file Name .
-            bool answer=false;
+            bool answer = false;
             try {
                 lock (this) {
                     if (!Saved) {
-                        Name=this.GetType().Name+"_"+Guid.NewGuid().ToString()+".js";
-                        string path=Path.Combine(MessagesPath,Name);
+                        Name = this.GetType().Name + "_" + Guid.NewGuid().ToString() + ".js";
+                        string path = Path.Combine(MessagesPath,Name);
                         StorageHelper.Save(this,path);
-                        Saved=true;
-                        answer=true;
+                        Saved = true;
+                        answer = true;
                     }
                 }
             } catch (Exception ie) {
@@ -111,17 +111,17 @@ namespace CrittercismSDK {
         /// </summary>
         /// <returns>   true if it succeeds, false if it fails. </returns>
         internal bool Delete() {
-            bool answer=false;
+            bool answer = false;
             try {
                 lock (this) {
                     if (Saved) {
-                        string path=Path.Combine(MessagesPath,this.Name);
+                        string path = Path.Combine(MessagesPath,this.Name);
                         if (StorageHelper.FileExists(path)) {
                             StorageHelper.DeleteFile(path);
-                            Saved=false;
+                            Saved = false;
                         }
                     }
-                    answer=true;
+                    answer = true;
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -150,12 +150,12 @@ namespace CrittercismSDK {
 
         #region Static Methods
         internal static List<MessageReport> LoadMessages() {
-            List<MessageReport> messages=new List<MessageReport>();
+            List<MessageReport> messages = new List<MessageReport>();
             if (StorageHelper.FolderExists(MessagesPath)) {
-                string[] names=StorageHelper.GetFileNames(MessagesPath);
+                string[] names = StorageHelper.GetFileNames(MessagesPath);
                 foreach (string name in names) {
-                    MessageReport message=LoadMessage(name);
-                    if (message!=null) {
+                    MessageReport message = LoadMessage(name);
+                    if (message != null) {
                         messages.Add(message);
                     }
                 }
@@ -166,37 +166,37 @@ namespace CrittercismSDK {
         internal static MessageReport LoadMessage(string name) {
             // name is wrt MessagesPath "Crittercism\Messages", e.g "Crash_<guid>"
             // path is Crittercism\Messages\name
-            MessageReport message=null;
+            MessageReport message = null;
             try {
-                string path=Path.Combine(MessagesPath,name);
-                string[] nameSplit=name.Split('_');
+                string path = Path.Combine(MessagesPath,name);
+                string[] nameSplit = name.Split('_');
                 switch (nameSplit[0]) {
                     case "AppLoad":
-                        message=(AppLoad)StorageHelper.Load(path,typeof(AppLoad));
+                        message = (AppLoad)StorageHelper.Load(path,typeof(AppLoad));
                         break;
                     case "APMReport":
-                        message=(APMReport)StorageHelper.Load(path,typeof(APMReport));
+                        message = (APMReport)StorageHelper.Load(path,typeof(APMReport));
                         break;
                     case "HandledException":
-                        message=(HandledException)StorageHelper.Load(path,typeof(HandledException));
+                        message = (HandledException)StorageHelper.Load(path,typeof(HandledException));
                         break;
                     case "CrashReport":
-                        message=(CrashReport)StorageHelper.Load(path,typeof(CrashReport));
+                        message = (CrashReport)StorageHelper.Load(path,typeof(CrashReport));
                         break;
                     case "MetadataReport":
-                        message=(MetadataReport)StorageHelper.Load(path,typeof(MetadataReport));
+                        message = (MetadataReport)StorageHelper.Load(path,typeof(MetadataReport));
                         break;
                     default:
                         // Skip this file.
                         break;
                 }
-                if (message==null) {
+                if (message == null) {
                     // Possibly file is still being written.  Skip file for
                     // now by returning null .
                 } else {
-                    message.Name=name;
-                    message.CreationTime=StorageHelper.GetCreationTime(path);
-                    message.Saved=true;
+                    message.Name = name;
+                    message.CreationTime = StorageHelper.GetCreationTime(path);
+                    message.Saved = true;
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);

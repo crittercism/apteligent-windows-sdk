@@ -2,15 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Windows;
-   
-namespace CrittercismSDK
-{
+
+namespace CrittercismSDK {
     /// <summary>
     /// Application load.
     /// </summary>
     [DataContract]
-    internal class AppLoad : MessageReport
-    {
+    internal class AppLoad : MessageReport {
         /// <summary>
         /// Crittercism-issued Application identification string
         /// </summary>
@@ -21,7 +19,7 @@ namespace CrittercismSDK
         /// User-specified state of the application as it's executing
         /// </summary>
         [DataMember]
-        public Dictionary<string, object> app_state { get; internal set; }
+        public Dictionary<string,object> app_state { get; internal set; }
 
         /// <summary>
         /// Execution platform on which the app runs
@@ -33,9 +31,9 @@ namespace CrittercismSDK
         /// Constructor.
         /// </summary>
         public AppLoad() {
-            app_id=Crittercism.AppID;
-            app_state=ComputeAppState();
-            platform=new Platform();
+            app_id = Crittercism.AppID;
+            app_state = ComputeAppState();
+            platform = new Platform();
         }
     }
 }

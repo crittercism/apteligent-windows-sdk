@@ -6,11 +6,9 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     [JsonConverter(typeof(UserBreadcrumbConverter))]
-    internal class UserBreadcrumb
-    {
+    internal class UserBreadcrumb {
         #region Properties
         private string timestamp;
         private string message;
@@ -32,7 +30,7 @@ namespace CrittercismSDK
                 case BreadcrumbType.Text:
                     {
                         // 1 - user breadcrumb       ; {text:,level:}
-                        Dictionary<string,Object> data = (Dictionary <string,Object>)breadcrumb.GetData();
+                        Dictionary<string,Object> data = (Dictionary<string,Object>)breadcrumb.GetData();
                         message = (string)data["text"];
                     }
                     break;

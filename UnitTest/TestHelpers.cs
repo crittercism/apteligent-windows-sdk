@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace UnitTest {
     class TestHelpers {
-        public const string VALID_APPID="50807ba33a47481dd5000002";
+        public const string VALID_APPID = "50807ba33a47481dd5000002";
 
         [AssemblyInitialize()]
         public static void AssemblyInit(TestContext context) {
@@ -35,8 +35,8 @@ namespace UnitTest {
                 "\"locale\":",
             };
             foreach (string jsonFragment in jsonStrings) {
-                Trace.WriteLine("jsonFragment == "+jsonFragment);
-                Trace.WriteLine("json.Contains == "+json.Contains(jsonFragment));
+                Trace.WriteLine("jsonFragment == " + jsonFragment);
+                Trace.WriteLine("json.Contains == " + json.Contains(jsonFragment));
                 Assert.IsTrue(json.Contains(jsonFragment));
             };
             // Make sure DateTimes are stringified in the canonical way and not in this goofy default way
@@ -47,7 +47,7 @@ namespace UnitTest {
             // This method is for clean all the possible variables that may be will used by another unit test
             Crittercism.enableSendMessage = false;
             Crittercism.SetOptOutStatus(false);
-            if (Crittercism.MessageQueue!=null) {
+            if (Crittercism.MessageQueue != null) {
                 Crittercism.MessageQueue.Clear();
             }
             // Some unit tests might pollute the message folder.  clean those up
@@ -57,7 +57,7 @@ namespace UnitTest {
                     storage.DeleteFile(file);
                 }
             } catch (Exception ex) {
-                Console.WriteLine("Cleanup exception: "+ex);
+                Console.WriteLine("Cleanup exception: " + ex);
             }
         }
 
@@ -95,13 +95,13 @@ namespace UnitTest {
         }
 
         public static MessageReport DequeueMessageType(Type type) {
-            MessageReport answer=null;
-            while (Crittercism.MessageQueue.Count>0) {
-                MessageReport messageReport=Crittercism.MessageQueue.Dequeue();
+            MessageReport answer = null;
+            while (Crittercism.MessageQueue.Count > 0) {
+                MessageReport messageReport = Crittercism.MessageQueue.Dequeue();
                 messageReport.Delete();
-                if ((messageReport.GetType()==type)
-                    ||(messageReport.GetType().IsSubclassOf(type))) {
-                    answer=messageReport;
+                if ((messageReport.GetType() == type)
+                    || (messageReport.GetType().IsSubclassOf(type))) {
+                    answer = messageReport;
                     break;
                 }
             }

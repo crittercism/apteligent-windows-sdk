@@ -9,11 +9,9 @@ using Windows.Graphics.Display;
 using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     [DataContract]
-    internal class HandledException : MessageReport
-    {
+    internal class HandledException : MessageReport {
         /// <summary>
         /// Gets or sets the identifier of the application.
         /// </summary>
@@ -25,7 +23,7 @@ namespace CrittercismSDK
         /// Gets or sets the application state.
         /// </summary>
         [DataMember]
-        public Dictionary<string, object> app_state { get; internal set; }
+        public Dictionary<string,object> app_state { get; internal set; }
 
         /// <summary>
         /// Gets or sets the error.
@@ -55,8 +53,7 @@ namespace CrittercismSDK
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public HandledException()
-        {
+        public HandledException() {
         }
 
         /// <summary>
@@ -70,8 +67,7 @@ namespace CrittercismSDK
             UserBreadcrumbs breadcrumbs,
             List<Endpoint> endpoints,
             List<Breadcrumb> systemBreadcrumbs,
-            ExceptionObject exception)
-        {
+            ExceptionObject exception) {
             app_id = appId;
             app_state = ComputeAppState();
             error = exception;

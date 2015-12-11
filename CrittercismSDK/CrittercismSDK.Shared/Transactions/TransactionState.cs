@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     ////////////////////////////////////////////////////////////////
     // * CREATED = Transaction created but not begun yet.
     // * BEBUN = Transaction begun via Begin .
@@ -25,8 +24,7 @@ namespace CrittercismSDK
     // and CRASHED transactions are ever reported to platform.
     // SLOW isn't being used.
     ////////////////////////////////////////////////////////////////
-    internal enum TransactionState
-    {
+    internal enum TransactionState {
         CREATED = 0,
         BEGUN,
         ENDED,

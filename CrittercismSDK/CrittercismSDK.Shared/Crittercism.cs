@@ -33,7 +33,7 @@ namespace CrittercismSDK {
     public class Crittercism {
         #region Constants
 
-        private const string errorNotInitialized="Crittercism not initialized yet.";
+        private const string errorNotInitialized = "Crittercism not initialized yet.";
 
         #endregion Constants
 
@@ -48,7 +48,7 @@ namespace CrittercismSDK {
         internal static string DeviceModel { get; private set; }
 
 #if NETFX_CORE
-        internal static string Version=typeof(Crittercism).GetTypeInfo().Assembly.GetName().Version.ToString();
+        internal static string Version = typeof(Crittercism).GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
         internal static string Version=Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
@@ -57,17 +57,17 @@ namespace CrittercismSDK {
         internal static string Carrier=Microsoft.Phone.Net.NetworkInformation.
             DeviceNetworkInformation.CellularMobileOperator;
 #else
-        internal static string Carrier="UNKNOWN";
+        internal static string Carrier = "UNKNOWN";
 #endif
 
         // NOTE: Appears platform won't allow "wp" to be replaced by "windows"
         // carte blanche.  Doing so prevents handled exception reports from
         // being accepted by platform.
-//#if WINDOWS_PHONE
-        internal static readonly string OSName="wp";
-//#else
-//        internal static readonly string OSName="windows";
-//#endif
+        //#if WINDOWS_PHONE
+        internal static readonly string OSName = "wp";
+        //#else
+        //        internal static readonly string OSName="windows";
+        //#endif
 
         internal static long SessionId { get; private set; }
 
@@ -77,8 +77,8 @@ namespace CrittercismSDK {
         /// <value> A SynchronizedQueue of messages. </value>
         internal static SynchronizedQueue<MessageReport> MessageQueue { get; set; }
 
-        internal static object lockObject=new Object();
-        internal static volatile bool initialized=false;
+        internal static object lockObject = new Object();
+        internal static volatile bool initialized = false;
 
         /// <summary>
         /// Gets or sets the identifier of the application.
@@ -92,13 +92,13 @@ namespace CrittercismSDK {
         /// Gets or sets the operating system platform.
         /// </summary>
         /// <value> The operating system platform. </value>
-        internal static string OSVersion="";
+        internal static string OSVersion = "";
 
         /// <summary>
         /// Gets or sets the arbitrary user metadata.
         /// </summary>
         /// <value> The user metadata. </value>
-        private static Dictionary<string, string> Metadata { get; set; }
+        private static Dictionary<string,string> Metadata { get; set; }
 
         private static Dictionary<string,string> CurrentMetadata() {
             // Copy of current Metadata
@@ -119,7 +119,7 @@ namespace CrittercismSDK {
         /// The thread for the reader
         /// </summary>
 #if NETFX_CORE
-        internal static Task readerThread=null;
+        internal static Task readerThread = null;
 #else
         internal static Thread readerThread = null;
 #endif
@@ -141,12 +141,12 @@ namespace CrittercismSDK {
 
         // OptOut is internal for test cleanup, OW only 2 methods in
         // class Crittercism.cs should be touching member variable OptOut directly.
-        internal static volatile bool OptOut=false;
+        internal static volatile bool OptOut = false;
 
         // Is OptOut known to be equal to what's persisted on disk?
-        internal static volatile bool OptOutLoaded=false;
+        internal static volatile bool OptOutLoaded = false;
 
-        private static string OptOutStatusPath="Crittercism\\OptOutStatus.js";
+        private static string OptOutStatusPath = "Crittercism\\OptOutStatus.js";
         private static void SaveOptOutStatus(bool optOutStatus) {
             // Knows how to persist value of OptOut
             StorageHelper.Save(Convert.ToBoolean(optOutStatus),OptOutStatusPath);
@@ -154,9 +154,9 @@ namespace CrittercismSDK {
 
         private static bool LoadOptOutStatus() {
             // Knows how to unpersist value of OptOut
-            bool answer=false;
+            bool answer = false;
             if (StorageHelper.FileExists(OptOutStatusPath)) {
-                answer=(bool)StorageHelper.Load(OptOutStatusPath,typeof(Boolean));
+                answer = (bool)StorageHelper.Load(OptOutStatusPath,typeof(Boolean));
             };
             return answer;
         }
@@ -171,8 +171,8 @@ namespace CrittercismSDK {
                 lock (lockObject) {
                     // Check flag again inside lock in case our thread loses race.
                     if (!OptOutLoaded) {
-                        OptOut=LoadOptOutStatus();
-                        OptOutLoaded=true;
+                        OptOut = LoadOptOutStatus();
+                        OptOutLoaded = true;
                     };
                 };
             };
@@ -184,8 +184,8 @@ namespace CrittercismSDK {
             lock (lockObject) {
                 // OptOut is volatile, but this method accesses it twice,
                 // so we need the lock
-                if (optOut!=GetOptOutStatus()) {
-                    OptOut=optOut;
+                if (optOut != GetOptOutStatus()) {
+                    OptOut = optOut;
                     SaveOptOutStatus(optOut);
                 }
             }
@@ -229,18 +229,18 @@ namespace CrittercismSDK {
         /// </summary>
         /// <returns>String with device_id, null otherwise</returns>
         private static string LoadDeviceId() {
-            string deviceId=null;
-            string path=Path.Combine(StorageHelper.CrittercismPath(),"DeviceId.js");
+            string deviceId = null;
+            string path = Path.Combine(StorageHelper.CrittercismPath(),"DeviceId.js");
             try {
                 if (StorageHelper.FileExists(path)) {
-                    deviceId=(string)StorageHelper.Load(path,typeof(String));
+                    deviceId = (string)StorageHelper.Load(path,typeof(String));
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
-            if (deviceId==null) {
+            if (deviceId == null) {
                 try {
-                    deviceId=Guid.NewGuid().ToString();
+                    deviceId = Guid.NewGuid().ToString();
                     StorageHelper.Save(deviceId,path);
                 } catch (Exception ie) {
                     LogInternalException(ie);
@@ -248,7 +248,7 @@ namespace CrittercismSDK {
                     // it wasn't able to initialize
                 }
             }
-            Debug.WriteLine("LoadDeviceId --> "+deviceId);
+            Debug.WriteLine("LoadDeviceId --> " + deviceId);
             return deviceId;
         }
 
@@ -268,30 +268,30 @@ namespace CrittercismSDK {
         }
 
         internal static Dictionary<string,string> LoadMetadata() {
-            Dictionary<string,string> answer=null;
+            Dictionary<string,string> answer = null;
             try {
-                string path=Path.Combine(StorageHelper.CrittercismPath(),"Metadata.js");
+                string path = Path.Combine(StorageHelper.CrittercismPath(),"Metadata.js");
                 if (StorageHelper.FileExists(path)) {
-                    answer=(Dictionary<string,string>)StorageHelper.Load(
+                    answer = (Dictionary<string,string>)StorageHelper.Load(
                         path,
                         typeof(Dictionary<string,string>));
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
-            if (answer==null) {
-                answer=new Dictionary<string,string>();
+            if (answer == null) {
+                answer = new Dictionary<string,string>();
             }
-            Debug.WriteLine("LoadMetadata: "+JsonConvert.SerializeObject(answer));
+            Debug.WriteLine("LoadMetadata: " + JsonConvert.SerializeObject(answer));
             return answer;
         }
 
         private static bool SaveMetadata() {
-            bool answer=false;
+            bool answer = false;
             try {
-                Debug.WriteLine("SaveMetadata: "+JsonConvert.SerializeObject(Metadata));
-                string path=Path.Combine(StorageHelper.CrittercismPath(),"Metadata.js");
-                answer=StorageHelper.Save(Metadata,path);
+                Debug.WriteLine("SaveMetadata: " + JsonConvert.SerializeObject(Metadata));
+                string path = Path.Combine(StorageHelper.CrittercismPath(),"Metadata.js");
+                answer = StorageHelper.Save(Metadata,path);
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             };
@@ -304,7 +304,7 @@ namespace CrittercismSDK {
             // "You cannot get the OS or .NET framework version in a Windows Store app ...
             // Marked as answer by Anne Jing Microsoft contingent staff, Moderator"
             // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/66e662a9-9ece-4863-8cf1-a5e259c7b571/c-windows-store-8-os-version-name-and-net-version-name
-            string answer="";
+            string answer = "";
 #else
             string answer=Environment.OSVersion.Platform.ToString();
 #endif
@@ -319,19 +319,19 @@ namespace CrittercismSDK {
         /// <returns>The session id is a positive integer.</returns>
         private static long LoadSessionId() {
             // API Protocol doesn't specify this, but 1 is consistent with iOS SDK's choice.
-            const long FIRST_SESSION_NUMBER=1;
-            long sessionId=FIRST_SESSION_NUMBER-1;
-            string path=Path.Combine(StorageHelper.CrittercismPath(),"SessionId.js");
+            const long FIRST_SESSION_NUMBER = 1;
+            long sessionId = FIRST_SESSION_NUMBER - 1;
+            string path = Path.Combine(StorageHelper.CrittercismPath(),"SessionId.js");
             try {
                 if (StorageHelper.FileExists(path)) {
-                    sessionId=(long)StorageHelper.Load(path,typeof(long));
+                    sessionId = (long)StorageHelper.Load(path,typeof(long));
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
             try {
-                if (sessionId<FIRST_SESSION_NUMBER) {
-                    sessionId=FIRST_SESSION_NUMBER;
+                if (sessionId < FIRST_SESSION_NUMBER) {
+                    sessionId = FIRST_SESSION_NUMBER;
                 } else {
                     sessionId++;
                 }
@@ -339,7 +339,7 @@ namespace CrittercismSDK {
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
-            Debug.WriteLine("LoadSessionId --> "+sessionId);
+            Debug.WriteLine("LoadSessionId --> " + sessionId);
             return sessionId;
         }
 
@@ -356,25 +356,25 @@ namespace CrittercismSDK {
                     return;
                 };
                 lock (lockObject) {
-                    appLocator=new AppLocator(appID);
-                    if (appLocator.domain==null) {
+                    appLocator = new AppLocator(appID);
+                    if (appLocator.domain == null) {
                         DebugUtils.LOG_ERROR("Illegal Crittercism appID");
                         return;
                     }
-                    AppID=appID;
+                    AppID = appID;
                     APM.Init();
                     MessageReport.Init();
                     TransactionReporter.Init();
-                    AppVersion=LoadAppVersion();
-                    DeviceId=LoadDeviceId();
-                    DeviceModel=LoadDeviceModel();
-                    Metadata=LoadMetadata();
-                    OSVersion=LoadOSVersion();
-                    SessionId=LoadSessionId();
-                    QueueReader queueReader=new QueueReader();
+                    AppVersion = LoadAppVersion();
+                    DeviceId = LoadDeviceId();
+                    DeviceModel = LoadDeviceModel();
+                    Metadata = LoadMetadata();
+                    OSVersion = LoadOSVersion();
+                    SessionId = LoadSessionId();
+                    QueueReader queueReader = new QueueReader();
 #if NETFX_CORE
-                    Action threadStart=() => { queueReader.ReadQueue(); };
-                    readerThread=new Task(threadStart);
+                    Action threadStart = () => { queueReader.ReadQueue(); };
+                    readerThread = new Task(threadStart);
 #else
                     ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
                     readerThread=new Thread(threadStart);
@@ -383,8 +383,8 @@ namespace CrittercismSDK {
                     // enableSendMessage for unit test purposes
                     if (enableSendMessage) {
 #if NETFX_CORE
-                        Application.Current.UnhandledException+=Application_UnhandledException;
-                        NetworkInformation.NetworkStatusChanged+=NetworkInformation_NetworkStatusChanged;
+                        Application.Current.UnhandledException += Application_UnhandledException;
+                        NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
 #elif WINDOWS_PHONE
                         Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(SilverlightApplication_UnhandledException);
                         DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
@@ -402,18 +402,18 @@ namespace CrittercismSDK {
 #endif
                     };
                     Breadcrumbs.UserBreadcrumbs();
-                    MessageQueue=new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
+                    MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
                     LoadQueue();
                     // NOTE: Put initialized=true before readerThread.Start() .
                     // Later on, initialized may be reset back to false during shutdown,
                     // and readerThread will see initialized==false as a message to exit.
                     // Spares us from creating an additional "shuttingdown" flag.
-                    initialized=true;
+                    initialized = true;
                 };
                 readerThread.Start();
                 CreateAppLoadReport();
             } catch (Exception) {
-                initialized=false;
+                initialized = false;
             }
             if (initialized) {
                 Debug.WriteLine("Crittercism initialized.");
@@ -448,7 +448,7 @@ namespace CrittercismSDK {
                 if (initialized) {
                     lock (lockObject) {
                         if (initialized) {
-                            initialized=false;
+                            initialized = false;
                             // Stop the producers
                             APM.Shutdown();
                             TransactionReporter.Shutdown();
@@ -478,7 +478,7 @@ namespace CrittercismSDK {
             if (GetOptOutStatus()) {
                 return;
             }
-            AppLoad appLoad=new AppLoad();
+            AppLoad appLoad = new AppLoad();
             AddMessageToQueue(appLoad);
         }
         #endregion AppLoads
@@ -504,7 +504,7 @@ namespace CrittercismSDK {
 
         #region Exceptions and Crashes
         internal static void LogInternalException(Exception e) {
-            Debug.WriteLine("UNEXPECTED ERROR!!! "+e.Message);
+            Debug.WriteLine("UNEXPECTED ERROR!!! " + e.Message);
             Debug.WriteLine(e.StackTrace);
             Debug.WriteLine("");
         }
@@ -516,25 +516,25 @@ namespace CrittercismSDK {
             // will include this information in the StackTrace .  The horizontal
             // lines (hyphens) separate InnerException's from each other and the
             // outermost Exception e .
-            string answer=e.StackTrace;
+            string answer = e.StackTrace;
             // Using seen for cycle detection to break cycling.
-            List<Exception> seen=new List<Exception>();
+            List<Exception> seen = new List<Exception>();
             seen.Add(e);
-            if (answer!=null) {
+            if (answer != null) {
                 // There has to be some way of telling where InnerException ie stacktrace
                 // ends and main Exception e stacktrace begins.  This is it.
-                answer=((e.GetType().FullName+" : "+e.Message+"\r\n")
-                    +answer);
-                Exception ie=e.InnerException;
-                while ((ie!=null)&&(seen.IndexOf(ie)<0)) {
+                answer = ((e.GetType().FullName + " : " + e.Message + "\r\n")
+                    + answer);
+                Exception ie = e.InnerException;
+                while ((ie != null) && (seen.IndexOf(ie) < 0)) {
                     seen.Add(ie);
-                    answer=((ie.GetType().FullName+" : "+ie.Message+"\r\n")
-                        +(ie.StackTrace+"\r\n")
-                        +answer);
-                    ie=ie.InnerException;
+                    answer = ((ie.GetType().FullName + " : " + ie.Message + "\r\n")
+                        + (ie.StackTrace + "\r\n")
+                        + answer);
+                    ie = ie.InnerException;
                 }
             } else {
-                answer="";
+                answer = "";
             }
             return answer;
         }
@@ -549,7 +549,7 @@ namespace CrittercismSDK {
             } else {
                 try {
                     lock (lockObject) {
-                        Dictionary<string,string> metadata=CurrentMetadata();
+                        Dictionary<string,string> metadata = CurrentMetadata();
                         UserBreadcrumbs breadcrumbs = Breadcrumbs.GetAllSessionsBreadcrumbs();
                         List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                         List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
@@ -563,7 +563,7 @@ namespace CrittercismSDK {
                 }
             }
         }
-        
+
         /// <summary>
         /// Creates a crash report.
         /// </summary>
@@ -574,14 +574,14 @@ namespace CrittercismSDK {
                 // without really crashing.  For Windows Forms apps, we're only
                 // reporting the first one in a given session.  This is why
                 // we're checking "initialized".
-                Dictionary<string,string> metadata=CurrentMetadata();
-                UserBreadcrumbs breadcrumbs=Breadcrumbs.GetAllSessionsBreadcrumbs();
+                Dictionary<string,string> metadata = CurrentMetadata();
+                UserBreadcrumbs breadcrumbs = Breadcrumbs.GetAllSessionsBreadcrumbs();
                 List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
                 List<Transaction> transactions = TransactionReporter.CrashTransactions();
-                string stacktrace=StackTrace(e);
-                ExceptionObject exception=new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                CrashReport crashReport =new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,transactions,exception);
+                string stacktrace = StackTrace(e);
+                ExceptionObject exception = new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+                CrashReport crashReport = new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,transactions,exception);
                 // Add crash to message queue and save state .
                 Shutdown();
                 AddMessageToQueue(crashReport);
@@ -624,13 +624,13 @@ namespace CrittercismSDK {
             } else {
                 try {
                     lock (lockObject) {
-                        if (!Metadata.ContainsKey(key)||!Metadata[key].Equals(value)) {
-                            if (value==null) {
+                        if (!Metadata.ContainsKey(key) || !Metadata[key].Equals(value)) {
+                            if (value == null) {
                                 Metadata.Remove(key);
                             } else {
-                                Metadata[key]=value;
+                                Metadata[key] = value;
                             }
-                            MetadataReport metadataReport=new MetadataReport(
+                            MetadataReport metadataReport = new MetadataReport(
                                 AppID,new Dictionary<string,string>(Metadata));
                             AddMessageToQueue(metadataReport);
                         }
@@ -646,7 +646,7 @@ namespace CrittercismSDK {
         /// </summary>
         /// <param name="key">      The key. </param>
         public static string ValueFor(string key) {
-            string answer=null;
+            string answer = null;
             if (GetOptOutStatus()) {
             } else if (!initialized) {
                 DebugUtils.LOG_ERROR(errorNotInitialized);
@@ -654,7 +654,7 @@ namespace CrittercismSDK {
                 try {
                     lock (lockObject) {
                         if (Metadata.ContainsKey(key)) {
-                            answer=Metadata[key];
+                            answer = Metadata[key];
                         }
                     }
                 } catch (Exception ie) {
@@ -727,7 +727,7 @@ namespace CrittercismSDK {
             // End an already begun transaction successfully.
             try {
                 Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction!=null) {
+                if (transaction != null) {
                     transaction.End();
                 } else {
                     CantFindTransaction(name);
@@ -792,7 +792,7 @@ namespace CrittercismSDK {
             // String obtained by removing query string portion of uriString .
             string answer = uriString;
             int p = uriString.IndexOf('?');
-            if (p>=0) {
+            if (p >= 0) {
                 answer = uriString.Substring(0,p);
             };
             return answer;
@@ -821,10 +821,10 @@ namespace CrittercismSDK {
                         statusCode,
                         exceptionStatus);
                     if (APM.IsFiltered(uriString)) {
-                        Debug.WriteLine("APM FILTERED: "+uriString);
+                        Debug.WriteLine("APM FILTERED: " + uriString);
                     } else {
-                        string timestamp=DateUtils.ISO8601DateString(DateTime.UtcNow);
-                        Endpoint endpoint=new Endpoint(method,
+                        string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+                        Endpoint endpoint = new Endpoint(method,
                             RemoveQueryString(uriString),
                             timestamp,
                             latency,
@@ -840,7 +840,7 @@ namespace CrittercismSDK {
                 }
             }
         }
-#endregion LogNetworkRequest
+        #endregion LogNetworkRequest
 
         #region Configuring Service Monitoring
         public static void AddFilter(CRFilter filter) {
@@ -875,22 +875,22 @@ namespace CrittercismSDK {
         /// Loads the messages from disk into the queue.
         /// </summary>
         private static void LoadQueue() {
-            List<MessageReport> messages=MessageReport.LoadMessages();
+            List<MessageReport> messages = MessageReport.LoadMessages();
             foreach (MessageReport message in messages) {
                 // I'm wondering if we needed to restrict to 50 message of something similar?
                 MessageQueue.Enqueue(message);
             }
         }
 
-        private const int MaxMessageQueueCount=100;
+        private const int MaxMessageQueueCount = 100;
 
         /// <summary>
         /// Adds message to queue
         /// </summary>
         internal static void AddMessageToQueue(MessageReport message) {
-            while (MessageQueue.Count>=MaxMessageQueueCount) {
+            while (MessageQueue.Count >= MaxMessageQueueCount) {
                 // Sacrifice an oldMessage
-                MessageReport oldMessage=MessageQueue.Dequeue();
+                MessageReport oldMessage = MessageQueue.Dequeue();
                 oldMessage.Delete();
             }
             MessageQueue.Enqueue(message);
@@ -919,11 +919,11 @@ namespace CrittercismSDK {
             }
             try {
                 Debug.WriteLine("NetworkStatusChanged");
-                ConnectionProfile profile=NetworkInformation.GetInternetConnectionProfile();
-                bool isConnected=(profile!=null
-                    &&(profile.GetNetworkConnectivityLevel()==NetworkConnectivityLevel.InternetAccess));
+                ConnectionProfile profile = NetworkInformation.GetInternetConnectionProfile();
+                bool isConnected = (profile != null
+                    && (profile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess));
                 if (isConnected) {
-                    if (MessageQueue!=null&&MessageQueue.Count>0) {
+                    if (MessageQueue != null && MessageQueue.Count > 0) {
                         readerEvent.Set();
                     }
                 }
