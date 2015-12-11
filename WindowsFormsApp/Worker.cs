@@ -16,12 +16,11 @@ namespace WindowsFormsApp
         public static void Work()
         {
             Console.WriteLine("Worker.Work running in its own thread.");
-            Random rnd = new Random();
+            Random random = new Random();
             while (true) {
                 // Wait around 2 second.
-                Thread.Sleep(rnd.Next(4000));
-                if (rnd.Next(10)==0) {
-                    Random random=new Random();
+                Thread.Sleep(random.Next(4000));
+                if (random.Next(10)==0) {
                     string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
                     string name=names[random.Next(0,names.Length)];
                     Crittercism.LeaveBreadcrumb(name);

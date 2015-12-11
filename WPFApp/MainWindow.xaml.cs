@@ -22,6 +22,8 @@ namespace WPFApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static Random random = new Random();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -99,7 +101,6 @@ namespace WPFApp
                 const string endTransactionLabel = "End Transaction";
                 String label = button.Content.ToString();
                 if (label == beginTransactionLabel) {
-                    Random random = new Random();
                     transactionName = transactionNames[random.Next(0,transactionNames.Length)];
                     Crittercism.BeginTransaction(transactionName);
                     button.Content = endTransactionLabel;
@@ -144,23 +145,23 @@ namespace WPFApp
         }
 
         private void DeepError(int n) {
-            if (n==0) {
-                throw new Exception("Deep Inner Exception");
+            if (n == 0) {
+                throw new Exception("Exception " + random.NextDouble());
             } else {
-                DeepError(n-1);
+                DeepError(n - 1);
             }
         }
 
         private void ThrowException() {
-            Random random = new Random();
-            throw new Exception("Exception "+random.NextDouble());
-#if false
+            DeepError(random.Next(0,4));
+        }
+
+        private void OuterException() {
             try {
                 DeepError(4);
             } catch (Exception ie) {
                 throw new Exception("Outer Exception",ie);
             }
-#endif
         }
         
         private void testMultithreadClick(object sender,RoutedEventArgs e) {

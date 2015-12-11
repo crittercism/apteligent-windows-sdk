@@ -12,6 +12,8 @@ using System.Threading;
 
 namespace WP8TestApp {
     public partial class CrashSim : PhoneApplicationPage {
+        private static Random random = new Random();
+
         public CrashSim() {
             InitializeComponent();
         }
@@ -102,21 +104,25 @@ namespace WP8TestApp {
         }
 
         private void DeepError(int n) {
-            if (n==0) {
-                throw new Exception("Deep Inner Exception");
+            if (n == 0) {
+                throw new Exception("Exception " + random.NextDouble());
             } else {
-                DeepError(n-1);
+                DeepError(n - 1);
             }
         }
 
         private void ThrowException() {
+            DeepError(random.Next(0,4));
+        }
+
+        private void OuterException() {
             try {
                 DeepError(4);
             } catch (Exception ie) {
                 throw new Exception("Outer Exception",ie);
             }
         }
-        
+
         private void testMultithreadClick(object sender,RoutedEventArgs e)
         {
             Thread thread = new Thread(new ThreadStart(Worker.Work));

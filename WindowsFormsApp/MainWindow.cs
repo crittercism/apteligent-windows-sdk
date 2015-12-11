@@ -14,6 +14,7 @@ using CrittercismSDK;
 namespace WindowsFormsApp {
     public partial class MainWindow : Form {
         private static int ApplicationOpenFormsCount = 0;
+        private static Random random = new Random();
 
         public MainWindow() {
             InitializeComponent();
@@ -33,7 +34,6 @@ namespace WindowsFormsApp {
         }
 
         private void leaveBreadcrumb_Click(object sender,EventArgs e) {
-            Random random=new Random();
             string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
             string name=names[random.Next(0,names.Length)];
             Crittercism.LeaveBreadcrumb(name);
@@ -102,14 +102,18 @@ namespace WindowsFormsApp {
         }
 
         private void DeepError(int n) {
-            if (n==0) {
-                throw new Exception("Deep Inner Exception");
+            if (n == 0) {
+                throw new Exception("Exception " + random.NextDouble());
             } else {
-                DeepError(n-1);
+                DeepError(n - 1);
             }
         }
 
         private void ThrowException() {
+            DeepError(random.Next(0,4));
+        }
+
+        private void OuterException() {
             try {
                 DeepError(4);
             } catch (Exception ie) {
@@ -164,7 +168,6 @@ namespace WindowsFormsApp {
                 const string endTransactionLabel = "End Transaction";
                 String label = button.Text;
                 if (label == beginTransactionLabel) {
-                    Random random = new Random();
                     transactionName = transactionNames[random.Next(0,transactionNames.Length)];
                     Crittercism.BeginTransaction(transactionName);
                     button.Text = endTransactionLabel;
