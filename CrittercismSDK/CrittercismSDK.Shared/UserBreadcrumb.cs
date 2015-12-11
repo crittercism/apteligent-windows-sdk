@@ -44,8 +44,8 @@ namespace CrittercismSDK
         #region JSON
         internal JObject ToJObject() {
             JObject answer = new JObject();
-            answer["timestamp"] = timestamp;
             answer["message"] = message;
+            answer["timestamp"] = timestamp;
             return answer;
         }
         #endregion

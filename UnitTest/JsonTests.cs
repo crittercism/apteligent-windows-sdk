@@ -226,21 +226,22 @@ namespace UnitTest {
         [TestMethod]
         public void NetworkBreadcrumbJsonTest() {
             // Network,         // 2 - network breadcrumb    ; [verb,url,...,statusCode,errorCode]
-            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            DateTime now = DateTime.UtcNow;
+            // Yes, DateUtils.ISO8601DateString for Endpoint and DateUtils.GMTDateString for Breadcrumb is odd.
             Endpoint endpoint1 = new Endpoint(
                 "POST",
-                "http://www.mrscritter.com?doYouLoveCrittercism=YES",
-                timestamp,
+                "http://www.mrscritter.com",
+                DateUtils.ISO8601DateString(now),
                 433,
                 3213,
                 2478,
                 HttpStatusCode.OK,
                 WebExceptionStatus.Success);
-            Breadcrumb breadcrumb1 = new Breadcrumb(timestamp,BreadcrumbType.Network,endpoint1);
+            Breadcrumb breadcrumb1 = new Breadcrumb(DateUtils.GMTDateString(now),BreadcrumbType.Network,endpoint1);
             // Testing BreadcrumbConverter WriteJson
             string json1 = JsonConvert.SerializeObject(breadcrumb1);
             // NOTE: VS editor syntax colors embedded URL, but the C# syntax is correct.
-            Assert.IsTrue(json1.IndexOf(",2,[\"POST\",\"http://www.mrscritter.com?doYouLoveCrittercism=YES\"")>=0);
+            Assert.IsTrue(json1.IndexOf(",2,[\"POST\",\"http://www.mrscritter.com")>=0);
             Assert.IsTrue(json1.IndexOf(",433,2,3213,2478,200,5,0]]")>=0);
             string json2 = JsonConvert.SerializeObject(breadcrumb1,Formatting.None,new BreadcrumbConverter());
             Debug.WriteLine("json1 == " + json1);
@@ -256,11 +257,12 @@ namespace UnitTest {
         [TestMethod]
         public void UserBreadcrumbJsonTest() {
             // Text,            // 1 - user breadcrumb       ; {text:,level:}
-            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            DateTime now = DateTime.UtcNow;
+            // Yes, DateUtils.ISO8601DateString for Endpoint and DateUtils.GMTDateString for Breadcrumb is odd.
             Dictionary<string,Object> data1 = new Dictionary<string,Object>();
             data1["text"] = "Critter Bowl is Empty!";
             data1["level"] = (int)BreadcrumbTextType.Urgent;
-            Breadcrumb breadcrumb1 = new Breadcrumb(timestamp,BreadcrumbType.Text,data1);
+            Breadcrumb breadcrumb1 = new Breadcrumb(DateUtils.GMTDateString(now),BreadcrumbType.Text,data1);
             // Testing BreadcrumbConverter WriteJson
             string json1 = JsonConvert.SerializeObject(breadcrumb1);
             // We don't assume Dictionary key-value pairs appear in any particular order.

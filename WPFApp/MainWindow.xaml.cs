@@ -152,11 +152,15 @@ namespace WPFApp
         }
 
         private void ThrowException() {
+            Random random = new Random();
+            throw new Exception("Exception "+random.NextDouble());
+#if false
             try {
                 DeepError(4);
             } catch (Exception ie) {
                 throw new Exception("Outer Exception",ie);
             }
+#endif
         }
         
         private void testMultithreadClick(object sender,RoutedEventArgs e) {

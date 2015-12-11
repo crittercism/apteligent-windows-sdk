@@ -18,14 +18,14 @@ namespace CrittercismSDK
             bool answer = (o != null);
             answer = answer && (o.Count == 2);
             {
-                JToken timestamp = null;
-                answer = answer && o.TryGetValue("timestamp",out timestamp);
-                answer = answer && JsonUtils.IsJsonDate(timestamp);
-            }
-            {
                 JToken message = null;
                 answer = answer && o.TryGetValue("message",out message);
                 answer = answer && (message.Type == JTokenType.String);
+            }
+            {
+                JToken timestamp = null;
+                answer = answer && o.TryGetValue("timestamp",out timestamp);
+                answer = answer && JsonUtils.IsJsonDate(timestamp);
             }
             return answer;
         }
