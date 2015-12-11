@@ -24,6 +24,12 @@ namespace UnitTest {
             }
         }
 
+#if false
+        ////////////////////////////////////////////////////////////////
+        // TODO: UnfifiedAppLoad.cs is some D.A. code that was never
+        // completely put into production.  Currently dead weight.
+        // It might be deleted in the future.
+        ////////////////////////////////////////////////////////////////
         [TestMethod]
         public void AppLoadFormat() {
             UnifiedAppLoad newMessageReport = new UnifiedAppLoad(TestHelpers.VALID_APPID);
@@ -33,5 +39,6 @@ namespace UnitTest {
             Assert.AreEqual(inner.osName,Crittercism.OSName);
             Assert.AreEqual(inner.carrier,"UNKNOWN");     // On emulator
         }
+#endif
     }
 }
