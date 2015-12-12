@@ -369,7 +369,10 @@ namespace CrittercismSDK {
             list.Add((int)state);
             list.Add(timeout / (double)MSEC_PER_SEC);  // seconds
             if (value == NULL_VALUE) {
-                list.Add(null);
+                // TODO: list.Add(null) will be correct here, but until we get Transaction config
+                // from AppLoad, let's make this default be $1.00 == 100 pennies.
+                //list.Add(null);
+                list.Add(100);
             } else {
                 list.Add(value);
             };
