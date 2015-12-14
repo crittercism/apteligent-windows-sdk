@@ -9,7 +9,9 @@ using CrittercismSDK;
 
 namespace ConsoleApp {
     class Program {
-        static void Main(string[] args) {
+        private static Random random = new Random();
+
+        public static void Main(string[] args) {
             Crittercism.Init("537a4e738039805d82000002");
             try {
                 Console.WriteLine("ConsoleApp Demo");

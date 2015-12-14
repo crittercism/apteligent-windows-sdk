@@ -31,6 +31,7 @@ namespace HubApp
     {
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
+        private static Random random = new Random();
 
         public ItemPage()
         {
@@ -156,6 +157,10 @@ namespace HubApp
         }
 
         private void ThrowException() {
+            DeepError(random.Next(0,4));
+        }
+
+        private void OuterException() {
             try {
                 DeepError(4);
             } catch (Exception ie) {

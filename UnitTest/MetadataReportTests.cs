@@ -13,10 +13,10 @@ namespace UnitTest {
     public class MetadataReportTests {
         [TestMethod]
         public void MetadataEncodingTest() {
-            Dictionary<string, string> dict = new Dictionary<string, string>();
-            dict.Add("key with space", "value1");
-            dict.Add("key&%", "value2");
-            MetadataReport metadataReport = new MetadataReport(TestHelpers.VALID_APPID, dict);
+            Dictionary<string,string> dict = new Dictionary<string,string>();
+            dict.Add("key with space","value1");
+            dict.Add("key&%","value2");
+            MetadataReport metadataReport = new MetadataReport(TestHelpers.VALID_APPID,dict);
             string formEncoded = CrittercismSDK.QueueReader.ComputeFormPostBody(metadataReport);
             // We're form-encoding JSON here...gross
             // Encoded metadata string: {"key with space":"value1","key&%":"value2"}
@@ -48,8 +48,8 @@ namespace UnitTest {
         public void MetadataPersistenceTest() {
             Crittercism.Init("5350bb642bd1f1017c000002");
             Crittercism.SetUsername("harry");
-            Crittercism.SetValue("surname", "hedwig");
-            Trace.WriteLine("surname == "+Crittercism.ValueFor("surname"));
+            Crittercism.SetValue("surname","hedwig");
+            Trace.WriteLine("surname == " + Crittercism.ValueFor("surname"));
             Assert.AreEqual(Crittercism.ValueFor("surname"),"hedwig");
             Assert.AreEqual(Crittercism.ValueFor("username"),"harry");
             Crittercism.SetUsername("hermione");
