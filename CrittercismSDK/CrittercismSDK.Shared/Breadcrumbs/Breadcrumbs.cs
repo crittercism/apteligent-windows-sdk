@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -136,6 +137,116 @@ namespace CrittercismSDK {
             // "2014-01-04T21:11:41.806+0000", 116, 0, 217, 502, 200, 3, "0"]
             ////////////////////////////////////////////////////////////////
             NetworkBreadcrumbs().AddBreadcrumb(BreadcrumbType.Network,endpoint);
+        }
+        internal static void LeaveEventBreadcrumb(string eventType) {
+            // 3 - app event (i.e. foreground/background)   ; {event:}
+            ////////////////////////////////////////////////////////////////
+            // 3 - Application Event
+            // Properties:
+            // event - string, event type, i.e. "foregrounded", "backgrounded"
+            ////////////////////////////////////////////////////////////////
+            Dictionary<string,Object> data = new Dictionary<string,Object>();
+            data["event"] = eventType;
+            SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.Event,data);
+        }
+        internal static void LeaveReachabilityBreadcrumb(BreadcrumbReachabilityType change) {
+            // 4 - network change ; {change:}
+            ////////////////////////////////////////////////////////////////
+            // 4 - Network change
+            // Used to convey various changes to the network connectivity of the
+            // device.
+            // Properties:
+            // change - number, type of network change that occurred
+            // 0 - internet connection up                      ;
+            // 1 - internet connection down                    ;
+            // EXAMPLE:
+            // network event, internet connectivity gained
+            // ["1992-04-26T13:12:36Z", 4, {change: 0}],
+            ////////////////////////////////////////////////////////////////
+            Debug.Assert(((change == BreadcrumbReachabilityType.Up) || (change == BreadcrumbReachabilityType.Down)),
+              "Illegal change arg for LeaveReachabilityBreadcrumb");
+            Dictionary<string,Object> data = new Dictionary<string,Object>();
+            data["change"] = change;
+            SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.Reachability,data);
+        }
+        internal static void LeaveReachabilityBreadcrumb(BreadcrumbReachabilityType change,string reachabilityType) {
+            // 4 - network change ; {change:,type:}
+            ////////////////////////////////////////////////////////////////
+            // 4 - Network change
+            // Used to convey various changes to the network connectivity of the
+            // device.
+            // Properties:
+            // change - number, type of network change that occurred
+            // 2 - connectivity type gained                    ; type
+            // 3 - connectivity type lost                      ; type
+            // reachabilityType - string, connection type
+            // only applies to change types 2 and 3
+            // oldType - string, previous connection type
+            // only applies to change type 4
+            // newType - string, new connection type
+            // only applies to change type 4
+            // EXAMPLE:
+            // network event, connectivity type gained, "wifi"
+            // ["1992-04-26T13:12:38Z", 4, {change: 2, type: "wifi"}],
+            ////////////////////////////////////////////////////////////////
+            Debug.Assert(((change == BreadcrumbReachabilityType.Gained) || (change == BreadcrumbReachabilityType.Lost)),
+              "Illegal change arg for LeaveReachabilityBreadcrumb");
+            Dictionary<string,Object> data = new Dictionary<string,Object>();
+            data["change"] = change;
+            data["type"] = reachabilityType;
+            SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.Reachability,data);
+        }
+        internal static void LeaveReachabilityBreadcrumb(BreadcrumbReachabilityType change,string oldType,string newType) {
+            // 4 - network change ; {change:,oldType:,newType:}
+            ////////////////////////////////////////////////////////////////
+            // 4 - Network change
+            // Used to convey various changes to the network connectivity of the
+            // device.
+            // Properties:
+            // change - number, type of network change that occurred
+            // 4 - switch from one connection type to another  ; oldType,newType
+            // oldType - string, previous connection type
+            // only applies to change type 4
+            // newType - string, new connection type
+            // only applies to change type 4
+            ////////////////////////////////////////////////////////////////
+            Debug.Assert((change == BreadcrumbReachabilityType.Switch),
+              "Illegal change arg for LeaveReachabilityBreadcrumb");
+            Dictionary<string,Object> data = new Dictionary<string,Object>();
+            data["change"] = change;
+            data["oldType"] = oldType;
+            data["newType"] = newType;
+            SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.Reachability,data);
+        }
+        internal static void LeaveViewBreadcrumb(BreadcrumbViewType eventType,string viewName) {
+            // 5 - uiview/"activity" load ; {event:,viewName:}
+            ////////////////////////////////////////////////////////////////
+            // 5 - UI View/Activity Events
+            // Used to denote when user interface views (activities on android)
+            // are loaded and unloaded.
+            // Properties:
+            // event - number, type of ui event
+            // 0 - view loaded/activated
+            // 1 - view unloaded/deactivated
+            // viewName - string, name of view or activity
+            ////////////////////////////////////////////////////////////////
+            Dictionary<string,Object> data = new Dictionary<string,Object>();
+            data["event"] = eventType;
+            data["viewName"] = viewName;
+            SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.View,data);
+        }
+        internal static void LeaveErrorBreadcrumb(string name,string reason) {
+            // 6 - handled exception ; {name:,reason:}
+            ////////////////////////////////////////////////////////////////
+            // 6 - Handled Exception Occurred
+            // Properties
+            // name, string - exception name
+            // reason, string - exception reason
+            ////////////////////////////////////////////////////////////////
+            Dictionary<string,Object> data = new Dictionary<string,Object>();
+            data["name"] = name;
+            data["reason"] = reason;
+            SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.Error,data);
         }
         #endregion
 
