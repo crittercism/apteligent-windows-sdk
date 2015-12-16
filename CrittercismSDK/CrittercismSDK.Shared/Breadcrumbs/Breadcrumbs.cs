@@ -259,11 +259,11 @@ namespace CrittercismSDK {
             }
             return answer;
         }
-        internal static List<UserBreadcrumb> ConvertToUserBreadcrumbs(List<Breadcrumb> session) {
+        internal static List<UserBreadcrumb> ConvertToUserBreadcrumbs(List<Breadcrumb> session,bool windowsStyle) {
             // Convert List<Breadcrumb> to List<UserBreadcrumb> .
             List<UserBreadcrumb> answer = new List<UserBreadcrumb>();
             foreach (Breadcrumb breadcrumb in session) {
-                UserBreadcrumb userBreadcrumb = new UserBreadcrumb(breadcrumb);
+                UserBreadcrumb userBreadcrumb = new UserBreadcrumb(breadcrumb,windowsStyle);
                 answer.Add(userBreadcrumb);
             }
             return answer;
@@ -281,13 +281,13 @@ namespace CrittercismSDK {
                     list.Insert(0,sessionStartBreadcrumb);
                 }
             }
-            List<UserBreadcrumb> answer = ConvertToUserBreadcrumbs(list);
+            List<UserBreadcrumb> answer = ConvertToUserBreadcrumbs(list,false);
             return answer;
         }
         internal static UserBreadcrumbs GetAllSessionsBreadcrumbs() {
             // Extract legacy UserBreadcrumbs object from userBreadcrumbs. (CrashReport "breadcrumbs".)
-            List<UserBreadcrumb> previous = ConvertToUserBreadcrumbs(userBreadcrumbs.previous_session);
-            List<UserBreadcrumb> current = ConvertToUserBreadcrumbs(userBreadcrumbs.current_session);
+            List<UserBreadcrumb> previous = ConvertToUserBreadcrumbs(userBreadcrumbs.previous_session,true);
+            List<UserBreadcrumb> current = ConvertToUserBreadcrumbs(userBreadcrumbs.current_session,true);
             UserBreadcrumbs answer = new CrittercismSDK.UserBreadcrumbs(previous,current);
             return answer;
         }
