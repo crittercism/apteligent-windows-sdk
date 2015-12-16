@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Net;
@@ -18,7 +19,7 @@ namespace WindowsFormsApp {
 
         public MainWindow() {
             InitializeComponent();
-
+            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
             ApplicationOpenFormsCount++;
         }
 
@@ -158,13 +159,13 @@ namespace WindowsFormsApp {
             (new MainWindow()).Show();
         }
 
+        private const string beginTransactionLabel = "Begin Transaction";
+        private const string endTransactionLabel = "End Transaction";
         private string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
         private string transactionName;
         private void transactionButton_Click(object sender,EventArgs e) {
             Button button = sender as Button;
             if (button != null) {
-                const string beginTransactionLabel = "Begin Transaction";
-                const string endTransactionLabel = "End Transaction";
                 String label = button.Text;
                 if (label == beginTransactionLabel) {
                     transactionName = transactionNames[random.Next(0,transactionNames.Length)];
@@ -190,6 +191,14 @@ namespace WindowsFormsApp {
                     }
                 }
             }
+        }
+        private void TransactionTimeOutHandler(object sender,EventArgs e) {
+            Debug.WriteLine("The transaction timed out.");
+            // Execute this Action on the main UI thread.
+            this.Invoke((MethodInvoker)delegate {
+                transactionButton.Text = beginTransactionLabel;
+                MessageBox.Show(this,"Transaction Timed Out","WindowsFormsApp",MessageBoxButtons.OK);
+            });
         }
     }
 }
