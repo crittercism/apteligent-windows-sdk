@@ -25,7 +25,7 @@ namespace UnitTest {
         public static void CheckCommonJsonFragments(String json) {
             Platform p = new Platform();
             string[] jsonStrings = new string[] {
-                "\"app_id\":\"50807ba33a47481dd5000002\"",
+                "\"app_id\":\""+VALID_APPID+"\"",
                 "\"app_state\":{\"app_version\":\"",
                 "\"platform\":{\"client\":",
                 "\"device_id\":\"" + p.device_id + "\"",
