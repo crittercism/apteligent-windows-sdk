@@ -54,10 +54,10 @@ namespace CrittercismSDK {
             long answer = 0;
             switch (json.Type) {
                 case JTokenType.Date:
-                    answer = ((DateTime)((JValue)json).Value).ToUniversalTime().Ticks;  // ticks
+                    answer = ((DateTime)((JValue)json).Value).ToUniversalTime().Ticks; // ticks
                     break;
                 case JTokenType.String:
-                    answer = DateUtils.StringToTicks((string)((JValue)json).Value);  // ticks
+                    answer = DateUtils.StringToTicks((string)((JValue)json).Value); // ticks
                     break;
             }
             return answer;

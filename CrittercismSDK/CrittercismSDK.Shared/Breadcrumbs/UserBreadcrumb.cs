@@ -10,7 +10,7 @@ namespace CrittercismSDK {
     [JsonConverter(typeof(UserBreadcrumbConverter))]
     internal class UserBreadcrumb {
         #region Properties
-        private string timestamp;
+        private string timestamp; // GMTDateString
         private string message;
         #endregion
 

@@ -47,11 +47,10 @@ namespace CrittercismSDK {
         private long beginTime; // ticks (absolute)
         private long endTime; // ticks (absolute)
         private long eyeTime; // ticks (relative interval)
-
-        private string beginTimeString;
-        private string endTimeString;
+        private string beginTimeString; // ISO8601DateString
+        private string endTimeString; // ISO8601DateString
         private long foregroundTime; // ticks (absolute)
-        private string foregroundTimeString;
+        private string foregroundTimeString; // ISO8601DateString
         private bool isForegrounded;
 
         #region Properties
@@ -282,12 +281,12 @@ namespace CrittercismSDK {
             // Transaction's appearing in either a TransactionReport or a Crash report.
             this.name = name;
             this.state = state;
-            this.timeout = timeout;  // milliseconds
+            this.timeout = timeout; // milliseconds
             this.value = value;
             this.metadata = metadata;
-            SetBeginTime(beginTime);  // ticks
-            SetEndTime(endTime);  // ticks
-            this.eyeTime = eyeTime;  // ticks
+            SetBeginTime(beginTime); // ticks
+            SetEndTime(endTime); // ticks
+            this.eyeTime = eyeTime; // ticks
         }
         #endregion
 
@@ -367,7 +366,7 @@ namespace CrittercismSDK {
             List<JToken> list = new List<JToken>();
             list.Add(name);
             list.Add((int)state);
-            list.Add(timeout / (double)MSEC_PER_SEC);  // seconds
+            list.Add(timeout / (double)MSEC_PER_SEC); // seconds
             if (value == NULL_VALUE) {
                 // TODO: list.Add(null) will be correct here, but until we get Transaction config
                 // from AppLoad, let's make this default be $1.00 == 100 pennies.
@@ -379,7 +378,7 @@ namespace CrittercismSDK {
             list.Add(new JObject());
             list.Add(beginTimeString);
             list.Add(endTimeString);
-            list.Add(eyeTime / (double)TICKS_PER_SEC);  // seconds
+            list.Add(eyeTime / (double)TICKS_PER_SEC); // seconds
             JArray answer = new JArray(list);
             return answer;
         }
@@ -416,7 +415,6 @@ namespace CrittercismSDK {
             }
         }
         #endregion
-
 
         #region Persistence
         internal static Transaction[] AllTransactions() {
