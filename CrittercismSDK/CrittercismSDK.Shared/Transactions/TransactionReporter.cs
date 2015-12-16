@@ -20,7 +20,8 @@ namespace CrittercismSDK {
         #region Constants
         internal const int MSEC_PER_SEC = 1000;
         internal const int MAX_TRANSACTION_COUNT = 50;
-        const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
+        private const int ONE_MINUTE = 60 * MSEC_PER_SEC; // milliseconds
+        private const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
         #endregion
 
         #region Properties
@@ -33,6 +34,7 @@ namespace CrittercismSDK {
         // Batch additional network requests for 20 seconds before sending TransactionReport .
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
         private static int defaultTimeout = ONE_HOUR; // milliseconds
+        // private static int defaultTimeout = ONE_MINUTE; // milliseconds
         private static Dictionary<string,Object> thresholds = new Dictionary<string,Object>();
 
         internal static int Interval() {

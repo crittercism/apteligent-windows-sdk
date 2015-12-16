@@ -12,7 +12,7 @@ namespace CrittercismSDK {
             return dateTime.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ",CultureInfo.InvariantCulture);
         }
         internal static long StringToTicks(string timestamp) {
-            return Convert.ToDateTime(timestamp).Ticks;
+            return Convert.ToDateTime(timestamp).ToUniversalTime().Ticks;
         }
     }
 }
