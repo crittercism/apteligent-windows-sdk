@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -24,6 +25,7 @@ namespace WPFApp {
 
         public MainWindow() {
             InitializeComponent();
+            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -89,13 +91,15 @@ namespace WPFApp {
                 (HttpStatusCode)responseCode,
                 WebExceptionStatus.Success);
         }
+
+        private const string beginTransactionLabel = "Begin Transaction";
+        private const string endTransactionLabel = "End Transaction";
         private string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
         private string transactionName;
         private void transactionClick(object sender,RoutedEventArgs e) {
             Button button = sender as Button;
             if (button != null) {
-                const string beginTransactionLabel = "Begin Transaction";
-                const string endTransactionLabel = "End Transaction";
+                Debug.Assert(button == transactionButton);
                 String label = button.Content.ToString();
                 if (label == beginTransactionLabel) {
                     transactionName = transactionNames[random.Next(0,transactionNames.Length)];
@@ -122,6 +126,14 @@ namespace WPFApp {
                     }
                 }
             }
+        }
+        private void TransactionTimeOutHandler(object sender,EventArgs e) {
+            Debug.WriteLine("The transaction timed out.");
+            // Execute this Action on the main UI thread.
+            transactionButton.Dispatcher.Invoke(new Action(() => {
+                transactionButton.Content = beginTransactionLabel;
+                MessageBox.Show(this,"Transaction Timed Out","WPFApp",MessageBoxButton.OK);
+            }));
         }
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
             try {
@@ -176,7 +188,7 @@ namespace WPFApp {
                 username = "User";
             }
             string response = "";
-            MessageBoxResult result = MessageBox.Show("Do you love Crittercism?","WPFApp",MessageBoxButton.YesNo);
+            MessageBoxResult result = MessageBox.Show(this,"Do you love Crittercism?","WPFApp",MessageBoxButton.YesNo);
             switch (result) {
                 case MessageBoxResult.Yes:
                     response = "loves Crittercism.";

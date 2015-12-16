@@ -127,13 +127,12 @@ namespace WindowsFormsApp {
         }
 
         private void pictureBox1_Click(object sender,EventArgs e) {
-            
             string username=Crittercism.Username();
             if (username==null) {
                 username="User";
             }
             string response="";
-            DialogResult result=MessageBox.Show("Do you love Crittercism?","WindowsFormsApp",MessageBoxButtons.YesNo);
+            DialogResult result=MessageBox.Show(this,"Do you love Crittercism?","WindowsFormsApp",MessageBoxButtons.YesNo);
             switch (result) {
                 case DialogResult.Yes:
                     response="loves Crittercism.";

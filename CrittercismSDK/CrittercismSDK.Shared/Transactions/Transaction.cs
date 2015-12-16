@@ -92,6 +92,9 @@ namespace CrittercismSDK {
                         eyeTime += nowTime - foregroundTime;
                         isForegrounded = false;
                     }
+                    if (newState == TransactionState.TIMEOUT) {
+                        Crittercism.OnTransactionTimeOut(EventArgs.Empty);
+                    }
                     break;
             }
             TransactionReporter.Save(this);
@@ -351,7 +354,9 @@ namespace CrittercismSDK {
                         break;
                     default:
                         if (newState != TransactionState.TIMEOUT) {
-                            // Already in final state
+                            // Already in final state.  We are only checking for TIMEOUT to prevent
+                            // printing this message (the Transaction must have entered some final
+                            // state in the nick of time).
                             DebugUtils.LOG_ERROR("Ending transaction more than once is forbidden.");
                         }
                         break;
