@@ -56,7 +56,8 @@ namespace CrittercismSDK {
             Saved = false;
         }
 
-        public static Dictionary<string,object> ComputeAppState() {
+        internal static Dictionary<string,object> ComputeLegacyAppState() {
+            // Used by CrashReport and HandledException report.
             // Getting lots of stuff here. Some things like "DeviceId" require manifest-level authorization so skipping
             // those for now, see http://msdn.microsoft.com/en-us/library/ff769509%28v=vs.92%29.aspx#BKMK_Capabilities
 
@@ -80,7 +81,28 @@ namespace CrittercismSDK {
                 { "reported_at", DateUtils.GMTDateString(DateTime.UtcNow) }
             };
         }
-
+        internal static Dictionary<string,object> ComputeAppState() {
+            // Used by AppLoad and TransactionReport
+            // NOTE: ComputeAppState() isn't identical to ComputeLegacyAppState() .
+            Dictionary<string,object> answer = new Dictionary<string,object>();
+            answer["appVersion"] = Crittercism.AppVersion;
+            answer["appVersion"] = Crittercism.AppVersion;
+            answer["osName"] = Crittercism.OSName;
+            answer["crPlatform"] = "windows";
+            answer["osVersion"] = Crittercism.OSVersion;
+            answer["appID"] = Crittercism.AppID;
+            answer["locale"] = CultureInfo.CurrentCulture.Name;
+            answer["deviceModel"] = Crittercism.DeviceModel;
+            answer["appVersion"] = Crittercism.AppVersion;
+            answer["deviceID"] = Crittercism.DeviceId;
+#if WINDOWS_PHONE
+            answer["carrier"] = DeviceNetworkInformation.CellularMobileOperator;
+#else
+            answer["carrier"] = "UNKNOWN";
+#endif
+            answer["crVersion"] = "2.2.4";
+            return answer;
+        }
 
         /// <summary>
         /// Saves the message to disk.
@@ -143,7 +165,8 @@ namespace CrittercismSDK {
         }
         internal virtual string PostBody() {
             // Most MessageReport's are POST'd via JSON .
-            // The exceptional legacy MetadataReport overrides this method. 
+            // The exceptional legacy MetadataReport overrides this method.
+            // Appload overrides this method too.
             return JsonConvert.SerializeObject(this);
         }
         #endregion

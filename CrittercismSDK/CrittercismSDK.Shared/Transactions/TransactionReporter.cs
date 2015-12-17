@@ -260,34 +260,14 @@ namespace CrittercismSDK {
             }
             return answer;
         }
-        private static Dictionary<string,object> ComputeAppState() {
-            // NOTE: TransactionReporter ComputeAppState() isn't identical to MessageReport ComputeAppState() .
-            Dictionary<string,object> answer = new Dictionary<string,object>();
-            answer["appVersion"] = Crittercism.AppVersion;
-            answer["appVersion"] = Crittercism.AppVersion;
-            answer["osName"] = Crittercism.OSName;
-            answer["crPlatform"] = "windows";
-            answer["osVersion"] = Crittercism.OSVersion;
-            answer["appID"] = Crittercism.AppID;
-            answer["locale"] = CultureInfo.CurrentCulture.Name;
-            answer["deviceModel"] = Crittercism.DeviceModel;
-            answer["appVersion"] = Crittercism.AppVersion;
-            answer["deviceID"] = Crittercism.DeviceId;
-#if WINDOWS_PHONE
-            answer["carrier"] = DeviceNetworkInformation.CellularMobileOperator;
-#else
-            answer["carrier"] = "UNKNOWN";
-#endif
-            answer["crVersion"] = "2.2.4";
-            return answer;
-        }
+
         private static void SendTransactionReport() {
             if (TransactionsQueue.Count > 0) {
                 List<Transaction> transactions = TransactionsQueue.ToList();
                 TransactionsQueue.Clear();
                 long beginTime = BeginTime(transactions);
                 long endTime = EndTime(transactions);
-                Dictionary<string,object> appState = ComputeAppState();
+                Dictionary<string,object> appState = MessageReport.ComputeAppState();
                 List<UserBreadcrumb> breadcrumbs = Breadcrumbs.ExtractUserBreadcrumbs(beginTime,endTime);
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
                 List<Endpoint> endpoints = Breadcrumbs.ExtractEndpoints(beginTime,endTime);

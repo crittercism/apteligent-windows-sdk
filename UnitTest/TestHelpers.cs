@@ -22,18 +22,7 @@ namespace UnitTest {
             Crittercism.Shutdown();
         }
 
-        public static void CheckCommonJsonFragments(String json) {
-            Platform p = new Platform();
-            string[] jsonStrings = new string[] {
-                "\"app_id\":\""+VALID_APPID+"\"",
-                "\"app_state\":{\"app_version\":\"",
-                "\"platform\":{\"client\":",
-                "\"device_id\":\"" + p.device_id + "\"",
-                "\"device_model\":",
-                "\"os_name\":",
-                "\"os_version\":",
-                "\"locale\":",
-            };
+        private static void CheckJsonContains(String json,string[] jsonStrings) {
             foreach (string jsonFragment in jsonStrings) {
                 Trace.WriteLine("jsonFragment == " + jsonFragment);
                 Trace.WriteLine("json.Contains == " + json.Contains(jsonFragment));
@@ -41,6 +30,33 @@ namespace UnitTest {
             };
             // Make sure DateTimes are stringified in the canonical way and not in this goofy default way
             Assert.IsFalse(json.Contains("Date("));
+        }
+        public static void CheckJsonLegacy(String json) {
+            string[] jsonStrings = new string[] {
+                "\"app_id\":\"",
+                "\"app_state\":{\"app_version\":\"",
+                "\"platform\":{\"client\":",
+                "\"device_id\":\"",
+                "\"device_model\":",
+                "\"os_name\":",
+                "\"os_version\":",
+                "\"locale\":",
+            };
+            CheckJsonContains(json,jsonStrings);
+        }
+        public static void CheckJson(String json) {
+            string[] jsonStrings = new string[] {
+                "\"appID\":\"",
+                "\"appVersion\":\"",
+                "\"crPlatform\":\"",
+                "\"crVersion\":\"",
+                "\"deviceID\":\"",
+                "\"deviceModel\":",
+                "\"locale\":",
+                "\"osName\":",
+                "\"osVersion\":"
+            };
+            CheckJsonContains(json,jsonStrings);
         }
 
         public static void Cleanup() {

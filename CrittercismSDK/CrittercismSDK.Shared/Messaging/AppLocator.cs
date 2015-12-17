@@ -92,7 +92,7 @@ namespace CrittercismSDK {
             HttpWebRequest answer = null;
             switch (t.Name) {
                 case "AppLoad":
-                    answer = (HttpWebRequest)WebRequest.Create(new Uri(apiURL + "/v1/loads",UriKind.Absolute));
+                    answer = (HttpWebRequest)WebRequest.Create(new Uri(appLoadURL + "/v0/appload",UriKind.Absolute));
                     break;
                 case "APMReport":
                     answer = (HttpWebRequest)WebRequest.Create(new Uri(apmURL + "/api/apm/network",UriKind.Absolute));

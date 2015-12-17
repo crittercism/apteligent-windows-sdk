@@ -16,8 +16,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)APM\EndpointConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)APM\EndpointIndex.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AppLoad\AppLoad.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppLoad\UnifiedAppLoad.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppLoad\UnifiedMessageReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\Breadcrumb.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\BreadcrumbConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\BreadcrumbIndex.cs" />
