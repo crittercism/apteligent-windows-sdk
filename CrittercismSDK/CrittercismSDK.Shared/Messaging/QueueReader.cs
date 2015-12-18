@@ -22,9 +22,7 @@ using System.Web;
 
 namespace CrittercismSDK {
     internal class QueueReader {
-        /// <summary>
-        /// Reads the queue.
-        /// </summary>
+        #region ReadQueue
         internal void ReadQueue() {
             Debug.WriteLine("ReadQueue: ENTER");
             try {
@@ -79,11 +77,9 @@ namespace CrittercismSDK {
             }
             Debug.WriteLine("ReadStep: EXIT");
         }
+        #endregion // ReadQueue
 
-        /// <summary>
-        /// Send message to the endpoint.
-        /// </summary>
-        /// <returns>   true if it succeeds, false if it fails. </returns>
+        #region SendMessage
         private bool SendMessage() {
             //Debug.WriteLine("SendMessage: ENTER");
             bool sendCompleted = false;
@@ -116,7 +112,10 @@ namespace CrittercismSDK {
             //Debug.WriteLine("SendMessage: EXIT ---> "+sendCompleted);
             return sendCompleted;
         }
+        #endregion // SendMessage
 
+        #region SendRequest
+        // SendRequest
 #if WINDOWS_PHONE_APP
         private bool SendRequest(HttpWebRequest request,string postBody) {
             //Debug.WriteLine("SendRequest: request.RequestUri == "+request.RequestUri);
@@ -124,40 +123,12 @@ namespace CrittercismSDK {
             Debug.WriteLine("SendRequest: ENTER");
             try {
                 Task<Stream> writerTask = request.GetRequestStreamAsync();
-                using (Stream writer = writerTask.Result) {
-                    // NOTE: SendRequest caller's request.ContentType=="application/json; charset=utf-8"
-                    // or request.ContentType=="application/x-www-form-urlencoded"
-                    Debug.WriteLine("SendRequest: POST BODY:");
-                    Debug.WriteLine(postBody);
-                    byte[] postBytes = Encoding.UTF8.GetBytes(postBody);
-                    writer.Write(postBytes,0,postBytes.Length);
-                    writer.Flush();
+                using (Stream stream = writerTask.Result) {
+                    SendRequestWritePostBody(stream,postBody);
                 }
                 Task<WebResponse> responseTask = request.GetResponseAsync();
                 using (HttpWebResponse response = (HttpWebResponse)responseTask.Result) {
-                    try {
-                        Debug.WriteLine("SendRequest: response.StatusCode == " + (int)response.StatusCode);
-                        if ((((long)response.StatusCode) / 100) == 2) {
-                            // 2xx Success
-                            sendCompleted = true;
-                        }
-                    } catch (WebException webEx) {
-                        Debug.WriteLine("SendRequest: webEx == " + webEx);
-                        if (webEx.Response != null) {
-                            //Debug.WriteLine("SendRequest: response.StatusCode == "+(int)response.StatusCode);
-                            if (response.StatusCode == HttpStatusCode.BadRequest) {
-                                try {
-                                    using (StreamReader errorReader = (new StreamReader(webEx.Response.GetResponseStream()))) {
-                                        string errorMessage = errorReader.ReadToEnd();
-                                        Debug.WriteLine("SendRequest: " + errorMessage);
-                                    }
-                                } catch {
-                                }
-                            }
-                        }
-                    } catch (Exception ex) {
-                        Debug.WriteLine("SendRequest: ex == " + ex.Message);
-                    }
+                    sendCompleted = DidReceiveResult(request,response);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -176,47 +147,12 @@ namespace CrittercismSDK {
                     (result) => {
                         //Debug.WriteLine("SendRequest: BeginGetRequestStream");
                         try {
-                            using (Stream requestStream=request.EndGetRequestStream(result)) {
-                                using (StreamWriter writer=new StreamWriter(requestStream)) {
-                                    writer.Write(postBody);
-                                    Debug.WriteLine("SendRequest: POST BODY:");
-                                    Debug.WriteLine(postBody);
-                                    writer.Flush();
-#if NETFX_CORE
-#else
-                                    writer.Close();
-#endif
-                                }
+                            using (Stream stream = request.EndGetRequestStream(result)) {
+                                SendRequestWritePostBody(stream,postBody);
                             }
                             request.BeginGetResponse(
                                 (asyncResponse) => {
-                                    //Debug.WriteLine("SendRequest: BeginGetResponse");
-                                    try {
-                                        using (HttpWebResponse response=(HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                                            Debug.WriteLine("SendRequest: response.StatusCode == "+(int)response.StatusCode);
-                                            if ((((long)response.StatusCode)/100)==2) {
-                                                // 2xx Success
-                                                sendCompleted=true;
-                                            }
-                                        }
-                                    } catch (WebException webEx) {
-                                        Debug.WriteLine("SendRequest: webEx == "+webEx);
-                                        if (webEx.Response!=null) {
-                                            using (HttpWebResponse response=(HttpWebResponse)webEx.Response) {
-                                                //Debug.WriteLine("SendRequest: response.StatusCode == "+(int)response.StatusCode);
-                                                if (response.StatusCode==HttpStatusCode.BadRequest) {
-                                                    try {
-                                                        using (StreamReader errorReader=(new StreamReader(webEx.Response.GetResponseStream()))) {
-                                                            string errorMessage=errorReader.ReadToEnd();
-                                                            Debug.WriteLine(errorMessage);
-                                                        }
-                                                    } catch {
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    } catch {
-                                    }
+                                    sendCompleted = DidReceiveResult(request,asyncResponse);
                                     resetEvent.Set();
                                 },null);
                         } catch {
@@ -253,11 +189,95 @@ namespace CrittercismSDK {
 #else
             // Only .NETFramework 4.5 has WebUtility.UrlEncode, earlier version
             // .NETFramework 4.0 has HttpUtility.UrlEncode
-            postBody+="metadata="+HttpUtility.UrlEncode(metadataJson)+"&";
-            postBody+="device_name="+HttpUtility.UrlEncode(metadataReport.platform.device_model);
+            postBody += "metadata=" + HttpUtility.UrlEncode(metadataJson) + "&";
+            postBody += "device_name=" + HttpUtility.UrlEncode(metadataReport.platform.device_model);
 #endif
             return postBody;
         }
 
+        private void SendRequestWritePostBody(Stream stream,string postBody) {
+            using (StreamWriter writer = new StreamWriter(stream)) {
+                writer.Write(postBody);
+                Debug.WriteLine("SendRequest: POST BODY:");
+                Debug.WriteLine(postBody);
+                writer.Flush();
+#if NETFX_CORE
+#else
+                writer.Close();
+#endif
+            }
+        }
+        #endregion // SendRequest
+
+        #region DidReceiveResult
+        // DidReceiveResult
+#if WINDOWS_PHONE_APP
+        private bool DidReceiveResult(HttpWebRequest request,HttpWebResponse response) {
+            bool sendCompleted = false;
+            try {
+                sendCompleted = DidReceiveResponse(request,response);
+            } catch (WebException webEx) {
+                DidFailWithError(webEx);
+            } catch (Exception ex) {
+                Debug.WriteLine("SendRequest: ex == " + ex.Message);
+            }
+            return sendCompleted;
+        }
+#else
+        private bool DidReceiveResult(HttpWebRequest request,IAsyncResult asyncResponse) {
+            bool sendCompleted = false;
+            try {
+                sendCompleted = DidReceiveResponse(request,asyncResponse);
+            } catch (WebException webEx) {
+                DidFailWithError(webEx);
+            } catch {
+            }
+            return sendCompleted;
+        }
+#endif
+
+        // DidReceiveResponse
+#if WINDOWS_PHONE_APP
+        private bool DidReceiveResponse(HttpWebRequest request,HttpWebResponse response) {
+            bool sendCompleted = false;
+            Debug.WriteLine("SendRequest: response.StatusCode == " + (int)response.StatusCode);
+            if ((((long)response.StatusCode) / 100) == 2) {
+                // 2xx Success
+                sendCompleted = true;
+            }
+            return sendCompleted;
+        }
+#else
+        private bool DidReceiveResponse(HttpWebRequest request,IAsyncResult asyncResponse) {
+            bool sendCompleted = false;
+            using (HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse)) {
+                Debug.WriteLine("SendRequest: response.StatusCode == " + (int)response.StatusCode);
+                if ((((long)response.StatusCode) / 100) == 2) {
+                    // 2xx Success
+                    sendCompleted = true;
+                }
+            };
+            return sendCompleted;
+        }
+#endif // WINDOWS_PHONE_APP
+
+        private void DidFailWithError(WebException webEx) {
+            Debug.WriteLine("SendRequest: webEx == " + webEx);
+            if (webEx.Response != null) {
+                using (HttpWebResponse response = (HttpWebResponse)webEx.Response) {
+                    //Debug.WriteLine("SendRequest: response.StatusCode == "+(int)response.StatusCode);
+                    if (response.StatusCode == HttpStatusCode.BadRequest) {
+                        try {
+                            using (StreamReader errorReader = (new StreamReader(webEx.Response.GetResponseStream()))) {
+                                string errorMessage = errorReader.ReadToEnd();
+                                Debug.WriteLine(errorMessage);
+                            }
+                        } catch {
+                        }
+                    }
+                }
+            }
+        }
+        #endregion // DidReceiveResult
     }
 }
