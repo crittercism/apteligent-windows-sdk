@@ -45,7 +45,7 @@
         <Button Grid.Row="2" Grid.Column="0" Content="LogNetworkRequest"
                 Style="{StaticResource CritterStyle}"
                 Click="logNetworkRequestClick"/>
-        <Button Grid.Row="3" Grid.Column="0"  Content="Begin Transaction"
+        <Button Grid.Row="3" Grid.Column="0" Name="transactionButton" Content="Begin Transaction"
                 Style="{StaticResource CritterStyle}"
                 Click="transactionClick"/>
         <Button Grid.Row="4" Grid.Column="0"  Content="Handled Exception"

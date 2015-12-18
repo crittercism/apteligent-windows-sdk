@@ -69,7 +69,7 @@ namespace CrittercismSDK {
             List<Breadcrumb> systemBreadcrumbs,
             ExceptionObject exception) {
             app_id = appId;
-            app_state = ComputeAppState();
+            app_state = ComputeLegacyAppState();
             error = exception;
             this.metadata = metadata;
             this.breadcrumbs = breadcrumbs;

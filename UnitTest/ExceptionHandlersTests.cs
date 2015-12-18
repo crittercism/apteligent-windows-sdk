@@ -28,7 +28,7 @@ namespace UnitTest {
             Assert.IsNotNull(messageReport,"Expected a HandledException message");
             String asJson = JsonConvert.SerializeObject(messageReport);
             Trace.WriteLine("asJson == " + asJson);
-            TestHelpers.CheckCommonJsonFragments(asJson);
+            TestHelpers.CheckJsonLegacy(asJson);
             string[] jsonStrings = new string[] {
                 "\"breadcrumbs\":",
                 "\"current_session\":",

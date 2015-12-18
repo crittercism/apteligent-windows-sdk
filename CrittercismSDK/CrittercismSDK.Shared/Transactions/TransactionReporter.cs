@@ -20,7 +20,8 @@ namespace CrittercismSDK {
         #region Constants
         internal const int MSEC_PER_SEC = 1000;
         internal const int MAX_TRANSACTION_COUNT = 50;
-        const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
+        private const int ONE_MINUTE = 60 * MSEC_PER_SEC; // milliseconds
+        private const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
         #endregion
 
         #region Properties
@@ -33,6 +34,7 @@ namespace CrittercismSDK {
         // Batch additional network requests for 20 seconds before sending TransactionReport .
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
         private static int defaultTimeout = ONE_HOUR; // milliseconds
+        // private static int defaultTimeout = ONE_MINUTE; // milliseconds
         private static Dictionary<string,Object> thresholds = new Dictionary<string,Object>();
 
         internal static int Interval() {
@@ -258,34 +260,14 @@ namespace CrittercismSDK {
             }
             return answer;
         }
-        private static Dictionary<string,object> ComputeAppState() {
-            // NOTE: TransactionReporter ComputeAppState() isn't identical to MessageReport ComputeAppState() .
-            Dictionary<string,object> answer = new Dictionary<string,object>();
-            answer["appVersion"] = Crittercism.AppVersion;
-            answer["appVersion"] = Crittercism.AppVersion;
-            answer["osName"] = Crittercism.OSName;
-            answer["crPlatform"] = "windows";
-            answer["osVersion"] = Crittercism.OSVersion;
-            answer["appID"] = Crittercism.AppID;
-            answer["locale"] = CultureInfo.CurrentCulture.Name;
-            answer["deviceModel"] = Crittercism.DeviceModel;
-            answer["appVersion"] = Crittercism.AppVersion;
-            answer["deviceID"] = Crittercism.DeviceId;
-#if WINDOWS_PHONE
-            answer["carrier"] = DeviceNetworkInformation.CellularMobileOperator;
-#else
-            answer["carrier"] = "UNKNOWN";
-#endif
-            answer["crVersion"] = "2.2.4";
-            return answer;
-        }
+
         private static void SendTransactionReport() {
             if (TransactionsQueue.Count > 0) {
                 List<Transaction> transactions = TransactionsQueue.ToList();
                 TransactionsQueue.Clear();
                 long beginTime = BeginTime(transactions);
                 long endTime = EndTime(transactions);
-                Dictionary<string,object> appState = ComputeAppState();
+                Dictionary<string,object> appState = MessageReport.ComputeAppState();
                 List<UserBreadcrumb> breadcrumbs = Breadcrumbs.ExtractUserBreadcrumbs(beginTime,endTime);
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
                 List<Endpoint> endpoints = Breadcrumbs.ExtractEndpoints(beginTime,endTime);

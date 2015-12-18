@@ -131,6 +131,10 @@ namespace CrittercismSDK {
 
         #endregion Properties
 
+        #region Events
+        public static event EventHandler TransactionTimeOut;
+        #endregion
+
         #region OptOutStatus
 
         ////////////////////////////////////////////////////////////////
@@ -666,6 +670,13 @@ namespace CrittercismSDK {
         #endregion Metadata
 
         #region Transactions
+        internal static void OnTransactionTimeOut(EventArgs e) {
+            EventHandler handler = TransactionTimeOut;
+            if (handler != null) {
+                handler(null, e);
+            }
+        }
+
         public static void BeginTransaction(string name) {
             // Init and begin a transaction with a default value.
             try {

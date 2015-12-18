@@ -16,8 +16,8 @@ namespace CrittercismSDK {
 
         private string method;
         private string uriString;
-        private string timestamp;
-        private long latency;
+        private string timestamp; // ISO8601DateString
+        private long latency; // milliseconds
         private long activeNetwork;
         private long bytesRead;
         private long bytesSent;
@@ -30,7 +30,7 @@ namespace CrittercismSDK {
             string method,
             string uriString,
             string timestamp,
-            long latency,      // milliseconds
+            long latency,
             long bytesRead,
             long bytesSent,
             HttpStatusCode statusCode,

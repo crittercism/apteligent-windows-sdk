@@ -16,7 +16,7 @@ namespace CrittercismSDK
         ////////////////////////////////////////////////////////////////////////
 
         #region Properties
-        private string timestamp;
+        private string timestamp; // GMTDateString
         private BreadcrumbType breadcrumbType;
         private Object data;
         internal string GetTimestamp() {

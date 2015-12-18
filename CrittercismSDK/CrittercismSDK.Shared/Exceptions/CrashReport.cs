@@ -79,7 +79,7 @@ namespace CrittercismSDK {
             List<Transaction> transactions,
             ExceptionObject exception) {
             app_id = appId;
-            app_state = ComputeAppState();
+            app_state = ComputeLegacyAppState();
             this.metadata = metadata;
             this.breadcrumbs = breadcrumbs;
             this.endpoints = endpoints;

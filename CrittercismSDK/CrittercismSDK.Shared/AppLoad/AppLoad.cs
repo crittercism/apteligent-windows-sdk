@@ -1,39 +1,45 @@
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
-using System.Windows;
+using System.Threading.Tasks;
+#if NETFX_CORE
+using Windows.ApplicationModel;
+#elif WINDOWS_PHONE
+using Microsoft.Phone.Info;
+#endif
 
-namespace CrittercismSDK {
-    /// <summary>
-    /// Application load.
-    /// </summary>
+namespace CrittercismSDK
+{
     [DataContract]
     internal class AppLoad : MessageReport {
-        /// <summary>
-        /// Crittercism-issued Application identification string
-        /// </summary>
+        #region Properties
         [DataMember]
-        public string app_id { get; internal set; }
-
-        /// <summary>
-        /// User-specified state of the application as it's executing
-        /// </summary>
+        public Dictionary<string,object> appLoads;
         [DataMember]
-        public Dictionary<string,object> app_state { get; internal set; }
-
-        /// <summary>
-        /// Execution platform on which the app runs
-        /// </summary>
+        public int count = 1;
         [DataMember]
-        public Platform platform { get; internal set; }
+        public bool current = true;
+        #endregion
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
+        #region Constructor
         public AppLoad() {
-            app_id = Crittercism.AppID;
-            app_state = ComputeAppState();
-            platform = new Platform();
+            appLoads = MessageReport.ComputeAppState();
         }
+        #endregion
+
+        #region JSON
+        internal override string PostBody() {
+            // AppLoad PostBody is an exceptional override.
+            // Instead of inventing a whole new class and JSON
+            // serialization code just to get an Appload put into a JSON
+            // array, we instead create another specialized override
+            // of the MessageReport.cs "internal virtual string PostBody()"
+            return "[" + JsonConvert.SerializeObject(this) + "]";
+        }
+        #endregion
     }
 }
