@@ -1,5 +1,6 @@
 using CrittercismSDK;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -261,10 +262,13 @@ namespace CrittercismSDK {
                     sendCompleted = true;
                 }
                 using (StreamReader reader = (new StreamReader(response.GetResponseStream()))) {
-                    string message = reader.ReadToEnd();
-                    Debug.WriteLine(message);
+                    string json = reader.ReadToEnd();
+                    if (json.Length > 0) {
+                        AppLoad.DidReceiveResponse(json);
+                    }
                 }
-            } catch {
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
             }
             return sendCompleted;
         }
