@@ -239,35 +239,27 @@ namespace CrittercismSDK {
         // DidReceiveResponse
 #if WINDOWS_PHONE_APP
         private bool DidReceiveResponse(HttpWebRequest request,HttpWebResponse response) {
-            bool sendCompleted = DidReceiveResponseShared(request,response);
+            bool sendCompleted = false;
+            Debug.WriteLine("SendRequest: response.StatusCode == " + (int)response.StatusCode);
+            if ((((long)response.StatusCode) / 100) == 2) {
+                // 2xx Success
+                sendCompleted = true;
+            }
             return sendCompleted;
         }
 #else
         private bool DidReceiveResponse(HttpWebRequest request,IAsyncResult asyncResponse) {
             bool sendCompleted = false;
             using (HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                sendCompleted = DidReceiveResponseShared(request,response);
-            };
-            return sendCompleted;
-        }
-#endif // WINDOWS_PHONE_APP
-
-        private bool DidReceiveResponseShared(HttpWebRequest request,HttpWebResponse response) {
-            bool sendCompleted = false;
-            try {
                 Debug.WriteLine("SendRequest: response.StatusCode == " + (int)response.StatusCode);
                 if ((((long)response.StatusCode) / 100) == 2) {
                     // 2xx Success
                     sendCompleted = true;
                 }
-                using (StreamReader reader = (new StreamReader(response.GetResponseStream()))) {
-                    string message = reader.ReadToEnd();
-                    Debug.WriteLine(message);
-                }
-            } catch {
-            }
+            };
             return sendCompleted;
         }
+#endif // WINDOWS_PHONE_APP
 
         private void DidFailWithError(WebException webEx) {
             Debug.WriteLine("SendRequest: webEx == " + webEx);
@@ -276,9 +268,9 @@ namespace CrittercismSDK {
                     //Debug.WriteLine("SendRequest: response.StatusCode == "+(int)response.StatusCode);
                     if (response.StatusCode == HttpStatusCode.BadRequest) {
                         try {
-                            using (StreamReader reader = (new StreamReader(webEx.Response.GetResponseStream()))) {
-                                string message = reader.ReadToEnd();
-                                Debug.WriteLine(message);
+                            using (StreamReader errorReader = (new StreamReader(webEx.Response.GetResponseStream()))) {
+                                string errorMessage = errorReader.ReadToEnd();
+                                Debug.WriteLine(errorMessage);
                             }
                         } catch {
                         }
