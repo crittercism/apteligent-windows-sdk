@@ -94,11 +94,7 @@ namespace CrittercismSDK {
                         Crittercism.MessageQueue.Dequeue();
                         message.Delete();
                         try {
-                            HttpWebRequest request = message.WebRequest();
-                            if (request != null) {
-                                Debug.WriteLine("SendMessage: " + message.GetType().Name);
-                                sendCompleted = SendRequest(request,message.PostBody());
-                            }
+                            sendCompleted = SendRequest(message);
                         } catch (Exception ie) {
                             Crittercism.LogInternalException(ie);
                         }
@@ -118,18 +114,22 @@ namespace CrittercismSDK {
         #region SendRequest
         // SendRequest
 #if WINDOWS_PHONE_APP
-        private bool SendRequest(HttpWebRequest request,string postBody) {
-            //Debug.WriteLine("SendRequest: request.RequestUri == "+request.RequestUri);
+        private bool SendRequest(MessageReport message) {
+            //Debug.WriteLine("SendRequest: " + message.GetType().Name);
             bool sendCompleted = false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                Task<Stream> writerTask = request.GetRequestStreamAsync();
-                using (Stream stream = writerTask.Result) {
-                    SendRequestWritePostBody(stream,postBody);
-                }
-                Task<WebResponse> responseTask = request.GetResponseAsync();
-                using (HttpWebResponse response = (HttpWebResponse)responseTask.Result) {
-                    sendCompleted = DidReceiveResult(request,response);
+                HttpWebRequest request = message.WebRequest();
+                if (request != null) {
+                    string postBody = message.PostBody();
+                    Task<Stream> writerTask = request.GetRequestStreamAsync();
+                    using (Stream stream = writerTask.Result) {
+                        SendRequestWritePostBody(stream,postBody);
+                    }
+                    Task<WebResponse> responseTask = request.GetResponseAsync();
+                    using (HttpWebResponse response = (HttpWebResponse)responseTask.Result) {
+                        sendCompleted = DidReceiveResult(message,request,response);
+                    }
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -138,38 +138,42 @@ namespace CrittercismSDK {
             return sendCompleted;
         }
 #else
-        private bool SendRequest(HttpWebRequest request,string postBody) {
-            //Debug.WriteLine("SendRequest: request.RequestUri == "+request.RequestUri);
+        private bool SendRequest(MessageReport message) {
+            //Debug.WriteLine("SendRequest: " + message.GetType().Name);
             bool sendCompleted=false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                ManualResetEvent resetEvent=new ManualResetEvent(false);
-                request.BeginGetRequestStream(
-                    (result) => {
-                        //Debug.WriteLine("SendRequest: BeginGetRequestStream");
-                        try {
-                            using (Stream stream = request.EndGetRequestStream(result)) {
-                                SendRequestWritePostBody(stream,postBody);
+                HttpWebRequest request = message.WebRequest();
+                if (request != null) {
+                    string postBody = message.PostBody();
+                    ManualResetEvent resetEvent = new ManualResetEvent(false);
+                    request.BeginGetRequestStream(
+                        (result) => {
+                            //Debug.WriteLine("SendRequest: BeginGetRequestStream");
+                            try {
+                                using (Stream stream = request.EndGetRequestStream(result)) {
+                                    SendRequestWritePostBody(stream,postBody);
+                                }
+                                request.BeginGetResponse(
+                                    (asyncResponse) => {
+                                        sendCompleted = DidReceiveResult(message,request,asyncResponse);
+                                        resetEvent.Set();
+                                    },null);
+                            } catch {
+                                resetEvent.Set();
                             }
-                            request.BeginGetResponse(
-                                (asyncResponse) => {
-                                    sendCompleted = DidReceiveResult(request,asyncResponse);
-                                    resetEvent.Set();
-                                },null);
-                        } catch {
-                            resetEvent.Set();
-                        }
-                    },null);
-                {
+                        },null);
+                    {
 #if DEBUG
-                    Stopwatch stopWatch=new Stopwatch();
-                    stopWatch.Start();
+                        Stopwatch stopWatch = new Stopwatch();
+                        stopWatch.Start();
 #endif
-                    resetEvent.WaitOne();
+                        resetEvent.WaitOne();
 #if DEBUG
-                    stopWatch.Stop();
-                    Debug.WriteLine("SendRequest: TOTAL SECONDS == "+stopWatch.Elapsed.TotalSeconds);
+                        stopWatch.Stop();
+                        Debug.WriteLine("SendRequest: TOTAL SECONDS == " + stopWatch.Elapsed.TotalSeconds);
 #endif
+                    }
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -212,11 +216,16 @@ namespace CrittercismSDK {
 
         #region DidReceiveResult
         // DidReceiveResult
+        // While moving DidReceiveResult into MessageReport.cs is tempting, our judgement is the
+        // hairy details of the HttpWebRequest / HttpWebResponse / IAsyncResult processing belong
+        // here at home in QueueReader.cs along with all the similar hairy details of the
+        // SendMessage / HttpWebRequest processing .  So, the QueueReader.cs is charged with
+        // getting a nice simple "string responseText" over to MessageReport.cs .
 #if WINDOWS_PHONE_APP
-        private bool DidReceiveResult(HttpWebRequest request,HttpWebResponse response) {
+        private bool DidReceiveResult(MessageReport message,HttpWebRequest request,HttpWebResponse response) {
             bool sendCompleted = false;
             try {
-                sendCompleted = DidReceiveResponse(request,response);
+                sendCompleted = DidReceiveResponse(message,request,response);
             } catch (WebException webEx) {
                 DidFailWithError(webEx);
             } catch (Exception ex) {
@@ -225,10 +234,10 @@ namespace CrittercismSDK {
             return sendCompleted;
         }
 #else
-        private bool DidReceiveResult(HttpWebRequest request,IAsyncResult asyncResponse) {
+        private bool DidReceiveResult(MessageReport message,HttpWebRequest request,IAsyncResult asyncResponse) {
             bool sendCompleted = false;
             try {
-                sendCompleted = DidReceiveResponse(request,asyncResponse);
+                sendCompleted = DidReceiveResponse(message,request,asyncResponse);
             } catch (WebException webEx) {
                 DidFailWithError(webEx);
             } catch {
@@ -239,21 +248,21 @@ namespace CrittercismSDK {
 
         // DidReceiveResponse
 #if WINDOWS_PHONE_APP
-        private bool DidReceiveResponse(HttpWebRequest request,HttpWebResponse response) {
-            bool sendCompleted = DidReceiveResponseShared(request,response);
+        private bool DidReceiveResponse(MessageReport message,HttpWebRequest request,HttpWebResponse response) {
+            bool sendCompleted = DidReceiveResponseShared(message,request,response);
             return sendCompleted;
         }
 #else
-        private bool DidReceiveResponse(HttpWebRequest request,IAsyncResult asyncResponse) {
+        private bool DidReceiveResponse(MessageReport message,HttpWebRequest request,IAsyncResult asyncResponse) {
             bool sendCompleted = false;
             using (HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                sendCompleted = DidReceiveResponseShared(request,response);
+                sendCompleted = DidReceiveResponseShared(message,request,response);
             };
             return sendCompleted;
         }
 #endif // WINDOWS_PHONE_APP
 
-        private bool DidReceiveResponseShared(HttpWebRequest request,HttpWebResponse response) {
+        private bool DidReceiveResponseShared(MessageReport message,HttpWebRequest request,HttpWebResponse response) {
             bool sendCompleted = false;
             try {
                 Debug.WriteLine("SendRequest: response.StatusCode == " + (int)response.StatusCode);
@@ -262,10 +271,8 @@ namespace CrittercismSDK {
                     sendCompleted = true;
                 }
                 using (StreamReader reader = (new StreamReader(response.GetResponseStream()))) {
-                    string json = reader.ReadToEnd();
-                    if (json.Length > 0) {
-                        AppLoad.DidReceiveResponse(json);
-                    }
+                    string responseText = reader.ReadToEnd();
+                    message.DidReceiveResponse(responseText);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);

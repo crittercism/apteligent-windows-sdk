@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -20,8 +22,9 @@ namespace CrittercismSDK {
         // TODO: SynchronizedQueue has its virtues, but we may want synchronization
         // at the higher APM level instead.
         private static SynchronizedQueue<Endpoint> EndpointsQueue { get; set; }
+        private static bool enabled = true;
         // Batch additional network requests for 10 seconds before sending APMReport .
-        internal static int NETWORK_SEND_INTERVAL = 10000;
+        internal static int interval = 10000; // milliseconds
         // CRFilter's
         private static HashSet<CRFilter> Filters;
         #endregion
@@ -82,32 +85,34 @@ namespace CrittercismSDK {
         internal static void Enqueue(Endpoint endpoint) {
             Debug.WriteLine("APM Enqueue");
             lock (lockObject) {
-                while (EndpointsQueue.Count >= MAX_NETWORK_STATS) {
-                    EndpointsQueue.Dequeue();
-                };
-                EndpointsQueue.Enqueue(endpoint);
-                Debug.WriteLine("APM NETWORK_SEND_INTERVAL == " + NETWORK_SEND_INTERVAL);
+                if (enabled) {
+                    while (EndpointsQueue.Count >= MAX_NETWORK_STATS) {
+                        EndpointsQueue.Dequeue();
+                    };
+                    EndpointsQueue.Enqueue(endpoint);
+                    Debug.WriteLine("APM interval == " + interval);
 #if NETFX_CORE || WINDOWS_PHONE
-                if (timer == null) {
-                    // Creates a single-use timer.
-                    // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
-                    Debug.WriteLine("APM ThreadPoolTimer.CreateTimer");
-                    timer = ThreadPoolTimer.CreateTimer(
-                        OnTimerElapsed,
-                        TimeSpan.FromMilliseconds(NETWORK_SEND_INTERVAL));
-                }
+                    if (timer == null) {
+                        // Creates a single-use timer.
+                        // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
+                        Debug.WriteLine("APM ThreadPoolTimer.CreateTimer");
+                        timer = ThreadPoolTimer.CreateTimer(
+                            OnTimerElapsed,
+                            TimeSpan.FromMilliseconds(interval));
+                    }
 #else
-                if (timer==null) {
-                    // Generates an event after a set interval
-                    // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
-                    Debug.WriteLine("APM new Timer");
-                    timer = new Timer(NETWORK_SEND_INTERVAL);
-                    timer.Elapsed += OnTimerElapsed;
-                    // the Timer should raise the Elapsed event only once (false)
-                    timer.AutoReset = false;        // fire once
-                    timer.Enabled = true;           // Start the timer
-                }
+                    if (timer==null) {
+                        // Generates an event after a set interval
+                        // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
+                        Debug.WriteLine("APM new Timer");
+                        timer = new Timer(interval);
+                        timer.Elapsed += OnTimerElapsed;
+                        // the Timer should raise the Elapsed event only once (false)
+                        timer.AutoReset = false;        // fire once
+                        timer.Enabled = true;           // Start the timer
+                    }
 #endif // NETFX_CORE
+                }
             }
         }
 
@@ -181,6 +186,44 @@ namespace CrittercismSDK {
                 }
             }
             return answer;
+        }
+        #endregion
+
+        #region Sampling Control
+        ////////////////////////////////////////////////////////////////
+        //    EXAMPLE APM "config" EXTRACTED FROM PLATFORM AppLoad RESPONSE JSON
+        // {... TODO: EXAMPLE ...}
+        // See example in AppLoad.cs for context.
+        ////////////////////////////////////////////////////////////////
+        internal static void DidReceiveResponse(JObject txnConfig) {
+            try {
+                if (txnConfig["enabled"] != null) {
+                    bool enabled = (bool)((JValue)(txnConfig["enabled"])).Value;
+                    if (enabled) {
+                        int interval = (int)((JValue)(txnConfig["interval"])).Value;
+                        Enable(interval);
+                    } else {
+                        Disable();
+                    }
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        internal static void Enable(int interval) {
+            ////////////////////////////////////////////////////////////////
+            // Input:
+            //     interval == milliseconds (millisecond == 10^-3 seconds)
+            ////////////////////////////////////////////////////////////////
+            lock (lockObject) {
+                enabled = true;
+                APM.interval = interval;
+            }
+        }
+        internal static void Disable() {
+            lock (lockObject) {
+                enabled = false;
+            }
         }
         #endregion
     }

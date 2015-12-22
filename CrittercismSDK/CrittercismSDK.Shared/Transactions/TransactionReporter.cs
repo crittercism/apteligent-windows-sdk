@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -27,15 +29,12 @@ namespace CrittercismSDK {
         #region Properties
         private static Object lockObject = new object();
         private static SynchronizedQueue<Transaction> TransactionsQueue { get; set; }
-#pragma warning disable 0414
-        // TODO: Get enabled set via AppLoad response and Enable method.
         private static bool enabled = true;
-#pragma warning restore 0414
         // Batch additional network requests for 20 seconds before sending TransactionReport .
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
         private static int defaultTimeout = ONE_HOUR; // milliseconds
         // private static int defaultTimeout = ONE_MINUTE; // milliseconds
-        private static Dictionary<string,Object> thresholds = new Dictionary<string,Object>();
+        private static JObject thresholds = null;
 
         internal static int Interval() {
             // Transaction batch reporting interval in milliseconds
@@ -219,29 +218,31 @@ namespace CrittercismSDK {
         #region Reporting
         internal static void Enqueue(Transaction transaction) {
             lock (lockObject) {
-                while (TransactionsQueue.Count >= MAX_TRANSACTION_COUNT) {
-                    TransactionsQueue.Dequeue();
-                };
-                TransactionsQueue.Enqueue(transaction);
+                if (enabled) {
+                    while (TransactionsQueue.Count >= MAX_TRANSACTION_COUNT) {
+                        TransactionsQueue.Dequeue();
+                    };
+                    TransactionsQueue.Enqueue(transaction);
 #if NETFX_CORE || WINDOWS_PHONE
-                if (timer == null) {
-                    // Creates a single-use timer.
-                    // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
-                    timer = ThreadPoolTimer.CreateTimer(
-                        OnTimerElapsed,
-                        TimeSpan.FromMilliseconds(Interval()));
-                }
+                    if (timer == null) {
+                        // Creates a single-use timer.
+                        // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
+                        timer = ThreadPoolTimer.CreateTimer(
+                            OnTimerElapsed,
+                            TimeSpan.FromMilliseconds(Interval()));
+                    }
 #else
-                if (timer==null) {
-                    // Generates an event after a set interval
-                    // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
-                    timer = new Timer(Interval());
-                    timer.Elapsed += OnTimerElapsed;
-                    // the Timer should raise the Elapsed event only once (false)
-                    timer.AutoReset = false;        // fire once
-                    timer.Enabled = true;           // Start the timer
-                }
+                    if (timer==null) {
+                        // Generates an event after a set interval
+                        // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
+                        timer = new Timer(Interval());
+                        timer.Elapsed += OnTimerElapsed;
+                        // the Timer should raise the Elapsed event only once (false)
+                        timer.AutoReset = false;        // fire once
+                        timer.Enabled = true;           // Start the timer
+                    }
 #endif // NETFX_CORE
+                }
             }
         }
         private static long BeginTime(List<Transaction> transactions) {
@@ -300,7 +301,34 @@ namespace CrittercismSDK {
         #endregion
 
         #region Sampling Control
-        internal static void Enable(int interval,int defaultTimeout,Dictionary<string,Object> thresholds) {
+        ////////////////////////////////////////////////////////////////
+        //    EXAMPLE TRANSACTION "config" EXTRACTED FROM PLATFORM AppLoad RESPONSE JSON
+        // {"defaultTimeout":3600000,
+        //  "interval":10,
+        //  "enabled":true,
+        //  "transactions":{"Buy Critter Feed":{"timeout":60000,"slowness":3600000,"value":1299},
+        //                  "Sing Critter Song":{"timeout":90000,"slowness":3600000,"value":1500},
+        //                  "Write Critter Poem":{"timeout":60000,"slowness":3600000,"value":2000}}}
+        // See example in AppLoad.cs for context.
+        ////////////////////////////////////////////////////////////////
+        internal static void DidReceiveResponse(JObject config) {
+            try {
+                if (config["enabled"] != null) {
+                    bool enabled = (bool)((JValue)(config["enabled"])).Value;
+                    if (enabled) {
+                        int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
+                        int defaultTimeout = Convert.ToInt32(((JValue)(config["defaultTimeout"])).Value);
+                        JObject thresholds = config["transactions"] as JObject;
+                        Enable(interval,defaultTimeout,thresholds);
+                    } else {
+                        Disable();
+                    }
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        internal static void Enable(int interval,int defaultTimeout,JObject thresholds) {
             ////////////////////////////////////////////////////////////////
             // Input:
             //     interval == milliseconds (millisecond == 10^-3 seconds)
@@ -327,17 +355,23 @@ namespace CrittercismSDK {
             // txnConfig transactions thresholds dictionaries.
             int answer = newTimeout;
             lock (lockObject) {
-                if (thresholds.ContainsKey(name)) {
-                    // thresholdTimeout in milliseconds
-                    double thresholdTimeout = JsonUtils.StringToExtendedReal(thresholds[name]);
-                    if ((thresholdTimeout > 0.0) && (answer > thresholdTimeout)) {
-                        answer = (int)thresholdTimeout;
+                if (thresholds != null) {
+                    JObject threshold = thresholds[name] as JObject;
+                    if (threshold != null) {
+                        // thresholdTimeout in milliseconds
+                        JValue timeoutValue = threshold["timeout"] as JValue;
+                        if (timeoutValue != null) {
+                            double thresholdTimeout = Convert.ToDouble(timeoutValue.Value);
+                            if ((thresholdTimeout > 0.0) && (answer > thresholdTimeout)) {
+                                answer = (int)thresholdTimeout;
+                            }
+                        }
+                    } else {
+                        ////////////////////////////////////////////////////////////////
+                        // Don't go over global "defaultTimeout" milliseconds
+                        ////////////////////////////////////////////////////////////////
+                        answer = Math.Min(answer,defaultTimeout);
                     }
-                } else {
-                    ////////////////////////////////////////////////////////////////
-                    // Don't go over global "defaultTimeout" milliseconds
-                    ////////////////////////////////////////////////////////////////
-                    answer = Math.Min(answer,defaultTimeout);
                 }
             }
             return answer;

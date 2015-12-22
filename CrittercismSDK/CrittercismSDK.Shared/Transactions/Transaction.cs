@@ -26,6 +26,7 @@ namespace CrittercismSDK {
         internal const int TICKS_PER_SEC = MSEC_PER_SEC * TICKS_PER_MSEC;
         #endregion
 
+        #region Properties
         ////////////////////////////////////////////////////////////////
         // NOTE: Microsoft Time Measurements
         // Not living in Steve Jobs' ideal world, we must contend with
@@ -53,7 +54,6 @@ namespace CrittercismSDK {
         private string foregroundTimeString; // ISO8601DateString
         private bool isForegrounded;
 
-        #region Properties
         internal string Name() {
             // The "name" is immutable.
             return name;
@@ -246,11 +246,12 @@ namespace CrittercismSDK {
             SetEndTime(referenceTime);
             eyeTime = 0;
             SetForegroundTime(referenceTime);
-            // timeout in milliseconds
-            timeout = ClampTimeout(Int32.MaxValue);
         }
         internal Transaction(string name) : this() {
             this.name = StringUtils.TruncateString(name,MAX_NAME_LENGTH);
+            // timeout in milliseconds (Applying "transaction specific configuration"
+            // can only be done after we know "name" of this transaction.)
+            timeout = ClampTimeout(Int32.MaxValue);
             TransactionReporter.Save(this);
         }
         internal Transaction(string name,int value) : this(name) {

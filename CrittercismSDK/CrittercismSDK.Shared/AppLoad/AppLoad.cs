@@ -57,21 +57,25 @@ namespace CrittercismSDK
         //  "needPkg":1,
         //  "internalExceptionReporting":true}
         ////////////////////////////////////////////////////////////////
-        internal static void DidReceiveResponse(string json) {
+        internal override void DidReceiveResponse(string json) {
             // Process AppLoad response JSON from platform.
             try {
                 Debug.WriteLine(json);
                 JObject response = JToken.Parse(json) as JObject;
                 if (response != null) {
                     {
-                        JObject txnConfig = response["txnConfig"] as JObject;
-                        Debug.WriteLine("txnConfig == " + JsonConvert.SerializeObject(txnConfig));
-                        // TODO: Process "txnConfig" .
+                        JObject config = response["txnConfig"] as JObject;
+                        if (config != null) {
+                            Debug.WriteLine("txnConfig == " + JsonConvert.SerializeObject(config));
+                            TransactionReporter.DidReceiveResponse(config);
+                        }
                     }
                     {
-                        JObject apm = response["apm"] as JObject;
-                        Debug.WriteLine("apm == " + JsonConvert.SerializeObject(apm));
-                        // TODO: Process "apm" .
+                        JObject config = response["apm"] as JObject;
+                        if (config != null) {
+                            Debug.WriteLine("apm == " + JsonConvert.SerializeObject(config));
+                            APM.DidReceiveResponse(config);
+                        }
                     }
                 }
             } catch (Exception ie) {

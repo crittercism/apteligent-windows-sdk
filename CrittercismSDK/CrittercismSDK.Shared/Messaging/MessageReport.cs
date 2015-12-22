@@ -228,5 +228,12 @@ namespace CrittercismSDK {
         }
 
         #endregion
+
+        #region Response Processing
+        internal virtual void DidReceiveResponse(string responseText) {
+            // Most MessageReport's ignore the responseText .
+            // However, AppLoad which does care, overrides this method.
+        }
+        #endregion
     }
 }

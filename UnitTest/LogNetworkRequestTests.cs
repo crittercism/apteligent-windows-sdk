@@ -22,7 +22,7 @@ namespace UnitTest {
         [TestMethod]
         public void LogNetworkRequestTest() {
             try {
-                APM.NETWORK_SEND_INTERVAL = 1;
+                APM.interval = 1;
                 TestHelpers.StartApp();
                 string method = "GET";
                 string uriString = "http://www.mrscritter.com";
