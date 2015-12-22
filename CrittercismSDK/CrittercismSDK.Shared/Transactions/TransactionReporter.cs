@@ -376,6 +376,28 @@ namespace CrittercismSDK {
             }
             return answer;
         }
+        internal static int DefaultValue(string name) {
+            // Default value of transaction name (kind of) according to Wire+Protocol doc
+            // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
+            // details regarding txnConfig thresholds dictionaries specifying "value"s.
+            int answer = 100;    // 100 U.S. pennies = $1.00 if nothing else.
+            lock (lockObject) {
+                if (thresholds != null) {
+                    JObject threshold = thresholds[name] as JObject;
+                    if (threshold != null) {
+                        // thresholdValue in U.S. pennies
+                        JValue valueValue = threshold["value"] as JValue;
+                        if (valueValue != null) {
+                            int thresholdValue = Convert.ToInt32(valueValue.Value);
+                            if (thresholdValue >= 0) {
+                                answer = thresholdValue;
+                            }
+                        }
+                    }
+                }
+            }
+            return answer;
+        }
         #endregion
     }
 }

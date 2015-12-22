@@ -125,6 +125,10 @@ namespace CrittercismSDK {
                 }
             }
         }
+        private int DefaultValue() {
+            int answer = TransactionReporter.DefaultValue(name);
+            return answer;
+        }
         internal int Value() {
             int answer;
             lock (this) {
@@ -247,17 +251,20 @@ namespace CrittercismSDK {
             eyeTime = 0;
             SetForegroundTime(referenceTime);
         }
-        internal Transaction(string name) : this() {
+        internal Transaction(string name,int value) : this() {
             this.name = StringUtils.TruncateString(name,MAX_NAME_LENGTH);
             // timeout in milliseconds (Applying "transaction specific configuration"
             // can only be done after we know "name" of this transaction.)
             timeout = ClampTimeout(Int32.MaxValue);
+            if (value == NULL_VALUE) {
+                value = DefaultValue();
+            }
+            this.value = value;
             TransactionReporter.Save(this);
         }
-        internal Transaction(string name,int value) : this(name) {
-            this.value = value;
+        internal Transaction(string name) : this(name,NULL_VALUE) {
         }
-        internal Transaction(string name,long beginTime,long endTime) : this(name) {
+        internal Transaction(string name,long beginTime,long endTime) : this(name,0) {
             ////////////////////////////////////////////////////////////////
             // Input:
             //    name = transaction name
@@ -266,7 +273,6 @@ namespace CrittercismSDK {
             // NOTE: Automatic transactions ("App Load", "App Foreground", "App Background")
             ////////////////////////////////////////////////////////////////
             state = TransactionState.ENDED;
-            value = 0;
             SetBeginTime(beginTime);
             SetEndTime(endTime);
             eyeTime = endTime - beginTime;
@@ -374,10 +380,7 @@ namespace CrittercismSDK {
             list.Add((int)state);
             list.Add(timeout / (double)MSEC_PER_SEC); // seconds
             if (value == NULL_VALUE) {
-                // TODO: list.Add(null) will be correct here, but until we get Transaction config
-                // from AppLoad, let's make this default be $1.00 == 100 pennies.
-                //list.Add(null);
-                list.Add(100);
+                list.Add(null);
             } else {
                 list.Add(value);
             };
