@@ -20,7 +20,7 @@ namespace CrittercismSDK {
         // It's conceivable some apps might want modest negative values for
         // debits, so we use Int32.MinValue == -2^31 == -2147483648 == -$21,474,836.48
         // here.
-        private const int NULL_VALUE = Int32.MinValue;
+        internal const int NULL_VALUE = Int32.MinValue;
         private const int TICKS_PER_MSEC = 10000;
         internal const int MSEC_PER_SEC = 1000;
         internal const int TICKS_PER_SEC = MSEC_PER_SEC * TICKS_PER_MSEC;

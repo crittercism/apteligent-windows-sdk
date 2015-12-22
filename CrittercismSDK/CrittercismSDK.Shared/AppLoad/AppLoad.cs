@@ -63,6 +63,7 @@ namespace CrittercismSDK
                 Debug.WriteLine(json);
                 JObject response = JToken.Parse(json) as JObject;
                 if (response != null) {
+                    Debug.WriteLine("AppLoad response == " + JsonConvert.SerializeObject(response));
                     {
                         JObject config = response["txnConfig"] as JObject;
                         if (config != null) {

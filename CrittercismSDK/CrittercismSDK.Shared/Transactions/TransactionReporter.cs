@@ -380,7 +380,10 @@ namespace CrittercismSDK {
             // Default value of transaction name (kind of) according to Wire+Protocol doc
             // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
             // details regarding txnConfig thresholds dictionaries specifying "value"s.
-            int answer = 100;    // 100 U.S. pennies = $1.00 if nothing else.
+            // An argument in favor of the ultimate default NULL_VALUE over $0.00 and $1.00
+            // would be that registered $0.00's and $1.00's will pollute later values,
+            // perhaps before the user finally figures out he should supply values.
+            int answer = Transaction.NULL_VALUE;
             lock (lockObject) {
                 if (thresholds != null) {
                     JObject threshold = thresholds[name] as JObject;
