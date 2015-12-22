@@ -61,8 +61,14 @@ namespace CrittercismSDK
             // Process AppLoad response JSON from platform.
             try {
                 Debug.WriteLine(json);
-                JObject response = JToken.Parse(json) as JObject;
-                if (response != null) {
+                JObject response = null;
+                try {
+                    response = JToken.Parse(json) as JObject;
+                } catch {
+                };
+                if (response == null) {
+                    // TODO: Use stored AppLoad response JSON from a previous session.
+                } else  {
                     Debug.WriteLine("AppLoad response == " + JsonConvert.SerializeObject(response));
                     {
                         JObject config = response["txnConfig"] as JObject;

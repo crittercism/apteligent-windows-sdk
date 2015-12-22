@@ -183,6 +183,23 @@ namespace UnitTest {
             }
         }
         [TestMethod]
+        public void JTokenParseGarbageTest() {
+            // JToken.Parse throws a JsonReaderException when passed garbage.
+            string json = "[[[{{{1,2,3:::;;;";
+            JToken token = null;
+            try {
+                token = JToken.Parse(json);
+            } catch (JsonReaderException e) {
+                // Expecting Newtonsoft.Json.JsonReaderException
+                // E.G. "Invalid property identifier character: {. Path '[0][0][0]', line 1, position 4."
+                Debug.WriteLine(e.Message);
+            } catch (Exception e) {
+                Debug.WriteLine(e.GetType().FullName);
+                Assert.Fail();
+            };
+            Assert.IsNull(token);
+        }
+        [TestMethod]
         public void EndpointJsonTest() {
             string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
             Endpoint endpoint1 = new Endpoint(
