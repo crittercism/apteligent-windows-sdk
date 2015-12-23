@@ -675,6 +675,28 @@ namespace CrittercismSDK {
         #endregion Metadata
 
         #region Settings
+        internal static void SetSettings(string json) {
+            // Called from AppLoad.DidReceiveResponse
+            try {
+                Debug.WriteLine("AppLoad response == " + json);
+                // Checking for a sane "response"
+                JObject response = null;
+                try {
+                    response = JToken.Parse(json) as JObject;
+                } catch {
+                };
+                if (CheckSettings(response)) {
+                    // This is an AppLoad response JSON we can apply to current session.
+                    // TODO: Some "lock" goes here.  TBD.
+                    Settings = response;
+                    SaveSettings(json);
+                    APM.SettingsChange();
+                    TransactionReporter.SettingsChange();
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
         internal static bool CheckSettings(JObject settings) {
             // Minimum sanity test for "settings" received from platform.
             // Use the same sanity test that iOS SDK uses.  Look for pattern

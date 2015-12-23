@@ -34,6 +34,7 @@ namespace CrittercismSDK {
             lock (lockObject) {
                 // Crittercism.Init calling APM.Init should effectively make
                 // lock lockObject here pointless, but no real harm doing so.
+                SettingsChange();
                 Filters = new HashSet<CRFilter>();
                 EndpointsQueue = new SynchronizedQueue<Endpoint>(new Queue<Endpoint>());
             }
@@ -192,25 +193,30 @@ namespace CrittercismSDK {
         #region Sampling Control
         ////////////////////////////////////////////////////////////////
         //    EXAMPLE APM "config" EXTRACTED FROM PLATFORM AppLoad RESPONSE JSON
-        // {... TODO: EXAMPLE ...}
+        // {"net":{"enabled":true,
+        //         "persist":false,
+        //         "interval":10}}
         // See example in AppLoad.cs for context.
         ////////////////////////////////////////////////////////////////
-        internal static void DidReceiveResponse(JObject txnConfig) {
+        internal static void SettingsChange() {
             try {
-                if (txnConfig["enabled"] != null) {
-                    bool enabled = (bool)((JValue)(txnConfig["enabled"])).Value;
-                    if (enabled) {
-                        int interval = (int)((JValue)(txnConfig["interval"])).Value;
-                        Enable(interval);
-                    } else {
-                        Disable();
+                if (Crittercism.Settings != null) {
+                    JObject config = Crittercism.Settings["apm"] as JObject;
+                    if (config["enabled"] != null) {
+                        bool enabled = (bool)((JValue)(config["enabled"])).Value;
+                        if (enabled) {
+                            int interval = (int)((JValue)(config["interval"])).Value;
+                            Enable(interval);
+                        } else {
+                            Disable();
+                        }
                     }
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        internal static void Enable(int interval) {
+        private static void Enable(int interval) {
             ////////////////////////////////////////////////////////////////
             // Input:
             //     interval == milliseconds (millisecond == 10^-3 seconds)
@@ -220,7 +226,7 @@ namespace CrittercismSDK {
                 APM.interval = interval;
             }
         }
-        internal static void Disable() {
+        private static void Disable() {
             lock (lockObject) {
                 enabled = false;
             }

@@ -59,35 +59,7 @@ namespace CrittercismSDK {
         ////////////////////////////////////////////////////////////////
         internal override void DidReceiveResponse(string json) {
             // Process AppLoad response JSON from platform.
-            try {
-                Debug.WriteLine("AppLoad response == " + json);
-                // Checking for a sane "response"
-                JObject response = null;
-                try {
-                    response = JToken.Parse(json) as JObject;
-                } catch {
-                };
-                if (Crittercism.CheckSettings(response)) {
-                    // There is an AppLoad response JSON we can apply to current session.
-                    Crittercism.SaveSettings(json);
-                    {
-                        JObject config = response["txnConfig"] as JObject;
-                        if (config != null) {
-                            Debug.WriteLine("txnConfig == " + JsonConvert.SerializeObject(config));
-                            TransactionReporter.DidReceiveResponse(config);
-                        }
-                    }
-                    {
-                        JObject config = response["apm"] as JObject;
-                        if (config != null) {
-                            Debug.WriteLine("apm == " + JsonConvert.SerializeObject(config));
-                            APM.DidReceiveResponse(config);
-                        }
-                    }
-                }
-            } catch (Exception ie) {
-                Crittercism.LogInternalException(ie);
-            }
+            Crittercism.SetSettings(json);
         }
         #endregion
     }

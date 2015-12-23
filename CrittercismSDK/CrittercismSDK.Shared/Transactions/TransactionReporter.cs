@@ -98,6 +98,7 @@ namespace CrittercismSDK {
             lock (lockObject) {
                 // Crittercism.Init calling TransactionReporter.Init should effectively make
                 // lock lockObject here pointless, but no real harm doing so.
+                SettingsChange();
                 // Initialize transactionsDictionary and TransactionsQueue
                 transactionsDictionary = new Dictionary<string,Transaction>();
                 TransactionsQueue = new SynchronizedQueue<Transaction>(new Queue<Transaction>());
@@ -311,24 +312,27 @@ namespace CrittercismSDK {
         //                  "Write Critter Poem":{"timeout":60000,"slowness":3600000,"value":2000}}}
         // See example in AppLoad.cs for context.
         ////////////////////////////////////////////////////////////////
-        internal static void DidReceiveResponse(JObject config) {
+        internal static void SettingsChange() {
             try {
-                if (config["enabled"] != null) {
-                    bool enabled = (bool)((JValue)(config["enabled"])).Value;
-                    if (enabled) {
-                        int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
-                        int defaultTimeout = Convert.ToInt32(((JValue)(config["defaultTimeout"])).Value);
-                        JObject thresholds = config["transactions"] as JObject;
-                        Enable(interval,defaultTimeout,thresholds);
-                    } else {
-                        Disable();
+                if (Crittercism.Settings != null) {
+                    JObject config = Crittercism.Settings["txnConfig"] as JObject;
+                    if (config["enabled"] != null) {
+                        bool enabled = (bool)((JValue)(config["enabled"])).Value;
+                        if (enabled) {
+                            int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
+                            int defaultTimeout = Convert.ToInt32(((JValue)(config["defaultTimeout"])).Value);
+                            JObject thresholds = config["transactions"] as JObject;
+                            Enable(interval,defaultTimeout,thresholds);
+                        } else {
+                            Disable();
+                        }
                     }
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        internal static void Enable(int interval,int defaultTimeout,JObject thresholds) {
+        private static void Enable(int interval,int defaultTimeout,JObject thresholds) {
             ////////////////////////////////////////////////////////////////
             // Input:
             //     interval == milliseconds (millisecond == 10^-3 seconds)
@@ -343,7 +347,7 @@ namespace CrittercismSDK {
                 TransactionReporter.thresholds = thresholds;
             }
         }
-        internal static void Disable() {
+        private static void Disable() {
             lock (lockObject) {
                 enabled = false;
             }
