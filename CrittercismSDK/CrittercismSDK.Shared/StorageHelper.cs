@@ -177,7 +177,7 @@ namespace CrittercismSDK {
             return data;
         }
 
-        private static string LoadString(string path) {
+        internal static string LoadString(string path) {
             string dataString = null;
             try {
 #if NETFX_CORE
@@ -352,7 +352,7 @@ namespace CrittercismSDK {
         }
 #endif
 
-        private static void SaveString(string path,string dataString) {
+        internal static void SaveString(string path,string dataString) {
 #if NETFX_CORE
             {
                 StorageFile file = SaveFile(path);

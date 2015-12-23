@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -14,8 +15,7 @@ using Windows.ApplicationModel;
 using Microsoft.Phone.Info;
 #endif
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     [DataContract]
     internal class AppLoad : MessageReport {
         #region Properties
@@ -60,16 +60,16 @@ namespace CrittercismSDK
         internal override void DidReceiveResponse(string json) {
             // Process AppLoad response JSON from platform.
             try {
-                Debug.WriteLine(json);
+                Debug.WriteLine("AppLoad response == " + json);
+                // Checking for a sane "response"
                 JObject response = null;
                 try {
                     response = JToken.Parse(json) as JObject;
                 } catch {
                 };
-                if (response == null) {
-                    // TODO: Use stored AppLoad response JSON from a previous session.
-                } else  {
-                    Debug.WriteLine("AppLoad response == " + JsonConvert.SerializeObject(response));
+                if (Crittercism.CheckSettings(response)) {
+                    // There is an AppLoad response JSON we can apply to current session.
+                    Crittercism.SaveSettings(json);
                     {
                         JObject config = response["txnConfig"] as JObject;
                         if (config != null) {

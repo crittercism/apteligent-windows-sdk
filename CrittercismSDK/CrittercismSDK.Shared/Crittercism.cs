@@ -1,5 +1,6 @@
 using CrittercismSDK;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -70,6 +71,8 @@ namespace CrittercismSDK {
         //#endif
 
         internal static long SessionId { get; private set; }
+
+        internal static JObject Settings { get; private set; }
 
         /// <summary>
         /// Gets or sets a queue of messages.
@@ -366,6 +369,8 @@ namespace CrittercismSDK {
                         return;
                     }
                     AppID = appID;
+                    // Put default initialized Settings before APM.Init() and TransactionReporter.Init() .
+                    Settings = LoadSettings();
                     APM.Init();
                     MessageReport.Init();
                     TransactionReporter.Init();
@@ -668,6 +673,52 @@ namespace CrittercismSDK {
             return answer;
         }
         #endregion Metadata
+
+        #region Settings
+        internal static bool CheckSettings(JObject settings) {
+            // Minimum sanity test for "settings" received from platform.
+            // Use the same sanity test that iOS SDK uses.  Look for pattern
+            // {"apm":{"net":...},...}
+            bool answer = false;
+            if (settings != null) {
+                // We get this far if received "settings" was a legal JSON object.
+                JObject apm = settings["apm"] as JObject;
+                if (apm != null) {
+                    JObject net = apm["net"] as JObject;
+                    if (net != null) {
+                        // Good enough!
+                        answer = true;
+                    };
+                };
+            };
+            return answer;
+        }
+        private static JObject LoadSettings() {
+            // Load AppLoad response JSON from prior session.
+            JObject answer = null;
+            try {
+                string path = Path.Combine(StorageHelper.CrittercismPath(),"Settings.js");
+                if (StorageHelper.FileExists(path)) {
+                    string json = StorageHelper.LoadString(path);
+                    answer = JObject.Parse(json);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+            Debug.WriteLine("LoadSettings: " + JsonConvert.SerializeObject(answer));
+            return answer;
+        }
+        internal static void SaveSettings(string json) {
+            // Persist AppLoad response JSON
+            try {
+                Debug.WriteLine("SaveSettings: " + json);
+                string path = Path.Combine(StorageHelper.CrittercismPath(),"Settings.js");
+                StorageHelper.SaveString(path,json);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        #endregion
 
         #region Transactions
         internal static void OnTransactionTimeOut(EventArgs e) {
