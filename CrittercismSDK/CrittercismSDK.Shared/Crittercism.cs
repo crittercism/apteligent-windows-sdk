@@ -39,10 +39,9 @@ namespace CrittercismSDK {
         #endregion Constants
 
         #region Properties
-        /// <summary>
-        /// Enable SendMessage
-        /// </summary>
-        internal static bool enableSendMessage = true;
+        // For UnitTest
+        internal static bool Testing = false;
+        internal static ITest Test = null;
 
         internal static string AppVersion { get; private set; }
         internal static string DeviceId { get; private set; }
@@ -389,8 +388,8 @@ namespace CrittercismSDK {
                     readerThread=new Thread(threadStart);
                     readerThread.Name="Crittercism";
 #endif
-                    // enableSendMessage for unit test purposes
-                    if (enableSendMessage) {
+                    // Testing for unit test purposes
+                    if (!Testing) {
 #if NETFX_CORE
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;

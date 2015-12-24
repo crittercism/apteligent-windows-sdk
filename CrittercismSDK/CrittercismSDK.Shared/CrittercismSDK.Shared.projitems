@@ -32,6 +32,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions\ExceptionObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Exceptions\HandledException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messaging\AppLocator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\ITest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messaging\MessageReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messaging\QueueReader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Messaging\SynchronizedQueue.cs" />

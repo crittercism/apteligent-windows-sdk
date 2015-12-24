@@ -86,15 +86,17 @@ namespace CrittercismSDK {
             bool sendCompleted = false;
             try {
                 if ((Crittercism.MessageQueue != null) && (Crittercism.MessageQueue.Count > 0)) {
-                    if (!Crittercism.enableSendMessage) {
-                        // This case used by UnitTest .
-                        sendCompleted = true;
-                    } else if (NetworkInterface.GetIsNetworkAvailable()) {
+                    if (Crittercism.Testing || NetworkInterface.GetIsNetworkAvailable()) {
                         MessageReport message = Crittercism.MessageQueue.Peek();
                         Crittercism.MessageQueue.Dequeue();
                         message.Delete();
                         try {
-                            sendCompleted = SendRequest(message);
+                            if (Crittercism.Testing) {
+                                // This case used by UnitTest .
+                                sendCompleted = (Crittercism.Test == null) || Crittercism.Test.SendRequest(message);
+                            } else {
+                                sendCompleted = SendRequest(message);
+                            }
                         } catch (Exception ie) {
                             Crittercism.LogInternalException(ie);
                         }
@@ -128,7 +130,7 @@ namespace CrittercismSDK {
                     }
                     Task<WebResponse> responseTask = request.GetResponseAsync();
                     using (HttpWebResponse response = (HttpWebResponse)responseTask.Result) {
-                        sendCompleted = DidReceiveResult(message,request,response);
+                        sendCompleted = DidReceiveResult(message,response);
                     }
                 }
             } catch (Exception ie) {
@@ -222,10 +224,10 @@ namespace CrittercismSDK {
         // SendMessage / HttpWebRequest processing .  So, the QueueReader.cs is charged with
         // getting a nice simple "string responseText" over to MessageReport.cs .
 #if WINDOWS_PHONE_APP
-        private bool DidReceiveResult(MessageReport message,HttpWebRequest request,HttpWebResponse response) {
+        private bool DidReceiveResult(MessageReport message,HttpWebResponse response) {
             bool sendCompleted = false;
             try {
-                sendCompleted = DidReceiveResponse(message,request,response);
+                sendCompleted = DidReceiveResponse(message,response);
             } catch (WebException webEx) {
                 DidFailWithError(webEx);
             } catch (Exception ex) {
@@ -248,31 +250,31 @@ namespace CrittercismSDK {
 
         // DidReceiveResponse
 #if WINDOWS_PHONE_APP
-        private bool DidReceiveResponse(MessageReport message,HttpWebRequest request,HttpWebResponse response) {
-            bool sendCompleted = DidReceiveResponseShared(message,request,response);
+        private bool DidReceiveResponse(MessageReport message,HttpWebResponse response) {
+            bool sendCompleted = DidReceiveResponseShared(message,response);
             return sendCompleted;
         }
 #else
         private bool DidReceiveResponse(MessageReport message,HttpWebRequest request,IAsyncResult asyncResponse) {
             bool sendCompleted = false;
             using (HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                sendCompleted = DidReceiveResponseShared(message,request,response);
+                sendCompleted = DidReceiveResponseShared(message,response);
             };
             return sendCompleted;
         }
 #endif // WINDOWS_PHONE_APP
 
-        private bool DidReceiveResponseShared(MessageReport message,HttpWebRequest request,HttpWebResponse response) {
+        internal bool DidReceiveResponseShared(MessageReport message,HttpWebResponse response) {
             bool sendCompleted = false;
             try {
-                Debug.WriteLine("SendRequest: response.StatusCode == " + (int)response.StatusCode);
+                //Debug.WriteLine("DidReceiveResponseShared: response.StatusCode == " + (int)response.StatusCode);
                 if ((((long)response.StatusCode) / 100) == 2) {
                     // 2xx Success
                     sendCompleted = true;
-                }
-                using (StreamReader reader = (new StreamReader(response.GetResponseStream()))) {
-                    string responseText = reader.ReadToEnd();
-                    message.DidReceiveResponse(responseText);
+                    using (StreamReader reader = (new StreamReader(response.GetResponseStream()))) {
+                        string responseText = reader.ReadToEnd();
+                        message.DidReceiveResponse(responseText);
+                    }
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -280,7 +282,7 @@ namespace CrittercismSDK {
             return sendCompleted;
         }
 
-        private void DidFailWithError(WebException webEx) {
+        internal void DidFailWithError(WebException webEx) {
             Debug.WriteLine("SendRequest: webEx == " + webEx);
             if (webEx.Response != null) {
                 using (HttpWebResponse response = (HttpWebResponse)webEx.Response) {
