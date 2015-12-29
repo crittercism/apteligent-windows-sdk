@@ -55,8 +55,11 @@ namespace UnitTest {
         }
         [TestMethod]
         public void CrashLoadAfterSaveTest() {
+            // Crash the app
             TestHelpers.StartApp();
             TestHelpers.LogUnhandledException();
+            // Restart the app
+            TestHelpers.StartApp();
             CrashReport crashReport = TestHelpers.DequeueMessageType(typeof(CrashReport)) as CrashReport;
             String expectedJson = JsonConvert.SerializeObject(crashReport);
             crashReport.Save();
@@ -71,8 +74,11 @@ namespace UnitTest {
 
         [TestMethod]
         public void CrashHasExpectedDataTest() {
+            // Crash the app
             TestHelpers.StartApp();
             TestHelpers.LogUnhandledException();
+            // Restart the app
+            TestHelpers.StartApp();
             CrashReport crashReport = TestHelpers.DequeueMessageType(typeof(CrashReport)) as CrashReport;
             Trace.WriteLine("crashReport.crash.name == " + crashReport.crash.name);
             Trace.WriteLine("crashReport.crash.reason == " + crashReport.crash.reason);

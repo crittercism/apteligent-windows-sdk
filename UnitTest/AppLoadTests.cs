@@ -13,32 +13,7 @@ using System.Threading.Tasks;
 
 namespace UnitTest {
     [TestClass]
-    public class AppLoadTests : ITest {
-        private volatile bool AppLoadResponseReceived = false;
-        private string ExampleAppLoadResponse = (
-            "{\"txnConfig\":{\"defaultTimeout\":3600000,\n"
-            + "              \"interval\":10,\n"
-            + "              \"enabled\":true,\n"
-            + "              \"transactions\":{\"Buy Critter Feed\":{\"timeout\":60000,\"slowness\":3600000,\"value\":1299},\n"
-            + "                              \"Sing Critter Song\":{\"timeout\":90000,\"slowness\":3600000,\"value\":1500},\n"
-            + "                              \"Write Critter Poem\":{\"timeout\":60000,\"slowness\":3600000,\"value\":2000}}},\n"
-            + " \"apm\":{\"net\":{\"enabled\":true,\n"
-            + "               \"persist\":false,\n"
-            + "               \"interval\":10}},\n"
-            + " \"needPkg\":1,\n"
-            + " \"internalExceptionReporting\":true}"
-        );
-        public bool SendRequest(MessageReport message) {
-            message.DidReceiveResponse(ExampleAppLoadResponse);
-            if (message is AppLoad) {
-                AppLoadResponseReceived = true;
-            }
-            return true;
-        }
-        [TestInitialize()]
-        public void TestInitialize() {
-            AppLoadResponseReceived = false;
-        }
+    public class AppLoadTests {
         [TestCleanup()]
         public void TestCleanup() {
             // Use TestCleanup to run code after each test has run
@@ -62,19 +37,13 @@ namespace UnitTest {
         public void AppLoadTest2() {
             // Test the AppLoad json response equals ExampleResponse.
             {
-                // Crittercism.Test == this means messageReport's received by test.
-                Crittercism.Test = this;
+                // Invalidate current Crittercism.Settings .
+                Crittercism.Settings = null;
             }
             // StartApp
             TestHelpers.StartApp();
             // Wait sufficiently long for AppLoad response.
-            for (int i = 1; i < 10; i++) {
-                Thread.Sleep(100);
-                if (AppLoadResponseReceived) {
-                    break;
-                }
-            }
-            Assert.IsTrue(AppLoadResponseReceived);
+            TestHelpers.DequeueMessageType(typeof(AppLoad));
             {
                 // Check Crittercism.Settings agrees with ExampleResponse.
                 Assert.IsNotNull(Crittercism.Settings);

@@ -68,6 +68,7 @@
     <Compile Include="AdditionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LogNetworkRequestTests.cs" />
+    <Compile Include="MockNetwork.cs" />
     <Compile Include="TransactionTests.cs" />
   </ItemGroup>
   <ItemGroup>

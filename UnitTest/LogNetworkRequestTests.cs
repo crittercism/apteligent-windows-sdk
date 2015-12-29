@@ -21,41 +21,33 @@ namespace UnitTest {
         }
         [TestMethod]
         public void LogNetworkRequestTest() {
-            try {
-                APM.interval = 1;
-                TestHelpers.StartApp();
-                string method = "GET";
-                string uriString = "http://www.mrscritter.com";
-                long latency = 4000;
-                long bytesRead = 10000;
-                long bytesSent = 10000;
-                long responseCode = 200;
-                Crittercism.LogNetworkRequest(
-                    method,
-                    uriString,
-                    latency,
-                    bytesRead,
-                    bytesSent,
-                    (HttpStatusCode)responseCode,
-                    WebExceptionStatus.Success);
-                Trace.WriteLine("Crittercism.LogNetworkRequest returned");
-                MessageReport messageReport = null;
-                for (int i = 1; i <= 10; i++) {
-                    Thread.Sleep(100);
-                    messageReport = TestHelpers.DequeueMessageType(typeof(APMReport));
-                    if (messageReport != null) {
-                        break;
-                    }
-                }
-                if (messageReport != null) {
-                    Trace.WriteLine("We found an APMReport (YAY)");
-                } else {
-                    Trace.WriteLine("We didn't find an APMReport (BOO)");
-                    Assert.IsNotNull(messageReport,"Expected an APMReport message");
-                };
-                String asJson = JsonConvert.SerializeObject(messageReport);
-                Trace.WriteLine("asJson == " + asJson);
-                string[] jsonStrings = new string[] {
+            APM.interval = 1;
+            TestHelpers.StartApp();
+            string method = "GET";
+            string uriString = "http://www.mrscritter.com";
+            long latency = 4000;
+            long bytesRead = 10000;
+            long bytesSent = 10000;
+            long responseCode = 200;
+            Crittercism.LogNetworkRequest(
+                method,
+                uriString,
+                latency,
+                bytesRead,
+                bytesSent,
+                (HttpStatusCode)responseCode,
+                WebExceptionStatus.Success);
+            Trace.WriteLine("Crittercism.LogNetworkRequest returned");
+            MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(APMReport));
+            if (messageReport != null) {
+                Trace.WriteLine("We found an APMReport (YAY)");
+            } else {
+                Trace.WriteLine("We didn't find an APMReport (BOO)");
+                Assert.IsNotNull(messageReport,"Expected an APMReport message");
+            };
+            String asJson = JsonConvert.SerializeObject(messageReport);
+            Trace.WriteLine("asJson == " + asJson);
+            string[] jsonStrings = new string[] {
                     "\"d\":",
                     "\"GET\"",
                     "\"http://www.mrscritter.com\"",
@@ -63,15 +55,11 @@ namespace UnitTest {
                     "10000",
                     "200"
                 };
-                foreach (String jsonFragment in jsonStrings) {
-                    Trace.WriteLine("jsonFragment == " + jsonFragment);
-                    Trace.WriteLine("asJson.Contains(jsonFragment) == " + asJson.Contains(jsonFragment));
-                    Assert.IsTrue(asJson.Contains(jsonFragment));
-                };
-            } catch (Exception e) {
-                Trace.WriteLine("ERROR: Unexpected Exception == " + e.Message);
-                Assert.IsNull(e,"ERROR: Unexpected Exception == " + e.Message);
-            }
+            foreach (String jsonFragment in jsonStrings) {
+                Trace.WriteLine("jsonFragment == " + jsonFragment);
+                Trace.WriteLine("asJson.Contains(jsonFragment) == " + asJson.Contains(jsonFragment));
+                Assert.IsTrue(asJson.Contains(jsonFragment));
+            };
         }
     }
 }

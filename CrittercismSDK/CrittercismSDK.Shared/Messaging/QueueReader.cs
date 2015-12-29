@@ -86,22 +86,22 @@ namespace CrittercismSDK {
             bool sendCompleted = false;
             try {
                 if ((Crittercism.MessageQueue != null) && (Crittercism.MessageQueue.Count > 0)) {
-                    if (Crittercism.Testing || NetworkInterface.GetIsNetworkAvailable()) {
-                        MessageReport message = Crittercism.MessageQueue.Peek();
+                    if ((Crittercism.Test != null) || NetworkInterface.GetIsNetworkAvailable()) {
+                        MessageReport messageReport = Crittercism.MessageQueue.Peek();
                         Crittercism.MessageQueue.Dequeue();
-                        message.Delete();
+                        messageReport.Delete();
                         try {
-                            if (Crittercism.Testing) {
+                            if (Crittercism.Test != null) {
                                 // This case used by UnitTest .
-                                sendCompleted = (Crittercism.Test == null) || Crittercism.Test.SendRequest(message);
+                                sendCompleted = Crittercism.Test.SendRequest(messageReport);
                             } else {
-                                sendCompleted = SendRequest(message);
+                                sendCompleted = SendRequest(messageReport);
                             }
                         } catch (Exception ie) {
                             Crittercism.LogInternalException(ie);
                         }
                         if (!sendCompleted) {
-                            Crittercism.MessageQueue.Enqueue(message);
+                            Crittercism.MessageQueue.Enqueue(messageReport);
                         }
                     }
                 };
@@ -116,21 +116,21 @@ namespace CrittercismSDK {
         #region SendRequest
         // SendRequest
 #if WINDOWS_PHONE_APP
-        private bool SendRequest(MessageReport message) {
-            //Debug.WriteLine("SendRequest: " + message.GetType().Name);
+        private bool SendRequest(MessageReport messageReport) {
+            //Debug.WriteLine("SendRequest: " + messageReport.GetType().Name);
             bool sendCompleted = false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                HttpWebRequest request = message.WebRequest();
+                HttpWebRequest request = messageReport.WebRequest();
                 if (request != null) {
-                    string postBody = message.PostBody();
+                    string postBody = messageReport.PostBody();
                     Task<Stream> writerTask = request.GetRequestStreamAsync();
                     using (Stream stream = writerTask.Result) {
                         SendRequestWritePostBody(stream,postBody);
                     }
                     Task<WebResponse> responseTask = request.GetResponseAsync();
                     using (HttpWebResponse response = (HttpWebResponse)responseTask.Result) {
-                        sendCompleted = DidReceiveResult(message,response);
+                        sendCompleted = DidReceiveResult(messageReport,response);
                     }
                 }
             } catch (Exception ie) {
@@ -140,14 +140,14 @@ namespace CrittercismSDK {
             return sendCompleted;
         }
 #else
-        private bool SendRequest(MessageReport message) {
-            //Debug.WriteLine("SendRequest: " + message.GetType().Name);
+        private bool SendRequest(MessageReport messageReport) {
+            //Debug.WriteLine("SendRequest: " + messageReport.GetType().Name);
             bool sendCompleted=false;
             Debug.WriteLine("SendRequest: ENTER");
             try {
-                HttpWebRequest request = message.WebRequest();
+                HttpWebRequest request = messageReport.WebRequest();
                 if (request != null) {
-                    string postBody = message.PostBody();
+                    string postBody = messageReport.PostBody();
                     ManualResetEvent resetEvent = new ManualResetEvent(false);
                     request.BeginGetRequestStream(
                         (result) => {
@@ -158,7 +158,7 @@ namespace CrittercismSDK {
                                 }
                                 request.BeginGetResponse(
                                     (asyncResponse) => {
-                                        sendCompleted = DidReceiveResult(message,request,asyncResponse);
+                                        sendCompleted = DidReceiveResult(messageReport,request,asyncResponse);
                                         resetEvent.Set();
                                     },null);
                             } catch {
@@ -224,10 +224,10 @@ namespace CrittercismSDK {
         // SendMessage / HttpWebRequest processing .  So, the QueueReader.cs is charged with
         // getting a nice simple "string responseText" over to MessageReport.cs .
 #if WINDOWS_PHONE_APP
-        private bool DidReceiveResult(MessageReport message,HttpWebResponse response) {
+        private bool DidReceiveResult(MessageReport messageReport,HttpWebResponse response) {
             bool sendCompleted = false;
             try {
-                sendCompleted = DidReceiveResponse(message,response);
+                sendCompleted = DidReceiveResponse(messageReport,response);
             } catch (WebException webEx) {
                 DidFailWithError(webEx);
             } catch (Exception ex) {
@@ -236,10 +236,10 @@ namespace CrittercismSDK {
             return sendCompleted;
         }
 #else
-        private bool DidReceiveResult(MessageReport message,HttpWebRequest request,IAsyncResult asyncResponse) {
+        private bool DidReceiveResult(MessageReport messageReport,HttpWebRequest request,IAsyncResult asyncResponse) {
             bool sendCompleted = false;
             try {
-                sendCompleted = DidReceiveResponse(message,request,asyncResponse);
+                sendCompleted = DidReceiveResponse(messageReport,request,asyncResponse);
             } catch (WebException webEx) {
                 DidFailWithError(webEx);
             } catch {
@@ -250,21 +250,21 @@ namespace CrittercismSDK {
 
         // DidReceiveResponse
 #if WINDOWS_PHONE_APP
-        private bool DidReceiveResponse(MessageReport message,HttpWebResponse response) {
-            bool sendCompleted = DidReceiveResponseShared(message,response);
+        private bool DidReceiveResponse(MessageReport messageReport,HttpWebResponse response) {
+            bool sendCompleted = DidReceiveResponseShared(messageReport,response);
             return sendCompleted;
         }
 #else
-        private bool DidReceiveResponse(MessageReport message,HttpWebRequest request,IAsyncResult asyncResponse) {
+        private bool DidReceiveResponse(MessageReport messageReport,HttpWebRequest request,IAsyncResult asyncResponse) {
             bool sendCompleted = false;
             using (HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                sendCompleted = DidReceiveResponseShared(message,response);
+                sendCompleted = DidReceiveResponseShared(messageReport,response);
             };
             return sendCompleted;
         }
 #endif // WINDOWS_PHONE_APP
 
-        internal bool DidReceiveResponseShared(MessageReport message,HttpWebResponse response) {
+        internal bool DidReceiveResponseShared(MessageReport messageReport,HttpWebResponse response) {
             bool sendCompleted = false;
             try {
                 //Debug.WriteLine("DidReceiveResponseShared: response.StatusCode == " + (int)response.StatusCode);
@@ -273,7 +273,7 @@ namespace CrittercismSDK {
                     sendCompleted = true;
                     using (StreamReader reader = (new StreamReader(response.GetResponseStream()))) {
                         string responseText = reader.ReadToEnd();
-                        message.DidReceiveResponse(responseText);
+                        messageReport.DidReceiveResponse(responseText);
                     }
                 }
             } catch (Exception ie) {
@@ -290,8 +290,8 @@ namespace CrittercismSDK {
                     if (response.StatusCode == HttpStatusCode.BadRequest) {
                         try {
                             using (StreamReader reader = (new StreamReader(webEx.Response.GetResponseStream()))) {
-                                string message = reader.ReadToEnd();
-                                Debug.WriteLine(message);
+                                string messageReport = reader.ReadToEnd();
+                                Debug.WriteLine(messageReport);
                             }
                         } catch {
                         }

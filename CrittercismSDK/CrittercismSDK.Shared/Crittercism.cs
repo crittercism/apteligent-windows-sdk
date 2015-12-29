@@ -40,8 +40,7 @@ namespace CrittercismSDK {
 
         #region Properties
         // For UnitTest
-        internal static bool Testing = false;
-        internal static ITest Test = null;
+        internal static IMockNetwork Test = null;
 
         internal static string AppVersion { get; private set; }
         internal static string DeviceId { get; private set; }
@@ -71,7 +70,7 @@ namespace CrittercismSDK {
 
         internal static long SessionId { get; private set; }
 
-        internal static JObject Settings { get; private set; }
+        internal static JObject Settings { get; set; }
 
         /// <summary>
         /// Gets or sets a queue of messages.
@@ -389,7 +388,7 @@ namespace CrittercismSDK {
                     readerThread.Name="Crittercism";
 #endif
                     // Testing for unit test purposes
-                    if (!Testing) {
+                    if (Crittercism.Test == null) {
 #if NETFX_CORE
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
@@ -958,10 +957,10 @@ namespace CrittercismSDK {
         /// Loads the messages from disk into the queue.
         /// </summary>
         private static void LoadQueue() {
-            List<MessageReport> messages = MessageReport.LoadMessages();
-            foreach (MessageReport message in messages) {
-                // I'm wondering if we needed to restrict to 50 message of something similar?
-                MessageQueue.Enqueue(message);
+            List<MessageReport> messageReports = MessageReport.LoadMessages();
+            foreach (MessageReport messageReport in messageReports) {
+                // I'm wondering if we needed to restrict to 50 messageReport of something similar?
+                MessageQueue.Enqueue(messageReport);
             }
         }
 
@@ -970,13 +969,13 @@ namespace CrittercismSDK {
         /// <summary>
         /// Adds message to queue
         /// </summary>
-        internal static void AddMessageToQueue(MessageReport message) {
+        internal static void AddMessageToQueue(MessageReport messageReport) {
             while (MessageQueue.Count >= MaxMessageQueueCount) {
                 // Sacrifice an oldMessage
                 MessageReport oldMessage = MessageQueue.Dequeue();
                 oldMessage.Delete();
             }
-            MessageQueue.Enqueue(message);
+            MessageQueue.Enqueue(messageReport);
             readerEvent.Set();
         }
         #endregion // MessageQueue

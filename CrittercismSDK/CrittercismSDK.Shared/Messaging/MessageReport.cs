@@ -173,58 +173,58 @@ namespace CrittercismSDK {
 
         #region Static Methods
         internal static List<MessageReport> LoadMessages() {
-            List<MessageReport> messages = new List<MessageReport>();
+            List<MessageReport> answer = new List<MessageReport>();
             if (StorageHelper.FolderExists(MessagesPath)) {
                 string[] names = StorageHelper.GetFileNames(MessagesPath);
                 foreach (string name in names) {
-                    MessageReport message = LoadMessage(name);
-                    if (message != null) {
-                        messages.Add(message);
+                    MessageReport messageReport = LoadMessage(name);
+                    if (messageReport != null) {
+                        answer.Add(messageReport);
                     }
                 }
-                messages.Sort((m1,m2) => m1.CreationTime.CompareTo(m2.CreationTime));
+                answer.Sort((m1,m2) => m1.CreationTime.CompareTo(m2.CreationTime));
             }
-            return messages;
+            return answer;
         }
         internal static MessageReport LoadMessage(string name) {
             // name is wrt MessagesPath "Crittercism\Messages", e.g "Crash_<guid>"
             // path is Crittercism\Messages\name
-            MessageReport message = null;
+            MessageReport messageReport = null;
             try {
                 string path = Path.Combine(MessagesPath,name);
                 string[] nameSplit = name.Split('_');
                 switch (nameSplit[0]) {
                     case "AppLoad":
-                        message = (AppLoad)StorageHelper.Load(path,typeof(AppLoad));
+                        messageReport = (AppLoad)StorageHelper.Load(path,typeof(AppLoad));
                         break;
                     case "APMReport":
-                        message = (APMReport)StorageHelper.Load(path,typeof(APMReport));
+                        messageReport = (APMReport)StorageHelper.Load(path,typeof(APMReport));
                         break;
                     case "HandledException":
-                        message = (HandledException)StorageHelper.Load(path,typeof(HandledException));
+                        messageReport = (HandledException)StorageHelper.Load(path,typeof(HandledException));
                         break;
                     case "CrashReport":
-                        message = (CrashReport)StorageHelper.Load(path,typeof(CrashReport));
+                        messageReport = (CrashReport)StorageHelper.Load(path,typeof(CrashReport));
                         break;
                     case "MetadataReport":
-                        message = (MetadataReport)StorageHelper.Load(path,typeof(MetadataReport));
+                        messageReport = (MetadataReport)StorageHelper.Load(path,typeof(MetadataReport));
                         break;
                     default:
                         // Skip this file.
                         break;
                 }
-                if (message == null) {
+                if (messageReport == null) {
                     // Possibly file is still being written.  Skip file for
                     // now by returning null .
                 } else {
-                    message.Name = name;
-                    message.CreationTime = StorageHelper.GetCreationTime(path);
-                    message.Saved = true;
+                    messageReport.Name = name;
+                    messageReport.CreationTime = StorageHelper.GetCreationTime(path);
+                    messageReport.Saved = true;
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
-            return message;
+            return messageReport;
         }
 
         #endregion

@@ -4,8 +4,8 @@ using System.Text;
 
 namespace CrittercismSDK
 {
-    internal interface ITest
+    internal interface IMockNetwork
     {
-        bool SendRequest(MessageReport message);
+        bool SendRequest(MessageReport messageReport);
     }
 }

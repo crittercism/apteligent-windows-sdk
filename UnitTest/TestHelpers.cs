@@ -11,15 +11,12 @@ using System.Threading.Tasks;
 namespace UnitTest {
     class TestHelpers {
         public const string VALID_APPID = "50807ba33a47481dd5000002";
-
-        [AssemblyInitialize()]
-        public static void AssemblyInit(TestContext context) {
-            Cleanup();
-        }
-
-        [AssemblyCleanup()]
-        public static void AssemblyCleanup() {
-            Crittercism.Shutdown();
+        private static MockNetwork mockNetwork = null;
+        private static MockNetwork TestNetwork() {
+            if (mockNetwork == null) {
+                mockNetwork = new MockNetwork();
+            };
+            return mockNetwork;
         }
 
         private static void CheckJsonContains(String json,string[] jsonStrings) {
@@ -61,8 +58,8 @@ namespace UnitTest {
 
         public static void Cleanup() {
             // This method is for clean all the possible variables that may be will used by another unit test
-            Crittercism.Testing = true;
-            Crittercism.Test = null;
+            TestNetwork().Cleanup();
+            Crittercism.Test = TestNetwork();
             Crittercism.SetOptOutStatus(false);
             if (Crittercism.MessageQueue != null) {
                 Crittercism.MessageQueue.Clear();
@@ -84,8 +81,11 @@ namespace UnitTest {
 
         public static void StartApp(bool optOutStatus) {
             // Convenient for the OptOutTest which must pass optOutStatus = true
+            if (Crittercism.Test == null) {
+                // First time being called by the test suite.
+                Cleanup();
+            }
             Crittercism.SetOptOutStatus(optOutStatus);
-            Crittercism.Testing = true;
             Crittercism.Init(VALID_APPID);
         }
         public static void StartApp() {
@@ -116,16 +116,7 @@ namespace UnitTest {
         }
 
         public static MessageReport DequeueMessageType(Type type) {
-            MessageReport answer = null;
-            while (Crittercism.MessageQueue.Count > 0) {
-                MessageReport messageReport = Crittercism.MessageQueue.Dequeue();
-                messageReport.Delete();
-                if ((messageReport.GetType() == type)
-                    || (messageReport.GetType().IsSubclassOf(type))) {
-                    answer = messageReport;
-                    break;
-                }
-            }
+            MessageReport answer = TestNetwork().DequeueMessageType(type);
             return answer;
         }
     }
