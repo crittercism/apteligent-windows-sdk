@@ -39,72 +39,68 @@ namespace UnitTest {
         public void TestInitialize() {
             AppLoadResponseReceived = false;
         }
+        [TestCleanup()]
+        public void TestCleanup() {
+            // Use TestCleanup to run code after each test has run
+            Crittercism.Shutdown();
+            TestHelpers.Cleanup();
+        }
         [TestMethod]
         public void AppLoadTest1() {
             // Test AppLoad json message that is sent.
-            try {
-                {
-                    // Crittercism.Test == null means no messageReport's get sent, but stay in queue.
-                    Assert.IsNull(Crittercism.Test);
-                }
-                TestHelpers.StartApp();
-                MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(AppLoad));
-                Assert.IsNotNull(messageReport,"Expected an AppLoad message");
-                string json = JsonConvert.SerializeObject(messageReport);
-                TestHelpers.CheckJson(json);
-            } finally {
-                Crittercism.Shutdown();
-                TestHelpers.Cleanup();
+            {
+                // Crittercism.Test == null means no messageReport's get sent, but stay in queue.
+                Assert.IsNull(Crittercism.Test);
             }
+            TestHelpers.StartApp();
+            MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(AppLoad));
+            Assert.IsNotNull(messageReport,"Expected an AppLoad message");
+            string json = JsonConvert.SerializeObject(messageReport);
+            TestHelpers.CheckJson(json);
         }
         [TestMethod]
         public void AppLoadTest2() {
             // Test the AppLoad json response equals ExampleResponse.
-            try {
-                {
-                    // Crittercism.Test == this means messageReport's received by test.
-                    Crittercism.Test = this;
+            {
+                // Crittercism.Test == this means messageReport's received by test.
+                Crittercism.Test = this;
+            }
+            // StartApp
+            TestHelpers.StartApp();
+            // Wait sufficiently long for AppLoad response.
+            for (int i = 1; i < 10; i++) {
+                Thread.Sleep(100);
+                if (AppLoadResponseReceived) {
+                    break;
                 }
-                // StartApp
-                TestHelpers.StartApp();
-                // Wait sufficiently long for AppLoad response.
-                for (int i = 1; i < 10; i++) {
-                    Thread.Sleep(100);
-                    if (AppLoadResponseReceived) {
-                        break;
-                    }
+            }
+            Assert.IsTrue(AppLoadResponseReceived);
+            {
+                // Check Crittercism.Settings agrees with ExampleResponse.
+                Assert.IsNotNull(Crittercism.Settings);
+                Assert.IsTrue(Crittercism.Settings is JObject);
+                JObject settings = Crittercism.Settings;
+                Assert.IsTrue(Crittercism.CheckSettings(settings));
+            }
+            {
+                // Check Crittercism.Settings Details.
+                JObject config = Crittercism.Settings["txnConfig"] as JObject;
+                if (config["enabled"] != null) {
+                    bool enabled = (bool)((JValue)(config["enabled"])).Value;
+                    Assert.IsTrue(enabled);
+                    int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
+                    Assert.IsTrue(interval == 10);
+                    int defaultTimeout = Convert.ToInt32(((JValue)(config["defaultTimeout"])).Value);
+                    Assert.IsTrue(defaultTimeout == 3600000);
+                    JObject thresholds = config["transactions"] as JObject;
+                    Assert.IsNotNull(thresholds);
+                    JObject threshold = thresholds["Buy Critter Feed"] as JObject;
+                    Assert.IsNotNull(threshold);
+                    int timeout = Convert.ToInt32(((JValue)(threshold["timeout"])).Value);
+                    Assert.IsTrue(timeout == 60000);
+                    int value = Convert.ToInt32(((JValue)(threshold["value"])).Value);
+                    Assert.IsTrue(value == 1299);
                 }
-                Assert.IsTrue(AppLoadResponseReceived);
-                {
-                    // Check Crittercism.Settings agrees with ExampleResponse.
-                    Assert.IsNotNull(Crittercism.Settings);
-                    Assert.IsTrue(Crittercism.Settings is JObject);
-                    JObject settings = Crittercism.Settings;
-                    Assert.IsTrue(Crittercism.CheckSettings(settings));
-                }
-                {
-                    // Check Crittercism.Settings Details.
-                    JObject config = Crittercism.Settings["txnConfig"] as JObject;
-                    if (config["enabled"] != null) {
-                        bool enabled = (bool)((JValue)(config["enabled"])).Value;
-                        Assert.IsTrue(enabled);
-                        int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
-                        Assert.IsTrue(interval == 10);
-                        int defaultTimeout = Convert.ToInt32(((JValue)(config["defaultTimeout"])).Value);
-                        Assert.IsTrue(defaultTimeout == 3600000);
-                        JObject thresholds = config["transactions"] as JObject;
-                        Assert.IsNotNull(thresholds);
-                        JObject threshold = thresholds["Buy Critter Feed"] as JObject;
-                        Assert.IsNotNull(threshold);
-                        int timeout = Convert.ToInt32(((JValue)(threshold["timeout"])).Value);
-                        Assert.IsTrue(timeout == 60000);
-                        int value = Convert.ToInt32(((JValue)(threshold["value"])).Value);
-                        Assert.IsTrue(value == 1299);
-                    }
-                }
-            } finally {
-                Crittercism.Shutdown();
-                TestHelpers.Cleanup();
             }
         }
     }

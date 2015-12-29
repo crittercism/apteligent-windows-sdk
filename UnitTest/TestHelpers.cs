@@ -67,12 +67,16 @@ namespace UnitTest {
             if (Crittercism.MessageQueue != null) {
                 Crittercism.MessageQueue.Clear();
             }
-            // Some unit tests might pollute the message folder.  clean those up
+            // Some unit tests may pollute the Crittercism directory.  Clean it up.
             try {
-                IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                foreach (string file in storage.GetFileNames("")) {
-                    storage.DeleteFile(file);
-                }
+                string[] files = StorageHelper.GetFileNames("Crittercism");
+                foreach (string file in files) {
+                    StorageHelper.DeleteFile("Crittercism\\" + file);
+                };
+                files = StorageHelper.GetFileNames("Crittercism\\Messages");
+                foreach (string file in files) {
+                    StorageHelper.DeleteFile("Crittercism\\Messages\\" + file);
+                };
             } catch (Exception ex) {
                 Console.WriteLine("Cleanup exception: " + ex);
             }

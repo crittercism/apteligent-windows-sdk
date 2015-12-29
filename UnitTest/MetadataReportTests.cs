@@ -46,16 +46,21 @@ namespace UnitTest {
 
         [TestMethod]
         public void MetadataPersistenceTest() {
-            Crittercism.Init("5350bb642bd1f1017c000002");
-            Crittercism.SetUsername("harry");
-            Crittercism.SetValue("surname","hedwig");
-            Trace.WriteLine("surname == " + Crittercism.ValueFor("surname"));
-            Assert.AreEqual(Crittercism.ValueFor("surname"),"hedwig");
-            Assert.AreEqual(Crittercism.ValueFor("username"),"harry");
-            Crittercism.SetUsername("hermione");
-            Crittercism.SetValue("surname","crookshanks");
-            Assert.AreEqual(Crittercism.ValueFor("surname"),"crookshanks");
-            Assert.AreEqual(Crittercism.ValueFor("username"),"hermione");
+            try {
+                TestHelpers.StartApp();
+                Crittercism.SetUsername("harry");
+                Crittercism.SetValue("surname","hedwig");
+                Trace.WriteLine("surname == " + Crittercism.ValueFor("surname"));
+                Assert.AreEqual(Crittercism.ValueFor("surname"),"hedwig");
+                Assert.AreEqual(Crittercism.ValueFor("username"),"harry");
+                Crittercism.SetUsername("hermione");
+                Crittercism.SetValue("surname","crookshanks");
+                Assert.AreEqual(Crittercism.ValueFor("surname"),"crookshanks");
+                Assert.AreEqual(Crittercism.ValueFor("username"),"hermione");
+            } finally {
+                Crittercism.Shutdown();
+                TestHelpers.Cleanup();
+            }
         }
     }
 }
