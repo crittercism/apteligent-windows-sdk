@@ -23,6 +23,8 @@ namespace UnitTest {
         public void LogNetworkRequestTest() {
             APM.interval = 1;
             TestHelpers.StartApp();
+            Assert.IsNull(TestHelpers.TestNetwork().AppLoadResponse);
+            Assert.IsTrue(APM.enabled);
             string method = "GET";
             string uriString = "http://www.mrscritter.com";
             long latency = 4000;
@@ -38,11 +40,13 @@ namespace UnitTest {
                 (HttpStatusCode)responseCode,
                 WebExceptionStatus.Success);
             Trace.WriteLine("Crittercism.LogNetworkRequest returned");
+            Trace.WriteLine("APM.enabled == " + APM.enabled);
             MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(APMReport));
             if (messageReport != null) {
                 Trace.WriteLine("We found an APMReport (YAY)");
             } else {
                 Trace.WriteLine("We didn't find an APMReport (BOO)");
+                Trace.WriteLine("APM.enabled == " + APM.enabled);
                 Assert.IsNotNull(messageReport,"Expected an APMReport message");
             };
             String asJson = JsonConvert.SerializeObject(messageReport);

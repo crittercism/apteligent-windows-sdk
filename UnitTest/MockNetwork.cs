@@ -12,7 +12,7 @@ namespace UnitTest {
 
         #region SendRequest
         // Example AppLoad response platform might send.  AppLoadTests expect to see this.
-        private string ExampleAppLoadResponse = (
+        internal string DefaultAppLoadResponse = (
             "{\"txnConfig\":{\"defaultTimeout\":3600000,\n"
             + "              \"interval\":10,\n"
             + "              \"enabled\":true,\n"
@@ -25,13 +25,16 @@ namespace UnitTest {
             + " \"needPkg\":1,\n"
             + " \"internalExceptionReporting\":true}"
         );
+        // Simple API for a few AppLoadTests that want to see something different.  (Remember to set back to null !)
+        internal string AppLoadResponse = null;
 
         public bool SendRequest(MessageReport messageReport) {
             // Simulate sending messageReport to platform and receiving response.
             lock (this) {
                 if (messageReport is AppLoad) {
                     // Currently, the UnitTest is only testing AppLoad response details.
-                    messageReport.DidReceiveResponse(ExampleAppLoadResponse);
+                    string response = (AppLoadResponse != null) ? AppLoadResponse : DefaultAppLoadResponse;
+                    messageReport.DidReceiveResponse(response);
                 }
                 // The messageReport is stored on "platform" so DequeueMessageType can find it.
                 MessageQueue.Enqueue(messageReport);
@@ -70,6 +73,7 @@ namespace UnitTest {
 
         internal void Cleanup() {
             lock (this) {
+                AppLoadResponse = null;
                 MessageQueue.Clear();
             }
         }

@@ -201,14 +201,22 @@ namespace CrittercismSDK {
         internal static void SettingsChange() {
             try {
                 if (Crittercism.Settings != null) {
-                    JObject config = Crittercism.Settings["apm"] as JObject;
-                    if (config["enabled"] != null) {
-                        bool enabled = (bool)((JValue)(config["enabled"])).Value;
-                        if (enabled) {
-                            int interval = (int)((JValue)(config["interval"])).Value;
-                            Enable(interval);
-                        } else {
-                            Disable();
+                    // Both "apm" and "config" should be non-null since other
+                    // code already sanity checked Crittercism.Settings, but checking
+                    // again doesn't hurt anything.
+                    JObject apm = Crittercism.Settings["apm"] as JObject;
+                    if (apm != null) {
+                        JObject config = apm["net"] as JObject;
+                        if (config != null) {
+                            if (config["enabled"] != null) {
+                                bool enabled = (bool)((JValue)(config["enabled"])).Value;
+                                if (enabled) {
+                                    int interval = (int)((JValue)(config["interval"])).Value;
+                                    Enable(interval);
+                                } else {
+                                    Disable();
+                                }
+                            }
                         }
                     }
                 }

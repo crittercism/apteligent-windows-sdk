@@ -12,7 +12,7 @@ namespace UnitTest {
     class TestHelpers {
         public const string VALID_APPID = "50807ba33a47481dd5000002";
         private static MockNetwork mockNetwork = null;
-        private static MockNetwork TestNetwork() {
+        internal static MockNetwork TestNetwork() {
             if (mockNetwork == null) {
                 mockNetwork = new MockNetwork();
             };
@@ -60,6 +60,9 @@ namespace UnitTest {
             // This method is for clean all the possible variables that may be will used by another unit test
             TestNetwork().Cleanup();
             Crittercism.TestNetwork = TestNetwork();
+            // TODO: AppLoadTest3 forcing a few messy cleanup lines here.  Can this better?
+            APM.enabled = true;
+            TransactionReporter.enabled = true;
             Crittercism.SetOptOutStatus(false);
             if (Crittercism.MessageQueue != null) {
                 Crittercism.MessageQueue.Clear();

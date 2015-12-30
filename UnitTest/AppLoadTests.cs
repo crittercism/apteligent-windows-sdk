@@ -33,7 +33,7 @@ namespace UnitTest {
         }
         [TestMethod]
         public void AppLoadTest2() {
-            // Test the AppLoad json response equals ExampleResponse.
+            // Test the AppLoad json response equals MockNetork.DefaultAppLoadResponse .
             {
                 // Invalidate current Crittercism.Settings .
                 Crittercism.Settings = null;
@@ -69,6 +69,33 @@ namespace UnitTest {
                     Assert.IsTrue(value == 1299);
                 }
             }
+        }
+        // Example AppLoad response slightly different from MockNetork.DefaultAppLoadResponse .
+        private string AppLoadTest3Response = (
+            "{\"txnConfig\":{\"defaultTimeout\":3600000,\n"
+            + "              \"interval\":10,\n"
+            + "              \"enabled\":false,\n"
+            + "              \"transactions\":{\"Buy Critter Feed\":{\"timeout\":60000,\"slowness\":3600000,\"value\":1299},\n"
+            + "                              \"Sing Critter Song\":{\"timeout\":90000,\"slowness\":3600000,\"value\":1500},\n"
+            + "                              \"Write Critter Poem\":{\"timeout\":60000,\"slowness\":3600000,\"value\":2000}}},\n"
+            + " \"apm\":{\"net\":{\"enabled\":false,\n"
+            + "               \"persist\":false,\n"
+            + "               \"interval\":10}},\n"
+            + " \"needPkg\":1,\n"
+            + " \"internalExceptionReporting\":true}"
+        );
+        [TestMethod]
+        public void AppLoadTest3() {
+            // Testing an AppLoad response which disables APM and TransactionReporter
+            TestHelpers.TestNetwork().AppLoadResponse = AppLoadTest3Response;
+            TestHelpers.StartApp();
+            MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(AppLoad));
+            Assert.IsNotNull(messageReport,"Expected an AppLoad message");
+            string json = JsonConvert.SerializeObject(messageReport);
+            TestHelpers.CheckJson(json);
+            Assert.IsFalse(APM.enabled);
+            Assert.IsFalse(TransactionReporter.enabled);
+            // TestHelpers.Cleanup() gets TestHelpers.TestNetwork().AppLoadResponse = null .
         }
     }
 }
