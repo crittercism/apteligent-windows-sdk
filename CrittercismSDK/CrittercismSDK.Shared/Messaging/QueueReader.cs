@@ -86,14 +86,14 @@ namespace CrittercismSDK {
             bool sendCompleted = false;
             try {
                 if ((Crittercism.MessageQueue != null) && (Crittercism.MessageQueue.Count > 0)) {
-                    if ((Crittercism.Test != null) || NetworkInterface.GetIsNetworkAvailable()) {
+                    if ((Crittercism.TestNetwork != null) || NetworkInterface.GetIsNetworkAvailable()) {
                         MessageReport messageReport = Crittercism.MessageQueue.Peek();
                         Crittercism.MessageQueue.Dequeue();
                         messageReport.Delete();
                         try {
-                            if (Crittercism.Test != null) {
+                            if (Crittercism.TestNetwork != null) {
                                 // This case used by UnitTest .
-                                sendCompleted = Crittercism.Test.SendRequest(messageReport);
+                                sendCompleted = Crittercism.TestNetwork.SendRequest(messageReport);
                             } else {
                                 sendCompleted = SendRequest(messageReport);
                             }

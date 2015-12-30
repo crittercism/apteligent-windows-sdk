@@ -40,7 +40,7 @@ namespace CrittercismSDK {
 
         #region Properties
         // For UnitTest
-        internal static IMockNetwork Test = null;
+        internal static IMockNetwork TestNetwork = null;
 
         internal static string AppVersion { get; private set; }
         internal static string DeviceId { get; private set; }
@@ -388,7 +388,7 @@ namespace CrittercismSDK {
                     readerThread.Name="Crittercism";
 #endif
                     // Testing for unit test purposes
-                    if (Crittercism.Test == null) {
+                    if (Crittercism.TestNetwork == null) {
 #if NETFX_CORE
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;

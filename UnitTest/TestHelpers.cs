@@ -59,7 +59,7 @@ namespace UnitTest {
         public static void Cleanup() {
             // This method is for clean all the possible variables that may be will used by another unit test
             TestNetwork().Cleanup();
-            Crittercism.Test = TestNetwork();
+            Crittercism.TestNetwork = TestNetwork();
             Crittercism.SetOptOutStatus(false);
             if (Crittercism.MessageQueue != null) {
                 Crittercism.MessageQueue.Clear();
@@ -69,7 +69,7 @@ namespace UnitTest {
 
         public static void StartApp(bool optOutStatus) {
             // Convenient for the OptOutTest which must pass optOutStatus = true
-            if (Crittercism.Test == null) {
+            if (Crittercism.TestNetwork == null) {
                 // First time being called by the test suite.
                 Cleanup();
             }
