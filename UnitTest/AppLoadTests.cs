@@ -28,6 +28,8 @@ namespace UnitTest {
             Assert.IsNotNull(messageReport,"Expected an AppLoad message");
             string json = JsonConvert.SerializeObject(messageReport);
             TestHelpers.CheckJson(json);
+            Assert.IsTrue(APM.enabled);
+            Assert.IsTrue(TransactionReporter.enabled);
         }
         [TestMethod]
         public void AppLoadTest2() {

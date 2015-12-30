@@ -29,7 +29,7 @@ namespace CrittercismSDK {
         #region Properties
         private static Object lockObject = new object();
         private static SynchronizedQueue<Transaction> TransactionsQueue { get; set; }
-        private static bool enabled = true;
+        internal static bool enabled = true;
         // Batch additional network requests for 20 seconds before sending TransactionReport .
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
         private static int defaultTimeout = ONE_HOUR; // milliseconds

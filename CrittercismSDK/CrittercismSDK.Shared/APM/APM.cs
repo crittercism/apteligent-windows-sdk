@@ -22,7 +22,7 @@ namespace CrittercismSDK {
         // TODO: SynchronizedQueue has its virtues, but we may want synchronization
         // at the higher APM level instead.
         private static SynchronizedQueue<Endpoint> EndpointsQueue { get; set; }
-        private static bool enabled = true;
+        internal static bool enabled = true;
         // Batch additional network requests for 10 seconds before sending APMReport .
         internal static int interval = 10000; // milliseconds
         // CRFilter's
