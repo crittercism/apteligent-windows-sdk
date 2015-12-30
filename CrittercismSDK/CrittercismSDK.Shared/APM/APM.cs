@@ -211,7 +211,7 @@ namespace CrittercismSDK {
                             if (config["enabled"] != null) {
                                 bool enabled = (bool)((JValue)(config["enabled"])).Value;
                                 if (enabled) {
-                                    int interval = (int)((JValue)(config["interval"])).Value;
+                                    int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
                                     Enable(interval);
                                 } else {
                                     Disable();
