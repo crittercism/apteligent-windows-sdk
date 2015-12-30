@@ -41,10 +41,10 @@ namespace WindowsFormsApp {
             // 
             this.setUsernameButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.setUsernameButton.ForeColor = System.Drawing.Color.DarkGreen;
-            this.setUsernameButton.Location = new System.Drawing.Point(118, 15);
-            this.setUsernameButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.setUsernameButton.Location = new System.Drawing.Point(79, 10);
+            this.setUsernameButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.setUsernameButton.Name = "setUsernameButton";
-            this.setUsernameButton.Size = new System.Drawing.Size(420, 90);
+            this.setUsernameButton.Size = new System.Drawing.Size(280, 58);
             this.setUsernameButton.TabIndex = 0;
             this.setUsernameButton.Text = "Set Username";
             this.setUsernameButton.UseVisualStyleBackColor = true;
@@ -54,10 +54,10 @@ namespace WindowsFormsApp {
             // 
             this.leaveBreadcrumbButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.leaveBreadcrumbButton.ForeColor = System.Drawing.Color.DarkGreen;
-            this.leaveBreadcrumbButton.Location = new System.Drawing.Point(118, 130);
-            this.leaveBreadcrumbButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.leaveBreadcrumbButton.Location = new System.Drawing.Point(79, 84);
+            this.leaveBreadcrumbButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.leaveBreadcrumbButton.Name = "leaveBreadcrumbButton";
-            this.leaveBreadcrumbButton.Size = new System.Drawing.Size(420, 90);
+            this.leaveBreadcrumbButton.Size = new System.Drawing.Size(280, 58);
             this.leaveBreadcrumbButton.TabIndex = 1;
             this.leaveBreadcrumbButton.Text = "Leave Breadcrumb";
             this.leaveBreadcrumbButton.UseVisualStyleBackColor = true;
@@ -67,10 +67,10 @@ namespace WindowsFormsApp {
             // 
             this.handledExceptionButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.handledExceptionButton.ForeColor = System.Drawing.Color.DarkGreen;
-            this.handledExceptionButton.Location = new System.Drawing.Point(118, 475);
-            this.handledExceptionButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.handledExceptionButton.Location = new System.Drawing.Point(79, 309);
+            this.handledExceptionButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.handledExceptionButton.Name = "handledExceptionButton";
-            this.handledExceptionButton.Size = new System.Drawing.Size(420, 90);
+            this.handledExceptionButton.Size = new System.Drawing.Size(280, 58);
             this.handledExceptionButton.TabIndex = 2;
             this.handledExceptionButton.Text = "Handled Exception";
             this.handledExceptionButton.UseVisualStyleBackColor = true;
@@ -80,10 +80,10 @@ namespace WindowsFormsApp {
             // 
             this.crashButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.crashButton.ForeColor = System.Drawing.Color.DarkGreen;
-            this.crashButton.Location = new System.Drawing.Point(118, 590);
-            this.crashButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.crashButton.Location = new System.Drawing.Point(79, 383);
+            this.crashButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.crashButton.Name = "crashButton";
-            this.crashButton.Size = new System.Drawing.Size(420, 90);
+            this.crashButton.Size = new System.Drawing.Size(280, 58);
             this.crashButton.TabIndex = 3;
             this.crashButton.Text = "Crash";
             this.crashButton.UseVisualStyleBackColor = true;
@@ -93,10 +93,10 @@ namespace WindowsFormsApp {
             // 
             this.newWindowButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.newWindowButton.ForeColor = System.Drawing.Color.DarkGreen;
-            this.newWindowButton.Location = new System.Drawing.Point(118, 705);
-            this.newWindowButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.newWindowButton.Location = new System.Drawing.Point(79, 458);
+            this.newWindowButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.newWindowButton.Name = "newWindowButton";
-            this.newWindowButton.Size = new System.Drawing.Size(420, 90);
+            this.newWindowButton.Size = new System.Drawing.Size(280, 58);
             this.newWindowButton.TabIndex = 4;
             this.newWindowButton.Text = "New Window";
             this.newWindowButton.UseVisualStyleBackColor = true;
@@ -105,10 +105,10 @@ namespace WindowsFormsApp {
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(553, 629);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.pictureBox1.Location = new System.Drawing.Point(369, 409);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(96, 166);
+            this.pictureBox1.Size = new System.Drawing.Size(64, 108);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBox1.TabIndex = 5;
             this.pictureBox1.TabStop = false;
@@ -118,12 +118,12 @@ namespace WindowsFormsApp {
             // 
             this.logNetworkRequestButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.logNetworkRequestButton.ForeColor = System.Drawing.Color.DarkGreen;
-            this.logNetworkRequestButton.Location = new System.Drawing.Point(118, 245);
-            this.logNetworkRequestButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.logNetworkRequestButton.Location = new System.Drawing.Point(79, 159);
+            this.logNetworkRequestButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.logNetworkRequestButton.Name = "logNetworkRequestButton";
-            this.logNetworkRequestButton.Size = new System.Drawing.Size(420, 90);
+            this.logNetworkRequestButton.Size = new System.Drawing.Size(280, 58);
             this.logNetworkRequestButton.TabIndex = 6;
-            this.logNetworkRequestButton.Text = "LogNetworkRequest";
+            this.logNetworkRequestButton.Text = "Log Network Request";
             this.logNetworkRequestButton.UseVisualStyleBackColor = true;
             this.logNetworkRequestButton.Click += new System.EventHandler(this.logNetworkRequest_Click);
             // 
@@ -131,10 +131,10 @@ namespace WindowsFormsApp {
             // 
             this.transactionButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.transactionButton.ForeColor = System.Drawing.Color.DarkGreen;
-            this.transactionButton.Location = new System.Drawing.Point(116, 360);
-            this.transactionButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.transactionButton.Location = new System.Drawing.Point(77, 234);
+            this.transactionButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.transactionButton.Name = "transactionButton";
-            this.transactionButton.Size = new System.Drawing.Size(420, 90);
+            this.transactionButton.Size = new System.Drawing.Size(280, 58);
             this.transactionButton.TabIndex = 7;
             this.transactionButton.Text = "Begin Transaction";
             this.transactionButton.UseVisualStyleBackColor = true;
@@ -142,10 +142,10 @@ namespace WindowsFormsApp {
             // 
             // MainWindow
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Honeydew;
-            this.ClientSize = new System.Drawing.Size(653, 826);
+            this.ClientSize = new System.Drawing.Size(435, 537);
             this.Controls.Add(this.transactionButton);
             this.Controls.Add(this.logNetworkRequestButton);
             this.Controls.Add(this.pictureBox1);
@@ -155,7 +155,7 @@ namespace WindowsFormsApp {
             this.Controls.Add(this.leaveBreadcrumbButton);
             this.Controls.Add(this.setUsernameButton);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.Name = "MainWindow";
             this.Text = "WindowsFormsApp";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainWindow_FormClosed);
