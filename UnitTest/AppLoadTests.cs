@@ -23,10 +23,6 @@ namespace UnitTest {
         [TestMethod]
         public void AppLoadTest1() {
             // Test AppLoad json message that is sent.
-            {
-                // Crittercism.TestNetwork == null means no messageReport's get sent, but stay in queue.
-                Assert.IsNull(Crittercism.TestNetwork);
-            }
             TestHelpers.StartApp();
             MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(AppLoad));
             Assert.IsNotNull(messageReport,"Expected an AppLoad message");
