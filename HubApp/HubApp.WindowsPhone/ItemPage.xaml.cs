@@ -75,19 +75,19 @@ namespace HubApp
             this.DefaultViewModel["Item"]=item;
             Debug.WriteLine("UniqueId == "+item.UniqueId);
             Crittercism.LeaveBreadcrumb("UniqueId == "+item.UniqueId);
-            if (item.UniqueId.Equals("SetUsername")) {
+            if (item.UniqueId.Equals("Set Username")) {
                 Random random=new Random();
                 string[] names= { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
                 string name=names[random.Next(0,names.Length)];
                 Crittercism.SetUsername("Critter "+name);
-            } else if (item.UniqueId.Equals("LeaveBreadcrumb")) {
+            } else if (item.UniqueId.Equals("Leave Breadcrumb")) {
                 Random random=new Random();
                 string[] names= { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
                 string name=names[random.Next(0,names.Length)];
                 Crittercism.LeaveBreadcrumb(name);
-            } else if (item.UniqueId.Equals("LogNetworkRequest")) {
+            } else if (item.UniqueId.Equals("Network Request")) {
                 LogNetworkRequest();
-            } else if (item.UniqueId.Equals("LogHandledException")) {
+            } else if (item.UniqueId.Equals("Handled Exception")) {
                 {
                     try {
                         ThrowException();
@@ -95,7 +95,7 @@ namespace HubApp
                         Crittercism.LogHandledException(ex);
                     }
                 }
-            } else if (item.UniqueId.Equals("LogUnhandledException")) {
+            } else if (item.UniqueId.Equals("Crash")) {
                 ThrowException();
             }
         }
