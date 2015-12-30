@@ -10,6 +10,7 @@ namespace UnitTest {
     internal class MockNetwork : IMockNetwork {
         internal static SynchronizedQueue<MessageReport> MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
 
+        #region SendRequest
         // Example AppLoad response platform might send.  AppLoadTests expect to see this.
         private string ExampleAppLoadResponse = (
             "{\"txnConfig\":{\"defaultTimeout\":3600000,\n"
@@ -37,7 +38,9 @@ namespace UnitTest {
             }
             return true;
         }
+        #endregion
 
+        #region MessageReport's Received by Mock Platform
         internal MessageReport DequeueMessageType(Type type) {
             // Simulate platform receiving messageReport of a given type .
             MessageReport answer = null;
@@ -61,6 +64,7 @@ namespace UnitTest {
                     Thread.Sleep(100);
                 }
             }
+            // Returning MessageReport (or null) of the specified type .
             return answer;
         }
 
@@ -69,5 +73,6 @@ namespace UnitTest {
                 MessageQueue.Clear();
             }
         }
+        #endregion
     }
 }

@@ -485,5 +485,23 @@ namespace CrittercismSDK {
 
         #endregion
 
+        #region Test Support
+        internal static void Cleanup() {
+            // Some unit tests may pollute the Crittercism directory.  Clean it up.
+            try {
+                string[] files = GetFileNames("Crittercism");
+                foreach (string file in files) {
+                    DeleteFile("Crittercism\\" + file);
+                };
+                files = GetFileNames("Crittercism\\Messages");
+                foreach (string file in files) {
+                    DeleteFile("Crittercism\\Messages\\" + file);
+                };
+            } catch (Exception ex) {
+                Debug.WriteLine("Cleanup exception: " + ex);
+            }
+        }
+        #endregion
+
     }
 }
