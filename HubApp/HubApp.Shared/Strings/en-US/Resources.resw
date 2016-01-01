@@ -159,50 +159,26 @@
   <data name="GroupDescription" xml:space="preserve">
     <value>Group Description: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tempor scelerisque lorem in vehicula. Aliquam tincidunt, lacus ut sagittis tristique, turpis massa volutpat augue, eu rutrum ligula ante a ante</value>
   </data>
-  <data name="Item1Subtitle" xml:space="preserve">
-    <value>Item Subtitle: 1</value>
-  </data>
   <data name="Item1Title" xml:space="preserve">
     <value>Item Title: 1</value>
-  </data>
-  <data name="Item2Subtitle" xml:space="preserve">
-    <value>Item Subtitle: 2</value>
   </data>
   <data name="Item2Title" xml:space="preserve">
     <value>Item Title: 2</value>
   </data>
-  <data name="Item3Subtitle" xml:space="preserve">
-    <value>Item Subtitle: 3</value>
-  </data>
   <data name="Item3Title" xml:space="preserve">
     <value>Item Title: 3</value>
-  </data>
-  <data name="Item4Subtitle" xml:space="preserve">
-    <value>Item Subtitle: 4</value>
   </data>
   <data name="Item4Title" xml:space="preserve">
     <value>Item Title: 4</value>
   </data>
-  <data name="Item5Subtitle" xml:space="preserve">
-    <value>Item Subtitle: 5</value>
-  </data>
   <data name="Item5Title" xml:space="preserve">
     <value>Item Title: 5</value>
-  </data>
-  <data name="Item6Subtitle" xml:space="preserve">
-    <value>Item Subtitle: 6</value>
   </data>
   <data name="Item6Title" xml:space="preserve">
     <value>Item Title: 6</value>
   </data>
-  <data name="Item7Subtitle" xml:space="preserve">
-    <value>Item Subtitle: 7</value>
-  </data>
   <data name="Item7Title" xml:space="preserve">
     <value>Item Title: 7</value>
-  </data>
-  <data name="Item8Subtitle" xml:space="preserve">
-    <value>Item Subtitle: 8</value>
   </data>
   <data name="Item8Title" xml:space="preserve">
     <value>Item Title: 8</value>

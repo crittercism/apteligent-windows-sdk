@@ -1,10 +1,12 @@
 ﻿using HubApp.Data;
-using HubApp.Common;
+using HubApp;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Windows.Input;
 using Windows.Foundation;
@@ -17,19 +19,16 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace HubApp
-{
+namespace HubApp {
     /// <summary>
     /// A page that displays an overview of a single group, including a preview of the items
     /// within the group.
     /// </summary>
-    public sealed partial class SectionPage : Page
-    {
+    public sealed partial class SectionPage : Page {
         private NavigationHelper navigationHelper;
         private ObservableDictionary defaultViewModel = new ObservableDictionary();
 
-        public SectionPage()
-        {
+        public SectionPage() {
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
@@ -62,8 +61,7 @@ namespace HubApp
         /// <see cref="Frame.Navigate(Type, object)"/> when this page was initially requested and
         /// a dictionary of state preserved by this page during an earlier
         /// session.  The state will be null the first time a page is visited.</param>
-        private async void NavigationHelper_LoadState(object sender, LoadStateEventArgs e)
-        {
+        private async void NavigationHelper_LoadState(object sender,LoadStateEventArgs e) {
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
             var group = await SampleDataSource.GetGroupAsync((string)e.NavigationParameter);
             this.DefaultViewModel["Group"] = group;
@@ -75,14 +73,11 @@ namespace HubApp
         /// </summary>
         /// <param name="sender">The GridView displaying the item clicked.</param>
         /// <param name="e">Event data that describes the item clicked.</param>
-        private void ItemView_ItemClick(object sender, ItemClickEventArgs e)
-        {
+        private void ItemView_ItemClick(object sender,ItemClickEventArgs e) {
             // Navigate to the appropriate destination page, configuring the new page
             // by passing required information as a navigation parameter
-            var itemId = ((SampleDataItem)e.ClickedItem).UniqueId;
-            this.Frame.Navigate(typeof(ItemPage), itemId);
+            Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
         }
-
         #region NavigationHelper registration
 
         /// <summary>
@@ -94,13 +89,11 @@ namespace HubApp
         /// The navigation parameter is available in the LoadState method 
         /// in addition to page state preserved during an earlier session.
         /// </summary>
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
+        protected override void OnNavigatedTo(NavigationEventArgs e) {
             this.navigationHelper.OnNavigatedTo(e);
         }
 
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
-        {
+        protected override void OnNavigatedFrom(NavigationEventArgs e) {
             this.navigationHelper.OnNavigatedFrom(e);
         }
 

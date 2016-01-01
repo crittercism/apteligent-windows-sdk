@@ -63,7 +63,7 @@
                     <ImageBrush ImageSource="Assets/SomeColor.png" Stretch="UniformToFill" />
                 </HubSection.Background>
             </HubSection>
-            <HubSection IsHeaderInteractive="True" DataContext="{Binding Section3Items}" d:DataContext="{Binding Groups[3], Source={d:DesignData Source=../HubApp.Shared/DataModel/SampleData.json, Type=data:SampleDataSource}}"
+            <HubSection IsHeaderInteractive="True" DataContext="{Binding DemoItems}" d:DataContext="{Binding Groups[3], Source={d:DesignData Source=../HubApp.Shared/DataModel/SampleData.json, Type=data:SampleDataSource}}"
                         x:Uid="DemoHeader" Header="Demo" Padding="40,40,40,32">
                 <DataTemplate>
                     <GridView

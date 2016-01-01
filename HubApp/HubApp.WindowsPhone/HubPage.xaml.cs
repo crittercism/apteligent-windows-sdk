@@ -1,4 +1,4 @@
-﻿using HubApp.Common;
+﻿using HubApp;
 using HubApp.Data;
 
 using System;
@@ -111,17 +111,14 @@ namespace HubApp
         }
 
         /// <summary>
-        /// Shows the details of an item clicked on in the <see cref="ItemPage"/>
+        /// Shows the details of an item clicked on in the <see cref="SectionPage"/>
         /// </summary>
         /// <param name="sender">The source of the click event.</param>
         /// <param name="e">Defaults about the click event.</param>
-        private void ItemView_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            var itemId = ((SampleDataItem)e.ClickedItem).UniqueId;
-            if (!Frame.Navigate(typeof(ItemPage), itemId))
-            {
-                throw new Exception(this.resourceLoader.GetString("NavigationFailedExceptionMessage"));
-            }
+        void ItemView_ItemClick(object sender,ItemClickEventArgs e) {
+            // Navigate to the appropriate destination page, configuring the new page
+            // by passing required information as a navigation parameter
+            Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
         }
 
         #region NavigationHelper registration
