@@ -29,14 +29,12 @@ namespace WPFApp {
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
-            Random random = new Random();
             string[] names = { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };
             string name = names[random.Next(0,names.Length)];
             Crittercism.SetUsername("Critter " + name);
         }
 
         private void leaveBreadcrumbClick(object sender,RoutedEventArgs e) {
-            Random random = new Random();
             string[] names = { "Breadcrumb","Strawberry","Seed","Grape","Lettuce" };
             string name = names[random.Next(0,names.Length)];
             Crittercism.LeaveBreadcrumb(name);
@@ -65,7 +63,6 @@ namespace WPFApp {
             "http://www.crittercism.com/customers/"
         };
         private void logNetworkRequestClick(object sender,RoutedEventArgs e) {
-            Random random = new Random();
             string[] methods = new string[] { "GET","POST","HEAD","PUT" };
             string method = methods[random.Next(0,methods.Length)];
             string url = urls[random.Next(0,urls.Length)];

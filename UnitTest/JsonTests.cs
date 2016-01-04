@@ -54,6 +54,21 @@ namespace UnitTest {
             }
         }
         [TestMethod]
+        public void JObjectMissingKeyTest() {
+            string json = ("{"
+                + "\n  CPU: 'Intel',"
+                + "\n  Drives: ["
+                + "\n    'DVD read/writer',"
+                + "\n    '500 gigabyte hard drive'"
+                + "\n  ]"
+                + "\n}");
+            JObject o = JObject.Parse(json);
+            Assert.IsNotNull(o);
+            Assert.IsTrue(o.Count == 2);
+            JToken missing = o["doesntexist"];
+            Assert.IsNull(missing);
+        }
+        [TestMethod]
         public void JArrayParseTest() {
             string json = ("["
                 + "\n  'Small',"
@@ -168,6 +183,23 @@ namespace UnitTest {
             }
         }
         [TestMethod]
+        public void JTokenParseGarbageTest() {
+            // JToken.Parse throws a JsonReaderException when passed garbage.
+            string json = "[[[{{{1,2,3:::;;;";
+            JToken token = null;
+            try {
+                token = JToken.Parse(json);
+            } catch (JsonReaderException e) {
+                // Expecting Newtonsoft.Json.JsonReaderException
+                // E.G. "Invalid property identifier character: {. Path '[0][0][0]', line 1, position 4."
+                Debug.WriteLine(e.Message);
+            } catch (Exception e) {
+                Debug.WriteLine(e.GetType().FullName);
+                Assert.Fail();
+            };
+            Assert.IsNull(token);
+        }
+        [TestMethod]
         public void EndpointJsonTest() {
             string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
             Endpoint endpoint1 = new Endpoint(
@@ -211,7 +243,7 @@ namespace UnitTest {
             // Testing TransactionConverter WriteJson
             string json1 = JsonConvert.SerializeObject(transaction1);
             Debug.WriteLine(json1);
-            Assert.AreEqual(json1,"[\"Buy Critter Feed\",2,360.0,10000,{},\"2015-12-03T18:24:34.830Z\",\"2015-12-03T18:24:52.294Z\",1.74635489]");
+            Assert.AreEqual(json1,"[\"Buy Critter Feed\",2,3600.0,10000,{},\"2015-12-03T18:24:34.830Z\",\"2015-12-03T18:24:52.294Z\",17.4635489]");
             string json2 = JsonConvert.SerializeObject(transaction1,Formatting.None,new TransactionConverter());
             Debug.WriteLine("json1 == " + json1);
             Debug.WriteLine("json2 == " + json2);

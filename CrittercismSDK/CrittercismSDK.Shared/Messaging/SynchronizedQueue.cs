@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace CrittercismSDK {
@@ -45,6 +46,7 @@ namespace CrittercismSDK {
             lock (this._q)
                 this._q.Enqueue(value);
         }
+        private int TestDebugCrutch = 0;
         public T Dequeue() {
             ////////////////////////////////////////////////////////////////
             // NOTE: MSDN doc excerpt re Queue<T>.Dequeue Method

@@ -177,7 +177,7 @@ namespace CrittercismSDK {
             return data;
         }
 
-        private static string LoadString(string path) {
+        internal static string LoadString(string path) {
             string dataString = null;
             try {
 #if NETFX_CORE
@@ -352,7 +352,7 @@ namespace CrittercismSDK {
         }
 #endif
 
-        private static void SaveString(string path,string dataString) {
+        internal static void SaveString(string path,string dataString) {
 #if NETFX_CORE
             {
                 StorageFile file = SaveFile(path);
@@ -483,6 +483,24 @@ namespace CrittercismSDK {
 #endif
         }
 
+        #endregion
+
+        #region Test Support
+        internal static void Cleanup() {
+            // Some unit tests may pollute the Crittercism directory.  Clean it up.
+            try {
+                string[] files = GetFileNames("Crittercism");
+                foreach (string file in files) {
+                    DeleteFile("Crittercism\\" + file);
+                };
+                files = GetFileNames("Crittercism\\Messages");
+                foreach (string file in files) {
+                    DeleteFile("Crittercism\\Messages\\" + file);
+                };
+            } catch (Exception ex) {
+                Debug.WriteLine("Cleanup exception: " + ex);
+            }
+        }
         #endregion
 
     }

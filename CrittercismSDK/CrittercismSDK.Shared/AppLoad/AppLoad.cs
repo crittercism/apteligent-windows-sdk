@@ -1,7 +1,10 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -12,8 +15,7 @@ using Windows.ApplicationModel;
 using Microsoft.Phone.Info;
 #endif
 
-namespace CrittercismSDK
-{
+namespace CrittercismSDK {
     [DataContract]
     internal class AppLoad : MessageReport {
         #region Properties
@@ -39,6 +41,25 @@ namespace CrittercismSDK
             // array, we instead create another specialized override
             // of the MessageReport.cs "internal virtual string PostBody()"
             return "[" + JsonConvert.SerializeObject(this) + "]";
+        }
+
+        ////////////////////////////////////////////////////////////////
+        //    EXAMPLE AppLoad RESPONSE JSON FROM PLATFORM
+        // {"txnConfig":{"defaultTimeout":3600000,
+        //               "interval":10,
+        //               "enabled":true,
+        //               "transactions":{"Buy Critter Feed":{"timeout":60000,"slowness":3600000,"value":1299},
+        //                               "Sing Critter Song":{"timeout":90000,"slowness":3600000,"value":1500},
+        //                               "Write Critter Poem":{"timeout":60000,"slowness":3600000,"value":2000}}},
+        //  "apm":{"net":{"enabled":true,
+        //                "persist":false,
+        //                "interval":10}},
+        //  "needPkg":1,
+        //  "internalExceptionReporting":true}
+        ////////////////////////////////////////////////////////////////
+        internal override void DidReceiveResponse(string json) {
+            // Process AppLoad response JSON from platform.
+            Crittercism.SetSettings(json);
         }
         #endregion
     }

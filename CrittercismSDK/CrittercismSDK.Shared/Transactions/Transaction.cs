@@ -20,12 +20,13 @@ namespace CrittercismSDK {
         // It's conceivable some apps might want modest negative values for
         // debits, so we use Int32.MinValue == -2^31 == -2147483648 == -$21,474,836.48
         // here.
-        private const int NULL_VALUE = Int32.MinValue;
+        internal const int NULL_VALUE = Int32.MinValue;
         private const int TICKS_PER_MSEC = 10000;
-        internal const int MSEC_PER_SEC = 10000;
+        internal const int MSEC_PER_SEC = 1000;
         internal const int TICKS_PER_SEC = MSEC_PER_SEC * TICKS_PER_MSEC;
         #endregion
 
+        #region Properties
         ////////////////////////////////////////////////////////////////
         // NOTE: Microsoft Time Measurements
         // Not living in Steve Jobs' ideal world, we must contend with
@@ -53,7 +54,6 @@ namespace CrittercismSDK {
         private string foregroundTimeString; // ISO8601DateString
         private bool isForegrounded;
 
-        #region Properties
         internal string Name() {
             // The "name" is immutable.
             return name;
@@ -124,6 +124,10 @@ namespace CrittercismSDK {
                     }
                 }
             }
+        }
+        private int DefaultValue() {
+            int answer = TransactionReporter.DefaultValue(name);
+            return answer;
         }
         internal int Value() {
             int answer;
@@ -246,17 +250,21 @@ namespace CrittercismSDK {
             SetEndTime(referenceTime);
             eyeTime = 0;
             SetForegroundTime(referenceTime);
-            // timeout in milliseconds
-            timeout = ClampTimeout(Int32.MaxValue);
         }
-        internal Transaction(string name) : this() {
+        internal Transaction(string name,int value) : this() {
             this.name = StringUtils.TruncateString(name,MAX_NAME_LENGTH);
+            // timeout in milliseconds (Applying "transaction specific configuration"
+            // can only be done after we know "name" of this transaction.)
+            timeout = ClampTimeout(Int32.MaxValue);
+            if (value == NULL_VALUE) {
+                value = DefaultValue();
+            }
+            this.value = value;
             TransactionReporter.Save(this);
         }
-        internal Transaction(string name,int value) : this(name) {
-            this.value = value;
+        internal Transaction(string name) : this(name,NULL_VALUE) {
         }
-        internal Transaction(string name,long beginTime,long endTime) : this(name) {
+        internal Transaction(string name,long beginTime,long endTime) : this(name,0) {
             ////////////////////////////////////////////////////////////////
             // Input:
             //    name = transaction name
@@ -265,7 +273,6 @@ namespace CrittercismSDK {
             // NOTE: Automatic transactions ("App Load", "App Foreground", "App Background")
             ////////////////////////////////////////////////////////////////
             state = TransactionState.ENDED;
-            value = 0;
             SetBeginTime(beginTime);
             SetEndTime(endTime);
             eyeTime = endTime - beginTime;
@@ -373,10 +380,7 @@ namespace CrittercismSDK {
             list.Add((int)state);
             list.Add(timeout / (double)MSEC_PER_SEC); // seconds
             if (value == NULL_VALUE) {
-                // TODO: list.Add(null) will be correct here, but until we get Transaction config
-                // from AppLoad, let's make this default be $1.00 == 100 pennies.
-                //list.Add(null);
-                list.Add(100);
+                list.Add(null);
             } else {
                 list.Add(value);
             };

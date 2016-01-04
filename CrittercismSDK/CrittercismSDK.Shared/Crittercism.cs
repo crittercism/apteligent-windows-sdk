@@ -1,5 +1,6 @@
 using CrittercismSDK;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -38,10 +39,8 @@ namespace CrittercismSDK {
         #endregion Constants
 
         #region Properties
-        /// <summary>
-        /// Enable SendMessage
-        /// </summary>
-        internal static bool enableSendMessage = true;
+        // For UnitTest
+        internal static IMockNetwork TestNetwork = null;
 
         internal static string AppVersion { get; private set; }
         internal static string DeviceId { get; private set; }
@@ -70,6 +69,8 @@ namespace CrittercismSDK {
         //#endif
 
         internal static long SessionId { get; private set; }
+
+        internal static JObject Settings { get; set; }
 
         /// <summary>
         /// Gets or sets a queue of messages.
@@ -366,6 +367,8 @@ namespace CrittercismSDK {
                         return;
                     }
                     AppID = appID;
+                    // Put default initialized Settings before APM.Init() and TransactionReporter.Init() .
+                    Settings = LoadSettings();
                     APM.Init();
                     MessageReport.Init();
                     TransactionReporter.Init();
@@ -384,8 +387,8 @@ namespace CrittercismSDK {
                     readerThread=new Thread(threadStart);
                     readerThread.Name="Crittercism";
 #endif
-                    // enableSendMessage for unit test purposes
-                    if (enableSendMessage) {
+                    // Testing for unit test purposes
+                    if (Crittercism.TestNetwork == null) {
 #if NETFX_CORE
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
@@ -669,6 +672,74 @@ namespace CrittercismSDK {
         }
         #endregion Metadata
 
+        #region Settings
+        internal static void SetSettings(string json) {
+            // Called from AppLoad.DidReceiveResponse
+            try {
+                Debug.WriteLine("AppLoad response == " + json);
+                // Checking for a sane "response"
+                JObject response = null;
+                try {
+                    response = JToken.Parse(json) as JObject;
+                } catch {
+                };
+                if (CheckSettings(response)) {
+                    // This is an AppLoad response JSON we can apply to current session.
+                    // TODO: Some "lock" goes here.  TBD.
+                    Settings = response;
+                    SaveSettings(json);
+                    APM.SettingsChange();
+                    TransactionReporter.SettingsChange();
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        internal static bool CheckSettings(JObject settings) {
+            // Minimum sanity test for "settings" received from platform.
+            // Use the same sanity test that iOS SDK uses.  Look for pattern
+            // {"apm":{"net":...},...}
+            bool answer = false;
+            if (settings != null) {
+                // We get this far if received "settings" was a legal JSON object.
+                JObject apm = settings["apm"] as JObject;
+                if (apm != null) {
+                    JObject net = apm["net"] as JObject;
+                    if (net != null) {
+                        // Good enough!
+                        answer = true;
+                    };
+                };
+            };
+            return answer;
+        }
+        private static JObject LoadSettings() {
+            // Load AppLoad response JSON from prior session.
+            JObject answer = null;
+            try {
+                string path = Path.Combine(StorageHelper.CrittercismPath(),"Settings.js");
+                if (StorageHelper.FileExists(path)) {
+                    string json = StorageHelper.LoadString(path);
+                    answer = JObject.Parse(json);
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+            Debug.WriteLine("LoadSettings: " + JsonConvert.SerializeObject(answer));
+            return answer;
+        }
+        internal static void SaveSettings(string json) {
+            // Persist AppLoad response JSON
+            try {
+                Debug.WriteLine("SaveSettings: " + json);
+                string path = Path.Combine(StorageHelper.CrittercismPath(),"Settings.js");
+                StorageHelper.SaveString(path,json);
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+        }
+        #endregion
+
         #region Transactions
         internal static void OnTransactionTimeOut(EventArgs e) {
             EventHandler handler = TransactionTimeOut;
@@ -886,10 +957,10 @@ namespace CrittercismSDK {
         /// Loads the messages from disk into the queue.
         /// </summary>
         private static void LoadQueue() {
-            List<MessageReport> messages = MessageReport.LoadMessages();
-            foreach (MessageReport message in messages) {
-                // I'm wondering if we needed to restrict to 50 message of something similar?
-                MessageQueue.Enqueue(message);
+            List<MessageReport> messageReports = MessageReport.LoadMessages();
+            foreach (MessageReport messageReport in messageReports) {
+                // I'm wondering if we needed to restrict to 50 messageReport of something similar?
+                MessageQueue.Enqueue(messageReport);
             }
         }
 
@@ -898,13 +969,13 @@ namespace CrittercismSDK {
         /// <summary>
         /// Adds message to queue
         /// </summary>
-        internal static void AddMessageToQueue(MessageReport message) {
+        internal static void AddMessageToQueue(MessageReport messageReport) {
             while (MessageQueue.Count >= MaxMessageQueueCount) {
                 // Sacrifice an oldMessage
                 MessageReport oldMessage = MessageQueue.Dequeue();
                 oldMessage.Delete();
             }
-            MessageQueue.Enqueue(message);
+            MessageQueue.Enqueue(messageReport);
             readerEvent.Set();
         }
         #endregion // MessageQueue

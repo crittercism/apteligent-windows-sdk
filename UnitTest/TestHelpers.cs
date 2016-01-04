@@ -11,15 +11,12 @@ using System.Threading.Tasks;
 namespace UnitTest {
     class TestHelpers {
         public const string VALID_APPID = "50807ba33a47481dd5000002";
-
-        [AssemblyInitialize()]
-        public static void AssemblyInit(TestContext context) {
-            Cleanup();
-        }
-
-        [AssemblyCleanup()]
-        public static void AssemblyCleanup() {
-            Crittercism.Shutdown();
+        private static MockNetwork mockNetwork = null;
+        internal static MockNetwork TestNetwork() {
+            if (mockNetwork == null) {
+                mockNetwork = new MockNetwork();
+            };
+            return mockNetwork;
         }
 
         private static void CheckJsonContains(String json,string[] jsonStrings) {
@@ -61,26 +58,25 @@ namespace UnitTest {
 
         public static void Cleanup() {
             // This method is for clean all the possible variables that may be will used by another unit test
-            Crittercism.enableSendMessage = false;
+            TestNetwork().Cleanup();
+            Crittercism.TestNetwork = TestNetwork();
+            // TODO: AppLoadTest3 forcing a few messy cleanup lines here.  Can this better?
+            APM.enabled = true;
+            TransactionReporter.enabled = true;
             Crittercism.SetOptOutStatus(false);
             if (Crittercism.MessageQueue != null) {
                 Crittercism.MessageQueue.Clear();
             }
-            // Some unit tests might pollute the message folder.  clean those up
-            try {
-                IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                foreach (string file in storage.GetFileNames("")) {
-                    storage.DeleteFile(file);
-                }
-            } catch (Exception ex) {
-                Console.WriteLine("Cleanup exception: " + ex);
-            }
+            StorageHelper.Cleanup();
         }
 
         public static void StartApp(bool optOutStatus) {
             // Convenient for the OptOutTest which must pass optOutStatus = true
+            if (Crittercism.TestNetwork == null) {
+                // First time being called by the test suite.
+                Cleanup();
+            }
             Crittercism.SetOptOutStatus(optOutStatus);
-            Crittercism.enableSendMessage = false;
             Crittercism.Init(VALID_APPID);
         }
         public static void StartApp() {
@@ -111,16 +107,7 @@ namespace UnitTest {
         }
 
         public static MessageReport DequeueMessageType(Type type) {
-            MessageReport answer = null;
-            while (Crittercism.MessageQueue.Count > 0) {
-                MessageReport messageReport = Crittercism.MessageQueue.Dequeue();
-                messageReport.Delete();
-                if ((messageReport.GetType() == type)
-                    || (messageReport.GetType().IsSubclassOf(type))) {
-                    answer = messageReport;
-                    break;
-                }
-            }
+            MessageReport answer = TestNetwork().DequeueMessageType(type);
             return answer;
         }
     }
