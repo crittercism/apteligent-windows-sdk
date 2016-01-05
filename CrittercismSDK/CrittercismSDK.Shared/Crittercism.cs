@@ -49,11 +49,11 @@ namespace CrittercismSDK {
 #if NETFX_CORE
         internal static string Version = typeof(Crittercism).GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
-        internal static string Version=Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        internal static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
 
 #if WINDOWS_PHONE
-        internal static string Carrier=Microsoft.Phone.Net.NetworkInformation.
+        internal static string Carrier = Microsoft.Phone.Net.NetworkInformation.
             DeviceNetworkInformation.CellularMobileOperator;
 #else
         internal static string Carrier = "UNKNOWN";
@@ -311,7 +311,7 @@ namespace CrittercismSDK {
             // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/66e662a9-9ece-4863-8cf1-a5e259c7b571/c-windows-store-8-os-version-name-and-net-version-name
             string answer = "";
 #else
-            string answer=Environment.OSVersion.Platform.ToString();
+            string answer = Environment.OSVersion.Platform.ToString();
 #endif
             return answer;
         }
@@ -383,9 +383,9 @@ namespace CrittercismSDK {
                     Action threadStart = () => { queueReader.ReadQueue(); };
                     readerThread = new Task(threadStart);
 #else
-                    ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
-                    readerThread=new Thread(threadStart);
-                    readerThread.Name="Crittercism";
+                    ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
+                    readerThread = new Thread(threadStart);
+                    readerThread.Name = "Crittercism";
 #endif
                     // Testing for unit test purposes
                     if (Crittercism.TestNetwork == null) {
@@ -393,12 +393,12 @@ namespace CrittercismSDK {
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
 #elif WINDOWS_PHONE
-                        Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(SilverlightApplication_UnhandledException);
-                        DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
+                        Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(SilverlightApplication_UnhandledException);
+                        DeviceNetworkInformation.NetworkAvailabilityChanged += DeviceNetworkInformation_NetworkAvailabilityChanged;
                         try {
-                            if (PhoneApplicationService.Current!=null) {
-                                PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(PhoneApplicationService_Activated);
-                                PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(PhoneApplicationService_Deactivated);
+                            if (PhoneApplicationService.Current != null) {
+                                PhoneApplicationService.Current.Activated += new EventHandler<ActivatedEventArgs>(PhoneApplicationService_Activated);
+                                PhoneApplicationService.Current.Deactivated += new EventHandler<DeactivatedEventArgs>(PhoneApplicationService_Deactivated);
                             }
                         } catch (Exception ie) {
                             LogInternalException(ie);
@@ -482,11 +482,31 @@ namespace CrittercismSDK {
         /// Creates the application load report.
         /// </summary>
         private static void CreateAppLoadReport() {
+            // Creates the application load report.
             if (GetOptOutStatus()) {
                 return;
             }
             AppLoad appLoad = new AppLoad();
             AddMessageToQueue(appLoad);
+            CreateAppLoadTransaction();
+        }
+        private static void CreateAppLoadTransaction() {
+            // Automatic "App Load" Transaction
+            long now = DateTime.UtcNow.Ticks;
+#if NETFX_CORE
+            long beginTime =  now;
+#elif WINDOWS_PHONE
+            long beginTime = now;
+#else
+            long beginTime = Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks;
+            if (now < beginTime) {
+                // In case the beginTime from System.Diagnostics.Process is insane
+                // for any reason.
+                beginTime = now;
+            }
+#endif
+            long endTime = now;
+            new Transaction("App Load",beginTime,endTime);
         }
         #endregion AppLoads
 
@@ -744,7 +764,7 @@ namespace CrittercismSDK {
         internal static void OnTransactionTimeOut(EventArgs e) {
             EventHandler handler = TransactionTimeOut;
             if (handler != null) {
-                handler(null, e);
+                handler(null,e);
             }
         }
 
@@ -1030,7 +1050,7 @@ namespace CrittercismSDK {
             }
         }
 
-        static void PhoneApplicationService_Activated(object sender, ActivatedEventArgs e) {
+        static void PhoneApplicationService_Activated(object sender,ActivatedEventArgs e) {
             ////////////////////////////////////////////////////////////////
             // The Windows Phone execution model allows only one app to run in the
             // foreground at a time. When the user navigates away from an app, the
@@ -1052,8 +1072,8 @@ namespace CrittercismSDK {
                     if (PhoneApplicationService.Current.State.ContainsKey("Crittercism.AppID")) {
                         // Take this to mean that Crittercism was Init'd in this app prior to
                         // a Deactivate.  Restart Crittercism asynchronously.
-                        BackgroundWorker backgroundWorker=new BackgroundWorker();
-                        backgroundWorker.DoWork+=new DoWorkEventHandler(BackgroundWorker_DoWork);
+                        BackgroundWorker backgroundWorker = new BackgroundWorker();
+                        backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
                         backgroundWorker.RunWorkerAsync();
                     }
                 }
@@ -1062,13 +1082,11 @@ namespace CrittercismSDK {
             }
         }
 
-        static void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
+        static void BackgroundWorker_DoWork(object sender,DoWorkEventArgs e) {
             Init((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
         }
 
-        static void PhoneApplicationService_Deactivated(object sender, DeactivatedEventArgs e)
-        {
+        static void PhoneApplicationService_Deactivated(object sender,DeactivatedEventArgs e) {
             if (GetOptOutStatus()) {
                 return;
             }
@@ -1087,7 +1105,7 @@ namespace CrittercismSDK {
                 switch (e.NotificationType) {
                     case NetworkNotificationType.InterfaceConnected:
                         if (NetworkInterface.GetIsNetworkAvailable()) {
-                            if (MessageQueue!=null&&MessageQueue.Count>0) {
+                            if (MessageQueue != null && MessageQueue.Count > 0) {
                                 readerEvent.Set();
                             }
                         }
