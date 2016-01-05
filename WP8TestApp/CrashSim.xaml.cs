@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using CrittercismSDK;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
@@ -83,9 +85,65 @@ namespace WP8TestApp {
                 WebExceptionStatus.Success);
         }
 
+        private const string beginTransactionLabel = "Begin Transaction";
+        private const string endTransactionLabel = "End Transaction";
+        private string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private string transactionName;
+        private void transactionClick(object sender,RoutedEventArgs e) {
+            Button button = sender as Button;
+            if (button != null) {
+                Debug.Assert(button == transactionButton);
+                String label = button.Content.ToString();
+                if (label == beginTransactionLabel) {
+                    transactionName = transactionNames[random.Next(0,transactionNames.Length)];
+                    Crittercism.BeginTransaction(transactionName);
+                    button.Content = endTransactionLabel;
+                } else if (label == endTransactionLabel) {
+#if false
+                    // TODO: NavigationService.Navigate(new Uri("/EndTransaction.xaml", UriKind.Relative));
+                    // ... this code gets a make over ...
+                    EndTransactionDialog dialog = new EndTransactionDialog();
+                    dialog.Owner = Window.GetWindow(this);
+                    dialog.ShowDialog();
+                    Nullable<bool> dialogResult = dialog.DialogResult;
+                    string dialogAnswer = "";
+                    if (dialogResult == true) {
+                        dialogAnswer = dialog.Answer;
+                    }
+#else
+                    Nullable<bool> dialogResult = true;
+                    string dialogAnswer = "Fail Transaction";
+#endif
+                    if (dialogResult == true) {
+                        switch (dialogAnswer) {
+                            case "End Transaction":
+                                Crittercism.EndTransaction(transactionName);
+                                break;
+                            case "Fail Transaction":
+                                Crittercism.FailTransaction(transactionName);
+                                break;
+                            case "Cancel Transaction":
+                                Crittercism.CancelTransaction(transactionName);
+                                break;
+                        }
+                        button.Content = beginTransactionLabel;
+                    }
+
+                }
+            }
+        }
+        private void TransactionTimeOutHandler(object sender,EventArgs e) {
+            Debug.WriteLine("The transaction timed out.");
+            // Execute this Action on the main UI thread.
+            transactionButton.Dispatcher.BeginInvoke(new Action(() => {
+                transactionButton.Content = beginTransactionLabel;
+                MessageBox.Show("Transaction Timed Out","WP8TestApp",MessageBoxButton.OK);
+            }));
+        }
+
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
             try {
-                ThrowException(); ;
+                ThrowException();
             } catch (Exception ex) {
                 Crittercism.LogHandledException(ex);
             }
