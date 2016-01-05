@@ -19,6 +19,9 @@ namespace WP8TestApp
         /// <returns>The root frame of the Phone Application.</returns>
         public static PhoneApplicationFrame RootFrame { get; private set; }
 
+        // Crittercism transaction name for this Crittercism demo.
+        public static string transactionName = null;
+
         /// <summary>
         /// Constructor for the Application object.
         /// </summary>

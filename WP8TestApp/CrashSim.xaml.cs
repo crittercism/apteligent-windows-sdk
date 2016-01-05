@@ -18,6 +18,11 @@ namespace WP8TestApp {
 
         public CrashSim() {
             InitializeComponent();
+            if (App.transactionName == null) {
+                transactionButton.Content = beginTransactionLabel;
+            } else {
+                transactionButton.Content = endTransactionLabel;
+            }
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -88,47 +93,17 @@ namespace WP8TestApp {
         private const string beginTransactionLabel = "Begin Transaction";
         private const string endTransactionLabel = "End Transaction";
         private string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private string transactionName;
         private void transactionClick(object sender,RoutedEventArgs e) {
             Button button = sender as Button;
             if (button != null) {
                 Debug.Assert(button == transactionButton);
                 String label = button.Content.ToString();
                 if (label == beginTransactionLabel) {
-                    transactionName = transactionNames[random.Next(0,transactionNames.Length)];
-                    Crittercism.BeginTransaction(transactionName);
+                    App.transactionName = transactionNames[random.Next(0,transactionNames.Length)];
+                    Crittercism.BeginTransaction(App.transactionName);
                     button.Content = endTransactionLabel;
                 } else if (label == endTransactionLabel) {
-#if false
-                    // TODO: NavigationService.Navigate(new Uri("/EndTransaction.xaml", UriKind.Relative));
-                    // ... this code gets a make over ...
-                    EndTransactionDialog dialog = new EndTransactionDialog();
-                    dialog.Owner = Window.GetWindow(this);
-                    dialog.ShowDialog();
-                    Nullable<bool> dialogResult = dialog.DialogResult;
-                    string dialogAnswer = "";
-                    if (dialogResult == true) {
-                        dialogAnswer = dialog.Answer;
-                    }
-#else
-                    Nullable<bool> dialogResult = true;
-                    string dialogAnswer = "Fail Transaction";
-#endif
-                    if (dialogResult == true) {
-                        switch (dialogAnswer) {
-                            case "End Transaction":
-                                Crittercism.EndTransaction(transactionName);
-                                break;
-                            case "Fail Transaction":
-                                Crittercism.FailTransaction(transactionName);
-                                break;
-                            case "Cancel Transaction":
-                                Crittercism.CancelTransaction(transactionName);
-                                break;
-                        }
-                        button.Content = beginTransactionLabel;
-                    }
-
+                    NavigationService.Navigate(new Uri("/EndTransaction.xaml",UriKind.Relative));
                 }
             }
         }
