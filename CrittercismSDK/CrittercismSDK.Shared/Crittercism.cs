@@ -1076,6 +1076,14 @@ namespace CrittercismSDK {
                         backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
                         backgroundWorker.RunWorkerAsync();
                     }
+                    // Above will (generally?) get Crittercism.Init called generating a
+                    // new automatic "App Load" transaction.
+                } else {
+                    // Automatic "App Foreground" Transaction
+                    long now = DateTime.UtcNow.Ticks;
+                    new Transaction("App Foreground",now,now);
+                    // TODO: We're supposed to pause/resume all open Transation timers
+                    // on background and foreground events.
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);
@@ -1092,6 +1100,11 @@ namespace CrittercismSDK {
             }
             try {
                 PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
+                {
+                    // Automatic "App Background" Transaction
+                    long now = DateTime.UtcNow.Ticks;
+                    new Transaction("App Background",now,now);
+                }
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
