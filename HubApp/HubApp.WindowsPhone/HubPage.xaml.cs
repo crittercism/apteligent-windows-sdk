@@ -20,6 +20,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using CrittercismSDK;
 
 // The Universal Hub Application project template is documented at http://go.microsoft.com/fwlink/?LinkID=391955
 
@@ -37,15 +38,13 @@ namespace HubApp
         public HubPage()
         {
             this.InitializeComponent();
-
             // Hub is only supported in Portrait orientation
             DisplayInformation.AutoRotationPreferences = DisplayOrientations.Portrait;
-
             this.NavigationCacheMode = NavigationCacheMode.Required;
-
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
+            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
         }
 
         /// <summary>
@@ -119,6 +118,10 @@ namespace HubApp
             // Navigate to the appropriate destination page, configuring the new page
             // by passing required information as a navigation parameter
             Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
+        }
+
+        private void TransactionTimeOutHandler(object sender,EventArgs e) {
+            Demo.TransactionTimeOutHandler(this,e);
         }
 
         #region NavigationHelper registration

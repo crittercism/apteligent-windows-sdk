@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -13,8 +14,7 @@ using Windows.UI.Xaml.Navigation;
 using CrittercismSDK;
 using HubApp.Data;
 
-namespace HubApp
-{
+namespace HubApp {
     class Demo {
         private static Random random = new Random();
         internal static void ItemClick(Frame frame,SampleDataItem item) {
@@ -129,20 +129,18 @@ namespace HubApp
                 frame.Navigate(typeof(SectionPage),item.Title);
             }
         }
-        private void TransactionTimeOutHandler(object sender,EventArgs e) {
-            Debug.WriteLine("The transaction timed out. " + sender.GetType().FullName);
-            // Execute this Action on the main UI thread.
-#if false
-            // TODO: We haven't figured this out 100% yet.
-            // (Maybe each page that cares need to register its own TransactionTimeOutHandler?)
-            sender.Dispatcher.Invoke(new Action(() => {
+        internal static async void TransactionTimeOutHandler(Page page,EventArgs e) {
+            // Transaction timed out.
+            await page.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
                 transactionItem.Title = beginTransactionLabel;
                 string name = ((CRTransactionEventArgs)e).Name;
-                string message = String.Format("'{0}' Timed Out", name);
-                // If we find ourselves currently on the "End Transaction" SectionPage ...
-                frame.GoBack();
-            }));
-#endif
+                string message = String.Format("'{0}' Timed Out",name);
+                // TODO: It would be nice to show something in UI akin to MessageBox .
+                Debug.WriteLine(message);
+                // TODO: If we find ourselves currently on the "End Transaction" SectionPage ...
+                //Frame frame = page.Frame;
+                //frame.GoBack();
+            });
         }
 
         private static void DeepError(int n) {

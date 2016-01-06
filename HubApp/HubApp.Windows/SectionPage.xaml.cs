@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using CrittercismSDK;
 
 namespace HubApp {
     /// <summary>
@@ -32,6 +33,7 @@ namespace HubApp {
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
+            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
         }
 
         /// <summary>
@@ -78,6 +80,11 @@ namespace HubApp {
             // by passing required information as a navigation parameter
             Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
         }
+
+        private void TransactionTimeOutHandler(object sender,EventArgs e) {
+            Demo.TransactionTimeOutHandler(this,e);
+        }
+
         #region NavigationHelper registration
 
         /// <summary>
