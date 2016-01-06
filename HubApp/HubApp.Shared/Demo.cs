@@ -134,8 +134,11 @@ namespace HubApp
             // Execute this Action on the main UI thread.
 #if false
             // TODO: We haven't figured this out 100% yet.
+            // (Maybe each page that cares need to register its own TransactionTimeOutHandler?)
             sender.Dispatcher.Invoke(new Action(() => {
                 transactionItem.Title = beginTransactionLabel;
+                string name = ((CRTransactionEventArgs)e).Name;
+                string message = String.Format("'{0}' Timed Out", name);
                 // If we find ourselves currently on the "End Transaction" SectionPage ...
                 frame.GoBack();
             }));

@@ -129,7 +129,9 @@ namespace WPFApp {
             // Execute this Action on the main UI thread.
             transactionButton.Dispatcher.Invoke(new Action(() => {
                 transactionButton.Content = beginTransactionLabel;
-                MessageBox.Show(this,"Transaction Timed Out","WPFApp",MessageBoxButton.OK);
+                string name = ((CRTransactionEventArgs)e).Name;
+                string message = String.Format("'{0}' Timed Out", name);
+                MessageBox.Show(this,message,"WPFApp",MessageBoxButton.OK);
             }));
         }
         private void handledExceptionClick(object sender,RoutedEventArgs e) {

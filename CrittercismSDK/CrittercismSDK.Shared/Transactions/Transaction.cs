@@ -93,7 +93,7 @@ namespace CrittercismSDK {
                         isForegrounded = false;
                     }
                     if (newState == TransactionState.TIMEOUT) {
-                        Crittercism.OnTransactionTimeOut(EventArgs.Empty);
+                        Crittercism.OnTransactionTimeOut(new CRTransactionEventArgs(name));
                     }
                     break;
             }

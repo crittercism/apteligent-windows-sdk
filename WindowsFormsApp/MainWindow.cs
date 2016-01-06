@@ -197,7 +197,9 @@ namespace WindowsFormsApp {
             // Execute this Action on the main UI thread.
             this.Invoke((MethodInvoker)delegate {
                 transactionButton.Text = beginTransactionLabel;
-                MessageBox.Show(this,"Transaction Timed Out","WindowsFormsApp",MessageBoxButtons.OK);
+                string name = ((CRTransactionEventArgs)e).Name;
+                string message = String.Format("'{0}' Timed Out",name);
+                MessageBox.Show(this,message,"WindowsFormsApp",MessageBoxButtons.OK);
             });
         }
     }

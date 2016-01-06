@@ -39,6 +39,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Metadata\MetadataReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Platform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StorageHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Transactions\CRTransactionEventArgs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\Transaction.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionIndex.cs" />

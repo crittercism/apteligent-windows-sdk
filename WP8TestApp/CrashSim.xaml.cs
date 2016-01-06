@@ -112,7 +112,9 @@ namespace WP8TestApp {
             // Execute this Action on the main UI thread.
             transactionButton.Dispatcher.BeginInvoke(new Action(() => {
                 transactionButton.Content = beginTransactionLabel;
-                MessageBox.Show("Transaction Timed Out","WP8TestApp",MessageBoxButton.OK);
+                string name = ((CRTransactionEventArgs)e).Name;
+                string message = String.Format("'{0}' Timed Out",name);
+                MessageBox.Show(message,"WP8TestApp",MessageBoxButton.OK);
             }));
         }
 
