@@ -82,6 +82,19 @@ namespace CrittercismSDK {
         }
         #endregion
 
+        #region Background / Foreground
+        internal static void Background() {
+            lock (lockObject) {
+                RemoveTimer();
+            }
+        }
+        internal static void Foreground() {
+            lock (lockObject) {
+                SendAPMReport();
+            }
+        }
+        #endregion
+
         #region Reporting
         internal static void Enqueue(Endpoint endpoint) {
             Debug.WriteLine("APM Enqueue");

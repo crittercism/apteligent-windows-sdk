@@ -1082,8 +1082,8 @@ namespace CrittercismSDK {
                     // Automatic "App Foreground" Transaction
                     long now = DateTime.UtcNow.Ticks;
                     new Transaction("App Foreground",now,now);
-                    // TODO: We're supposed to pause/resume all open Transation timers
-                    // on background and foreground events.
+                    APM.Foreground();
+                    TransactionReporter.Foreground();
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);
@@ -1104,6 +1104,8 @@ namespace CrittercismSDK {
                     // Automatic "App Background" Transaction
                     long now = DateTime.UtcNow.Ticks;
                     new Transaction("App Background",now,now);
+                    APM.Background();
+                    TransactionReporter.Background();
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);

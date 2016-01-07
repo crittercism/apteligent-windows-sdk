@@ -45,29 +45,6 @@ namespace CrittercismSDK {
             // Transaction default timeout in milliseconds
             return defaultTimeout;
         }
-
-        internal static bool IsForegrounded() {
-            // TODO: NIY
-            return true;
-        }
-        internal static void Background() {
-            lock (lockObject) {
-                long backgroundTime = DateTime.UtcNow.Ticks;
-                foreach (Transaction transaction in transactionsDictionary.Values) {
-                    transaction.Background(backgroundTime);
-                };
-                RemoveTimer();
-            }
-        }
-        internal static void Resume() {
-            lock (lockObject) {
-                long foregroundTime = DateTime.UtcNow.Ticks;
-                foreach (Transaction transaction in transactionsDictionary.Values) {
-                    transaction.Foreground(foregroundTime);
-                };
-                // TODO: Timer.  Entire Resume method needs more work.
-            }
-        }
         #endregion
 
         #region Multithreading Remarks
@@ -213,6 +190,27 @@ namespace CrittercismSDK {
                 timer = null;
             }
 #endif // NETFX_CORE
+        }
+        #endregion
+
+        #region Background / Foreground
+        internal static void Background() {
+            lock (lockObject) {
+                long backgroundTime = DateTime.UtcNow.Ticks;
+                foreach (Transaction transaction in transactionsDictionary.Values) {
+                    transaction.Background(backgroundTime);
+                };
+                RemoveTimer();
+            }
+        }
+        internal static void Foreground() {
+            lock (lockObject) {
+                SendTransactionReport();
+                long foregroundTime = DateTime.UtcNow.Ticks;
+                foreach (Transaction transaction in transactionsDictionary.Values) {
+                    transaction.Foreground(foregroundTime);
+                };
+            }
         }
         #endregion
 

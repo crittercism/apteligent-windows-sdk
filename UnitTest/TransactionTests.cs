@@ -406,7 +406,7 @@ namespace UnitTest {
             string firstEndTime = example1.EndTimeString();
             // Save followed by load.
             TransactionReporter.Background();
-            TransactionReporter.Resume();
+            TransactionReporter.Foreground();
             example1 = Transaction.TransactionForName(firstName);
             Assert.IsNotNull(example1,
                            "Expecting to find example1 again");
