@@ -166,11 +166,11 @@ namespace WP8TestApp {
 
         private void backButtonClicked(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new Uri("/Crashes.xaml", UriKind.Relative));
+            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
         }
 
         private void nextButtonClicked(object sender, RoutedEventArgs e) {
-            NavigationService.Navigate(new Uri("/Loads.xaml", UriKind.Relative));
+            NavigationService.Navigate(new Uri("/End.xaml", UriKind.Relative));
         }
     }
 }

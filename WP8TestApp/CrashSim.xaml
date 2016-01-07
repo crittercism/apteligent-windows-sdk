@@ -65,7 +65,7 @@
         </Grid>
         <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="9,9,0,0" 
                    FontSize="16" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Height="112" Width="436"
-                   Text="Pressing the Crash button above forces a crash in this app's code. Crittercism saves a detailed error report and sends an email to the application's owner, notifying him that a problem has occurred. The email includes a stack trace and the device on which the problem occurred."/>
+                   Text="Pressing the Crash button above forces a crash in this app's code. Crittercism saves a detailed crash report and sends an email to the application's owner, indicating that a crash has occurred. The email includes a stack trace and the device on which the crash occurred."/>
         <Button Grid.Row="3" Grid.Column="0"
                 Content="Back" HorizontalAlignment="Left" VerticalAlignment="Top" Height="72" Width="120" Click="backButtonClicked"/>
         <Button Grid.Row="3" Grid.Column="1"
