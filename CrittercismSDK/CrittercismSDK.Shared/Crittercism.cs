@@ -16,6 +16,7 @@ using System.Windows;
 #if NETFX_CORE
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.Networking.Connectivity;
@@ -390,6 +391,7 @@ namespace CrittercismSDK {
                     // Testing for unit test purposes
                     if (Crittercism.TestNetwork == null) {
 #if NETFX_CORE
+                        Window.Current.VisibilityChanged += Window_VisibilityChanged;
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
 #elif WINDOWS_PHONE
@@ -1004,6 +1006,20 @@ namespace CrittercismSDK {
 
 #if NETFX_CORE
 #pragma warning disable 1998
+        private static void Window_VisibilityChanged(object sender,VisibilityChangedEventArgs e) {
+            if (GetOptOutStatus()) {
+                return;
+            }
+            try {
+                if (e.Visible) {
+                    Foreground();
+                } else {
+                    Background();
+                }
+            } catch (Exception ie) {
+                LogInternalException(ie);
+            }
+        }
         private static async void Application_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
                 return;
@@ -1079,11 +1095,7 @@ namespace CrittercismSDK {
                     // Above will (generally?) get Crittercism.Init called generating a
                     // new automatic "App Load" transaction.
                 } else {
-                    // Automatic "App Foreground" Transaction
-                    long now = DateTime.UtcNow.Ticks;
-                    new Transaction("App Foreground",now,now);
-                    APM.Foreground();
-                    TransactionReporter.Foreground();
+                    Foreground();
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);
@@ -1100,13 +1112,7 @@ namespace CrittercismSDK {
             }
             try {
                 PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
-                {
-                    // Automatic "App Background" Transaction
-                    long now = DateTime.UtcNow.Ticks;
-                    new Transaction("App Background",now,now);
-                    APM.Background();
-                    TransactionReporter.Background();
-                }
+                Background();
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
@@ -1163,6 +1169,24 @@ namespace CrittercismSDK {
             } catch (Exception e) {
                 LogInternalException(e);
             }
+        }
+#endif
+
+#if NETFX_CORE || WINDOWS_PHONE
+        private static void Foreground() {
+            // Automatic "App Foreground" Transaction
+            long now = DateTime.UtcNow.Ticks;
+            new Transaction("App Foreground",now,now);
+            APM.Foreground();
+            TransactionReporter.Foreground();
+        }
+
+        private static void Background() {
+            // Automatic "App Background" Transaction
+            long now = DateTime.UtcNow.Ticks;
+            new Transaction("App Background",now,now);
+            APM.Background();
+            TransactionReporter.Background();
         }
 #endif
 
