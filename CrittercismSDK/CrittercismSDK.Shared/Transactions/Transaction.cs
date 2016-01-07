@@ -260,9 +260,9 @@ namespace CrittercismSDK {
                 value = DefaultValue();
             }
             this.value = value;
+            TransactionReporter.Save(this);
         }
         internal Transaction(string name) : this(name,NULL_VALUE) {
-            TransactionReporter.Save(this);
         }
         internal Transaction(string name,long beginTime,long endTime) : this(name,0) {
             ////////////////////////////////////////////////////////////////
