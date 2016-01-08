@@ -68,7 +68,7 @@ namespace CrittercismSDK {
         private void SetState(TransactionState newState,long nowTime) {
             // Establishes newState for transaction at nowTime .
             state = newState;
-            isForegrounded = true;
+            isForegrounded = TransactionReporter.isForegrounded;
             switch (state) {
                 case TransactionState.CANCELLED:
                     SetEndTime(nowTime);

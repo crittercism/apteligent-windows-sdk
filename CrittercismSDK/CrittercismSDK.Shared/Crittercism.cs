@@ -420,6 +420,9 @@ namespace CrittercismSDK {
                     initialized = true;
                 };
                 readerThread.Start();
+                // It seems sensible to put CreateAppLoadReport here after all the
+                // necessary Crittercism infrastructure to do so (including MessageQueue,
+                // TransactionReporter, readerThread, etc.) have been initialized above.
                 CreateAppLoadReport();
             } catch (Exception) {
                 initialized = false;

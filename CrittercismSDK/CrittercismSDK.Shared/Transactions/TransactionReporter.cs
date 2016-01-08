@@ -30,6 +30,7 @@ namespace CrittercismSDK {
         private static Object lockObject = new object();
         private static SynchronizedQueue<Transaction> TransactionsQueue { get; set; }
         internal static bool enabled = true;
+        internal static volatile bool isForegrounded = true;
         // Batch additional network requests for 20 seconds before sending TransactionReport .
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
         private static int defaultTimeout = ONE_HOUR; // milliseconds
@@ -73,6 +74,8 @@ namespace CrittercismSDK {
         #region Life Cycle
         internal static void Init() {
             lock (lockObject) {
+                // TODO: Rigorously we should check if app's window is visible just now
+                isForegrounded = true;
                 // Crittercism.Init calling TransactionReporter.Init should effectively make
                 // lock lockObject here pointless, but no real harm doing so.
                 SettingsChange();
@@ -196,6 +199,7 @@ namespace CrittercismSDK {
         #region Background / Foreground
         internal static void Background() {
             lock (lockObject) {
+                isForegrounded = false;
                 long backgroundTime = DateTime.UtcNow.Ticks;
                 foreach (Transaction transaction in transactionsDictionary.Values) {
                     transaction.Background(backgroundTime);
@@ -205,6 +209,7 @@ namespace CrittercismSDK {
         }
         internal static void Foreground() {
             lock (lockObject) {
+                isForegrounded = true;
                 SendTransactionReport();
                 long foregroundTime = DateTime.UtcNow.Ticks;
                 foreach (Transaction transaction in transactionsDictionary.Values) {
