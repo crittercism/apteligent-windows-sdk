@@ -22,25 +22,29 @@ namespace WP8TestApp {
         {
             Crittercism.EndTransaction(App.transactionName);
             App.transactionName = null;
-            NavigationService.Navigate(new Uri("/CrashSim.xaml", UriKind.Relative));
+            GoBack();
         }
 
         private void failTransactionClick(object sender,RoutedEventArgs e) {
             Crittercism.FailTransaction(App.transactionName);
             App.transactionName = null;
-            NavigationService.Navigate(new Uri("/CrashSim.xaml", UriKind.Relative));
+            GoBack();
         }
 
         private void cancelTransactionClick(object sender,RoutedEventArgs e)
         {
             Crittercism.CancelTransaction(App.transactionName);
             App.transactionName = null;
-            NavigationService.Navigate(new Uri("/CrashSim.xaml", UriKind.Relative));
+            GoBack();
         }
 
         private void backButtonClicked(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new Uri("/CrashSim.xaml", UriKind.Relative));
+            GoBack();
+        }
+
+        private void GoBack() {
+            NavigationService.Navigate(new Uri("/CrashSim.xaml",UriKind.Relative));
         }
     }
 }
