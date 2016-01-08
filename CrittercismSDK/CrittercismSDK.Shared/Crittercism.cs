@@ -1177,6 +1177,7 @@ namespace CrittercismSDK {
             // Automatic "App Foreground" Transaction
             long now = DateTime.UtcNow.Ticks;
             new Transaction("App Foreground",now,now);
+            Breadcrumbs.LeaveEventBreadcrumb("foregrounded");
             APM.Foreground();
             TransactionReporter.Foreground();
         }
@@ -1185,6 +1186,7 @@ namespace CrittercismSDK {
             // Automatic "App Background" Transaction
             long now = DateTime.UtcNow.Ticks;
             new Transaction("App Background",now,now);
+            Breadcrumbs.LeaveEventBreadcrumb("backgrounded");
             APM.Background();
             TransactionReporter.Background();
         }
