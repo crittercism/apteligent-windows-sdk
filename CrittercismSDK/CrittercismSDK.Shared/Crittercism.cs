@@ -40,6 +40,9 @@ namespace CrittercismSDK {
         #endregion Constants
 
         #region Properties
+        // Approximation to process start time if we can't do anything better (in some .NET's)
+        internal static long StartTime = DateTime.UtcNow.Ticks;
+
         // For UnitTest
         internal static IMockNetwork TestNetwork = null;
 
@@ -498,19 +501,18 @@ namespace CrittercismSDK {
         private static void CreateAppLoadTransaction() {
             // Automatic "App Load" Transaction
             long now = DateTime.UtcNow.Ticks;
-#if NETFX_CORE
-            long beginTime =  now;
-#elif WINDOWS_PHONE
-            long beginTime = now;
+#if NETFX_CORE || WINDOWS_PHONE
+            long beginTime = StartTime;
 #else
             long beginTime = Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks;
             if (now < beginTime) {
                 // In case the beginTime from System.Diagnostics.Process is insane
                 // for any reason.
-                beginTime = now;
-            }
+                beginTime = StartTime;
+            };
 #endif
             long endTime = now;
+            Debug.WriteLine("App Load time == " + (1.0E-7) * (endTime - beginTime) + " seconds");
             new Transaction("App Load",beginTime,endTime);
         }
         #endregion AppLoads
