@@ -79,7 +79,9 @@ namespace HubApp
         {
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
             var sampleDataGroups = await SampleDataSource.GetGroupsAsync();
-            this.DefaultViewModel["Groups"] = sampleDataGroups;
+            List<SampleDataGroup> groupsShown = new List<SampleDataGroup>();
+            groupsShown.Add(sampleDataGroups.First());
+            this.DefaultViewModel["Groups"] = groupsShown;
         }
 
         /// <summary>
