@@ -133,13 +133,23 @@ namespace HubApp {
             // Transaction timed out.
             await page.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
                 transactionItem.Title = beginTransactionLabel;
-                string name = ((CRTransactionEventArgs)e).Name;
-                string message = String.Format("'{0}' Timed Out",name);
-                // TODO: It would be nice to show something in UI akin to MessageBox .
-                Debug.WriteLine(message);
-                // TODO: If we find ourselves currently on the "End Transaction" SectionPage ...
-                //Frame frame = page.Frame;
-                //frame.GoBack();
+                if (page.Frame.Content == page) {
+                    // This page is being shown.
+                    string name = ((CRTransactionEventArgs)e).Name;
+                    string message = String.Format("'{0}' Timed Out",name);
+                    // TODO: It would be nice to show something in UI akin to MessageBox .
+                    Debug.WriteLine(message);
+                    if (page is SectionPage) {
+                        SectionPage sectionPage = (SectionPage)page;
+                        string title = sectionPage.Title();
+                        Debug.WriteLine("PageTitle == " + title);
+                        if (title == "End Transaction") {
+                            // If we find ourselves currently on the "End Transaction" SectionPage .
+                            Frame frame = page.Frame;
+                            frame.GoBack();
+                        }
+                    }
+                }
             });
         }
 

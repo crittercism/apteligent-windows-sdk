@@ -3,6 +3,7 @@ using HubApp.Data;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -39,6 +40,11 @@ namespace HubApp
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
             Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
+        }
+
+        internal string Title() {
+            // This method must be called on UI main thread.
+            return pageTitle.Text;
         }
 
         /// <summary>

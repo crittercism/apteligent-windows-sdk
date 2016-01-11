@@ -36,6 +36,11 @@ namespace HubApp {
             Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
         }
 
+        internal string Title() {
+            // This method must be called on UI main thread.
+            return pageTitle.Text;
+        }
+
         /// <summary>
         /// Gets the NavigationHelper used to aid in navigation and process lifetime management.
         /// </summary>
