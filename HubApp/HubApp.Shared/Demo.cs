@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Text;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -131,14 +132,19 @@ namespace HubApp {
         }
         internal static async void TransactionTimeOutHandler(Page page,EventArgs e) {
             // Transaction timed out.
-            await page.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,() => {
+            await page.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,async () => {
                 transactionItem.Title = beginTransactionLabel;
                 if (page.Frame.Content == page) {
                     // This page is being shown.
-                    string name = ((CRTransactionEventArgs)e).Name;
-                    string message = String.Format("'{0}' Timed Out",name);
-                    // TODO: It would be nice to show something in UI akin to MessageBox .
-                    Debug.WriteLine(message);
+                    {
+                        string name = ((CRTransactionEventArgs)e).Name;
+                        string message = String.Format("Transaction '{0}'\r\nTimed Out",name);
+                        Debug.WriteLine(message);
+                        var messageDialog = new MessageDialog(message);
+                        messageDialog.Commands.Add(new UICommand("Close"));
+                        messageDialog.DefaultCommandIndex = 0;
+                        await messageDialog.ShowAsync();
+                    };
                     if (page is SectionPage) {
                         SectionPage sectionPage = (SectionPage)page;
                         string title = sectionPage.Title();
