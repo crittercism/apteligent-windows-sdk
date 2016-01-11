@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Windows.UI.Core;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
@@ -130,21 +131,14 @@ namespace HubApp {
                 frame.Navigate(typeof(SectionPage),item.Title);
             }
         }
+
         internal static async void TransactionTimeOutHandler(Page page,EventArgs e) {
             // Transaction timed out.
             await page.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,async () => {
                 transactionItem.Title = beginTransactionLabel;
                 if (page.Frame.Content == page) {
                     // This page is being shown.
-                    {
-                        string name = ((CRTransactionEventArgs)e).Name;
-                        string message = String.Format("Transaction '{0}'\r\nTimed Out",name);
-                        Debug.WriteLine(message);
-                        var messageDialog = new MessageDialog(message);
-                        messageDialog.Commands.Add(new UICommand("Close"));
-                        messageDialog.DefaultCommandIndex = 0;
-                        await messageDialog.ShowAsync();
-                    };
+                    await TransactionTimeOutShowMessageDialog(e);
                     if (page is SectionPage) {
                         SectionPage sectionPage = (SectionPage)page;
                         string title = sectionPage.Title();
@@ -157,6 +151,17 @@ namespace HubApp {
                     }
                 }
             });
+        }
+
+        private static async Task TransactionTimeOutShowMessageDialog(EventArgs e) {
+            // Show MessageDialog routine for caller TransactionTimeOutHandler
+            string name = ((CRTransactionEventArgs)e).Name;
+            string message = String.Format("Transaction '{0}'\r\nTimed Out",name);
+            Debug.WriteLine(message);
+            var messageDialog = new MessageDialog(message);
+            messageDialog.Commands.Add(new UICommand("Close"));
+            messageDialog.DefaultCommandIndex = 0;
+            await messageDialog.ShowAsync();
         }
 
         private static void DeepError(int n) {
