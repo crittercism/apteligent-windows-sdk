@@ -46,7 +46,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionReport.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionReporter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Transactions\TransactionState.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Utils\DateUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\TimeUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\DebugUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\JsonUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\StringUtils.cs" />

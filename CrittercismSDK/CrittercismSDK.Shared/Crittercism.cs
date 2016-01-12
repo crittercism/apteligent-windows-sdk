@@ -932,7 +932,7 @@ namespace CrittercismSDK {
                     if (APM.IsFiltered(uriString)) {
                         Debug.WriteLine("APM FILTERED: " + uriString);
                     } else {
-                        string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+                        string timestamp = TimeUtils.ISO8601DateString(DateTime.UtcNow);
                         Endpoint endpoint = new Endpoint(method,
                             RemoveQueryString(uriString),
                             timestamp,

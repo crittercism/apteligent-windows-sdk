@@ -321,7 +321,7 @@ namespace CrittercismSDK {
             // Recent Breadcrumb's filtered by time . (TransactionReport "systemBreadcrumbs".)
             List<Breadcrumb> answer = new List<Breadcrumb>();
             foreach (Breadcrumb breadcrumb in current_session) {
-                long breadcrumbTime = DateUtils.StringToTicks(breadcrumb.GetTimestamp());
+                long breadcrumbTime = TimeUtils.StringToTicks(breadcrumb.GetTimestamp());
                 bool afterBeginTime = (beginTime <= breadcrumbTime);
                 bool beforeEndTime = (breadcrumbTime <= endTime);
                 if (afterBeginTime && beforeEndTime) {

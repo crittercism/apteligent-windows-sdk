@@ -20,10 +20,7 @@ using Microsoft.Phone.Net.NetworkInformation;
 namespace CrittercismSDK {
     internal class TransactionReporter {
         #region Constants
-        internal const int MSEC_PER_SEC = 1000;
         internal const int MAX_TRANSACTION_COUNT = 50;
-        private const int ONE_MINUTE = 60 * MSEC_PER_SEC; // milliseconds
-        private const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
         #endregion
 
         #region Properties
@@ -32,8 +29,11 @@ namespace CrittercismSDK {
         internal static bool enabled = true;
         internal static volatile bool isForegrounded = true;
         // Batch additional network requests for 20 seconds before sending TransactionReport .
+        private const int MSEC_PER_SEC = 1000;
+        private const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
         private static int defaultTimeout = ONE_HOUR; // milliseconds
+        // private const int ONE_MINUTE = 60 * MSEC_PER_SEC; // milliseconds
         // private static int defaultTimeout = ONE_MINUTE; // milliseconds
         private static JObject thresholds = null;
 
@@ -165,7 +165,7 @@ namespace CrittercismSDK {
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
         private static ThreadPoolTimer timer = null;
-        private static void OnTimerElapsed(ThreadPoolTimer timer) {
+        private static void OnTimerElapsed(ThreadPoolTimer sender) {
             lock (lockObject) {
                 SendTransactionReport();
                 timer = null;
@@ -314,6 +314,8 @@ namespace CrittercismSDK {
         //                  "Sing Critter Song":{"timeout":90000,"slowness":3600000,"value":1500},
         //                  "Write Critter Poem":{"timeout":60000,"slowness":3600000,"value":2000}}}
         // See example in AppLoad.cs for context.
+        // * OMG.  Platform is sending "defaultTimeout" in milliseconds
+        // and "interval" in seconds.
         ////////////////////////////////////////////////////////////////
         internal static void SettingsChange() {
             try {
@@ -322,7 +324,9 @@ namespace CrittercismSDK {
                     if (config["enabled"] != null) {
                         bool enabled = (bool)((JValue)(config["enabled"])).Value;
                         if (enabled) {
-                            int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
+                            // NOTE: Platform sends "interval" in seconds, but method Enable wants
+                            // that time converted to milliseconds.
+                            int interval = (int)(Convert.ToDouble(((JValue)(config["interval"])).Value) * MSEC_PER_SEC);
                             int defaultTimeout = Convert.ToInt32(((JValue)(config["defaultTimeout"])).Value);
                             JObject thresholds = config["transactions"] as JObject;
                             Enable(interval,defaultTimeout,thresholds);
@@ -345,6 +349,9 @@ namespace CrittercismSDK {
             ////////////////////////////////////////////////////////////////
             lock (lockObject) {
                 enabled = true;
+                if (interval<1000) {
+                    Debug.WriteLine("THIS SHOULDN'T HAPPEN");
+                }
                 TransactionReporter.interval = interval;
                 TransactionReporter.defaultTimeout = defaultTimeout;
                 TransactionReporter.thresholds = thresholds;

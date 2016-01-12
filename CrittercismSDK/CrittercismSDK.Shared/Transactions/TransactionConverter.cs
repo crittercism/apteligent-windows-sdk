@@ -40,7 +40,7 @@ namespace CrittercismSDK {
                 string name = (string)((JValue)(a[(int)TransactionIndex.Name])).Value;
                 TransactionState state = (TransactionState)(long)((JValue)(a[(int)TransactionIndex.State])).Value;
                 double timeoutSeconds = Convert.ToDouble(((JValue)(a[(int)TransactionIndex.Timeout])).Value); // seconds (!!!)
-                int timeout = (int)Convert.ToDouble(timeoutSeconds * Transaction.MSEC_PER_SEC); // milliseconds
+                int timeout = (int)Convert.ToDouble(timeoutSeconds * TimeUtils.MSEC_PER_SEC); // milliseconds
                 int value = Convert.ToInt32(((JValue)(a[(int)TransactionIndex.Value])).Value);
 #if DEBUG
                 {
@@ -55,7 +55,7 @@ namespace CrittercismSDK {
                 long beginTime = JsonUtils.JsonDateToTicks(a[(int)TransactionIndex.BeginTime]); // ticks
                 long endTime = JsonUtils.JsonDateToTicks(a[(int)TransactionIndex.EndTime]); // ticks
                 double eyeTimeSeconds = Convert.ToDouble(((JValue)(a[(int)TransactionIndex.EyeTime])).Value); // seconds (!!!)
-                long eyeTime = (long)(eyeTimeSeconds * Transaction.TICKS_PER_SEC); // ticks
+                long eyeTime = (long)(eyeTimeSeconds * TimeUtils.TICKS_PER_SEC); // ticks
                 // Call Transaction constructor.
                 transaction = new Transaction(
                     name,

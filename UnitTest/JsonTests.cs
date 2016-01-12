@@ -201,7 +201,7 @@ namespace UnitTest {
         }
         [TestMethod]
         public void EndpointJsonTest() {
-            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            string timestamp = TimeUtils.ISO8601DateString(DateTime.UtcNow);
             Endpoint endpoint1 = new Endpoint(
                 "POST",
                 "http://www.mrscritter.com?doYouLoveCrittercism=YES",
@@ -230,7 +230,7 @@ namespace UnitTest {
         }
         [TestMethod]
         public void TransactionJsonTest() {
-            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            string timestamp = TimeUtils.ISO8601DateString(DateTime.UtcNow);
             Transaction transaction1 = new Transaction(
                 "Buy Critter Feed",
                 TransactionState.ENDED,
@@ -259,17 +259,17 @@ namespace UnitTest {
         public void NetworkBreadcrumbJsonTest() {
             // Network,         // 2 - network breadcrumb    ; [verb,url,...,statusCode,errorCode]
             DateTime now = DateTime.UtcNow;
-            // Yes, DateUtils.ISO8601DateString for Endpoint and DateUtils.GMTDateString for Breadcrumb is odd.
+            // Yes, TimeUtils.ISO8601DateString for Endpoint and TimeUtils.GMTDateString for Breadcrumb is odd.
             Endpoint endpoint1 = new Endpoint(
                 "POST",
                 "http://www.mrscritter.com",
-                DateUtils.ISO8601DateString(now),
+                TimeUtils.ISO8601DateString(now),
                 433,
                 3213,
                 2478,
                 HttpStatusCode.OK,
                 WebExceptionStatus.Success);
-            Breadcrumb breadcrumb1 = new Breadcrumb(DateUtils.GMTDateString(now),BreadcrumbType.Network,endpoint1);
+            Breadcrumb breadcrumb1 = new Breadcrumb(TimeUtils.GMTDateString(now),BreadcrumbType.Network,endpoint1);
             // Testing BreadcrumbConverter WriteJson
             string json1 = JsonConvert.SerializeObject(breadcrumb1);
             // NOTE: VS editor syntax colors embedded URL, but the C# syntax is correct.
@@ -290,11 +290,11 @@ namespace UnitTest {
         public void UserBreadcrumbJsonTest() {
             // Text,            // 1 - user breadcrumb       ; {text:,level:}
             DateTime now = DateTime.UtcNow;
-            // Yes, DateUtils.ISO8601DateString for Endpoint and DateUtils.GMTDateString for Breadcrumb is odd.
+            // Yes, TimeUtils.ISO8601DateString for Endpoint and TimeUtils.GMTDateString for Breadcrumb is odd.
             Dictionary<string,Object> data1 = new Dictionary<string,Object>();
             data1["text"] = "Critter Bowl is Empty!";
             data1["level"] = (int)BreadcrumbTextType.Urgent;
-            Breadcrumb breadcrumb1 = new Breadcrumb(DateUtils.GMTDateString(now),BreadcrumbType.Text,data1);
+            Breadcrumb breadcrumb1 = new Breadcrumb(TimeUtils.GMTDateString(now),BreadcrumbType.Text,data1);
             // Testing BreadcrumbConverter WriteJson
             string json1 = JsonConvert.SerializeObject(breadcrumb1);
             // We don't assume Dictionary key-value pairs appear in any particular order.

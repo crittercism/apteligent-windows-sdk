@@ -78,7 +78,7 @@ namespace CrittercismSDK {
                 // skipping "name" for device name as it requires manifest approval
                 { "locale", CultureInfo.CurrentCulture.Name},
                 // all counters below in bytes
-                { "reported_at", DateUtils.GMTDateString(DateTime.UtcNow) }
+                { "reported_at", TimeUtils.GMTDateString(DateTime.UtcNow) }
             };
         }
         internal static Dictionary<string,object> ComputeAppState() {

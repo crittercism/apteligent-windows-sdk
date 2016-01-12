@@ -21,9 +21,6 @@ namespace CrittercismSDK {
         // debits, so we use Int32.MinValue == -2^31 == -2147483648 == -$21,474,836.48
         // here.
         internal const int NULL_VALUE = Int32.MinValue;
-        private const int TICKS_PER_MSEC = 10000;
-        internal const int MSEC_PER_SEC = 1000;
-        internal const int TICKS_PER_SEC = MSEC_PER_SEC * TICKS_PER_MSEC;
         #endregion
 
         #region Properties
@@ -167,7 +164,7 @@ namespace CrittercismSDK {
         private void SetBeginTime(long newBeginTime) {
             // Set begin time of transaction in ticks.
             DateTime begin_date = (new DateTime(newBeginTime,DateTimeKind.Utc));
-            beginTimeString = DateUtils.ISO8601DateString(begin_date);
+            beginTimeString = TimeUtils.ISO8601DateString(begin_date);
             beginTime = newBeginTime;
         }
         internal string BeginTimeString() {
@@ -188,7 +185,7 @@ namespace CrittercismSDK {
         private void SetEndTime(long newEndTime) {
             // Set end time of transaction in ticks.
             DateTime end_date = (new DateTime(newEndTime,DateTimeKind.Utc));
-            endTimeString = DateUtils.ISO8601DateString(end_date);
+            endTimeString = TimeUtils.ISO8601DateString(end_date);
             endTime = newEndTime;
         }
         internal string EndTimeString() {
@@ -221,7 +218,7 @@ namespace CrittercismSDK {
             // "Foreground time" == the latest Crittercism Init
             // time or foreground time, whichever is later, in ticks.
             DateTime foreground_date = (new DateTime(newForegroundTime,DateTimeKind.Utc));
-            foregroundTimeString = DateUtils.ISO8601DateString(foreground_date);
+            foregroundTimeString = TimeUtils.ISO8601DateString(foreground_date);
             foregroundTime = newForegroundTime;
         }
         internal string ForegroundTimeString() {
@@ -380,7 +377,7 @@ namespace CrittercismSDK {
             List<JToken> list = new List<JToken>();
             list.Add(name);
             list.Add((int)state);
-            list.Add(timeout / (double)MSEC_PER_SEC); // seconds
+            list.Add(timeout / (double)TimeUtils.MSEC_PER_SEC); // seconds
             if (value == NULL_VALUE) {
                 list.Add(null);
             } else {
@@ -389,7 +386,7 @@ namespace CrittercismSDK {
             list.Add(new JObject());
             list.Add(beginTimeString);
             list.Add(endTimeString);
-            list.Add(eyeTime / (double)TICKS_PER_SEC); // seconds
+            list.Add(eyeTime / (double)TimeUtils.TICKS_PER_SEC); // seconds
             JArray answer = new JArray(list);
             return answer;
         }
@@ -455,7 +452,7 @@ namespace CrittercismSDK {
                 } else {
                     // Create new timer based on "timeout" property and when we began
                     // and now.
-                    int milliseconds = timeout - (int)(eyeTime / TICKS_PER_MSEC);
+                    int milliseconds = timeout - (int)(eyeTime / TimeUtils.TICKS_PER_MSEC);
                     if (milliseconds <= 0) {
                         // If remaining time is nonpositive, just timeout here
                         Transition(TransactionState.TIMEOUT);
