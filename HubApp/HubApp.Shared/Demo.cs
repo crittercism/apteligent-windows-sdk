@@ -138,7 +138,7 @@ namespace HubApp {
                 transactionItem.Title = beginTransactionLabel;
                 if (page.Frame.Content == page) {
                     // This page is being shown.
-                    await TransactionTimeOutShowMessageDialog(e);
+                    await TransactionTimeOutShowMessage(e);
                     if (page is SectionPage) {
                         SectionPage sectionPage = (SectionPage)page;
                         string title = sectionPage.Title();
@@ -153,7 +153,7 @@ namespace HubApp {
             });
         }
 
-        private static async Task TransactionTimeOutShowMessageDialog(EventArgs e) {
+        private static async Task TransactionTimeOutShowMessage(EventArgs e) {
             // Show MessageDialog routine for caller TransactionTimeOutHandler
             string name = ((CRTransactionEventArgs)e).Name;
             string message = String.Format("Transaction '{0}'\r\nTimed Out",name);

@@ -18,11 +18,7 @@ namespace WP8TestApp {
 
         public CrashSim() {
             InitializeComponent();
-            if (App.transactionName == null) {
-                transactionButton.Content = beginTransactionLabel;
-            } else {
-                transactionButton.Content = endTransactionLabel;
-            }
+            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -108,14 +104,7 @@ namespace WP8TestApp {
             }
         }
         private void TransactionTimeOutHandler(object sender,EventArgs e) {
-            Debug.WriteLine("The transaction timed out.");
-            // Execute this Action on the main UI thread.
-            transactionButton.Dispatcher.BeginInvoke(new Action(() => {
-                transactionButton.Content = beginTransactionLabel;
-                string name = ((CRTransactionEventArgs)e).Name;
-                string message = String.Format("'{0}' Timed Out",name);
-                MessageBox.Show(message,"WP8TestApp",MessageBoxButton.OK);
-            }));
+            Demo.TransactionTimeOutHandler(this,e);
         }
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
@@ -162,11 +151,6 @@ namespace WP8TestApp {
         {
             Thread thread = new Thread(new ThreadStart(Worker.Work));
             thread.Start();
-        }
-
-        private void backButtonClicked(object sender, RoutedEventArgs e)
-        {
-            NavigationService.Navigate(new Uri("/MainPage.xaml", UriKind.Relative));
         }
 
         private void nextButtonClicked(object sender, RoutedEventArgs e) {

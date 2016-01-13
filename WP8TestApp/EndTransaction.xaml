@@ -55,9 +55,7 @@
         </Grid>
         <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="9,9,0,0" 
                    FontSize="16" HorizontalAlignment="Center" TextWrapping="Wrap" VerticalAlignment="Top" Height="112" Width="436"
-                   Text="Press one of the buttons 'Succeed', 'Fail', or 'Cancel' to end your transaction.  If you don't want to end your transaction, then press the 'Back' button."/>
-        <Button Grid.Row="3" Grid.Column="0"
-                Content="Back" HorizontalAlignment="Left" VerticalAlignment="Top" Height="72" Width="120" Click="backButtonClicked"/>
+                   Text="Press one of the buttons 'Succeed', 'Fail', or 'Cancel' to end your transaction.  If you don't want to end your transaction, then press the Back button (&lt;-)."/>
     </Grid>
 
 </phone:PhoneApplicationPage>

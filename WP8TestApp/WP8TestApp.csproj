@@ -97,6 +97,7 @@
     <Compile Include="CrashSim.xaml.cs">
       <DependentUpon>CrashSim.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Demo.cs" />
     <Compile Include="End.xaml.cs">
       <DependentUpon>End.xaml</DependentUpon>
     </Compile>

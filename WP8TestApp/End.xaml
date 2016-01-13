@@ -30,7 +30,6 @@
                 <RowDefinition Height="5*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Image Grid.Row="0" Grid.Column="0"
                    HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -43,10 +42,6 @@
                              HorizontalAlignment="Center" VerticalAlignment="Center"
                              Content="Windows SDK Documentation"
                              Click="Hyperlink_Click"/>
-            <Button Grid.Row="3" Grid.Column="0" 
-                    HorizontalAlignment="Center" VerticalAlignment="Center" 
-                    Content="Start over" Width="151" Click="Button_Click_1"/>
-
         </Grid>
         <!--ContentPanel - place additional content here-->
     </Grid>

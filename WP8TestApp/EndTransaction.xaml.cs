@@ -16,6 +16,7 @@ namespace WP8TestApp {
     public partial class EndTransaction : PhoneApplicationPage {
         public EndTransaction() {
             InitializeComponent();
+            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
         }
 
         private void endTransactionClick(object sender,RoutedEventArgs e)
@@ -38,13 +39,13 @@ namespace WP8TestApp {
             GoBack();
         }
 
-        private void backButtonClicked(object sender, RoutedEventArgs e)
-        {
-            GoBack();
+        internal void GoBack() {
+            Frame frame = Parent as Frame;
+            frame.GoBack();
         }
 
-        private void GoBack() {
-            NavigationService.Navigate(new Uri("/CrashSim.xaml",UriKind.Relative));
+        private void TransactionTimeOutHandler(object sender,EventArgs e) {
+            Demo.TransactionTimeOutHandler(this,e);
         }
     }
 }
