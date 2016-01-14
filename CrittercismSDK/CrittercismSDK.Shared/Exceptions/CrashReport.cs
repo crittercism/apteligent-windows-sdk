@@ -42,7 +42,7 @@ namespace CrittercismSDK {
         // COUGH.  This member variable MUST remain named "transactions"
         // per Wire Protocol if end-to-end with platform is going to work.
         [DataMember]
-        public List<UserFlow> transactions { get; internal set; }
+        public List<Userflow> transactions { get; internal set; }
 
         [DataMember]
         public Dictionary<string,string> metadata { get; internal set; }
@@ -78,7 +78,7 @@ namespace CrittercismSDK {
             UserBreadcrumbs breadcrumbs,
             List<Endpoint> endpoints,
             List<Breadcrumb> systemBreadcrumbs,
-            List<UserFlow> userFlows,
+            List<Userflow> userflows,
             ExceptionObject exception) {
             app_id = appId;
             app_state = ComputeLegacyAppState();
@@ -86,7 +86,7 @@ namespace CrittercismSDK {
             this.breadcrumbs = breadcrumbs;
             this.endpoints = endpoints;
             this.systemBreadcrumbs = systemBreadcrumbs;
-            this.transactions = userFlows;
+            this.transactions = userflows;
             crash = exception;
             platform = new Platform();
         }

@@ -29,7 +29,7 @@ namespace UnitTest {
             string json = JsonConvert.SerializeObject(messageReport);
             TestHelpers.CheckJson(json);
             Assert.IsTrue(APM.enabled);
-            Assert.IsTrue(UserFlowReporter.enabled);
+            Assert.IsTrue(UserflowReporter.enabled);
         }
         [TestMethod]
         public void AppLoadTest2() {
@@ -86,7 +86,7 @@ namespace UnitTest {
         );
         [TestMethod]
         public void AppLoadTest3() {
-            // Testing an AppLoad response which disables APM and UserFlowReporter
+            // Testing an AppLoad response which disables APM and UserflowReporter
             TestHelpers.TestNetwork().AppLoadResponse = AppLoadTest3Response;
             TestHelpers.StartApp();
             MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(AppLoad));
@@ -94,7 +94,7 @@ namespace UnitTest {
             string json = JsonConvert.SerializeObject(messageReport);
             TestHelpers.CheckJson(json);
             Assert.IsFalse(APM.enabled);
-            Assert.IsFalse(UserFlowReporter.enabled);
+            Assert.IsFalse(UserflowReporter.enabled);
             // TestHelpers.Cleanup() gets TestHelpers.TestNetwork().AppLoadResponse = null .
         }
     }

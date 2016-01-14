@@ -18,7 +18,7 @@ namespace WP8TestApp {
 
         public CrashSim() {
             InitializeComponent();
-            Crittercism.UserFlowTimeOut += UserFlowTimeOutHandler;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -86,25 +86,25 @@ namespace WP8TestApp {
                 WebExceptionStatus.Success);
         }
 
-        private const string beginUserFlowLabel = "Begin UserFlow";
-        private const string endUserFlowLabel = "End UserFlow";
-        private string[] userFlowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private void userFlowClick(object sender,RoutedEventArgs e) {
+        private const string beginUserflowLabel = "Begin Userflow";
+        private const string endUserflowLabel = "End Userflow";
+        private string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private void userflowClick(object sender,RoutedEventArgs e) {
             Button button = sender as Button;
             if (button != null) {
-                Debug.Assert(button == userFlowButton);
+                Debug.Assert(button == userflowButton);
                 String label = button.Content.ToString();
-                if (label == beginUserFlowLabel) {
-                    App.userFlowName = userFlowNames[random.Next(0,userFlowNames.Length)];
-                    Crittercism.BeginUserFlow(App.userFlowName);
-                    button.Content = endUserFlowLabel;
-                } else if (label == endUserFlowLabel) {
-                    NavigationService.Navigate(new Uri("/EndUserFlow.xaml",UriKind.Relative));
+                if (label == beginUserflowLabel) {
+                    App.userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(App.userflowName);
+                    button.Content = endUserflowLabel;
+                } else if (label == endUserflowLabel) {
+                    NavigationService.Navigate(new Uri("/EndUserflow.xaml",UriKind.Relative));
                 }
             }
         }
-        private void UserFlowTimeOutHandler(object sender,EventArgs e) {
-            Demo.UserFlowTimeOutHandler(this,e);
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserflowTimeOutHandler(this,e);
         }
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {

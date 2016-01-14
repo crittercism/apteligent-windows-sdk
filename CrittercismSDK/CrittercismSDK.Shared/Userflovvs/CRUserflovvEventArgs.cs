@@ -4,10 +4,10 @@ using System.Text;
 
 namespace CrittercismSDK
 {
-    public class CRUserFlowEventArgs : EventArgs
+    public class CRUserflowEventArgs : EventArgs
     {
         public string Name { get; internal set; }
-        internal CRUserFlowEventArgs(string name) {
+        internal CRUserflowEventArgs(string name) {
             Name = name;
         }
     }

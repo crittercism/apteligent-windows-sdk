@@ -106,8 +106,8 @@ namespace CrittercismSDK {
                 case "MetadataReport":
                     answer = (HttpWebRequest)WebRequest.Create(new Uri(apiURL + "/feedback/update_user_metadata",UriKind.Absolute));
                     break;
-                case "UserFlowReport":
-                    answer = (HttpWebRequest)WebRequest.Create(new Uri(txnURL + "/api/v1/userFlows",UriKind.Absolute));
+                case "UserflowReport":
+                    answer = (HttpWebRequest)WebRequest.Create(new Uri(txnURL + "/api/v1/userflows",UriKind.Absolute));
                     break;
             }
             return answer;

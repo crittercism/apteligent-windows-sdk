@@ -101,8 +101,8 @@
     <Compile Include="End.xaml.cs">
       <DependentUpon>End.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EndUserFlow.xaml.cs">
-      <DependentUpon>EndUserFlow.xaml</DependentUpon>
+    <Compile Include="EndUserflovv.xaml.cs">
+      <DependentUpon>EndUserflovv.xaml</DependentUpon>
     </Compile>
     <Compile Include="LocalizedStrings.cs" />
     <Compile Include="MainPage.xaml.cs">
@@ -129,7 +129,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EndUserFlow.xaml">
+    <Page Include="EndUserflovv.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

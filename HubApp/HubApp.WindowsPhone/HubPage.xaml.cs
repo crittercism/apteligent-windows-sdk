@@ -44,7 +44,7 @@ namespace HubApp
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
-            Crittercism.UserFlowTimeOut += UserFlowTimeOutHandler;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
         }
 
         /// <summary>
@@ -122,8 +122,8 @@ namespace HubApp
             Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
         }
 
-        private void UserFlowTimeOutHandler(object sender,EventArgs e) {
-            Demo.UserFlowTimeOutHandler(this,e);
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserflowTimeOutHandler(this,e);
         }
 
         #region NavigationHelper registration

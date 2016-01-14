@@ -45,20 +45,20 @@ namespace HubApp {
                         Crittercism.LogHandledException(ex);
                     }
                 }
-            } else if (itemId.Equals("Begin UserFlow")) {
-                UserFlowClick(frame,item);
+            } else if (itemId.Equals("Begin Userflow")) {
+                UserflowClick(frame,item);
             } else if (itemId.Equals("Crash")) {
                 ThrowException();
             } else {
-                // We are on "End UserFlow" SectionPage .
+                // We are on "End Userflow" SectionPage .
                 if (itemId.Equals("Succeed")) {
-                    Crittercism.EndUserFlow(userFlowName);
+                    Crittercism.EndUserflow(userflowName);
                 } else if (itemId.Equals("Fail")) {
-                    Crittercism.FailUserFlow(userFlowName);
+                    Crittercism.FailUserflow(userflowName);
                 } else if (itemId.Equals("Cancel")) {
-                    Crittercism.CancelUserFlow(userFlowName);
+                    Crittercism.CancelUserflow(userflowName);
                 };
-                userFlowItem.Title = beginUserFlowLabel;
+                userflowItem.Title = beginUserflowLabel;
                 frame.GoBack();
             }
         }
@@ -111,40 +111,40 @@ namespace HubApp {
                 (HttpStatusCode)responseCode,
                 WebExceptionStatus.Success);
         }
-        internal const string beginUserFlowLabel = "Begin UserFlow";
-        internal const string endUserFlowLabel = "End UserFlow";
-        private static string[] userFlowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private static string userFlowName;
-        private static SampleDataItem userFlowItem = null;
-        private static void UserFlowClick(Frame frame,SampleDataItem item) {
-            // Conveniently remembering userFlowItem so we can change its Title
-            // back to "Begin UserFlow" later on.
-            userFlowItem = item;
-            if (item.Title == beginUserFlowLabel) {
-                // "Begin UserFlow"
-                userFlowName = userFlowNames[random.Next(0,userFlowNames.Length)];
-                Crittercism.BeginUserFlow(userFlowName);
-                item.Title = endUserFlowLabel;
+        internal const string beginUserflowLabel = "Begin Userflow";
+        internal const string endUserflowLabel = "End Userflow";
+        private static string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private static string userflowName;
+        private static SampleDataItem userflowItem = null;
+        private static void UserflowClick(Frame frame,SampleDataItem item) {
+            // Conveniently remembering userflowItem so we can change its Title
+            // back to "Begin Userflow" later on.
+            userflowItem = item;
+            if (item.Title == beginUserflowLabel) {
+                // "Begin Userflow"
+                userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                Crittercism.BeginUserflow(userflowName);
+                item.Title = endUserflowLabel;
             } else {
-                // "End UserFlow"
-                // This works because "End UserFlow" == UniqueId of Groups[1]
+                // "End Userflow"
+                // This works because "End Userflow" == UniqueId of Groups[1]
                 frame.Navigate(typeof(SectionPage),item.Title);
             }
         }
 
-        internal static async void UserFlowTimeOutHandler(Page page,EventArgs e) {
-            // UserFlow timed out.
+        internal static async void UserflowTimeOutHandler(Page page,EventArgs e) {
+            // Userflow timed out.
             await page.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,async () => {
-                userFlowItem.Title = beginUserFlowLabel;
+                userflowItem.Title = beginUserflowLabel;
                 if (page.Frame.Content == page) {
                     // This page is being shown.
-                    await UserFlowTimeOutShowMessage(e);
+                    await UserflowTimeOutShowMessage(e);
                     if (page is SectionPage) {
                         SectionPage sectionPage = (SectionPage)page;
                         string title = sectionPage.Title();
                         Debug.WriteLine("PageTitle == " + title);
-                        if (title == "End UserFlow") {
-                            // If we find ourselves currently on the "End UserFlow" SectionPage .
+                        if (title == "End Userflow") {
+                            // If we find ourselves currently on the "End Userflow" SectionPage .
                             Frame frame = page.Frame;
                             frame.GoBack();
                         }
@@ -153,10 +153,10 @@ namespace HubApp {
             });
         }
 
-        private static async Task UserFlowTimeOutShowMessage(EventArgs e) {
-            // Show MessageDialog routine for caller UserFlowTimeOutHandler
-            string name = ((CRUserFlowEventArgs)e).Name;
-            string message = String.Format("UserFlow '{0}'\r\nTimed Out",name);
+        private static async Task UserflowTimeOutShowMessage(EventArgs e) {
+            // Show MessageDialog routine for caller UserflowTimeOutHandler
+            string name = ((CRUserflowEventArgs)e).Name;
+            string message = String.Format("Userflow '{0}'\r\nTimed Out",name);
             Debug.WriteLine(message);
             var messageDialog = new MessageDialog(message);
             messageDialog.Commands.Add(new UICommand("Close"));

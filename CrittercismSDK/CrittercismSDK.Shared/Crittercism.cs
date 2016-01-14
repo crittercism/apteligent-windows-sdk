@@ -137,7 +137,7 @@ namespace CrittercismSDK {
         #endregion Properties
 
         #region Events
-        public static event EventHandler UserFlowTimeOut;
+        public static event EventHandler UserflowTimeOut;
         #endregion
 
         #region OptOutStatus
@@ -371,11 +371,11 @@ namespace CrittercismSDK {
                         return;
                     }
                     AppID = appID;
-                    // Put default initialized Settings before APM.Init() and UserFlowReporter.Init() .
+                    // Put default initialized Settings before APM.Init() and UserflowReporter.Init() .
                     Settings = LoadSettings();
                     APM.Init();
                     MessageReport.Init();
-                    UserFlowReporter.Init();
+                    UserflowReporter.Init();
                     AppVersion = LoadAppVersion();
                     DeviceId = LoadDeviceId();
                     DeviceModel = LoadDeviceModel();
@@ -425,7 +425,7 @@ namespace CrittercismSDK {
                 readerThread.Start();
                 // It seems sensible to put CreateAppLoadReport here after all the
                 // necessary Crittercism infrastructure to do so (including MessageQueue,
-                // UserFlowReporter, readerThread, etc.) have been initialized above.
+                // UserflowReporter, readerThread, etc.) have been initialized above.
                 CreateAppLoadReport();
             } catch (Exception) {
                 initialized = false;
@@ -466,7 +466,7 @@ namespace CrittercismSDK {
                             initialized = false;
                             // Stop the producers
                             APM.Shutdown();
-                            UserFlowReporter.Shutdown();
+                            UserflowReporter.Shutdown();
                             // Get the readerThread to exit.
                             readerEvent.Set();
 #if NETFX_CORE
@@ -496,10 +496,10 @@ namespace CrittercismSDK {
             }
             AppLoad appLoad = new AppLoad();
             AddMessageToQueue(appLoad);
-            CreateAppLoadUserFlow();
+            CreateAppLoadUserflow();
         }
-        private static void CreateAppLoadUserFlow() {
-            // Automatic "App Load" UserFlow
+        private static void CreateAppLoadUserflow() {
+            // Automatic "App Load" Userflow
             long now = DateTime.UtcNow.Ticks;
 #if NETFX_CORE || WINDOWS_PHONE
             long beginTime = StartTime;
@@ -513,7 +513,7 @@ namespace CrittercismSDK {
 #endif
             long endTime = now;
             Debug.WriteLine("App Load time == " + (1.0E-7) * (endTime - beginTime) + " seconds");
-            new UserFlow("App Load",beginTime,endTime);
+            new Userflow("App Load",beginTime,endTime);
         }
         #endregion AppLoads
 
@@ -612,10 +612,10 @@ namespace CrittercismSDK {
                 UserBreadcrumbs breadcrumbs = Breadcrumbs.GetAllSessionsBreadcrumbs();
                 List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
-                List<UserFlow> userFlows = UserFlowReporter.CrashUserFlows();
+                List<Userflow> userflows = UserflowReporter.CrashUserflows();
                 string stacktrace = StackTrace(e);
                 ExceptionObject exception = new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                CrashReport crashReport = new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,userFlows,exception);
+                CrashReport crashReport = new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,userflows,exception);
                 // Add crash to message queue and save state .
                 Shutdown();
                 AddMessageToQueue(crashReport);
@@ -716,7 +716,7 @@ namespace CrittercismSDK {
                     Settings = response;
                     SaveSettings(json);
                     APM.SettingsChange();
-                    UserFlowReporter.SettingsChange();
+                    UserflowReporter.SettingsChange();
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -767,130 +767,130 @@ namespace CrittercismSDK {
         }
         #endregion
 
-        #region UserFlows
-        internal static void OnUserFlowTimeOut(EventArgs e) {
-            EventHandler handler = UserFlowTimeOut;
+        #region Userflows
+        internal static void OnUserflowTimeOut(EventArgs e) {
+            EventHandler handler = UserflowTimeOut;
             if (handler != null) {
                 handler(null,e);
             }
         }
 
-        public static void BeginUserFlow(string name) {
-            // Init and begin a userFlow with a default value.
+        public static void BeginUserflow(string name) {
+            // Init and begin a userflow with a default value.
             try {
-                AbortUserFlow(name);
-                // Do not begin a new userFlow if the userFlow count is at or has exceeded the max.
-                if (UserFlowReporter.UserFlowCount() >= UserFlowReporter.MAX_USERFLOW_COUNT) {
-                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent userFlows."
-                                                       + "\r\nIgnoring Crittercism.BeginUserFlow() call for {1}."),
-                                                       UserFlowReporter.MAX_USERFLOW_COUNT,name));
+                AbortUserflow(name);
+                // Do not begin a new userflow if the userflow count is at or has exceeded the max.
+                if (UserflowReporter.UserflowCount() >= UserflowReporter.MAX_USERFLOW_COUNT) {
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent userflows."
+                                                       + "\r\nIgnoring Crittercism.BeginUserflow() call for {1}."),
+                                                       UserflowReporter.MAX_USERFLOW_COUNT,name));
                     return;
                 }
-                (new UserFlow(name)).Begin();
+                (new Userflow(name)).Begin();
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void BeginUserFlow(string name,int value) {
-            // Init and begin a userFlow with an input value.
+        public static void BeginUserflow(string name,int value) {
+            // Init and begin a userflow with an input value.
             try {
-                AbortUserFlow(name);
-                // Do not begin a new userFlow if the userFlow count is at or has exceeded the max.
-                if (UserFlowReporter.UserFlowCount() >= UserFlowReporter.MAX_USERFLOW_COUNT) {
-                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent userFlows."
-                                                       + "\r\nIgnoring Crittercism.BeginUserFlow() call for {1}."),
-                                                       UserFlowReporter.MAX_USERFLOW_COUNT,name));
+                AbortUserflow(name);
+                // Do not begin a new userflow if the userflow count is at or has exceeded the max.
+                if (UserflowReporter.UserflowCount() >= UserflowReporter.MAX_USERFLOW_COUNT) {
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent userflows."
+                                                       + "\r\nIgnoring Crittercism.BeginUserflow() call for {1}."),
+                                                       UserflowReporter.MAX_USERFLOW_COUNT,name));
                     return;
                 }
-                (new UserFlow(name,value)).Begin();
+                (new Userflow(name,value)).Begin();
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        private static void AbortUserFlow(string name) {
-            // Cancel a userFlow with this name if one exists, otherwise be quiet.
+        private static void AbortUserflow(string name) {
+            // Cancel a userflow with this name if one exists, otherwise be quiet.
             try {
-                UserFlow userFlow = UserFlow.UserFlowForName(name);
-                if (userFlow != null) {
-                    DebugUtils.LOG_WARN(String.Format("Cancelling unfinished identically named userFlow {0}.",name));
-                    userFlow.Cancel();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    DebugUtils.LOG_WARN(String.Format("Cancelling unfinished identically named userflow {0}.",name));
+                    userflow.Cancel();
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void CancelUserFlow(string name) {
-            // Cancel a userFlow as if it never was.
+        public static void CancelUserflow(string name) {
+            // Cancel a userflow as if it never was.
             try {
-                UserFlow userFlow = UserFlow.UserFlowForName(name);
-                if (userFlow != null) {
-                    userFlow.Cancel();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    userflow.Cancel();
                 } else {
-                    CantFindUserFlow(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void EndUserFlow(string name) {
-            // End an already begun userFlow successfully.
+        public static void EndUserflow(string name) {
+            // End an already begun userflow successfully.
             try {
-                UserFlow userFlow = UserFlow.UserFlowForName(name);
-                if (userFlow != null) {
-                    userFlow.End();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    userflow.End();
                 } else {
-                    CantFindUserFlow(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void FailUserFlow(string name) {
-            // End an already begun userFlow as a failure.
+        public static void FailUserflow(string name) {
+            // End an already begun userflow as a failure.
             try {
-                UserFlow userFlow = UserFlow.UserFlowForName(name);
-                if (userFlow != null) {
-                    userFlow.Fail();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    userflow.Fail();
                 } else {
-                    CantFindUserFlow(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static int GetUserFlowValue(string name) {
-            // Get the currency cents value of a userFlow.
+        public static int GetUserflowValue(string name) {
+            // Get the currency cents value of a userflow.
             int answer = 0;
             try {
-                UserFlow userFlow = UserFlow.UserFlowForName(name);
-                if (userFlow != null) {
-                    answer = userFlow.Value();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    answer = userflow.Value();
                 } else {
-                    CantFindUserFlow(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
             return answer;
         }
-        public static void SetUserFlowValue(string name,int value) {
-            // Set the currency cents value of a userFlow.
+        public static void SetUserflowValue(string name,int value) {
+            // Set the currency cents value of a userflow.
             try {
-                UserFlow userFlow = UserFlow.UserFlowForName(name);
-                if (userFlow != null) {
-                    userFlow.SetValue(value);
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    userflow.SetValue(value);
                 } else {
-                    CantFindUserFlow(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
 
-        internal static void CantFindUserFlow(string name) {
+        internal static void CantFindUserflow(string name) {
 #if NETFX_CORE || WINDOWS_PHONE
 #else
-            Trace.WriteLine(String.Format("Can't find userFlow named \"{0}\"",name));
+            Trace.WriteLine(String.Format("Can't find userflow named \"{0}\"",name));
 #endif
         }
 
@@ -1098,7 +1098,7 @@ namespace CrittercismSDK {
                         backgroundWorker.RunWorkerAsync();
                     }
                     // Above will (generally?) get Crittercism.Init called generating a
-                    // new automatic "App Load" userFlow.
+                    // new automatic "App Load" userflow.
                 } else {
                     Foreground();
                 }
@@ -1179,21 +1179,21 @@ namespace CrittercismSDK {
 
 #if NETFX_CORE || WINDOWS_PHONE
         private static void Foreground() {
-            // Automatic "App Foreground" UserFlow
+            // Automatic "App Foreground" Userflow
             long now = DateTime.UtcNow.Ticks;
-            new UserFlow("App Foreground",now,now);
+            new Userflow("App Foreground",now,now);
             Breadcrumbs.LeaveEventBreadcrumb("foregrounded");
             APM.Foreground();
-            UserFlowReporter.Foreground();
+            UserflowReporter.Foreground();
         }
 
         private static void Background() {
-            // Automatic "App Background" UserFlow
+            // Automatic "App Background" Userflow
             long now = DateTime.UtcNow.Ticks;
-            new UserFlow("App Background",now,now);
+            new Userflow("App Background",now,now);
             Breadcrumbs.LeaveEventBreadcrumb("backgrounded");
             APM.Background();
-            UserFlowReporter.Background();
+            UserflowReporter.Background();
         }
 #endif
 

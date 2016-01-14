@@ -1,5 +1,5 @@
 namespace WindowsFormsApp {
-    partial class EndUserFlowDialog {
+    partial class EndUserflowDialog {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -23,7 +23,7 @@ namespace WindowsFormsApp {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EndUserFlowDialog));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EndUserflowDialog));
             this.successButton = new System.Windows.Forms.Button();
             this.failButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
@@ -68,7 +68,7 @@ namespace WindowsFormsApp {
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
-            // EndUserFlowDialog
+            // EndUserflowDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -79,8 +79,8 @@ namespace WindowsFormsApp {
             this.Controls.Add(this.successButton);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.Name = "EndUserFlowDialog";
-            this.Text = "EndUserFlowDialog";
+            this.Name = "EndUserflowDialog";
+            this.Text = "EndUserflowDialog";
             this.ResumeLayout(false);
 
         }

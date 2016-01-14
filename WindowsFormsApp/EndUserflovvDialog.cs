@@ -9,31 +9,31 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsFormsApp {
-    public partial class EndUserFlowDialog : Form {
+    public partial class EndUserflowDialog : Form {
         // Dialog return value
         private string answer;
         public string Answer {
             get { return answer; }
         }
-        public EndUserFlowDialog() {
+        public EndUserflowDialog() {
             InitializeComponent();
         }
 
         private void successButton_Click(object sender,EventArgs e) {
             // Set dialog return value
-            answer = "End UserFlow";
+            answer = "End Userflow";
             this.DialogResult = DialogResult.Yes;
         }
 
         private void failButton_Click(object sender,EventArgs e) {
             // Set dialog return value
-            answer = "Fail UserFlow";
+            answer = "Fail Userflow";
             this.DialogResult = DialogResult.Yes;
         }
 
         private void cancelButton_Click(object sender,EventArgs e) {
             // Set dialog return value
-            answer = "Cancel UserFlow";
+            answer = "Cancel Userflow";
             this.DialogResult = DialogResult.Yes;
         }
     }

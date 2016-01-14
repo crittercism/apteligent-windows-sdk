@@ -18,17 +18,17 @@ using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
 namespace CrittercismSDK {
-    internal class UserFlowReporter {
+    internal class UserflowReporter {
         #region Constants
         internal const int MAX_USERFLOW_COUNT = 50;
         #endregion
 
         #region Properties
         private static Object lockObject = new object();
-        private static SynchronizedQueue<UserFlow> UserFlowsQueue { get; set; }
+        private static SynchronizedQueue<Userflow> UserflowsQueue { get; set; }
         internal static bool enabled = true;
         internal static volatile bool isForegrounded = true;
-        // Batch additional network requests for 20 seconds before sending UserFlowReport .
+        // Batch additional network requests for 20 seconds before sending UserflowReport .
         private const int MSEC_PER_SEC = 1000;
         private const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
@@ -38,36 +38,36 @@ namespace CrittercismSDK {
         private static JObject thresholds = null;
 
         internal static int Interval() {
-            // UserFlow batch reporting interval in milliseconds
+            // Userflow batch reporting interval in milliseconds
             return interval;
         }
 
         internal static int DefaultTimeout() {
-            // UserFlow default timeout in milliseconds
+            // Userflow default timeout in milliseconds
             return defaultTimeout;
         }
         #endregion
 
         #region Multithreading Remarks
         ////////////////////////////////////////////////////////////////
-        // MULTITHREADING UserFlow AND UserFlowReporter REMARKS
+        // MULTITHREADING Userflow AND UserflowReporter REMARKS
         // * lock "Lock Ordering"
         //    The deadlock prevention technique of establishing a global ordering
         //    on resources which may be locked is known as "Lock Ordering"
         //    Lock ordering is a simple yet effective deadlock prevention mechanism.
         //    http://tutorials.jenkov.com/java-concurrency/deadlock-prevention.html#ordering
-        // UserFlow code sometimes needs to lock both a userFlow and
+        // Userflow code sometimes needs to lock both a userflow and
         // the reporter simultaneously.  Our lock deadlock prevention
-        // policy is to always obtain lock on userFlow first and lock
+        // policy is to always obtain lock on userflow first and lock
         // on reporter second whenever this is necessary.  Effectively:
-        //    lock (userFlow) {
-        //      lock (UserFlowReporter.lockObject) {
+        //    lock (userflow) {
+        //      lock (UserflowReporter.lockObject) {
         //        ...
         //      }
         //    }
         // though possibly spread out on the stack trace, not necessarily
         // all in one function or class.
-        // * Changing properties of userFlows is done synchronously.
+        // * Changing properties of userflows is done synchronously.
         ////////////////////////////////////////////////////////////////
         #endregion
 
@@ -76,85 +76,85 @@ namespace CrittercismSDK {
             lock (lockObject) {
                 // TODO: Rigorously we should check if app's window is visible just now
                 isForegrounded = true;
-                // Crittercism.Init calling UserFlowReporter.Init should effectively make
+                // Crittercism.Init calling UserflowReporter.Init should effectively make
                 // lock lockObject here pointless, but no real harm doing so.
                 SettingsChange();
-                // Initialize userFlowsDictionary and UserFlowsQueue
-                userFlowsDictionary = new Dictionary<string,UserFlow>();
-                UserFlowsQueue = new SynchronizedQueue<UserFlow>(new Queue<UserFlow>());
+                // Initialize userflowsDictionary and UserflowsQueue
+                userflowsDictionary = new Dictionary<string,Userflow>();
+                UserflowsQueue = new SynchronizedQueue<Userflow>(new Queue<Userflow>());
             }
         }
         internal static void Shutdown() {
             lock (lockObject) {
-                // Crittercism.Shutdown calls UserFlowReporter.Shutdown
+                // Crittercism.Shutdown calls UserflowReporter.Shutdown
                 Background();
             }
         }
         #endregion
 
         #region Persistence
-        internal static void Save(UserFlow userFlow) {
-            // Persist userFlow to correct directory
+        internal static void Save(Userflow userflow) {
+            // Persist userflow to correct directory
             lock (lockObject) {
-                switch (userFlow.State()) {
-                    case UserFlowState.CANCELLED:
-                        CancelUserFlow(userFlow);
+                switch (userflow.State()) {
+                    case UserflowState.CANCELLED:
+                        CancelUserflow(userflow);
                         break;
-                    case UserFlowState.CREATED:
+                    case UserflowState.CREATED:
                         // Make visible via persistence API methods.
-                        AddUserFlow(userFlow);
+                        AddUserflow(userflow);
                         break;
-                    case UserFlowState.BEGUN:
+                    case UserflowState.BEGUN:
                         // Nothing extra to do.
                         break;
-                    case UserFlowState.CRASHED:
-                        CancelUserFlow(userFlow);
+                    case UserflowState.CRASHED:
+                        CancelUserflow(userflow);
                         break;
                     default:
                         // Final state
-                        CancelUserFlow(userFlow);
-                        Enqueue(userFlow);
+                        CancelUserflow(userflow);
+                        Enqueue(userflow);
                         break;
                 }
             }
         }
-        private static void AddUserFlow(UserFlow userFlow) {
+        private static void AddUserflow(Userflow userflow) {
             lock (lockObject) {
-                userFlowsDictionary[userFlow.Name()] = userFlow;
+                userflowsDictionary[userflow.Name()] = userflow;
             }
         }
-        private static void CancelUserFlow(UserFlow userFlow) {
+        private static void CancelUserflow(Userflow userflow) {
             lock (lockObject) {
-                userFlowsDictionary.Remove(userFlow.Name());
+                userflowsDictionary.Remove(userflow.Name());
             }
         }
         #endregion
 
-        #region UserFlow Dictionary
-        private static Dictionary<string,UserFlow> userFlowsDictionary;
-        internal static int UserFlowCount() {
+        #region Userflow Dictionary
+        private static Dictionary<string,Userflow> userflowsDictionary;
+        internal static int UserflowCount() {
             int answer = 0;
             lock (lockObject) {
-                answer = userFlowsDictionary.Count;
+                answer = userflowsDictionary.Count;
             }
             return answer;
         }
-        internal static UserFlow[] AllUserFlows() {
-            UserFlow[] answer = null;
+        internal static Userflow[] AllUserflows() {
+            Userflow[] answer = null;
             lock (lockObject) {
-                List<UserFlow> list = new List<UserFlow>();
-                foreach (UserFlow userFlow in userFlowsDictionary.Values) {
-                    list.Add(userFlow);
+                List<Userflow> list = new List<Userflow>();
+                foreach (Userflow userflow in userflowsDictionary.Values) {
+                    list.Add(userflow);
                 }
                 answer = list.ToArray();
             }
             return answer;
         }
-        internal static UserFlow UserFlowForName(string name) {
-            UserFlow answer = null;
+        internal static Userflow UserflowForName(string name) {
+            Userflow answer = null;
             lock (lockObject) {
-                if (userFlowsDictionary.ContainsKey(name)) {
-                    answer = userFlowsDictionary[name];
+                if (userflowsDictionary.ContainsKey(name)) {
+                    answer = userflowsDictionary[name];
                 }
             }
             return answer;
@@ -167,7 +167,7 @@ namespace CrittercismSDK {
         private static ThreadPoolTimer timer = null;
         private static void OnTimerElapsed(ThreadPoolTimer sender) {
             lock (lockObject) {
-                SendUserFlowReport();
+                SendUserflowReport();
                 timer = null;
             }
         }
@@ -175,7 +175,7 @@ namespace CrittercismSDK {
         private static Timer timer=null;
         private static void OnTimerElapsed(Object source, ElapsedEventArgs e) {
             lock (lockObject) {
-                SendUserFlowReport();
+                SendUserflowReport();
                 timer=null;
             }
         }
@@ -201,8 +201,8 @@ namespace CrittercismSDK {
             lock (lockObject) {
                 isForegrounded = false;
                 long backgroundTime = DateTime.UtcNow.Ticks;
-                foreach (UserFlow userFlow in userFlowsDictionary.Values) {
-                    userFlow.Background(backgroundTime);
+                foreach (Userflow userflow in userflowsDictionary.Values) {
+                    userflow.Background(backgroundTime);
                 };
                 RemoveTimer();
             }
@@ -210,23 +210,23 @@ namespace CrittercismSDK {
         internal static void Foreground() {
             lock (lockObject) {
                 isForegrounded = true;
-                SendUserFlowReport();
+                SendUserflowReport();
                 long foregroundTime = DateTime.UtcNow.Ticks;
-                foreach (UserFlow userFlow in userFlowsDictionary.Values) {
-                    userFlow.Foreground(foregroundTime);
+                foreach (Userflow userflow in userflowsDictionary.Values) {
+                    userflow.Foreground(foregroundTime);
                 };
             }
         }
         #endregion
 
         #region Reporting
-        internal static void Enqueue(UserFlow userFlow) {
+        internal static void Enqueue(Userflow userflow) {
             lock (lockObject) {
                 if (enabled) {
-                    while (UserFlowsQueue.Count >= MAX_USERFLOW_COUNT) {
-                        UserFlowsQueue.Dequeue();
+                    while (UserflowsQueue.Count >= MAX_USERFLOW_COUNT) {
+                        UserflowsQueue.Dequeue();
                     };
-                    UserFlowsQueue.Enqueue(userFlow);
+                    UserflowsQueue.Enqueue(userflow);
 #if NETFX_CORE || WINDOWS_PHONE
                     if (timer == null) {
                         // Creates a single-use timer.
@@ -249,55 +249,55 @@ namespace CrittercismSDK {
                 }
             }
         }
-        private static long BeginTime(List<UserFlow> userFlows) {
-            // Earliest BeginTime amongst these userFlows
+        private static long BeginTime(List<Userflow> userflows) {
+            // Earliest BeginTime amongst these userflows
             long answer = long.MaxValue;
-            foreach (UserFlow userFlow in userFlows) {
-                answer = Math.Min(answer,userFlow.BeginTime());
+            foreach (Userflow userflow in userflows) {
+                answer = Math.Min(answer,userflow.BeginTime());
             }
             return answer;
         }
-        private static long EndTime(List<UserFlow> userFlows) {
-            // Latest EndTime amongst these userFlows
+        private static long EndTime(List<Userflow> userflows) {
+            // Latest EndTime amongst these userflows
             long answer = long.MinValue;
-            foreach (UserFlow userFlow in userFlows) {
-                answer = Math.Max(answer,userFlow.EndTime());
+            foreach (Userflow userflow in userflows) {
+                answer = Math.Max(answer,userflow.EndTime());
             }
             return answer;
         }
 
-        private static void SendUserFlowReport() {
-            if (UserFlowsQueue.Count > 0) {
-                List<UserFlow> userFlows = UserFlowsQueue.ToList();
-                UserFlowsQueue.Clear();
-                long beginTime = BeginTime(userFlows);
-                long endTime = EndTime(userFlows);
+        private static void SendUserflowReport() {
+            if (UserflowsQueue.Count > 0) {
+                List<Userflow> userflows = UserflowsQueue.ToList();
+                UserflowsQueue.Clear();
+                long beginTime = BeginTime(userflows);
+                long endTime = EndTime(userflows);
                 Dictionary<string,object> appState = MessageReport.ComputeAppState();
                 List<UserBreadcrumb> breadcrumbs = Breadcrumbs.ExtractUserBreadcrumbs(beginTime,endTime);
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
                 List<Endpoint> endpoints = Breadcrumbs.ExtractEndpoints(beginTime,endTime);
-                UserFlowReport userFlowReport = new UserFlowReport(
+                UserflowReport userflowReport = new UserflowReport(
                     appState,
-                    userFlows,
+                    userflows,
                     breadcrumbs,
                     systemBreadcrumbs,
                     endpoints);
-                Crittercism.AddMessageToQueue(userFlowReport);
+                Crittercism.AddMessageToQueue(userflowReport);
             }
         }
-        internal static List<UserFlow> CrashUserFlows() {
-            // Remove BEGUN UserFlow's to CRASHED state.
+        internal static List<Userflow> CrashUserflows() {
+            // Remove BEGUN Userflow's to CRASHED state.
             // The code takes care to avoid deadlocks by not locking
-            // the reporter and then locking a UserFlow (wrong order).
-            UserFlow[] allUserFlows = AllUserFlows();
-            // Compute crashed UserFlow's .
-            List<UserFlow> answer = new List<UserFlow>();
-            foreach (UserFlow userFlow in allUserFlows) {
-                // Request userFlow to Crash.
-                userFlow.Crash();
-                if (userFlow.State() == UserFlowState.CRASHED) {
-                    // The userFlow crashed.
-                    answer.Add(userFlow);
+            // the reporter and then locking a Userflow (wrong order).
+            Userflow[] allUserflows = AllUserflows();
+            // Compute crashed Userflow's .
+            List<Userflow> answer = new List<Userflow>();
+            foreach (Userflow userflow in allUserflows) {
+                // Request userflow to Crash.
+                userflow.Crash();
+                if (userflow.State() == UserflowState.CRASHED) {
+                    // The userflow crashed.
+                    answer.Add(userflow);
                 };
             };
             return answer;
@@ -352,9 +352,9 @@ namespace CrittercismSDK {
                 if (interval<1000) {
                     Debug.WriteLine("THIS SHOULDN'T HAPPEN");
                 }
-                UserFlowReporter.interval = interval;
-                UserFlowReporter.defaultTimeout = defaultTimeout;
-                UserFlowReporter.thresholds = thresholds;
+                UserflowReporter.interval = interval;
+                UserflowReporter.defaultTimeout = defaultTimeout;
+                UserflowReporter.thresholds = thresholds;
             }
         }
         private static void Disable() {
@@ -366,7 +366,7 @@ namespace CrittercismSDK {
             // Clamp newTimeout according to Wire+Protocol doc
             // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
             // details regarding txnConfig defaultTimeout and possible "timeout"
-            // txnConfig userFlows thresholds dictionaries.
+            // txnConfig userflows thresholds dictionaries.
             int answer = newTimeout;
             lock (lockObject) {
                 if (thresholds != null) {
@@ -391,11 +391,11 @@ namespace CrittercismSDK {
             return answer;
         }
         internal static int DefaultValue(string name) {
-            // Default value of userFlow name (kind of) according to Wire+Protocol doc
+            // Default value of userflow name (kind of) according to Wire+Protocol doc
             // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
             // details regarding txnConfig thresholds dictionaries specifying "value"s.
 
-            int answer = UserFlow.NULL_VALUE;
+            int answer = Userflow.NULL_VALUE;
             lock (lockObject) {
                 if (thresholds != null) {
                     JObject threshold = thresholds[name] as JObject;

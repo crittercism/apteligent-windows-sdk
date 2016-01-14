@@ -82,7 +82,7 @@ namespace CrittercismSDK {
             };
         }
         internal static Dictionary<string,object> ComputeAppState() {
-            // Used by AppLoad and UserFlowReport
+            // Used by AppLoad and UserflowReport
             // NOTE: ComputeAppState() isn't identical to ComputeLegacyAppState() .
             Dictionary<string,object> answer = new Dictionary<string,object>();
             answer["appVersion"] = Crittercism.AppVersion;

@@ -31,9 +31,9 @@ namespace UnitTest {
             UserBreadcrumbs breadcrumbs = new UserBreadcrumbs(previous_session,current_session);
             List<Endpoint> endpoints = new List<Endpoint>();
             List<Breadcrumb> systemBreadcrumbs = new List<Breadcrumb>();
-            List<UserFlow> userFlows = new List<UserFlow>();
+            List<Userflow> userflows = new List<Userflow>();
             ExceptionObject exception = new ExceptionObject("name","reason","stackframe1\r\nstackframe2");
-            CrashReport crashReport1 = new CrashReport(appId,metadata,breadcrumbs,endpoints,systemBreadcrumbs,userFlows,exception);
+            CrashReport crashReport1 = new CrashReport(appId,metadata,breadcrumbs,endpoints,systemBreadcrumbs,userflows,exception);
             // Testing EndpointConverter WriteJson
             string json1 = JsonConvert.SerializeObject(crashReport1);
             Assert.IsTrue(json1.IndexOf("\"app_id\":") >= 0);

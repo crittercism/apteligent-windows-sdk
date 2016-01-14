@@ -11,12 +11,12 @@ using System.Timers;
 #endif // NETFX_CORE
 
 namespace CrittercismSDK {
-    [JsonConverter(typeof(UserFlowConverter))]
-    internal class UserFlow {
+    [JsonConverter(typeof(UserflowConverter))]
+    internal class Userflow {
         #region Constants
         internal const int MAX_NAME_LENGTH = 255;
         // Use Int32.MinValue pennies to represent Wire+Protocol doc's "null"
-        // userFlow value.  (We would prefer to not have "null" at all.)
+        // userflow value.  (We would prefer to not have "null" at all.)
         // It's conceivable some apps might want modest negative values for
         // debits, so we use Int32.MinValue == -2^31 == -2147483648 == -$21,474,836.48
         // here.
@@ -38,7 +38,7 @@ namespace CrittercismSDK {
         // to timers and Thread.Sleep .
         ////////////////////////////////////////////////////////////////
         private string name;
-        private UserFlowState state;
+        private UserflowState state;
         private int timeout; // milliseconds
         private int value; // pennies (http://www.usmint.gov/mint_programs/circulatingCoins/?action=circPenny)
         private Dictionary<string,string> metadata;
@@ -55,23 +55,23 @@ namespace CrittercismSDK {
             // The "name" is immutable.
             return name;
         }
-        internal UserFlowState State() {
-            UserFlowState answer;
+        internal UserflowState State() {
+            UserflowState answer;
             lock (this) {
                 answer = state;
             }
             return answer;
         }
-        private void SetState(UserFlowState newState,long nowTime) {
-            // Establishes newState for userFlow at nowTime .
+        private void SetState(UserflowState newState,long nowTime) {
+            // Establishes newState for userflow at nowTime .
             state = newState;
-            isForegrounded = UserFlowReporter.isForegrounded;
+            isForegrounded = UserflowReporter.isForegrounded;
             switch (state) {
-                case UserFlowState.CANCELLED:
+                case UserflowState.CANCELLED:
                     SetEndTime(nowTime);
                     RemoveTimer();
                     break;
-                case UserFlowState.BEGUN:
+                case UserflowState.BEGUN:
                     SetBeginTime(nowTime);
                     if (isForegrounded) {
                         SetForegroundTime(nowTime);
@@ -89,19 +89,19 @@ namespace CrittercismSDK {
                         eyeTime += nowTime - foregroundTime;
                         isForegrounded = false;
                     }
-                    if (newState == UserFlowState.TIMEOUT) {
-                        Crittercism.OnUserFlowTimeOut(new CRUserFlowEventArgs(name));
+                    if (newState == UserflowState.TIMEOUT) {
+                        Crittercism.OnUserflowTimeOut(new CRUserflowEventArgs(name));
                     }
                     break;
             }
-            UserFlowReporter.Save(this);
+            UserflowReporter.Save(this);
         }
         private int ClampTimeout(int newTimeout) {
-            int answer = UserFlowReporter.ClampTimeout(name,newTimeout);
+            int answer = UserflowReporter.ClampTimeout(name,newTimeout);
             return answer;
         }
         internal int Timeout() {
-            // UserFlow timeout in milliseconds
+            // Userflow timeout in milliseconds
             int answer;
             lock (this) {
                 answer = timeout;
@@ -109,11 +109,11 @@ namespace CrittercismSDK {
             return answer;
         }
         internal void SetTimeout(int newTimeout) {
-            // Set new userFlow timeout in milliseconds.
+            // Set new userflow timeout in milliseconds.
             lock (this) {
                 if (IsFinal()) {
                     // Complain
-                    DebugUtils.LOG_ERROR("Changing final state userFlow is forbidden.");
+                    DebugUtils.LOG_ERROR("Changing final state userflow is forbidden.");
                 } else {
                     timeout = ClampTimeout(newTimeout);
                     if (isForegrounded) {
@@ -123,7 +123,7 @@ namespace CrittercismSDK {
             }
         }
         private int DefaultValue() {
-            int answer = UserFlowReporter.DefaultValue(name);
+            int answer = UserflowReporter.DefaultValue(name);
             return answer;
         }
         internal int Value() {
@@ -137,10 +137,10 @@ namespace CrittercismSDK {
             lock (this) {
                 if (IsFinal()) {
                     // Complain
-                    DebugUtils.LOG_ERROR("Changing final state userFlow is forbidden.");
+                    DebugUtils.LOG_ERROR("Changing final state userflow is forbidden.");
                 } else if (newValue < 0) {
                     // DESIGN: Decision by product team.
-                    DebugUtils.LOG_ERROR("Cannot assign userFlow a negative value");
+                    DebugUtils.LOG_ERROR("Cannot assign userflow a negative value");
                 } else {
                     value = newValue;
                 }
@@ -154,7 +154,7 @@ namespace CrittercismSDK {
             return answer;
         }
         internal long BeginTime() {
-            // Begin time of userFlow in ticks
+            // Begin time of userflow in ticks
             long answer;
             lock (this) {
                 answer = beginTime;
@@ -162,7 +162,7 @@ namespace CrittercismSDK {
             return answer;
         }
         private void SetBeginTime(long newBeginTime) {
-            // Set begin time of userFlow in ticks.
+            // Set begin time of userflow in ticks.
             DateTime begin_date = (new DateTime(newBeginTime,DateTimeKind.Utc));
             beginTimeString = TimeUtils.ISO8601DateString(begin_date);
             beginTime = newBeginTime;
@@ -175,7 +175,7 @@ namespace CrittercismSDK {
             return answer;
         }
         internal long EndTime() {
-            // End time of userFlow in ticks.
+            // End time of userflow in ticks.
             long answer;
             lock (this) {
                 answer = endTime;
@@ -183,7 +183,7 @@ namespace CrittercismSDK {
             return answer;
         }
         private void SetEndTime(long newEndTime) {
-            // Set end time of userFlow in ticks.
+            // Set end time of userflow in ticks.
             DateTime end_date = (new DateTime(newEndTime,DateTimeKind.Utc));
             endTimeString = TimeUtils.ISO8601DateString(end_date);
             endTime = newEndTime;
@@ -196,8 +196,8 @@ namespace CrittercismSDK {
             return answer;
         }
         internal long EyeTime() {
-            // The "eyeTime" of a userFlow is the sum of the lengths of the
-            // [F B] intervals that appeared in the userFlow's lifetime, in ticks.
+            // The "eyeTime" of a userflow is the sum of the lengths of the
+            // [F B] intervals that appeared in the userflow's lifetime, in ticks.
             // F = foreground time, B = background time .
             long answer;
             lock (this) {
@@ -231,9 +231,9 @@ namespace CrittercismSDK {
         #endregion
 
         #region Instance Life Cycle
-        private UserFlow() {
+        private Userflow() {
             name = "";
-            state = UserFlowState.CREATED;
+            state = UserflowState.CREATED;
             value = NULL_VALUE;
             metadata = new Dictionary<string,string>();
             // 0 ticks corresponds to reference date of
@@ -248,46 +248,46 @@ namespace CrittercismSDK {
             eyeTime = 0;
             SetForegroundTime(referenceTime);
         }
-        internal UserFlow(string name,int value) : this() {
+        internal Userflow(string name,int value) : this() {
             this.name = StringUtils.TruncateString(name,MAX_NAME_LENGTH);
-            // timeout in milliseconds (Applying "userFlow specific configuration"
-            // can only be done after we know "name" of this userFlow.)
+            // timeout in milliseconds (Applying "userflow specific configuration"
+            // can only be done after we know "name" of this userflow.)
             timeout = ClampTimeout(Int32.MaxValue);
             if (value == NULL_VALUE) {
                 value = DefaultValue();
             }
             this.value = value;
-            UserFlowReporter.Save(this);
+            UserflowReporter.Save(this);
         }
-        internal UserFlow(string name) : this(name,NULL_VALUE) {
+        internal Userflow(string name) : this(name,NULL_VALUE) {
         }
-        internal UserFlow(string name,long beginTime,long endTime) : this(name,0) {
+        internal Userflow(string name,long beginTime,long endTime) : this(name,0) {
             ////////////////////////////////////////////////////////////////
             // Input:
-            //    name = userFlow name
-            //    beginTime = userFlow begin time in ticks
-            //    endTime = userFlow end time in ticks
-            // NOTE: Automatic userFlows ("App Load", "App Foreground", "App Background")
+            //    name = userflow name
+            //    beginTime = userflow begin time in ticks
+            //    endTime = userflow end time in ticks
+            // NOTE: Automatic userflows ("App Load", "App Foreground", "App Background")
             ////////////////////////////////////////////////////////////////
-            state = UserFlowState.ENDED;
+            state = UserflowState.ENDED;
             SetBeginTime(beginTime);
             SetEndTime(endTime);
             eyeTime = endTime - beginTime;
             SetForegroundTime(beginTime);
             // This "Save" needs to occur after the "state" assigned above is known.
-            UserFlowReporter.Save(this);
+            UserflowReporter.Save(this);
         }
-        internal UserFlow(
+        internal Userflow(
             string name,
-            UserFlowState state,
+            UserflowState state,
             int timeout,
             int value,
             Dictionary<string,string> metadata,
             long beginTime,
             long endTime,
             long eyeTime) {
-            // This constructor only used by UserFlowConvert ReadJson for finished
-            // UserFlow's appearing in either a UserFlowReport or a Crash report.
+            // This constructor only used by UserflowConvert ReadJson for finished
+            // Userflow's appearing in either a UserflowReport or a Crash report.
             this.name = name;
             this.state = state;
             this.timeout = timeout; // milliseconds
@@ -302,68 +302,68 @@ namespace CrittercismSDK {
         #region State Transitions
         internal void Begin() {
             lock (this) {
-                Transition(UserFlowState.BEGUN);
+                Transition(UserflowState.BEGUN);
             }
         }
         internal void Cancel() {
             lock (this) {
-                Transition(UserFlowState.CANCELLED);
+                Transition(UserflowState.CANCELLED);
             }
         }
         internal void End() {
             lock (this) {
-                Transition(UserFlowState.ENDED);
+                Transition(UserflowState.ENDED);
             }
         }
         internal void Fail() {
             lock (this) {
-                Transition(UserFlowState.FAILED);
+                Transition(UserflowState.FAILED);
             }
         }
         internal void Crash() {
             lock (this) {
-                Transition(UserFlowState.CRASHED);
+                Transition(UserflowState.CRASHED);
             }
         }
         private bool IsFinal() {
-            // UserFlow is in final state?
-            bool answer = ((state != UserFlowState.CREATED) && (state != UserFlowState.BEGUN));
+            // Userflow is in final state?
+            bool answer = ((state != UserflowState.CREATED) && (state != UserflowState.BEGUN));
             return answer;
         }
-        internal void Transition(UserFlowState newState) {
-            // Transition a userFlow from current state to newState .
-            if (newState == UserFlowState.CANCELLED) {
+        internal void Transition(UserflowState newState) {
+            // Transition a userflow from current state to newState .
+            if (newState == UserflowState.CANCELLED) {
                 SetState(newState,DateTime.UtcNow.Ticks);
             } else {
                 switch (state) {
-                    case UserFlowState.CREATED:
-                        if (newState == UserFlowState.BEGUN) {
+                    case UserflowState.CREATED:
+                        if (newState == UserflowState.BEGUN) {
                             SetState(newState,DateTime.UtcNow.Ticks);
-                        } else if (newState == UserFlowState.CRASHED) {
-                            // NOP. Leave userFlow in CREATED state.
+                        } else if (newState == UserflowState.CRASHED) {
+                            // NOP. Leave userflow in CREATED state.
                         } else {
-                            // UserFlow being begun for the first time after create.
+                            // Userflow being begun for the first time after create.
                             // Crittercism spec says newState has to be
-                            // UserFlowState.BEGUN in this case unless there is change
-                            // of opinion about immediately failing a userFlow possibility.
-                            DebugUtils.LOG_ERROR("Ending userFlow that hasn't begun is forbidden.");
+                            // UserflowState.BEGUN in this case unless there is change
+                            // of opinion about immediately failing a userflow possibility.
+                            DebugUtils.LOG_ERROR("Ending userflow that hasn't begun is forbidden.");
                         }
                         break;
-                    case UserFlowState.BEGUN:
-                        if (newState != UserFlowState.BEGUN) {
+                    case UserflowState.BEGUN:
+                        if (newState != UserflowState.BEGUN) {
                             SetState(newState,DateTime.UtcNow.Ticks);
                         } else {
-                            // Complain. Crittercism spec says you shouldn't begin userFlow
+                            // Complain. Crittercism spec says you shouldn't begin userflow
                             // more than once.
-                            DebugUtils.LOG_ERROR("Beginning userFlow more than once is forbidden.");
+                            DebugUtils.LOG_ERROR("Beginning userflow more than once is forbidden.");
                         }
                         break;
                     default:
-                        if (newState != UserFlowState.TIMEOUT) {
+                        if (newState != UserflowState.TIMEOUT) {
                             // Already in final state.  We are only checking for TIMEOUT to prevent
-                            // printing this message (the UserFlow must have entered some final
+                            // printing this message (the Userflow must have entered some final
                             // state in the nick of time).
-                            DebugUtils.LOG_ERROR("Ending userFlow more than once is forbidden.");
+                            DebugUtils.LOG_ERROR("Ending userflow more than once is forbidden.");
                         }
                         break;
                 }
@@ -373,7 +373,7 @@ namespace CrittercismSDK {
 
         #region JSON
         internal JArray ToJArray() {
-            // Per "UserFlows Wire Protocol - v1", timeout and eyeTime are returned in seconds.
+            // Per "Userflows Wire Protocol - v1", timeout and eyeTime are returned in seconds.
             List<JToken> list = new List<JToken>();
             list.Add(name);
             list.Add((int)state);
@@ -397,16 +397,16 @@ namespace CrittercismSDK {
 
         // #region Metadata
         // An archaeological curiousity.  Original iOS/Android SDK
-        // userFlow design called for userFlows to allow metadata.
+        // userflow design called for userflows to allow metadata.
         // Since then, Crittercism has not exposed API's in SDK's that
         // make it available to users.
         // #endregion
 
         #region Notifications
         internal void Foreground(long foregroundTime) {
-            // Called by UserFlowReporter's "Foreground" method when app foregrounds.
+            // Called by UserflowReporter's "Foreground" method when app foregrounds.
             lock (this) {
-                if (state == UserFlowState.BEGUN) {
+                if (state == UserflowState.BEGUN) {
                     SetForegroundTime(foregroundTime);
                     isForegrounded = true;
                     CreateTimer();
@@ -414,9 +414,9 @@ namespace CrittercismSDK {
             }
         }
         internal void Background(long backgroundTime) {
-            // Called by UserFlowReporter's "Background" method when app backgrounds.
+            // Called by UserflowReporter's "Background" method when app backgrounds.
             lock (this) {
-                if (state == UserFlowState.BEGUN) {
+                if (state == UserflowState.BEGUN) {
                     RemoveTimer();
                     eyeTime = (eyeTime + backgroundTime - foregroundTime);
                     isForegrounded = false;
@@ -426,12 +426,12 @@ namespace CrittercismSDK {
         #endregion
 
         #region Persistence
-        internal static UserFlow[] AllUserFlows() {
-            return UserFlowReporter.AllUserFlows();
+        internal static Userflow[] AllUserflows() {
+            return UserflowReporter.AllUserflows();
         }
 
-        internal static UserFlow UserFlowForName(string name) {
-            return UserFlowReporter.UserFlowForName(name);
+        internal static Userflow UserflowForName(string name) {
+            return UserflowReporter.UserflowForName(name);
         }
         #endregion
 
@@ -456,7 +456,7 @@ namespace CrittercismSDK {
                     int milliseconds = timeout - (int)(eyeTime / TimeUtils.TICKS_PER_MSEC);
                     if (milliseconds <= 0) {
                         // If remaining time is nonpositive, just timeout here
-                        Transition(UserFlowState.TIMEOUT);
+                        Transition(UserflowState.TIMEOUT);
                     } else {
                         // Otherwise
                         CreateTimerMilliseconds(milliseconds);
@@ -490,16 +490,16 @@ namespace CrittercismSDK {
 
 #if NETFX_CORE || WINDOWS_PHONE
         private void OnTimerElapsed(ThreadPoolTimer timer) {
-            // The userFlow has timed out.
+            // The userflow has timed out.
             lock (this) {
-                Transition(UserFlowState.TIMEOUT);
+                Transition(UserflowState.TIMEOUT);
             }
         }
 #else
         private void OnTimerElapsed(Object source, ElapsedEventArgs e) {
-            // The userFlow has timed out.
+            // The userflow has timed out.
             lock (this) {
-                Transition(UserFlowState.TIMEOUT);
+                Transition(UserflowState.TIMEOUT);
             }
         }
 #endif // NETFX_CORE

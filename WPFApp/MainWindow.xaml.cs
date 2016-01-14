@@ -25,7 +25,7 @@ namespace WPFApp {
 
         public MainWindow() {
             InitializeComponent();
-            Crittercism.UserFlowTimeOut += UserFlowTimeOutHandler;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -89,47 +89,47 @@ namespace WPFApp {
                 WebExceptionStatus.Success);
         }
 
-        private const string beginUserFlowLabel = "Begin UserFlow";
-        private const string endUserFlowLabel = "End UserFlow";
-        private string[] userFlowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private string userFlowName;
-        private void userFlowClick(object sender,RoutedEventArgs e) {
+        private const string beginUserflowLabel = "Begin Userflow";
+        private const string endUserflowLabel = "End Userflow";
+        private string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private string userflowName;
+        private void userflowClick(object sender,RoutedEventArgs e) {
             Button button = sender as Button;
             if (button != null) {
-                Debug.Assert(button == userFlowButton);
+                Debug.Assert(button == userflowButton);
                 String label = button.Content.ToString();
-                if (label == beginUserFlowLabel) {
-                    userFlowName = userFlowNames[random.Next(0,userFlowNames.Length)];
-                    Crittercism.BeginUserFlow(userFlowName);
-                    button.Content = endUserFlowLabel;
-                } else if (label == endUserFlowLabel) {
-                    EndUserFlowDialog dialog = new EndUserFlowDialog();
+                if (label == beginUserflowLabel) {
+                    userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(userflowName);
+                    button.Content = endUserflowLabel;
+                } else if (label == endUserflowLabel) {
+                    EndUserflowDialog dialog = new EndUserflowDialog();
                     dialog.Owner = Window.GetWindow(this);
                     dialog.ShowDialog();
                     Nullable<bool> dialogResult = dialog.DialogResult;
                     if (dialogResult == true) {
                         switch (dialog.Answer) {
-                            case "End UserFlow":
-                                Crittercism.EndUserFlow(userFlowName);
+                            case "End Userflow":
+                                Crittercism.EndUserflow(userflowName);
                                 break;
-                            case "Fail UserFlow":
-                                Crittercism.FailUserFlow(userFlowName);
+                            case "Fail Userflow":
+                                Crittercism.FailUserflow(userflowName);
                                 break;
-                            case "Cancel UserFlow":
-                                Crittercism.CancelUserFlow(userFlowName);
+                            case "Cancel Userflow":
+                                Crittercism.CancelUserflow(userflowName);
                                 break;
                         }
-                        button.Content = beginUserFlowLabel;
+                        button.Content = beginUserflowLabel;
                     }
                 }
             }
         }
-        private void UserFlowTimeOutHandler(object sender,EventArgs e) {
-            Debug.WriteLine("The userFlow timed out.");
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Debug.WriteLine("The userflow timed out.");
             // Execute this Action on the main UI thread.
-            userFlowButton.Dispatcher.Invoke(new Action(() => {
-                userFlowButton.Content = beginUserFlowLabel;
-                string name = ((CRUserFlowEventArgs)e).Name;
+            userflowButton.Dispatcher.Invoke(new Action(() => {
+                userflowButton.Content = beginUserflowLabel;
+                string name = ((CRUserflowEventArgs)e).Name;
                 string message = String.Format("'{0}' Timed Out", name);
                 MessageBox.Show(this,message,"WPFApp",MessageBoxButton.OK);
             }));

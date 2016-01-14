@@ -19,7 +19,7 @@ namespace WindowsFormsApp {
 
         public MainWindow() {
             InitializeComponent();
-            Crittercism.UserFlowTimeOut += UserFlowTimeOutHandler;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
             ApplicationOpenFormsCount++;
         }
 
@@ -159,45 +159,45 @@ namespace WindowsFormsApp {
             (new MainWindow()).Show();
         }
 
-        private const string beginUserFlowLabel = "Begin UserFlow";
-        private const string endUserFlowLabel = "End UserFlow";
-        private string[] userFlowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private string userFlowName;
-        private void userFlowButton_Click(object sender,EventArgs e) {
+        private const string beginUserflowLabel = "Begin Userflow";
+        private const string endUserflowLabel = "End Userflow";
+        private string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private string userflowName;
+        private void userflowButton_Click(object sender,EventArgs e) {
             Button button = sender as Button;
             if (button != null) {
                 String label = button.Text;
-                if (label == beginUserFlowLabel) {
-                    userFlowName = userFlowNames[random.Next(0,userFlowNames.Length)];
-                    Crittercism.BeginUserFlow(userFlowName);
-                    button.Text = endUserFlowLabel;
-                } else if (label == endUserFlowLabel) {
-                    EndUserFlowDialog dialog = new EndUserFlowDialog();
+                if (label == beginUserflowLabel) {
+                    userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(userflowName);
+                    button.Text = endUserflowLabel;
+                } else if (label == endUserflowLabel) {
+                    EndUserflowDialog dialog = new EndUserflowDialog();
                     dialog.Owner = this;
                     dialog.ShowDialog();
                     if (dialog.DialogResult == DialogResult.Yes) {
                         switch (dialog.Answer) {
-                            case "End UserFlow":
-                                Crittercism.EndUserFlow(userFlowName);
+                            case "End Userflow":
+                                Crittercism.EndUserflow(userflowName);
                                 break;
-                            case "Fail UserFlow":
-                                Crittercism.FailUserFlow(userFlowName);
+                            case "Fail Userflow":
+                                Crittercism.FailUserflow(userflowName);
                                 break;
-                            case "Cancel UserFlow":
-                                Crittercism.CancelUserFlow(userFlowName);
+                            case "Cancel Userflow":
+                                Crittercism.CancelUserflow(userflowName);
                                 break;
                         }
-                        button.Text = beginUserFlowLabel;
+                        button.Text = beginUserflowLabel;
                     }
                 }
             }
         }
-        private void UserFlowTimeOutHandler(object sender,EventArgs e) {
-            Debug.WriteLine("The userFlow timed out.");
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Debug.WriteLine("The userflow timed out.");
             // Execute this Action on the main UI thread.
             this.Invoke((MethodInvoker)delegate {
-                userFlowButton.Text = beginUserFlowLabel;
-                string name = ((CRUserFlowEventArgs)e).Name;
+                userflowButton.Text = beginUserflowLabel;
+                string name = ((CRUserflowEventArgs)e).Name;
                 string message = String.Format("'{0}' Timed Out",name);
                 MessageBox.Show(this,message,"WindowsFormsApp",MessageBoxButtons.OK);
             });

@@ -18,32 +18,32 @@ using CrittercismSDK;
 namespace WPFApp
 {
     /// <summary>
-    /// Interaction logic for EndUserFlowDialog.xaml
+    /// Interaction logic for EndUserflowDialog.xaml
     /// </summary>
-    public partial class EndUserFlowDialog : Window
+    public partial class EndUserflowDialog : Window
     {
         // Dialog return value
         private string answer;
         public string Answer {
             get { return answer; }
         }
-        public EndUserFlowDialog()
+        public EndUserflowDialog()
         {
             InitializeComponent();
         }
-        private void endUserFlowClick(object sender,RoutedEventArgs e) {
+        private void endUserflowClick(object sender,RoutedEventArgs e) {
             // Set dialog return value
-            answer = "End UserFlow";
+            answer = "End Userflow";
             this.DialogResult = true;
         }
-        private void failUserFlowClick(object sender,RoutedEventArgs e) {
+        private void failUserflowClick(object sender,RoutedEventArgs e) {
             // Set dialog return value
-            answer = "Fail UserFlow";
+            answer = "Fail Userflow";
             this.DialogResult = true;
         }
-        private void cancelUserFlowClick(object sender,RoutedEventArgs e) {
+        private void cancelUserflowClick(object sender,RoutedEventArgs e) {
             // Set dialog return value
-            answer = "Cancel UserFlow";
+            answer = "Cancel Userflow";
             this.DialogResult = true;
         }
         private void Window_Closed(object sender,EventArgs e) {

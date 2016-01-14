@@ -60,11 +60,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="EndUserFlowDialog.xaml.cs">
-      <DependentUpon>EndUserFlowDialog.xaml</DependentUpon>
+    <Compile Include="EndUserflovvDialog.xaml.cs">
+      <DependentUpon>EndUserflovvDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Worker.cs" />
-    <Page Include="EndUserFlowDialog.xaml">
+    <Page Include="EndUserflovvDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

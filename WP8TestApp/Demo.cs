@@ -13,33 +13,33 @@ using CrittercismSDK;
 
 namespace WP8TestApp {
     class Demo {
-        internal static void UserFlowTimeOutHandler(Page page,EventArgs e) {
-            // UserFlow timed out.
+        internal static void UserflowTimeOutHandler(Page page,EventArgs e) {
+            // Userflow timed out.
             page.Dispatcher.BeginInvoke(new Action(() => {
                 // This page is being shown?
                 Frame frame = page.Parent as Frame;
                 bool shown = ((frame != null) && (frame.Content == page));
                 if (shown) {
-                    // Show userFlow "Timed Out" dialog.
-                    UserFlowTimeOutShowMessage(e);
+                    // Show userflow "Timed Out" dialog.
+                    UserflowTimeOutShowMessage(e);
                 }
                 if (page is CrashSim) {
-                    // Change label of userFlowButton back to "Begin UserFlow".
+                    // Change label of userflowButton back to "Begin Userflow".
                     CrashSim sectionPage = (CrashSim)page;
-                    sectionPage.userFlowButton.Content = "Begin UserFlow";
-                } else if (page is EndUserFlow) {
+                    sectionPage.userflowButton.Content = "Begin Userflow";
+                } else if (page is EndUserflow) {
                     if (shown) {
-                        // We've found ourselves currently on the "End UserFlow" Page .
-                        EndUserFlow sectionPage = (EndUserFlow)page;
+                        // We've found ourselves currently on the "End Userflow" Page .
+                        EndUserflow sectionPage = (EndUserflow)page;
                         sectionPage.GoBack();
                     }
                 }
             }));
         }
-        private static void UserFlowTimeOutShowMessage(EventArgs e) {
-            // Show MessageBox routine for caller UserFlowTimeOutHandler
-            string name = ((CRUserFlowEventArgs)e).Name;
-            string message = String.Format("UserFlow '{0}'\r\nTimed Out",name);
+        private static void UserflowTimeOutShowMessage(EventArgs e) {
+            // Show MessageBox routine for caller UserflowTimeOutHandler
+            string name = ((CRUserflowEventArgs)e).Name;
+            string message = String.Format("Userflow '{0}'\r\nTimed Out",name);
             Debug.WriteLine(message);
             MessageBox.Show(message,"WP8TestApp",MessageBoxButton.OK);
         }
