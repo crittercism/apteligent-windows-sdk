@@ -51,11 +51,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EndUserflovvDialog.cs">
+    <Compile Include="EndUserflowDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="EndUserflovvDialog.Designer.cs">
-      <DependentUpon>EndUserflovvDialog.cs</DependentUpon>
+    <Compile Include="EndUserflowDialog.Designer.cs">
+      <DependentUpon>EndUserflowDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
@@ -66,8 +66,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Worker.cs" />
-    <EmbeddedResource Include="EndUserflovvDialog.resx">
-      <DependentUpon>EndUserflovvDialog.cs</DependentUpon>
+    <EmbeddedResource Include="EndUserflowDialog.resx">
+      <DependentUpon>EndUserflowDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
