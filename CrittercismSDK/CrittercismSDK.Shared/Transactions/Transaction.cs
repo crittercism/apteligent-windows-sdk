@@ -409,6 +409,7 @@ namespace CrittercismSDK {
                 if (state == TransactionState.BEGUN) {
                     SetForegroundTime(foregroundTime);
                     isForegrounded = true;
+                    CreateTimer();
                 }
             }
         }
