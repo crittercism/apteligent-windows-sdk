@@ -14,8 +14,10 @@ namespace CrittercismSDK {
     internal class UserflowReport : MessageReport {
         [DataMember]
         public Dictionary<string,object> appState { get; internal set; }
+        // COUGH.  This member variable MUST remain named "transactions"
+        // per Wire Protocol if end-to-end with platform is going to work.
         [DataMember]
-        public List<Userflow> userflows { get; internal set; }
+        public List<Userflow> transactions { get; internal set; }
         [DataMember]
         public List<UserBreadcrumb> breadcrumbs { get; internal set; }
         [DataMember]
@@ -31,7 +33,7 @@ namespace CrittercismSDK {
             List<Breadcrumb> systemBreadcrumbs,
             List<Endpoint> endpoints) {
             this.appState = appState;
-            this.userflows = userflows;
+            this.transactions = userflows;
             this.breadcrumbs = breadcrumbs;
             this.systemBreadcrumbs = systemBreadcrumbs;
             this.endpoints = endpoints;
