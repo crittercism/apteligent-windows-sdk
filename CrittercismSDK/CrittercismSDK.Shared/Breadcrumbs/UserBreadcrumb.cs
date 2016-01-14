@@ -13,7 +13,7 @@ namespace CrittercismSDK {
         // NOTE: RE LEGACY "Windows style" BREADCRUMBS (windowsStyle = true)
         // * Platform's "crash" and "errors" Windows endpoints currently
         // want the legacy "Windows style" dictionary object format.
-        // * Platform's "transactions" endpoint only accepts the newer
+        // * Platform's "txn.ingest" endpoint only accepts the newer
         // array format.
         ////////////////////////////////////////////////////////////////
 

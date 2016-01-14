@@ -56,8 +56,8 @@
             <Button Grid.Row="2" Grid.Column="1"
                 Content="Network Request" HorizontalAlignment="Left" VerticalAlignment="Center" Click="logNetworkRequestClick" Width="266"/>
             <Button Grid.Row="3" Grid.Column="1"
-                Name="transactionButton"
-                Content="Begin Transaction" HorizontalAlignment="Left" VerticalAlignment="Center" Click="transactionClick" Width="266"/>
+                Name="userFlowButton"
+                Content="Begin UserFlow" HorizontalAlignment="Left" VerticalAlignment="Center" Click="userFlowClick" Width="266"/>
             <Button Grid.Row="4" Grid.Column="1"
                 Content="Handled Exception" HorizontalAlignment="Left" VerticalAlignment="Center" Click="handledExceptionClick" Width="266"/>
             <Button Grid.Row="5" Grid.Column="1"

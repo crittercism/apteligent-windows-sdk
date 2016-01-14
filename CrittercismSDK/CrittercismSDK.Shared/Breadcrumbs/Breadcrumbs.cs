@@ -269,7 +269,7 @@ namespace CrittercismSDK {
             return answer;
         }
         internal static List<UserBreadcrumb> ExtractUserBreadcrumbs(long beginTime,long endTime) {
-            // Extract UserBreadcrumb's from converted userBreadcrumb's filtered by time. (TransactionReport "breadcrumbs")
+            // Extract UserBreadcrumb's from converted userBreadcrumb's filtered by time. (UserFlowReport "breadcrumbs")
             List<Breadcrumb> list = userBreadcrumbs.RecentBreadcrumbs(beginTime,endTime);
             {
                 Breadcrumb sessionStartBreadcrumb = SessionStartBreadcrumb(userBreadcrumbs.current_session);
@@ -309,7 +309,7 @@ namespace CrittercismSDK {
             return ExtractEndpointsFromBreadcrumbs(breadcrumbs);
         }
         internal static List<Endpoint> ExtractEndpoints(long beginTime,long endTime) {
-            // Extract Endpoint's from all Network Breadcrumb's filtered by time. (TransactionReport "endpoints".)
+            // Extract Endpoint's from all Network Breadcrumb's filtered by time. (UserFlowReport "endpoints".)
             List<Breadcrumb> breadcrumbs = NetworkBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
             return ExtractEndpointsFromBreadcrumbs(breadcrumbs);
         }
@@ -318,7 +318,7 @@ namespace CrittercismSDK {
             return new List<Breadcrumb>(current_session);
         }
         internal List<Breadcrumb> RecentBreadcrumbs(long beginTime,long endTime) {
-            // Recent Breadcrumb's filtered by time . (TransactionReport "systemBreadcrumbs".)
+            // Recent Breadcrumb's filtered by time . (UserFlowReport "systemBreadcrumbs".)
             List<Breadcrumb> answer = new List<Breadcrumb>();
             foreach (Breadcrumb breadcrumb in current_session) {
                 long breadcrumbTime = TimeUtils.StringToTicks(breadcrumb.GetTimestamp());

@@ -229,29 +229,29 @@ namespace UnitTest {
             Assert.AreEqual(json1,json3);
         }
         [TestMethod]
-        public void TransactionJsonTest() {
+        public void UserFlowJsonTest() {
             string timestamp = TimeUtils.ISO8601DateString(DateTime.UtcNow);
-            Transaction transaction1 = new Transaction(
+            UserFlow userFlow1 = new UserFlow(
                 "Buy Critter Feed",
-                TransactionState.ENDED,
+                UserFlowState.ENDED,
                 3600000,
                 10000,//-2147483648,
                 new Dictionary<string,string>(),
                 635847638748307732L,
                 635847638922943221L,
                 174635489L);
-            // Testing TransactionConverter WriteJson
-            string json1 = JsonConvert.SerializeObject(transaction1);
+            // Testing UserFlowConverter WriteJson
+            string json1 = JsonConvert.SerializeObject(userFlow1);
             Debug.WriteLine(json1);
             Assert.AreEqual(json1,"[\"Buy Critter Feed\",2,3600.0,10000,{},\"2015-12-03T18:24:34.830Z\",\"2015-12-03T18:24:52.294Z\",17.4635489]");
-            string json2 = JsonConvert.SerializeObject(transaction1,Formatting.None,new TransactionConverter());
+            string json2 = JsonConvert.SerializeObject(userFlow1,Formatting.None,new UserFlowConverter());
             Debug.WriteLine("json1 == " + json1);
             Debug.WriteLine("json2 == " + json2);
             Assert.AreEqual(json1,json2);
-            // Testing TransactionConverter ReadJson
-            Transaction transaction2 = JsonConvert.DeserializeObject(json1,typeof(Transaction)) as Transaction;
-            Assert.IsNotNull(transaction2);
-            string json3 = JsonConvert.SerializeObject(transaction2);
+            // Testing UserFlowConverter ReadJson
+            UserFlow userFlow2 = JsonConvert.DeserializeObject(json1,typeof(UserFlow)) as UserFlow;
+            Assert.IsNotNull(userFlow2);
+            string json3 = JsonConvert.SerializeObject(userFlow2);
             Debug.WriteLine("json3 == " + json3);
             Assert.AreEqual(json1,json3);
         }

@@ -33,7 +33,7 @@ namespace WindowsFormsApp {
             this.newWindowButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.logNetworkRequestButton = new System.Windows.Forms.Button();
-            this.transactionButton = new System.Windows.Forms.Button();
+            this.userFlowButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -127,18 +127,18 @@ namespace WindowsFormsApp {
             this.logNetworkRequestButton.UseVisualStyleBackColor = true;
             this.logNetworkRequestButton.Click += new System.EventHandler(this.logNetworkRequest_Click);
             // 
-            // transactionButton
+            // userFlowButton
             // 
-            this.transactionButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.transactionButton.ForeColor = System.Drawing.Color.DarkGreen;
-            this.transactionButton.Location = new System.Drawing.Point(77, 234);
-            this.transactionButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
-            this.transactionButton.Name = "transactionButton";
-            this.transactionButton.Size = new System.Drawing.Size(280, 58);
-            this.transactionButton.TabIndex = 7;
-            this.transactionButton.Text = "Begin Transaction";
-            this.transactionButton.UseVisualStyleBackColor = true;
-            this.transactionButton.Click += new System.EventHandler(this.transactionButton_Click);
+            this.userFlowButton.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.userFlowButton.ForeColor = System.Drawing.Color.DarkGreen;
+            this.userFlowButton.Location = new System.Drawing.Point(77, 234);
+            this.userFlowButton.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.userFlowButton.Name = "userFlowButton";
+            this.userFlowButton.Size = new System.Drawing.Size(280, 58);
+            this.userFlowButton.TabIndex = 7;
+            this.userFlowButton.Text = "Begin UserFlow";
+            this.userFlowButton.UseVisualStyleBackColor = true;
+            this.userFlowButton.Click += new System.EventHandler(this.userFlowButton_Click);
             // 
             // MainWindow
             // 
@@ -146,7 +146,7 @@ namespace WindowsFormsApp {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Honeydew;
             this.ClientSize = new System.Drawing.Size(435, 537);
-            this.Controls.Add(this.transactionButton);
+            this.Controls.Add(this.userFlowButton);
             this.Controls.Add(this.logNetworkRequestButton);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.newWindowButton);
@@ -173,7 +173,7 @@ namespace WindowsFormsApp {
         private System.Windows.Forms.Button newWindowButton;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button logNetworkRequestButton;
-        private System.Windows.Forms.Button transactionButton;
+        private System.Windows.Forms.Button userFlowButton;
     }
 }
 

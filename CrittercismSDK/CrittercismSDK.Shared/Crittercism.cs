@@ -137,7 +137,7 @@ namespace CrittercismSDK {
         #endregion Properties
 
         #region Events
-        public static event EventHandler TransactionTimeOut;
+        public static event EventHandler UserFlowTimeOut;
         #endregion
 
         #region OptOutStatus
@@ -371,11 +371,11 @@ namespace CrittercismSDK {
                         return;
                     }
                     AppID = appID;
-                    // Put default initialized Settings before APM.Init() and TransactionReporter.Init() .
+                    // Put default initialized Settings before APM.Init() and UserFlowReporter.Init() .
                     Settings = LoadSettings();
                     APM.Init();
                     MessageReport.Init();
-                    TransactionReporter.Init();
+                    UserFlowReporter.Init();
                     AppVersion = LoadAppVersion();
                     DeviceId = LoadDeviceId();
                     DeviceModel = LoadDeviceModel();
@@ -425,7 +425,7 @@ namespace CrittercismSDK {
                 readerThread.Start();
                 // It seems sensible to put CreateAppLoadReport here after all the
                 // necessary Crittercism infrastructure to do so (including MessageQueue,
-                // TransactionReporter, readerThread, etc.) have been initialized above.
+                // UserFlowReporter, readerThread, etc.) have been initialized above.
                 CreateAppLoadReport();
             } catch (Exception) {
                 initialized = false;
@@ -466,7 +466,7 @@ namespace CrittercismSDK {
                             initialized = false;
                             // Stop the producers
                             APM.Shutdown();
-                            TransactionReporter.Shutdown();
+                            UserFlowReporter.Shutdown();
                             // Get the readerThread to exit.
                             readerEvent.Set();
 #if NETFX_CORE
@@ -496,10 +496,10 @@ namespace CrittercismSDK {
             }
             AppLoad appLoad = new AppLoad();
             AddMessageToQueue(appLoad);
-            CreateAppLoadTransaction();
+            CreateAppLoadUserFlow();
         }
-        private static void CreateAppLoadTransaction() {
-            // Automatic "App Load" Transaction
+        private static void CreateAppLoadUserFlow() {
+            // Automatic "App Load" UserFlow
             long now = DateTime.UtcNow.Ticks;
 #if NETFX_CORE || WINDOWS_PHONE
             long beginTime = StartTime;
@@ -513,7 +513,7 @@ namespace CrittercismSDK {
 #endif
             long endTime = now;
             Debug.WriteLine("App Load time == " + (1.0E-7) * (endTime - beginTime) + " seconds");
-            new Transaction("App Load",beginTime,endTime);
+            new UserFlow("App Load",beginTime,endTime);
         }
         #endregion AppLoads
 
@@ -612,10 +612,10 @@ namespace CrittercismSDK {
                 UserBreadcrumbs breadcrumbs = Breadcrumbs.GetAllSessionsBreadcrumbs();
                 List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
-                List<Transaction> transactions = TransactionReporter.CrashTransactions();
+                List<UserFlow> userFlows = UserFlowReporter.CrashUserFlows();
                 string stacktrace = StackTrace(e);
                 ExceptionObject exception = new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                CrashReport crashReport = new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,transactions,exception);
+                CrashReport crashReport = new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,userFlows,exception);
                 // Add crash to message queue and save state .
                 Shutdown();
                 AddMessageToQueue(crashReport);
@@ -716,7 +716,7 @@ namespace CrittercismSDK {
                     Settings = response;
                     SaveSettings(json);
                     APM.SettingsChange();
-                    TransactionReporter.SettingsChange();
+                    UserFlowReporter.SettingsChange();
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -767,130 +767,130 @@ namespace CrittercismSDK {
         }
         #endregion
 
-        #region Transactions
-        internal static void OnTransactionTimeOut(EventArgs e) {
-            EventHandler handler = TransactionTimeOut;
+        #region UserFlows
+        internal static void OnUserFlowTimeOut(EventArgs e) {
+            EventHandler handler = UserFlowTimeOut;
             if (handler != null) {
                 handler(null,e);
             }
         }
 
-        public static void BeginTransaction(string name) {
-            // Init and begin a transaction with a default value.
+        public static void BeginUserFlow(string name) {
+            // Init and begin a userFlow with a default value.
             try {
-                AbortTransaction(name);
-                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
-                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
-                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
-                                                       + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
-                                                       TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                AbortUserFlow(name);
+                // Do not begin a new userFlow if the userFlow count is at or has exceeded the max.
+                if (UserFlowReporter.UserFlowCount() >= UserFlowReporter.MAX_USERFLOW_COUNT) {
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent userFlows."
+                                                       + "\r\nIgnoring Crittercism.BeginUserFlow() call for {1}."),
+                                                       UserFlowReporter.MAX_USERFLOW_COUNT,name));
                     return;
                 }
-                (new Transaction(name)).Begin();
+                (new UserFlow(name)).Begin();
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void BeginTransaction(string name,int value) {
-            // Init and begin a transaction with an input value.
+        public static void BeginUserFlow(string name,int value) {
+            // Init and begin a userFlow with an input value.
             try {
-                AbortTransaction(name);
-                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
-                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
-                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
-                                                       + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
-                                                       TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                AbortUserFlow(name);
+                // Do not begin a new userFlow if the userFlow count is at or has exceeded the max.
+                if (UserFlowReporter.UserFlowCount() >= UserFlowReporter.MAX_USERFLOW_COUNT) {
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent userFlows."
+                                                       + "\r\nIgnoring Crittercism.BeginUserFlow() call for {1}."),
+                                                       UserFlowReporter.MAX_USERFLOW_COUNT,name));
                     return;
                 }
-                (new Transaction(name,value)).Begin();
+                (new UserFlow(name,value)).Begin();
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        private static void AbortTransaction(string name) {
-            // Cancel a transaction with this name if one exists, otherwise be quiet.
+        private static void AbortUserFlow(string name) {
+            // Cancel a userFlow with this name if one exists, otherwise be quiet.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    DebugUtils.LOG_WARN(String.Format("Cancelling unfinished identically named transaction {0}.",name));
-                    transaction.Cancel();
+                UserFlow userFlow = UserFlow.UserFlowForName(name);
+                if (userFlow != null) {
+                    DebugUtils.LOG_WARN(String.Format("Cancelling unfinished identically named userFlow {0}.",name));
+                    userFlow.Cancel();
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void CancelTransaction(string name) {
-            // Cancel a transaction as if it never was.
+        public static void CancelUserFlow(string name) {
+            // Cancel a userFlow as if it never was.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    transaction.Cancel();
+                UserFlow userFlow = UserFlow.UserFlowForName(name);
+                if (userFlow != null) {
+                    userFlow.Cancel();
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserFlow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void EndTransaction(string name) {
-            // End an already begun transaction successfully.
+        public static void EndUserFlow(string name) {
+            // End an already begun userFlow successfully.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    transaction.End();
+                UserFlow userFlow = UserFlow.UserFlowForName(name);
+                if (userFlow != null) {
+                    userFlow.End();
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserFlow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void FailTransaction(string name) {
-            // End an already begun transaction as a failure.
+        public static void FailUserFlow(string name) {
+            // End an already begun userFlow as a failure.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    transaction.Fail();
+                UserFlow userFlow = UserFlow.UserFlowForName(name);
+                if (userFlow != null) {
+                    userFlow.Fail();
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserFlow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static int GetTransactionValue(string name) {
-            // Get the currency cents value of a transaction.
+        public static int GetUserFlowValue(string name) {
+            // Get the currency cents value of a userFlow.
             int answer = 0;
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    answer = transaction.Value();
+                UserFlow userFlow = UserFlow.UserFlowForName(name);
+                if (userFlow != null) {
+                    answer = userFlow.Value();
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserFlow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
             return answer;
         }
-        public static void SetTransactionValue(string name,int value) {
-            // Set the currency cents value of a transaction.
+        public static void SetUserFlowValue(string name,int value) {
+            // Set the currency cents value of a userFlow.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    transaction.SetValue(value);
+                UserFlow userFlow = UserFlow.UserFlowForName(name);
+                if (userFlow != null) {
+                    userFlow.SetValue(value);
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserFlow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
 
-        internal static void CantFindTransaction(string name) {
+        internal static void CantFindUserFlow(string name) {
 #if NETFX_CORE || WINDOWS_PHONE
 #else
-            Trace.WriteLine(String.Format("Can't find transaction named \"{0}\"",name));
+            Trace.WriteLine(String.Format("Can't find userFlow named \"{0}\"",name));
 #endif
         }
 
@@ -1098,7 +1098,7 @@ namespace CrittercismSDK {
                         backgroundWorker.RunWorkerAsync();
                     }
                     // Above will (generally?) get Crittercism.Init called generating a
-                    // new automatic "App Load" transaction.
+                    // new automatic "App Load" userFlow.
                 } else {
                     Foreground();
                 }
@@ -1179,21 +1179,21 @@ namespace CrittercismSDK {
 
 #if NETFX_CORE || WINDOWS_PHONE
         private static void Foreground() {
-            // Automatic "App Foreground" Transaction
+            // Automatic "App Foreground" UserFlow
             long now = DateTime.UtcNow.Ticks;
-            new Transaction("App Foreground",now,now);
+            new UserFlow("App Foreground",now,now);
             Breadcrumbs.LeaveEventBreadcrumb("foregrounded");
             APM.Foreground();
-            TransactionReporter.Foreground();
+            UserFlowReporter.Foreground();
         }
 
         private static void Background() {
-            // Automatic "App Background" Transaction
+            // Automatic "App Background" UserFlow
             long now = DateTime.UtcNow.Ticks;
-            new Transaction("App Background",now,now);
+            new UserFlow("App Background",now,now);
             Breadcrumbs.LeaveEventBreadcrumb("backgrounded");
             APM.Background();
-            TransactionReporter.Background();
+            UserFlowReporter.Background();
         }
 #endif
 

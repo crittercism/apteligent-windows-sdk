@@ -45,20 +45,20 @@ namespace HubApp {
                         Crittercism.LogHandledException(ex);
                     }
                 }
-            } else if (itemId.Equals("Begin Transaction")) {
-                TransactionClick(frame,item);
+            } else if (itemId.Equals("Begin UserFlow")) {
+                UserFlowClick(frame,item);
             } else if (itemId.Equals("Crash")) {
                 ThrowException();
             } else {
-                // We are on "End Transaction" SectionPage .
+                // We are on "End UserFlow" SectionPage .
                 if (itemId.Equals("Succeed")) {
-                    Crittercism.EndTransaction(transactionName);
+                    Crittercism.EndUserFlow(userFlowName);
                 } else if (itemId.Equals("Fail")) {
-                    Crittercism.FailTransaction(transactionName);
+                    Crittercism.FailUserFlow(userFlowName);
                 } else if (itemId.Equals("Cancel")) {
-                    Crittercism.CancelTransaction(transactionName);
+                    Crittercism.CancelUserFlow(userFlowName);
                 };
-                transactionItem.Title = beginTransactionLabel;
+                userFlowItem.Title = beginUserFlowLabel;
                 frame.GoBack();
             }
         }
@@ -111,40 +111,40 @@ namespace HubApp {
                 (HttpStatusCode)responseCode,
                 WebExceptionStatus.Success);
         }
-        internal const string beginTransactionLabel = "Begin Transaction";
-        internal const string endTransactionLabel = "End Transaction";
-        private static string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private static string transactionName;
-        private static SampleDataItem transactionItem = null;
-        private static void TransactionClick(Frame frame,SampleDataItem item) {
-            // Conveniently remembering transactionItem so we can change its Title
-            // back to "Begin Transaction" later on.
-            transactionItem = item;
-            if (item.Title == beginTransactionLabel) {
-                // "Begin Transaction"
-                transactionName = transactionNames[random.Next(0,transactionNames.Length)];
-                Crittercism.BeginTransaction(transactionName);
-                item.Title = endTransactionLabel;
+        internal const string beginUserFlowLabel = "Begin UserFlow";
+        internal const string endUserFlowLabel = "End UserFlow";
+        private static string[] userFlowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private static string userFlowName;
+        private static SampleDataItem userFlowItem = null;
+        private static void UserFlowClick(Frame frame,SampleDataItem item) {
+            // Conveniently remembering userFlowItem so we can change its Title
+            // back to "Begin UserFlow" later on.
+            userFlowItem = item;
+            if (item.Title == beginUserFlowLabel) {
+                // "Begin UserFlow"
+                userFlowName = userFlowNames[random.Next(0,userFlowNames.Length)];
+                Crittercism.BeginUserFlow(userFlowName);
+                item.Title = endUserFlowLabel;
             } else {
-                // "End Transaction"
-                // This works because "End Transaction" == UniqueId of Groups[1]
+                // "End UserFlow"
+                // This works because "End UserFlow" == UniqueId of Groups[1]
                 frame.Navigate(typeof(SectionPage),item.Title);
             }
         }
 
-        internal static async void TransactionTimeOutHandler(Page page,EventArgs e) {
-            // Transaction timed out.
+        internal static async void UserFlowTimeOutHandler(Page page,EventArgs e) {
+            // UserFlow timed out.
             await page.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,async () => {
-                transactionItem.Title = beginTransactionLabel;
+                userFlowItem.Title = beginUserFlowLabel;
                 if (page.Frame.Content == page) {
                     // This page is being shown.
-                    await TransactionTimeOutShowMessage(e);
+                    await UserFlowTimeOutShowMessage(e);
                     if (page is SectionPage) {
                         SectionPage sectionPage = (SectionPage)page;
                         string title = sectionPage.Title();
                         Debug.WriteLine("PageTitle == " + title);
-                        if (title == "End Transaction") {
-                            // If we find ourselves currently on the "End Transaction" SectionPage .
+                        if (title == "End UserFlow") {
+                            // If we find ourselves currently on the "End UserFlow" SectionPage .
                             Frame frame = page.Frame;
                             frame.GoBack();
                         }
@@ -153,10 +153,10 @@ namespace HubApp {
             });
         }
 
-        private static async Task TransactionTimeOutShowMessage(EventArgs e) {
-            // Show MessageDialog routine for caller TransactionTimeOutHandler
-            string name = ((CRTransactionEventArgs)e).Name;
-            string message = String.Format("Transaction '{0}'\r\nTimed Out",name);
+        private static async Task UserFlowTimeOutShowMessage(EventArgs e) {
+            // Show MessageDialog routine for caller UserFlowTimeOutHandler
+            string name = ((CRUserFlowEventArgs)e).Name;
+            string message = String.Format("UserFlow '{0}'\r\nTimed Out",name);
             Debug.WriteLine(message);
             var messageDialog = new MessageDialog(message);
             messageDialog.Commands.Add(new UICommand("Close"));

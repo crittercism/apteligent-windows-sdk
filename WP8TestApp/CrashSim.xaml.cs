@@ -18,7 +18,7 @@ namespace WP8TestApp {
 
         public CrashSim() {
             InitializeComponent();
-            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
+            Crittercism.UserFlowTimeOut += UserFlowTimeOutHandler;
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -86,25 +86,25 @@ namespace WP8TestApp {
                 WebExceptionStatus.Success);
         }
 
-        private const string beginTransactionLabel = "Begin Transaction";
-        private const string endTransactionLabel = "End Transaction";
-        private string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private void transactionClick(object sender,RoutedEventArgs e) {
+        private const string beginUserFlowLabel = "Begin UserFlow";
+        private const string endUserFlowLabel = "End UserFlow";
+        private string[] userFlowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private void userFlowClick(object sender,RoutedEventArgs e) {
             Button button = sender as Button;
             if (button != null) {
-                Debug.Assert(button == transactionButton);
+                Debug.Assert(button == userFlowButton);
                 String label = button.Content.ToString();
-                if (label == beginTransactionLabel) {
-                    App.transactionName = transactionNames[random.Next(0,transactionNames.Length)];
-                    Crittercism.BeginTransaction(App.transactionName);
-                    button.Content = endTransactionLabel;
-                } else if (label == endTransactionLabel) {
-                    NavigationService.Navigate(new Uri("/EndTransaction.xaml",UriKind.Relative));
+                if (label == beginUserFlowLabel) {
+                    App.userFlowName = userFlowNames[random.Next(0,userFlowNames.Length)];
+                    Crittercism.BeginUserFlow(App.userFlowName);
+                    button.Content = endUserFlowLabel;
+                } else if (label == endUserFlowLabel) {
+                    NavigationService.Navigate(new Uri("/EndUserFlow.xaml",UriKind.Relative));
                 }
             }
         }
-        private void TransactionTimeOutHandler(object sender,EventArgs e) {
-            Demo.TransactionTimeOutHandler(this,e);
+        private void UserFlowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserFlowTimeOutHandler(this,e);
         }
 
         private void handledExceptionClick(object sender,RoutedEventArgs e) {

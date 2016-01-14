@@ -33,7 +33,7 @@ namespace HubApp {
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
-            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
+            Crittercism.UserFlowTimeOut += UserFlowTimeOutHandler;
         }
 
         internal string Title() {
@@ -86,8 +86,8 @@ namespace HubApp {
             Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
         }
 
-        private void TransactionTimeOutHandler(object sender,EventArgs e) {
-            Demo.TransactionTimeOutHandler(this,e);
+        private void UserFlowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserFlowTimeOutHandler(this,e);
         }
 
         #region NavigationHelper registration

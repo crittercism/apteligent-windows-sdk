@@ -14,7 +14,7 @@ namespace WP8TestApp {
     public partial class End : PhoneApplicationPage {
         public End() {
             InitializeComponent();
-            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
+            Crittercism.UserFlowTimeOut += UserFlowTimeOutHandler;
         }
 
         private void Hyperlink_Click(object sender,RoutedEventArgs e) {
@@ -23,8 +23,8 @@ namespace WP8TestApp {
             webBrowserTask.Show();
         }
 
-        private void TransactionTimeOutHandler(object sender,EventArgs e) {
-            Demo.TransactionTimeOutHandler(this,e);
+        private void UserFlowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserFlowTimeOutHandler(this,e);
         }
     }
 }

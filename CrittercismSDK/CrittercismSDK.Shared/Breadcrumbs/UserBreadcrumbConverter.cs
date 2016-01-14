@@ -19,7 +19,7 @@ namespace CrittercismSDK {
             // either form,  { "message":message,"timestamp":timestamp} or [message,timestamp].
             // * Platform's "crash" and "errors" Windows endpoints currently
             // want the legacy "Windows style" dictionary object format.
-            // * Platform's "transactions" endpoint only accepts the newer
+            // * Platform's "txn.ingest" endpoint only accepts the newer
             // array format.
             ////////////////////////////////////////////////////////////////
             bool answer = (t != null);
@@ -39,7 +39,7 @@ namespace CrittercismSDK {
                     answer = answer && JsonUtils.IsJsonDate(timestamp);
                 }
             } else if (t.Type == JTokenType.Array) {
-                // * Platform's "transactions" endpoint only accepts the newer
+                // * Platform's "txn.ingest" endpoint only accepts the newer
                 // array format.
                 JArray a = (JArray)t;
                 answer = answer && (a.Count == 2);

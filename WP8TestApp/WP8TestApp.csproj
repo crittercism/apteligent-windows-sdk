@@ -101,8 +101,8 @@
     <Compile Include="End.xaml.cs">
       <DependentUpon>End.xaml</DependentUpon>
     </Compile>
-    <Compile Include="EndTransaction.xaml.cs">
-      <DependentUpon>EndTransaction.xaml</DependentUpon>
+    <Compile Include="EndUserFlow.xaml.cs">
+      <DependentUpon>EndUserFlow.xaml</DependentUpon>
     </Compile>
     <Compile Include="LocalizedStrings.cs" />
     <Compile Include="MainPage.xaml.cs">
@@ -129,7 +129,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="EndTransaction.xaml">
+    <Page Include="EndUserFlow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -173,7 +173,7 @@
     <Content Include="ninja-critter-times-square2.jpg" />
     <Content Include="ninja_critter.jpg" />
     <Content Include="stacktrace.png" />
-    <Content Include="transaction.png" />
+    <Content Include="userflow.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\AppResources.resx">
