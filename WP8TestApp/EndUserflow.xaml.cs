@@ -21,21 +21,21 @@ namespace WP8TestApp {
 
         private void endUserflowClick(object sender,RoutedEventArgs e)
         {
-            Crittercism.EndUserflow(App.userflowName);
-            App.userflowName = null;
+            Crittercism.EndUserflow(Demo.userflowName);
+            Demo.userflowName = null;
             GoBack();
         }
 
         private void failUserflowClick(object sender,RoutedEventArgs e) {
-            Crittercism.FailUserflow(App.userflowName);
-            App.userflowName = null;
+            Crittercism.FailUserflow(Demo.userflowName);
+            Demo.userflowName = null;
             GoBack();
         }
 
         private void cancelUserflowClick(object sender,RoutedEventArgs e)
         {
-            Crittercism.CancelUserflow(App.userflowName);
-            App.userflowName = null;
+            Crittercism.CancelUserflow(Demo.userflowName);
+            Demo.userflowName = null;
             GoBack();
         }
 

@@ -95,14 +95,23 @@ namespace WP8TestApp {
                 Debug.Assert(button == userflowButton);
                 String label = button.Content.ToString();
                 if (label == beginUserflowLabel) {
-                    App.userflowName = userflowNames[random.Next(0,userflowNames.Length)];
-                    Crittercism.BeginUserflow(App.userflowName);
+                    Demo.userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(Demo.userflowName);
                     button.Content = endUserflowLabel;
                 } else if (label == endUserflowLabel) {
                     NavigationService.Navigate(new Uri("/EndUserflow.xaml",UriKind.Relative));
                 }
             }
         }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e) {
+            if (Demo.userflowName == null) {
+                userflowButton.Content = beginUserflowLabel;
+            } else {
+                userflowButton.Content = endUserflowLabel;
+            };
+        }
+
         private void UserflowTimeOutHandler(object sender,EventArgs e) {
             Demo.UserflowTimeOutHandler(this,e);
         }

@@ -13,6 +13,9 @@ using CrittercismSDK;
 
 namespace WP8TestApp {
     class Demo {
+        // Crittercism userflow name for this Crittercism demo.
+        public static string userflowName = null;
+
         internal static void UserflowTimeOutHandler(Page page,EventArgs e) {
             // Userflow timed out.
             page.Dispatcher.BeginInvoke(new Action(() => {
@@ -33,7 +36,7 @@ namespace WP8TestApp {
                         EndUserflow sectionPage = (EndUserflow)page;
                         sectionPage.GoBack();
                     }
-                }
+                };
             }));
         }
         private static void UserflowTimeOutShowMessage(EventArgs e) {
@@ -42,6 +45,7 @@ namespace WP8TestApp {
             string message = String.Format("Userflow '{0}'\r\nTimed Out",name);
             Debug.WriteLine(message);
             MessageBox.Show(message,"WP8TestApp",MessageBoxButton.OK);
+            userflowName = null;
         }
     }
 }
