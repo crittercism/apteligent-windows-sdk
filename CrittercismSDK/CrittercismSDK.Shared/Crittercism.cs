@@ -24,6 +24,8 @@ using Windows.Networking.Connectivity;
 using Microsoft.Phone.Info;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Net.NetworkInformation;
+// TODO: We really need this include still?
+using System.Windows.Navigation;
 #else
 using Microsoft.Win32;
 #endif // NETFX_CORE
@@ -40,6 +42,12 @@ namespace CrittercismSDK {
         #endregion Constants
 
         #region Properties
+        // The isForegrounded flag is used to prevent Root_UIElement_GotFocus from
+        // reporting more than one "App Foreground" per background/foreground activity.
+        // "App Load" when app launches prevents "App Foreground" too, so this flag
+        // starts out being true.  "App Background" will make it false.
+        internal static volatile bool isForegrounded = true;
+
         // Approximation to process start time if we can't do anything better (in some .NET's)
         internal static long StartTime = DateTime.UtcNow.Ticks;
 
@@ -154,6 +162,8 @@ namespace CrittercismSDK {
 
         // Is OptOut known to be equal to what's persisted on disk?
         internal static volatile bool OptOutLoaded = false;
+        // Have we hooked WINDOWS_PHONE Application.Current.RootVisual GotFocus and LostFocus events yet?
+        internal static volatile bool ApplicationCurrentRootVisualHooked = false;
 
         private static string OptOutStatusPath = "Crittercism\\OptOutStatus.js";
         private static void SaveOptOutStatus(bool optOutStatus) {
@@ -185,6 +195,31 @@ namespace CrittercismSDK {
                     };
                 };
             };
+#if WINDOWS_PHONE
+            // NOTE: If we could figure out a way (we can't), we would put a shorter
+            // bit of code to be called by Crittercism.Init into WINDOWS_PHONE apps
+            // that would get root.GotFocus and root.LostFocus events hooked early
+            // on, much more like what are able to do for NETFX_CORE .  However, it
+            // turns out root == null is going to be the normal case for Crittercism.Init
+            // during a WINDOWS_PHONE app launch.  So, we must use more creative code.
+            if ((!OptOut)&&(!ApplicationCurrentRootVisualHooked)) {
+                 lock (lockObject) {
+                    // Check flag again inside lock in case our thread loses race.
+                    if (!ApplicationCurrentRootVisualHooked) {
+                        UIElement root = Application.Current.RootVisual as UIElement;
+                        if (root != null) {
+                            // NOTE: It is normal that "root" may be null in the early stages of
+                            // the application startup.  We just keep on checking till we get it. 
+                            // This may be assuming our users are accepting and not modifying the
+                            // MS generated "new Frame" just once part of the MS boiler plate code.
+                            root.GotFocus += Root_UIElement_GotFocus;
+                            root.LostFocus += Root_UIElement_LostFocus;
+                            ApplicationCurrentRootVisualHooked = true;
+                        };
+                    };
+                };               
+            };
+#endif
             return OptOut;
         }
 
@@ -394,6 +429,18 @@ namespace CrittercismSDK {
                     // Testing for unit test purposes
                     if (Crittercism.TestNetwork == null) {
 #if NETFX_CORE
+#if WINDOWS_PHONE_APP
+                        if (Window.Current != null) {
+                            // If there is a current Window (don't ask us why we're checking this)
+                            UIElement root = Window.Current.Content as UIElement;
+                            if (root != null) {
+                                // This may be assuming our users are accepting and not modifying the
+                                // MS generated "new Frame" just once part of the MS boiler plate code.
+                                root.GotFocus += Root_UIElement_GotFocus;
+                                root.LostFocus += Root_UIElement_LostFocus;
+                            }
+                        }
+#endif
                         Window.Current.VisibilityChanged += Window_VisibilityChanged;
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
@@ -1008,15 +1055,61 @@ namespace CrittercismSDK {
         #endregion // MessageQueue
 
         #region Event Handlers
+#if NETFX_CORE || WINDOWS_PHONE
+        ////////////////////////////////////////////////////////////////
+        // NOTE: The value of monitoring (root) Root_UIElement_GotFocus,
+        // (root) Root_UIElement_LostFocus, and Window_VisibilityChanged
+        // is proven by the following "App Background" + "App Foreground"
+        // VS2015 Output log of the HubApp.WindowsPhone test app:
+        //    * App Background
+        //    Root_UIElement_LostFocus: 635884114165261968
+        //    Window_VisibilityChanged: 635884114165541917
+        //    * App Foreground
+        //    Window_VisibilityChanged: 635884114201681836
+        //    Root_UIElement_GotFocus: 635884114203470952
+        // Here, UIElement root = Window.Current.Content as UIElement;
+        ////////////////////////////////////////////////////////////////
+        private static void Root_UIElement_GotFocus(object sender,RoutedEventArgs e) {
+            long root_UIElement_GotFocus_Time = DateTime.UtcNow.Ticks;  // ticks
+            Debug.WriteLine("Root_UIElement_GotFocus: " + root_UIElement_GotFocus_Time);
+            if (GetOptOutStatus()) {
+                return;
+            }
+            try {
+                // Automatic "App Foreground" Userflow
+                if (!isForegrounded) {
+                    // NOTE: Being a UIElement event handler, Root_UIElement_GotFocus should
+                    // only get called via the main UI thread.  So, no thread-safety worries here.
+                    new Userflow("App Foreground",window_VisibilityChanged_Time,root_UIElement_GotFocus_Time);
+                    isForegrounded = true;
+                }
+            } catch (Exception ie) {
+                LogInternalException(ie);
+            }
+        }
+        private static long root_UIElement_LostFocus_Time = 0;  // ticks
+        private static void Root_UIElement_LostFocus(object sender,RoutedEventArgs e) {
+            root_UIElement_LostFocus_Time = DateTime.UtcNow.Ticks;
+            Debug.WriteLine("Root_UIElement_LostFocus: " + root_UIElement_LostFocus_Time);
+            // That's all we do in this method:  Record the time we treat
+            // as the beginTime of an "App Background" UserFlow .
+        }
+        private static long window_VisibilityChanged_Time = 0;  // ticks
+#endif
 
 #if NETFX_CORE
 #pragma warning disable 1998
         private static void Window_VisibilityChanged(object sender,VisibilityChangedEventArgs e) {
+            window_VisibilityChanged_Time = DateTime.UtcNow.Ticks;
+            Debug.WriteLine("Window_VisibilityChanged: " + window_VisibilityChanged_Time);
             if (GetOptOutStatus()) {
                 return;
             }
             try {
                 if (e.Visible) {
+                    // If we could absolutely rely on Root_UIElement_GotFocus getting installed,
+                    // we might shift this "Foreground()" to that method.  However, we're not absolutely
+                    // sure that will always happen, and it might not happen.
                     Foreground();
                 } else {
                     Background();
@@ -1084,6 +1177,8 @@ namespace CrittercismSDK {
             // its own state because it is no longer in memory.
             // https://msdn.microsoft.com/en-us/library/windows/apps/ff967547(v=vs.105).aspx
             ////////////////////////////////////////////////////////////////
+            window_VisibilityChanged_Time = DateTime.UtcNow.Ticks;
+            Debug.WriteLine("Window_VisibilityChanged: " + window_VisibilityChanged_Time);
             if (GetOptOutStatus()) {
                 return;
             }
@@ -1112,6 +1207,8 @@ namespace CrittercismSDK {
         }
 
         static void PhoneApplicationService_Deactivated(object sender,DeactivatedEventArgs e) {
+            window_VisibilityChanged_Time = DateTime.UtcNow.Ticks;
+            Debug.WriteLine("Window_VisibilityChanged: " + window_VisibilityChanged_Time);
             if (GetOptOutStatus()) {
                 return;
             }
@@ -1179,18 +1276,23 @@ namespace CrittercismSDK {
 
 #if NETFX_CORE || WINDOWS_PHONE
         private static void Foreground() {
-            // Automatic "App Foreground" Userflow
-            long now = DateTime.UtcNow.Ticks;
-            new Userflow("App Foreground",now,now);
             Breadcrumbs.LeaveEventBreadcrumb("foregrounded");
             APM.Foreground();
             UserflowReporter.Foreground();
         }
 
         private static void Background() {
-            // Automatic "App Background" Userflow
-            long now = DateTime.UtcNow.Ticks;
-            new Userflow("App Background",now,now);
+            try {
+                if (root_UIElement_LostFocus_Time != 0) {
+                    // The minimum sanity check we can do on the slighly risky Root_UIElement_LostFocus
+                    // event handler installation is to check it did record a root_UIElement_LostFocus_Time .
+                    // Automatic "App Background" Userflow
+                    new Userflow("App Background",root_UIElement_LostFocus_Time,window_VisibilityChanged_Time);
+                    isForegrounded = false;
+                }
+            } catch (Exception ie) {
+                LogInternalException(ie);
+            }
             Breadcrumbs.LeaveEventBreadcrumb("backgrounded");
             APM.Background();
             UserflowReporter.Background();

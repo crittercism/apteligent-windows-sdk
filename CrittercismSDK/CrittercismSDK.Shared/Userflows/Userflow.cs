@@ -275,6 +275,7 @@ namespace CrittercismSDK {
             eyeTime = endTime - beginTime;
             SetForegroundTime(beginTime);
             // This "Save" needs to occur after the "state" assigned above is known.
+            Debug.WriteLine("Reporting '" + name + "' == " + (eyeTime / (double)TimeUtils.TICKS_PER_SEC) + " seconds");
             UserflowReporter.Save(this);
         }
         internal Userflow(
