@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace CrittercismSDK {
-    internal enum TransactionIndex {
+    internal enum UserflowIndex {
         Name = 0,
         State,
         Timeout,

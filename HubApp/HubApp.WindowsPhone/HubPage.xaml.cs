@@ -20,6 +20,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using CrittercismSDK;
 
 // The Universal Hub Application project template is documented at http://go.microsoft.com/fwlink/?LinkID=391955
 
@@ -37,15 +38,13 @@ namespace HubApp
         public HubPage()
         {
             this.InitializeComponent();
-
             // Hub is only supported in Portrait orientation
             DisplayInformation.AutoRotationPreferences = DisplayOrientations.Portrait;
-
             this.NavigationCacheMode = NavigationCacheMode.Required;
-
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
         }
 
         /// <summary>
@@ -80,7 +79,9 @@ namespace HubApp
         {
             // TODO: Create an appropriate data model for your problem domain to replace the sample data
             var sampleDataGroups = await SampleDataSource.GetGroupsAsync();
-            this.DefaultViewModel["Groups"] = sampleDataGroups;
+            List<SampleDataGroup> groupsShown = new List<SampleDataGroup>();
+            groupsShown.Add(sampleDataGroups.First());
+            this.DefaultViewModel["Groups"] = groupsShown;
         }
 
         /// <summary>
@@ -119,6 +120,10 @@ namespace HubApp
             // Navigate to the appropriate destination page, configuring the new page
             // by passing required information as a navigation parameter
             Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
+        }
+
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserflowTimeOutHandler(this,e);
         }
 
         #region NavigationHelper registration

@@ -62,7 +62,7 @@ namespace UnitTest {
             Crittercism.TestNetwork = TestNetwork();
             // TODO: AppLoadTest3 forcing a few messy cleanup lines here.  Can this better?
             APM.enabled = true;
-            TransactionReporter.enabled = true;
+            UserflowReporter.enabled = true;
             Crittercism.SetOptOutStatus(false);
             if (Crittercism.MessageQueue != null) {
                 Crittercism.MessageQueue.Clear();

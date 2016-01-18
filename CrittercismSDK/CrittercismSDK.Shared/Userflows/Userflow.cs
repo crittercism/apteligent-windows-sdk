@@ -11,19 +11,16 @@ using System.Timers;
 #endif // NETFX_CORE
 
 namespace CrittercismSDK {
-    [JsonConverter(typeof(TransactionConverter))]
-    internal class Transaction {
+    [JsonConverter(typeof(UserflowConverter))]
+    internal class Userflow {
         #region Constants
         internal const int MAX_NAME_LENGTH = 255;
         // Use Int32.MinValue pennies to represent Wire+Protocol doc's "null"
-        // transaction value.  (We would prefer to not have "null" at all.)
+        // userflow value.  (We would prefer to not have "null" at all.)
         // It's conceivable some apps might want modest negative values for
         // debits, so we use Int32.MinValue == -2^31 == -2147483648 == -$21,474,836.48
         // here.
         internal const int NULL_VALUE = Int32.MinValue;
-        private const int TICKS_PER_MSEC = 10000;
-        internal const int MSEC_PER_SEC = 1000;
-        internal const int TICKS_PER_SEC = MSEC_PER_SEC * TICKS_PER_MSEC;
         #endregion
 
         #region Properties
@@ -41,7 +38,7 @@ namespace CrittercismSDK {
         // to timers and Thread.Sleep .
         ////////////////////////////////////////////////////////////////
         private string name;
-        private TransactionState state;
+        private UserflowState state;
         private int timeout; // milliseconds
         private int value; // pennies (http://www.usmint.gov/mint_programs/circulatingCoins/?action=circPenny)
         private Dictionary<string,string> metadata;
@@ -58,23 +55,23 @@ namespace CrittercismSDK {
             // The "name" is immutable.
             return name;
         }
-        internal TransactionState State() {
-            TransactionState answer;
+        internal UserflowState State() {
+            UserflowState answer;
             lock (this) {
                 answer = state;
             }
             return answer;
         }
-        private void SetState(TransactionState newState,long nowTime) {
-            // Establishes newState for transaction at nowTime .
+        private void SetState(UserflowState newState,long nowTime) {
+            // Establishes newState for userflow at nowTime .
             state = newState;
-            isForegrounded = TransactionReporter.IsForegrounded();
+            isForegrounded = UserflowReporter.isForegrounded;
             switch (state) {
-                case TransactionState.CANCELLED:
+                case UserflowState.CANCELLED:
                     SetEndTime(nowTime);
                     RemoveTimer();
                     break;
-                case TransactionState.BEGUN:
+                case UserflowState.BEGUN:
                     SetBeginTime(nowTime);
                     if (isForegrounded) {
                         SetForegroundTime(nowTime);
@@ -92,19 +89,19 @@ namespace CrittercismSDK {
                         eyeTime += nowTime - foregroundTime;
                         isForegrounded = false;
                     }
-                    if (newState == TransactionState.TIMEOUT) {
-                        Crittercism.OnTransactionTimeOut(EventArgs.Empty);
+                    if (newState == UserflowState.TIMEOUT) {
+                        Crittercism.OnUserflowTimeOut(new CRUserflowEventArgs(name));
                     }
                     break;
             }
-            TransactionReporter.Save(this);
+            UserflowReporter.Save(this);
         }
         private int ClampTimeout(int newTimeout) {
-            int answer = TransactionReporter.ClampTimeout(name,newTimeout);
+            int answer = UserflowReporter.ClampTimeout(name,newTimeout);
             return answer;
         }
         internal int Timeout() {
-            // Transaction timeout in milliseconds
+            // Userflow timeout in milliseconds
             int answer;
             lock (this) {
                 answer = timeout;
@@ -112,11 +109,11 @@ namespace CrittercismSDK {
             return answer;
         }
         internal void SetTimeout(int newTimeout) {
-            // Set new transaction timeout in milliseconds.
+            // Set new userflow timeout in milliseconds.
             lock (this) {
                 if (IsFinal()) {
                     // Complain
-                    DebugUtils.LOG_ERROR("Changing final state transaction is forbidden.");
+                    DebugUtils.LOG_ERROR("Changing final state userflow is forbidden.");
                 } else {
                     timeout = ClampTimeout(newTimeout);
                     if (isForegrounded) {
@@ -126,7 +123,7 @@ namespace CrittercismSDK {
             }
         }
         private int DefaultValue() {
-            int answer = TransactionReporter.DefaultValue(name);
+            int answer = UserflowReporter.DefaultValue(name);
             return answer;
         }
         internal int Value() {
@@ -140,10 +137,10 @@ namespace CrittercismSDK {
             lock (this) {
                 if (IsFinal()) {
                     // Complain
-                    DebugUtils.LOG_ERROR("Changing final state transaction is forbidden.");
+                    DebugUtils.LOG_ERROR("Changing final state userflow is forbidden.");
                 } else if (newValue < 0) {
                     // DESIGN: Decision by product team.
-                    DebugUtils.LOG_ERROR("Cannot assign transaction a negative value");
+                    DebugUtils.LOG_ERROR("Cannot assign userflow a negative value");
                 } else {
                     value = newValue;
                 }
@@ -157,7 +154,7 @@ namespace CrittercismSDK {
             return answer;
         }
         internal long BeginTime() {
-            // Begin time of transaction in ticks
+            // Begin time of userflow in ticks
             long answer;
             lock (this) {
                 answer = beginTime;
@@ -165,9 +162,9 @@ namespace CrittercismSDK {
             return answer;
         }
         private void SetBeginTime(long newBeginTime) {
-            // Set begin time of transaction in ticks.
+            // Set begin time of userflow in ticks.
             DateTime begin_date = (new DateTime(newBeginTime,DateTimeKind.Utc));
-            beginTimeString = DateUtils.ISO8601DateString(begin_date);
+            beginTimeString = TimeUtils.ISO8601DateString(begin_date);
             beginTime = newBeginTime;
         }
         internal string BeginTimeString() {
@@ -178,7 +175,7 @@ namespace CrittercismSDK {
             return answer;
         }
         internal long EndTime() {
-            // End time of transaction in ticks.
+            // End time of userflow in ticks.
             long answer;
             lock (this) {
                 answer = endTime;
@@ -186,9 +183,9 @@ namespace CrittercismSDK {
             return answer;
         }
         private void SetEndTime(long newEndTime) {
-            // Set end time of transaction in ticks.
+            // Set end time of userflow in ticks.
             DateTime end_date = (new DateTime(newEndTime,DateTimeKind.Utc));
-            endTimeString = DateUtils.ISO8601DateString(end_date);
+            endTimeString = TimeUtils.ISO8601DateString(end_date);
             endTime = newEndTime;
         }
         internal string EndTimeString() {
@@ -199,8 +196,8 @@ namespace CrittercismSDK {
             return answer;
         }
         internal long EyeTime() {
-            // The "eyeTime" of a transaction is the sum of the lengths of the
-            // [F B] intervals that appeared in the transaction's lifetime, in ticks.
+            // The "eyeTime" of a userflow is the sum of the lengths of the
+            // [F B] intervals that appeared in the userflow's lifetime, in ticks.
             // F = foreground time, B = background time .
             long answer;
             lock (this) {
@@ -221,7 +218,7 @@ namespace CrittercismSDK {
             // "Foreground time" == the latest Crittercism Init
             // time or foreground time, whichever is later, in ticks.
             DateTime foreground_date = (new DateTime(newForegroundTime,DateTimeKind.Utc));
-            foregroundTimeString = DateUtils.ISO8601DateString(foreground_date);
+            foregroundTimeString = TimeUtils.ISO8601DateString(foreground_date);
             foregroundTime = newForegroundTime;
         }
         internal string ForegroundTimeString() {
@@ -234,9 +231,9 @@ namespace CrittercismSDK {
         #endregion
 
         #region Instance Life Cycle
-        private Transaction() {
+        private Userflow() {
             name = "";
-            state = TransactionState.CREATED;
+            state = UserflowState.CREATED;
             value = NULL_VALUE;
             metadata = new Dictionary<string,string>();
             // 0 ticks corresponds to reference date of
@@ -251,44 +248,47 @@ namespace CrittercismSDK {
             eyeTime = 0;
             SetForegroundTime(referenceTime);
         }
-        internal Transaction(string name,int value) : this() {
+        internal Userflow(string name,int value) : this() {
             this.name = StringUtils.TruncateString(name,MAX_NAME_LENGTH);
-            // timeout in milliseconds (Applying "transaction specific configuration"
-            // can only be done after we know "name" of this transaction.)
+            // timeout in milliseconds (Applying "userflow specific configuration"
+            // can only be done after we know "name" of this userflow.)
             timeout = ClampTimeout(Int32.MaxValue);
             if (value == NULL_VALUE) {
                 value = DefaultValue();
             }
             this.value = value;
-            TransactionReporter.Save(this);
+            UserflowReporter.Save(this);
         }
-        internal Transaction(string name) : this(name,NULL_VALUE) {
+        internal Userflow(string name) : this(name,NULL_VALUE) {
         }
-        internal Transaction(string name,long beginTime,long endTime) : this(name,0) {
+        internal Userflow(string name,long beginTime,long endTime) : this(name,0) {
             ////////////////////////////////////////////////////////////////
             // Input:
-            //    name = transaction name
-            //    beginTime = transaction begin time in ticks
-            //    endTime = transaction end time in ticks
-            // NOTE: Automatic transactions ("App Load", "App Foreground", "App Background")
+            //    name = userflow name
+            //    beginTime = userflow begin time in ticks
+            //    endTime = userflow end time in ticks
+            // NOTE: Automatic userflows ("App Load", "App Foreground", "App Background")
             ////////////////////////////////////////////////////////////////
-            state = TransactionState.ENDED;
+            state = UserflowState.ENDED;
             SetBeginTime(beginTime);
             SetEndTime(endTime);
             eyeTime = endTime - beginTime;
             SetForegroundTime(beginTime);
+            // This "Save" needs to occur after the "state" assigned above is known.
+            Debug.WriteLine("Reporting '" + name + "' == " + (eyeTime / (double)TimeUtils.TICKS_PER_SEC) + " seconds");
+            UserflowReporter.Save(this);
         }
-        internal Transaction(
+        internal Userflow(
             string name,
-            TransactionState state,
+            UserflowState state,
             int timeout,
             int value,
             Dictionary<string,string> metadata,
             long beginTime,
             long endTime,
             long eyeTime) {
-            // This constructor only used by TransactionConvert ReadJson for finished
-            // Transaction's appearing in either a TransactionReport or a Crash report.
+            // This constructor only used by UserflowConvert ReadJson for finished
+            // Userflow's appearing in either a UserflowReport or a Crash report.
             this.name = name;
             this.state = state;
             this.timeout = timeout; // milliseconds
@@ -303,68 +303,68 @@ namespace CrittercismSDK {
         #region State Transitions
         internal void Begin() {
             lock (this) {
-                Transition(TransactionState.BEGUN);
+                Transition(UserflowState.BEGUN);
             }
         }
         internal void Cancel() {
             lock (this) {
-                Transition(TransactionState.CANCELLED);
+                Transition(UserflowState.CANCELLED);
             }
         }
         internal void End() {
             lock (this) {
-                Transition(TransactionState.ENDED);
+                Transition(UserflowState.ENDED);
             }
         }
         internal void Fail() {
             lock (this) {
-                Transition(TransactionState.FAILED);
+                Transition(UserflowState.FAILED);
             }
         }
         internal void Crash() {
             lock (this) {
-                Transition(TransactionState.CRASHED);
+                Transition(UserflowState.CRASHED);
             }
         }
         private bool IsFinal() {
-            // Transaction is in final state?
-            bool answer = ((state != TransactionState.CREATED) && (state != TransactionState.BEGUN));
+            // Userflow is in final state?
+            bool answer = ((state != UserflowState.CREATED) && (state != UserflowState.BEGUN));
             return answer;
         }
-        internal void Transition(TransactionState newState) {
-            // Transition a transaction from current state to newState .
-            if (newState == TransactionState.CANCELLED) {
+        internal void Transition(UserflowState newState) {
+            // Transition a userflow from current state to newState .
+            if (newState == UserflowState.CANCELLED) {
                 SetState(newState,DateTime.UtcNow.Ticks);
             } else {
                 switch (state) {
-                    case TransactionState.CREATED:
-                        if (newState == TransactionState.BEGUN) {
+                    case UserflowState.CREATED:
+                        if (newState == UserflowState.BEGUN) {
                             SetState(newState,DateTime.UtcNow.Ticks);
-                        } else if (newState == TransactionState.CRASHED) {
-                            // NOP. Leave transaction in CREATED state.
+                        } else if (newState == UserflowState.CRASHED) {
+                            // NOP. Leave userflow in CREATED state.
                         } else {
-                            // Transaction being begun for the first time after create.
+                            // Userflow being begun for the first time after create.
                             // Crittercism spec says newState has to be
-                            // TransactionState.BEGUN in this case unless there is change
-                            // of opinion about immediately failing a transaction possibility.
-                            DebugUtils.LOG_ERROR("Ending transaction that hasn't begun is forbidden.");
+                            // UserflowState.BEGUN in this case unless there is change
+                            // of opinion about immediately failing a userflow possibility.
+                            DebugUtils.LOG_ERROR("Ending userflow that hasn't begun is forbidden.");
                         }
                         break;
-                    case TransactionState.BEGUN:
-                        if (newState != TransactionState.BEGUN) {
+                    case UserflowState.BEGUN:
+                        if (newState != UserflowState.BEGUN) {
                             SetState(newState,DateTime.UtcNow.Ticks);
                         } else {
-                            // Complain. Crittercism spec says you shouldn't begin transaction
+                            // Complain. Crittercism spec says you shouldn't begin userflow
                             // more than once.
-                            DebugUtils.LOG_ERROR("Beginning transaction more than once is forbidden.");
+                            DebugUtils.LOG_ERROR("Beginning userflow more than once is forbidden.");
                         }
                         break;
                     default:
-                        if (newState != TransactionState.TIMEOUT) {
+                        if (newState != UserflowState.TIMEOUT) {
                             // Already in final state.  We are only checking for TIMEOUT to prevent
-                            // printing this message (the Transaction must have entered some final
+                            // printing this message (the Userflow must have entered some final
                             // state in the nick of time).
-                            DebugUtils.LOG_ERROR("Ending transaction more than once is forbidden.");
+                            DebugUtils.LOG_ERROR("Ending userflow more than once is forbidden.");
                         }
                         break;
                 }
@@ -374,11 +374,11 @@ namespace CrittercismSDK {
 
         #region JSON
         internal JArray ToJArray() {
-            // Per "Transactions Wire Protocol - v1", timeout and eyeTime are returned in seconds.
+            // Per "Userflows Wire Protocol - v1", timeout and eyeTime are returned in seconds.
             List<JToken> list = new List<JToken>();
             list.Add(name);
             list.Add((int)state);
-            list.Add(timeout / (double)MSEC_PER_SEC); // seconds
+            list.Add(timeout / (double)TimeUtils.MSEC_PER_SEC); // seconds
             if (value == NULL_VALUE) {
                 list.Add(null);
             } else {
@@ -387,7 +387,7 @@ namespace CrittercismSDK {
             list.Add(new JObject());
             list.Add(beginTimeString);
             list.Add(endTimeString);
-            list.Add(eyeTime / (double)TICKS_PER_SEC); // seconds
+            list.Add(eyeTime / (double)TimeUtils.TICKS_PER_SEC); // seconds
             JArray answer = new JArray(list);
             return answer;
         }
@@ -398,25 +398,26 @@ namespace CrittercismSDK {
 
         // #region Metadata
         // An archaeological curiousity.  Original iOS/Android SDK
-        // transaction design called for transactions to allow metadata.
+        // userflow design called for userflows to allow metadata.
         // Since then, Crittercism has not exposed API's in SDK's that
         // make it available to users.
         // #endregion
 
         #region Notifications
         internal void Foreground(long foregroundTime) {
-            // Called by TransactionReporter's "Foreground" method when app foregrounds.
+            // Called by UserflowReporter's "Foreground" method when app foregrounds.
             lock (this) {
-                if (state == TransactionState.BEGUN) {
+                if (state == UserflowState.BEGUN) {
                     SetForegroundTime(foregroundTime);
                     isForegrounded = true;
+                    CreateTimer();
                 }
             }
         }
         internal void Background(long backgroundTime) {
-            // Called by TransactionReporter's "Background" method when app backgrounds.
+            // Called by UserflowReporter's "Background" method when app backgrounds.
             lock (this) {
-                if (state == TransactionState.BEGUN) {
+                if (state == UserflowState.BEGUN) {
                     RemoveTimer();
                     eyeTime = (eyeTime + backgroundTime - foregroundTime);
                     isForegrounded = false;
@@ -426,12 +427,12 @@ namespace CrittercismSDK {
         #endregion
 
         #region Persistence
-        internal static Transaction[] AllTransactions() {
-            return TransactionReporter.AllTransactions();
+        internal static Userflow[] AllUserflows() {
+            return UserflowReporter.AllUserflows();
         }
 
-        internal static Transaction TransactionForName(string name) {
-            return TransactionReporter.TransactionForName(name);
+        internal static Userflow UserflowForName(string name) {
+            return UserflowReporter.UserflowForName(name);
         }
         #endregion
 
@@ -453,10 +454,10 @@ namespace CrittercismSDK {
                 } else {
                     // Create new timer based on "timeout" property and when we began
                     // and now.
-                    int milliseconds = timeout - (int)(eyeTime / TICKS_PER_MSEC);
+                    int milliseconds = timeout - (int)(eyeTime / TimeUtils.TICKS_PER_MSEC);
                     if (milliseconds <= 0) {
                         // If remaining time is nonpositive, just timeout here
-                        Transition(TransactionState.TIMEOUT);
+                        Transition(UserflowState.TIMEOUT);
                     } else {
                         // Otherwise
                         CreateTimerMilliseconds(milliseconds);
@@ -490,16 +491,16 @@ namespace CrittercismSDK {
 
 #if NETFX_CORE || WINDOWS_PHONE
         private void OnTimerElapsed(ThreadPoolTimer timer) {
-            // The transaction has timed out.
+            // The userflow has timed out.
             lock (this) {
-                Transition(TransactionState.TIMEOUT);
+                Transition(UserflowState.TIMEOUT);
             }
         }
 #else
         private void OnTimerElapsed(Object source, ElapsedEventArgs e) {
-            // The transaction has timed out.
+            // The userflow has timed out.
             lock (this) {
-                Transition(TransactionState.TIMEOUT);
+                Transition(UserflowState.TIMEOUT);
             }
         }
 #endif // NETFX_CORE

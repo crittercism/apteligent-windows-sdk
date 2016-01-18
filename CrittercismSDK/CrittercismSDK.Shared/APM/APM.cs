@@ -82,6 +82,19 @@ namespace CrittercismSDK {
         }
         #endregion
 
+        #region Background / Foreground
+        internal static void Background() {
+            lock (lockObject) {
+                RemoveTimer();
+            }
+        }
+        internal static void Foreground() {
+            lock (lockObject) {
+                SendAPMReport();
+            }
+        }
+        #endregion
+
         #region Reporting
         internal static void Enqueue(Endpoint endpoint) {
             Debug.WriteLine("APM Enqueue");
@@ -142,7 +155,7 @@ namespace CrittercismSDK {
             //   <mobile_network_code>         // optional
             //   ]
             Object[] answer = new Object[] {
-                DateUtils.ISO8601DateString(DateTime.UtcNow),
+                TimeUtils.ISO8601DateString(DateTime.UtcNow),
                 Crittercism.Carrier,
                 Crittercism.DeviceModel,
                 Crittercism.OSName,
@@ -211,7 +224,9 @@ namespace CrittercismSDK {
                             if (config["enabled"] != null) {
                                 bool enabled = (bool)((JValue)(config["enabled"])).Value;
                                 if (enabled) {
-                                    int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
+                                    // NOTE: Platform sends "interval" in seconds, but method Enable wants
+                                    // that time converted to milliseconds.
+                                    int interval = (int)(Convert.ToDouble(((JValue)(config["interval"])).Value) * TimeUtils.MSEC_PER_SEC);
                                     Enable(interval);
                                 } else {
                                     Disable();

@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
+using System.Windows.Threading;
 using CrittercismSDK;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
@@ -16,6 +18,7 @@ namespace WP8TestApp {
 
         public CrashSim() {
             InitializeComponent();
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -83,9 +86,39 @@ namespace WP8TestApp {
                 WebExceptionStatus.Success);
         }
 
+        private const string beginUserflowLabel = "Begin Userflow";
+        private const string endUserflowLabel = "End Userflow";
+        private string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private void userflowClick(object sender,RoutedEventArgs e) {
+            Button button = sender as Button;
+            if (button != null) {
+                Debug.Assert(button == userflowButton);
+                String label = button.Content.ToString();
+                if (label == beginUserflowLabel) {
+                    Demo.userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(Demo.userflowName);
+                    button.Content = endUserflowLabel;
+                } else if (label == endUserflowLabel) {
+                    NavigationService.Navigate(new Uri("/EndUserflow.xaml",UriKind.Relative));
+                }
+            }
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e) {
+            if (Demo.userflowName == null) {
+                userflowButton.Content = beginUserflowLabel;
+            } else {
+                userflowButton.Content = endUserflowLabel;
+            };
+        }
+
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserflowTimeOutHandler(this,e);
+        }
+
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
             try {
-                ThrowException(); ;
+                ThrowException();
             } catch (Exception ex) {
                 Crittercism.LogHandledException(ex);
             }
@@ -129,13 +162,8 @@ namespace WP8TestApp {
             thread.Start();
         }
 
-        private void backButtonClicked(object sender, RoutedEventArgs e)
-        {
-            NavigationService.Navigate(new Uri("/Crashes.xaml", UriKind.Relative));
-        }
-
         private void nextButtonClicked(object sender, RoutedEventArgs e) {
-            NavigationService.Navigate(new Uri("/Loads.xaml", UriKind.Relative));
+            NavigationService.Navigate(new Uri("/End.xaml", UriKind.Relative));
         }
     }
 }

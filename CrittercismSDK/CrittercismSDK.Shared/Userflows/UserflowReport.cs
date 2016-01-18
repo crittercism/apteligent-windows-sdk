@@ -11,27 +11,29 @@ using Microsoft.Phone.Net.NetworkInformation;
 
 namespace CrittercismSDK {
     [DataContract]
-    internal class TransactionReport : MessageReport {
+    internal class UserflowReport : MessageReport {
         [DataMember]
         public Dictionary<string,object> appState { get; internal set; }
+        // COUGH.  This member variable MUST remain named "transactions"
+        // per Wire Protocol if end-to-end with platform is going to work.
         [DataMember]
-        public List<Transaction> transactions { get; internal set; }
+        public List<Userflow> transactions { get; internal set; }
         [DataMember]
         public List<UserBreadcrumb> breadcrumbs { get; internal set; }
         [DataMember]
         public List<Breadcrumb> systemBreadcrumbs { get; internal set; }
         [DataMember]
         public List<Endpoint> endpoints { get; internal set; }
-        private TransactionReport() {
+        private UserflowReport() {
         }
-        public TransactionReport(
+        public UserflowReport(
             Dictionary<string,object> appState,
-            List<Transaction> transactions,
+            List<Userflow> userflows,
             List<UserBreadcrumb> breadcrumbs,
             List<Breadcrumb> systemBreadcrumbs,
             List<Endpoint> endpoints) {
             this.appState = appState;
-            this.transactions = transactions;
+            this.transactions = userflows;
             this.breadcrumbs = breadcrumbs;
             this.systemBreadcrumbs = systemBreadcrumbs;
             this.endpoints = endpoints;

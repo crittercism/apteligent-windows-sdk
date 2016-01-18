@@ -25,7 +25,7 @@ namespace WPFApp {
 
         public MainWindow() {
             InitializeComponent();
-            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -89,47 +89,49 @@ namespace WPFApp {
                 WebExceptionStatus.Success);
         }
 
-        private const string beginTransactionLabel = "Begin Transaction";
-        private const string endTransactionLabel = "End Transaction";
-        private string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private string transactionName;
-        private void transactionClick(object sender,RoutedEventArgs e) {
+        private const string beginUserflowLabel = "Begin Userflow";
+        private const string endUserflowLabel = "End Userflow";
+        private string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private string userflowName;
+        private void userflowClick(object sender,RoutedEventArgs e) {
             Button button = sender as Button;
             if (button != null) {
-                Debug.Assert(button == transactionButton);
+                Debug.Assert(button == userflowButton);
                 String label = button.Content.ToString();
-                if (label == beginTransactionLabel) {
-                    transactionName = transactionNames[random.Next(0,transactionNames.Length)];
-                    Crittercism.BeginTransaction(transactionName);
-                    button.Content = endTransactionLabel;
-                } else if (label == endTransactionLabel) {
-                    EndTransactionDialog dialog = new EndTransactionDialog();
+                if (label == beginUserflowLabel) {
+                    userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(userflowName);
+                    button.Content = endUserflowLabel;
+                } else if (label == endUserflowLabel) {
+                    EndUserflowDialog dialog = new EndUserflowDialog();
                     dialog.Owner = Window.GetWindow(this);
                     dialog.ShowDialog();
                     Nullable<bool> dialogResult = dialog.DialogResult;
                     if (dialogResult == true) {
                         switch (dialog.Answer) {
-                            case "End Transaction":
-                                Crittercism.EndTransaction(transactionName);
+                            case "End Userflow":
+                                Crittercism.EndUserflow(userflowName);
                                 break;
-                            case "Fail Transaction":
-                                Crittercism.FailTransaction(transactionName);
+                            case "Fail Userflow":
+                                Crittercism.FailUserflow(userflowName);
                                 break;
-                            case "Cancel Transaction":
-                                Crittercism.CancelTransaction(transactionName);
+                            case "Cancel Userflow":
+                                Crittercism.CancelUserflow(userflowName);
                                 break;
                         }
-                        button.Content = beginTransactionLabel;
+                        button.Content = beginUserflowLabel;
                     }
                 }
             }
         }
-        private void TransactionTimeOutHandler(object sender,EventArgs e) {
-            Debug.WriteLine("The transaction timed out.");
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Debug.WriteLine("The userflow timed out.");
             // Execute this Action on the main UI thread.
-            transactionButton.Dispatcher.Invoke(new Action(() => {
-                transactionButton.Content = beginTransactionLabel;
-                MessageBox.Show(this,"Transaction Timed Out","WPFApp",MessageBoxButton.OK);
+            userflowButton.Dispatcher.Invoke(new Action(() => {
+                userflowButton.Content = beginUserflowLabel;
+                string name = ((CRUserflowEventArgs)e).Name;
+                string message = String.Format("'{0}' Timed Out", name);
+                MessageBox.Show(this,message,"WPFApp",MessageBoxButton.OK);
             }));
         }
         private void handledExceptionClick(object sender,RoutedEventArgs e) {

@@ -88,6 +88,7 @@ namespace CrittercismSDK {
                 if ((Crittercism.MessageQueue != null) && (Crittercism.MessageQueue.Count > 0)) {
                     if ((Crittercism.TestNetwork != null) || NetworkInterface.GetIsNetworkAvailable()) {
                         MessageReport messageReport = Crittercism.MessageQueue.Peek();
+                        Debug.WriteLine("SendMessage: " + messageReport.GetType().Name);
                         Crittercism.MessageQueue.Dequeue();
                         messageReport.Delete();
                         try {

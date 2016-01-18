@@ -57,7 +57,7 @@ namespace CrittercismSDK {
                     answer = ((DateTime)((JValue)json).Value).ToUniversalTime().Ticks; // ticks
                     break;
                 case JTokenType.String:
-                    answer = DateUtils.StringToTicks((string)((JValue)json).Value); // ticks
+                    answer = TimeUtils.StringToTicks((string)((JValue)json).Value); // ticks
                     break;
             }
             return answer;
@@ -67,7 +67,7 @@ namespace CrittercismSDK {
             string answer = "";
             switch (json.Type) {
                 case JTokenType.Date:
-                    answer = DateUtils.GMTDateString((DateTime)((JValue)json).Value);
+                    answer = TimeUtils.GMTDateString((DateTime)((JValue)json).Value);
                     break;
                 case JTokenType.String:
                     // Assume json was already an GMTDateString
@@ -81,7 +81,7 @@ namespace CrittercismSDK {
             string answer = "";
             switch (json.Type) {
                 case JTokenType.Date:
-                    answer = DateUtils.ISO8601DateString((DateTime)((JValue)json).Value);
+                    answer = TimeUtils.ISO8601DateString((DateTime)((JValue)json).Value);
                     break;
                 case JTokenType.String:
                     // Assume json was already an ISO8601DateString

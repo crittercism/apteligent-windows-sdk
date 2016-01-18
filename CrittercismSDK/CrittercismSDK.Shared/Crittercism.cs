@@ -16,6 +16,7 @@ using System.Windows;
 #if NETFX_CORE
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.Networking.Connectivity;
@@ -23,6 +24,8 @@ using Windows.Networking.Connectivity;
 using Microsoft.Phone.Info;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Net.NetworkInformation;
+// TODO: We really need this include still?
+using System.Windows.Navigation;
 #else
 using Microsoft.Win32;
 #endif // NETFX_CORE
@@ -39,6 +42,15 @@ namespace CrittercismSDK {
         #endregion Constants
 
         #region Properties
+        // The isForegrounded flag is used to prevent Root_UIElement_GotFocus from
+        // reporting more than one "App Foreground" per background/foreground activity.
+        // "App Load" when app launches prevents "App Foreground" too, so this flag
+        // starts out being true.  "App Background" will make it false.
+        internal static volatile bool isForegrounded = true;
+
+        // Approximation to process start time if we can't do anything better (in some .NET's)
+        internal static long StartTime = DateTime.UtcNow.Ticks;
+
         // For UnitTest
         internal static IMockNetwork TestNetwork = null;
 
@@ -49,11 +61,11 @@ namespace CrittercismSDK {
 #if NETFX_CORE
         internal static string Version = typeof(Crittercism).GetTypeInfo().Assembly.GetName().Version.ToString();
 #else
-        internal static string Version=Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        internal static string Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 #endif
 
 #if WINDOWS_PHONE
-        internal static string Carrier=Microsoft.Phone.Net.NetworkInformation.
+        internal static string Carrier = Microsoft.Phone.Net.NetworkInformation.
             DeviceNetworkInformation.CellularMobileOperator;
 #else
         internal static string Carrier = "UNKNOWN";
@@ -133,7 +145,7 @@ namespace CrittercismSDK {
         #endregion Properties
 
         #region Events
-        public static event EventHandler TransactionTimeOut;
+        public static event EventHandler UserflowTimeOut;
         #endregion
 
         #region OptOutStatus
@@ -150,6 +162,8 @@ namespace CrittercismSDK {
 
         // Is OptOut known to be equal to what's persisted on disk?
         internal static volatile bool OptOutLoaded = false;
+        // Have we hooked WINDOWS_PHONE Application.Current.RootVisual GotFocus and LostFocus events yet?
+        internal static volatile bool IsRootUIElementFocusHooked = false;
 
         private static string OptOutStatusPath = "Crittercism\\OptOutStatus.js";
         private static void SaveOptOutStatus(bool optOutStatus) {
@@ -181,8 +195,49 @@ namespace CrittercismSDK {
                     };
                 };
             };
+#if WINDOWS_PHONE_APP || WINDOWS_PHONE
+            // NOTE: If we could figure out a way (we can't), we would put a shorter
+            // bit of code to be called by Crittercism.Init into WINDOWS_PHONE apps
+            // that would get root.GotFocus and root.LostFocus events hooked early
+            // on, much more like what are able to do for NETFX_CORE .  However, it
+            // turns out root == null is going to be the normal case for Crittercism.Init
+            // during a WINDOWS_PHONE app launch.  So, we must use more creative code.
+            if ((!OptOut)&&(!IsRootUIElementFocusHooked)) {
+                HookRootUIElementFocus();              
+            };
+#endif
             return OptOut;
         }
+
+#if WINDOWS_PHONE_APP || WINDOWS_PHONE
+        private static void HookRootUIElementFocus() {
+            lock (lockObject) {
+                // Check flag again inside lock in case our thread loses race.
+                if (!IsRootUIElementFocusHooked) {
+                        UIElement root = null;
+#if WINDOWS_PHONE_APP
+                        if (Window.Current != null) {
+                            // If there is a current Window (don't ask us why we're checking this)
+                            root = Window.Current.Content as UIElement;
+                        }
+#elif WINDOWS_PHONE
+                        if (Application.Current != null) {
+                             // We are unaware of any Application.Current == null possibilities,
+                             // but it doesn't cost us much to be paranoid here.
+                             root = Application.Current.RootVisual as UIElement;
+                        }
+#endif
+                        if (root != null) {
+                            // This may be assuming our users are accepting and not modifying the
+                            // MS generated "new Frame" just once part of the MS boiler plate code.
+                            root.GotFocus += Root_UIElement_GotFocus;
+                            root.LostFocus += Root_UIElement_LostFocus;
+                            IsRootUIElementFocusHooked = true;
+                        }
+                };
+            };
+        }
+#endif // WINDOWS_PHONE_APP || WINDOWS_PHONE
 
         public static void SetOptOutStatus(bool optOut) {
             // Set in memory cached value OptOut, persisting if necessary.
@@ -196,9 +251,9 @@ namespace CrittercismSDK {
             }
         }
 
-        #endregion OptOutStatus
+#endregion OptOutStatus
 
-        #region Life Cycle
+#region Life Cycle
         private static string LoadAppVersion() {
             string answer = "UNKNOWN";
             try {
@@ -311,7 +366,7 @@ namespace CrittercismSDK {
             // https://social.msdn.microsoft.com/Forums/sqlserver/en-US/66e662a9-9ece-4863-8cf1-a5e259c7b571/c-windows-store-8-os-version-name-and-net-version-name
             string answer = "";
 #else
-            string answer=Environment.OSVersion.Platform.ToString();
+            string answer = Environment.OSVersion.Platform.ToString();
 #endif
             return answer;
         }
@@ -367,11 +422,11 @@ namespace CrittercismSDK {
                         return;
                     }
                     AppID = appID;
-                    // Put default initialized Settings before APM.Init() and TransactionReporter.Init() .
+                    // Put default initialized Settings before APM.Init() and UserflowReporter.Init() .
                     Settings = LoadSettings();
                     APM.Init();
                     MessageReport.Init();
-                    TransactionReporter.Init();
+                    UserflowReporter.Init();
                     AppVersion = LoadAppVersion();
                     DeviceId = LoadDeviceId();
                     DeviceModel = LoadDeviceModel();
@@ -383,22 +438,27 @@ namespace CrittercismSDK {
                     Action threadStart = () => { queueReader.ReadQueue(); };
                     readerThread = new Task(threadStart);
 #else
-                    ThreadStart threadStart=new ThreadStart(queueReader.ReadQueue);
-                    readerThread=new Thread(threadStart);
-                    readerThread.Name="Crittercism";
+                    ThreadStart threadStart = new ThreadStart(queueReader.ReadQueue);
+                    readerThread = new Thread(threadStart);
+                    readerThread.Name = "Crittercism";
 #endif
                     // Testing for unit test purposes
                     if (Crittercism.TestNetwork == null) {
 #if NETFX_CORE
+#if WINDOWS_PHONE_APP
+                        HookRootUIElementFocus();
+#endif
+                        Window.Current.VisibilityChanged += Window_VisibilityChanged;
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
 #elif WINDOWS_PHONE
-                        Application.Current.UnhandledException+=new EventHandler<ApplicationUnhandledExceptionEventArgs>(SilverlightApplication_UnhandledException);
-                        DeviceNetworkInformation.NetworkAvailabilityChanged+=DeviceNetworkInformation_NetworkAvailabilityChanged;
+                        HookRootUIElementFocus();
+                        Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(SilverlightApplication_UnhandledException);
+                        DeviceNetworkInformation.NetworkAvailabilityChanged += DeviceNetworkInformation_NetworkAvailabilityChanged;
                         try {
-                            if (PhoneApplicationService.Current!=null) {
-                                PhoneApplicationService.Current.Activated+=new EventHandler<ActivatedEventArgs>(PhoneApplicationService_Activated);
-                                PhoneApplicationService.Current.Deactivated+=new EventHandler<DeactivatedEventArgs>(PhoneApplicationService_Deactivated);
+                            if (PhoneApplicationService.Current != null) {
+                                PhoneApplicationService.Current.Activated += new EventHandler<ActivatedEventArgs>(PhoneApplicationService_Activated);
+                                PhoneApplicationService.Current.Deactivated += new EventHandler<DeactivatedEventArgs>(PhoneApplicationService_Deactivated);
                             }
                         } catch (Exception ie) {
                             LogInternalException(ie);
@@ -418,6 +478,9 @@ namespace CrittercismSDK {
                     initialized = true;
                 };
                 readerThread.Start();
+                // It seems sensible to put CreateAppLoadReport here after all the
+                // necessary Crittercism infrastructure to do so (including MessageQueue,
+                // UserflowReporter, readerThread, etc.) have been initialized above.
                 CreateAppLoadReport();
             } catch (Exception) {
                 initialized = false;
@@ -458,7 +521,7 @@ namespace CrittercismSDK {
                             initialized = false;
                             // Stop the producers
                             APM.Shutdown();
-                            TransactionReporter.Shutdown();
+                            UserflowReporter.Shutdown();
                             // Get the readerThread to exit.
                             readerEvent.Set();
 #if NETFX_CORE
@@ -475,22 +538,41 @@ namespace CrittercismSDK {
                 LogInternalException(ie);
             }
         }
-        #endregion Shutdown
+#endregion Shutdown
 
-        #region AppLoads
+#region AppLoads
         /// <summary>
         /// Creates the application load report.
         /// </summary>
         private static void CreateAppLoadReport() {
+            // Creates the application load report.
             if (GetOptOutStatus()) {
                 return;
             }
             AppLoad appLoad = new AppLoad();
             AddMessageToQueue(appLoad);
+            CreateAppLoadUserflow();
         }
-        #endregion AppLoads
+        private static void CreateAppLoadUserflow() {
+            // Automatic "App Load" Userflow
+            long now = DateTime.UtcNow.Ticks;
+#if NETFX_CORE || WINDOWS_PHONE
+            long beginTime = StartTime;
+#else
+            long beginTime = Process.GetCurrentProcess().StartTime.ToUniversalTime().Ticks;
+            if (now < beginTime) {
+                // In case the beginTime from System.Diagnostics.Process is insane
+                // for any reason.
+                beginTime = StartTime;
+            };
+#endif
+            long endTime = now;
+            Debug.WriteLine("App Load time == " + (1.0E-7) * (endTime - beginTime) + " seconds");
+            new Userflow("App Load",beginTime,endTime);
+        }
+#endregion AppLoads
 
-        #region Breadcrumbs
+#region Breadcrumbs
         /// <summary>
         /// Leave breadcrumb.
         /// </summary>
@@ -507,9 +589,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion Breadcrumbs
+#endregion Breadcrumbs
 
-        #region Exceptions and Crashes
+#region Exceptions and Crashes
         internal static void LogInternalException(Exception e) {
             Debug.WriteLine("UNEXPECTED ERROR!!! " + e.Message);
             Debug.WriteLine(e.StackTrace);
@@ -585,10 +667,10 @@ namespace CrittercismSDK {
                 UserBreadcrumbs breadcrumbs = Breadcrumbs.GetAllSessionsBreadcrumbs();
                 List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
-                List<Transaction> transactions = TransactionReporter.CrashTransactions();
+                List<Userflow> userflows = UserflowReporter.CrashUserflows();
                 string stacktrace = StackTrace(e);
                 ExceptionObject exception = new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
-                CrashReport crashReport = new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,transactions,exception);
+                CrashReport crashReport = new CrashReport(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,userflows,exception);
                 // Add crash to message queue and save state .
                 Shutdown();
                 AddMessageToQueue(crashReport);
@@ -599,9 +681,9 @@ namespace CrittercismSDK {
                 // but let the crash go ahead.
             }
         }
-        #endregion Exceptions and Crashes
+#endregion Exceptions and Crashes
 
-        #region Metadata
+#region Metadata
         /// <summary>
         /// Sets "username" metadata value.
         /// </summary>
@@ -670,9 +752,9 @@ namespace CrittercismSDK {
             }
             return answer;
         }
-        #endregion Metadata
+#endregion Metadata
 
-        #region Settings
+#region Settings
         internal static void SetSettings(string json) {
             // Called from AppLoad.DidReceiveResponse
             try {
@@ -689,7 +771,7 @@ namespace CrittercismSDK {
                     Settings = response;
                     SaveSettings(json);
                     APM.SettingsChange();
-                    TransactionReporter.SettingsChange();
+                    UserflowReporter.SettingsChange();
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
@@ -738,138 +820,138 @@ namespace CrittercismSDK {
                 Crittercism.LogInternalException(ie);
             }
         }
-        #endregion
+#endregion
 
-        #region Transactions
-        internal static void OnTransactionTimeOut(EventArgs e) {
-            EventHandler handler = TransactionTimeOut;
+#region Userflows
+        internal static void OnUserflowTimeOut(EventArgs e) {
+            EventHandler handler = UserflowTimeOut;
             if (handler != null) {
-                handler(null, e);
+                handler(null,e);
             }
         }
 
-        public static void BeginTransaction(string name) {
-            // Init and begin a transaction with a default value.
+        public static void BeginUserflow(string name) {
+            // Init and begin a userflow with a default value.
             try {
-                AbortTransaction(name);
-                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
-                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
-                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
-                                                       + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
-                                                       TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                AbortUserflow(name);
+                // Do not begin a new userflow if the userflow count is at or has exceeded the max.
+                if (UserflowReporter.UserflowCount() >= UserflowReporter.MAX_USERFLOW_COUNT) {
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent userflows."
+                                                       + "\r\nIgnoring Crittercism.BeginUserflow() call for {1}."),
+                                                       UserflowReporter.MAX_USERFLOW_COUNT,name));
                     return;
                 }
-                (new Transaction(name)).Begin();
+                (new Userflow(name)).Begin();
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void BeginTransaction(string name,int value) {
-            // Init and begin a transaction with an input value.
+        public static void BeginUserflow(string name,int value) {
+            // Init and begin a userflow with an input value.
             try {
-                AbortTransaction(name);
-                // Do not begin a new transaction if the transaction count is at or has exceeded the max.
-                if (TransactionReporter.TransactionCount() >= TransactionReporter.MAX_TRANSACTION_COUNT) {
-                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent transactions."
-                                                       + "\r\nIgnoring Crittercism.BeginTransaction() call for {1}."),
-                                                       TransactionReporter.MAX_TRANSACTION_COUNT,name));
+                AbortUserflow(name);
+                // Do not begin a new userflow if the userflow count is at or has exceeded the max.
+                if (UserflowReporter.UserflowCount() >= UserflowReporter.MAX_USERFLOW_COUNT) {
+                    DebugUtils.LOG_ERROR(String.Format(("Crittercism only supports a maximum of {0} concurrent userflows."
+                                                       + "\r\nIgnoring Crittercism.BeginUserflow() call for {1}."),
+                                                       UserflowReporter.MAX_USERFLOW_COUNT,name));
                     return;
                 }
-                (new Transaction(name,value)).Begin();
+                (new Userflow(name,value)).Begin();
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        private static void AbortTransaction(string name) {
-            // Cancel a transaction with this name if one exists, otherwise be quiet.
+        private static void AbortUserflow(string name) {
+            // Cancel a userflow with this name if one exists, otherwise be quiet.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    DebugUtils.LOG_WARN(String.Format("Cancelling unfinished identically named transaction {0}.",name));
-                    transaction.Cancel();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    DebugUtils.LOG_WARN(String.Format("Cancelling unfinished identically named userflow {0}.",name));
+                    userflow.Cancel();
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void CancelTransaction(string name) {
-            // Cancel a transaction as if it never was.
+        public static void CancelUserflow(string name) {
+            // Cancel a userflow as if it never was.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    transaction.Cancel();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    userflow.Cancel();
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void EndTransaction(string name) {
-            // End an already begun transaction successfully.
+        public static void EndUserflow(string name) {
+            // End an already begun userflow successfully.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    transaction.End();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    userflow.End();
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static void FailTransaction(string name) {
-            // End an already begun transaction as a failure.
+        public static void FailUserflow(string name) {
+            // End an already begun userflow as a failure.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    transaction.Fail();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    userflow.Fail();
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
-        public static int GetTransactionValue(string name) {
-            // Get the currency cents value of a transaction.
+        public static int GetUserflowValue(string name) {
+            // Get the currency cents value of a userflow.
             int answer = 0;
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    answer = transaction.Value();
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    answer = userflow.Value();
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
             return answer;
         }
-        public static void SetTransactionValue(string name,int value) {
-            // Set the currency cents value of a transaction.
+        public static void SetUserflowValue(string name,int value) {
+            // Set the currency cents value of a userflow.
             try {
-                Transaction transaction = Transaction.TransactionForName(name);
-                if (transaction != null) {
-                    transaction.SetValue(value);
+                Userflow userflow = Userflow.UserflowForName(name);
+                if (userflow != null) {
+                    userflow.SetValue(value);
                 } else {
-                    CantFindTransaction(name);
+                    CantFindUserflow(name);
                 }
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
         }
 
-        internal static void CantFindTransaction(string name) {
+        internal static void CantFindUserflow(string name) {
 #if NETFX_CORE || WINDOWS_PHONE
 #else
-            Trace.WriteLine(String.Format("Can't find transaction named \"{0}\"",name));
+            Trace.WriteLine(String.Format("Can't find userflow named \"{0}\"",name));
 #endif
         }
 
-        #endregion
+#endregion
 
-        #region Network Requests
+#region Network Requests
         private static string RemoveQueryString(string uriString) {
             // String obtained by removing query string portion of uriString .
             string answer = uriString;
@@ -905,7 +987,7 @@ namespace CrittercismSDK {
                     if (APM.IsFiltered(uriString)) {
                         Debug.WriteLine("APM FILTERED: " + uriString);
                     } else {
-                        string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+                        string timestamp = TimeUtils.ISO8601DateString(DateTime.UtcNow);
                         Endpoint endpoint = new Endpoint(method,
                             RemoveQueryString(uriString),
                             timestamp,
@@ -922,9 +1004,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion LogNetworkRequest
+#endregion LogNetworkRequest
 
-        #region Configuring Service Monitoring
+#region Configuring Service Monitoring
         public static void AddFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
@@ -950,9 +1032,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion
+#endregion
 
-        #region MessageQueue
+#region MessageQueue
         /// <summary>
         /// Loads the messages from disk into the queue.
         /// </summary>
@@ -978,12 +1060,72 @@ namespace CrittercismSDK {
             MessageQueue.Enqueue(messageReport);
             readerEvent.Set();
         }
-        #endregion // MessageQueue
+#endregion // MessageQueue
 
-        #region Event Handlers
+#region Event Handlers
+#if NETFX_CORE || WINDOWS_PHONE
+        ////////////////////////////////////////////////////////////////
+        // NOTE: The value of monitoring (root) Root_UIElement_GotFocus,
+        // (root) Root_UIElement_LostFocus, and Window_VisibilityChanged
+        // is proven by the following "App Background" + "App Foreground"
+        // VS2015 Output log of the HubApp.WindowsPhone test app:
+        //    * App Background
+        //    Root_UIElement_LostFocus: 635884114165261968
+        //    Window_VisibilityChanged: 635884114165541917
+        //    * App Foreground
+        //    Window_VisibilityChanged: 635884114201681836
+        //    Root_UIElement_GotFocus: 635884114203470952
+        // Here, UIElement root = Window.Current.Content as UIElement;
+        ////////////////////////////////////////////////////////////////
+        private static void Root_UIElement_GotFocus(object sender,RoutedEventArgs e) {
+            long root_UIElement_GotFocus_Time = DateTime.UtcNow.Ticks;  // ticks
+            Debug.WriteLine("Root_UIElement_GotFocus: " + root_UIElement_GotFocus_Time);
+            if (GetOptOutStatus()) {
+                return;
+            }
+            try {
+                // Automatic "App Foreground" Userflow
+                if (!isForegrounded) {
+                    // NOTE: Being a UIElement event handler, Root_UIElement_GotFocus should
+                    // only get called via the main UI thread.  So, no thread-safety worries here.
+                    new Userflow("App Foreground",window_VisibilityChanged_Time,root_UIElement_GotFocus_Time);
+                    isForegrounded = true;
+                }
+            } catch (Exception ie) {
+                LogInternalException(ie);
+            }
+        }
+        private static long root_UIElement_LostFocus_Time = 0;  // ticks
+        private static void Root_UIElement_LostFocus(object sender,RoutedEventArgs e) {
+            root_UIElement_LostFocus_Time = DateTime.UtcNow.Ticks;
+            Debug.WriteLine("Root_UIElement_LostFocus: " + root_UIElement_LostFocus_Time);
+            // That's all we do in this method:  Record the time we treat
+            // as the beginTime of an "App Background" UserFlow .
+        }
+        private static long window_VisibilityChanged_Time = 0;  // ticks
+#endif
 
 #if NETFX_CORE
 #pragma warning disable 1998
+        private static void Window_VisibilityChanged(object sender,VisibilityChangedEventArgs e) {
+            window_VisibilityChanged_Time = DateTime.UtcNow.Ticks;
+            Debug.WriteLine("Window_VisibilityChanged: " + window_VisibilityChanged_Time);
+            if (GetOptOutStatus()) {
+                return;
+            }
+            try {
+                if (e.Visible) {
+                    // If we could absolutely rely on Root_UIElement_GotFocus getting installed,
+                    // we might shift this "Foreground()" to that method.  However, we're not absolutely
+                    // sure that will always happen, and it might not happen.
+                    Foreground();
+                } else {
+                    Background();
+                }
+            } catch (Exception ie) {
+                LogInternalException(ie);
+            }
+        }
         private static async void Application_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
                 return;
@@ -1030,7 +1172,7 @@ namespace CrittercismSDK {
             }
         }
 
-        static void PhoneApplicationService_Activated(object sender, ActivatedEventArgs e) {
+        static void PhoneApplicationService_Activated(object sender,ActivatedEventArgs e) {
             ////////////////////////////////////////////////////////////////
             // The Windows Phone execution model allows only one app to run in the
             // foreground at a time. When the user navigates away from an app, the
@@ -1043,6 +1185,8 @@ namespace CrittercismSDK {
             // its own state because it is no longer in memory.
             // https://msdn.microsoft.com/en-us/library/windows/apps/ff967547(v=vs.105).aspx
             ////////////////////////////////////////////////////////////////
+            window_VisibilityChanged_Time = DateTime.UtcNow.Ticks;
+            Debug.WriteLine("Window_VisibilityChanged: " + window_VisibilityChanged_Time);
             if (GetOptOutStatus()) {
                 return;
             }
@@ -1052,28 +1196,33 @@ namespace CrittercismSDK {
                     if (PhoneApplicationService.Current.State.ContainsKey("Crittercism.AppID")) {
                         // Take this to mean that Crittercism was Init'd in this app prior to
                         // a Deactivate.  Restart Crittercism asynchronously.
-                        BackgroundWorker backgroundWorker=new BackgroundWorker();
-                        backgroundWorker.DoWork+=new DoWorkEventHandler(BackgroundWorker_DoWork);
+                        BackgroundWorker backgroundWorker = new BackgroundWorker();
+                        backgroundWorker.DoWork += new DoWorkEventHandler(BackgroundWorker_DoWork);
                         backgroundWorker.RunWorkerAsync();
                     }
+                    // Above will (generally?) get Crittercism.Init called generating a
+                    // new automatic "App Load" userflow.
+                } else {
+                    Foreground();
                 }
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
         }
 
-        static void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
+        static void BackgroundWorker_DoWork(object sender,DoWorkEventArgs e) {
             Init((string)PhoneApplicationService.Current.State["Crittercism.AppID"]);
         }
 
-        static void PhoneApplicationService_Deactivated(object sender, DeactivatedEventArgs e)
-        {
+        static void PhoneApplicationService_Deactivated(object sender,DeactivatedEventArgs e) {
+            window_VisibilityChanged_Time = DateTime.UtcNow.Ticks;
+            Debug.WriteLine("Window_VisibilityChanged: " + window_VisibilityChanged_Time);
             if (GetOptOutStatus()) {
                 return;
             }
             try {
                 PhoneApplicationService.Current.State["Crittercism.AppID"] = AppID;
+                Background();
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
@@ -1087,7 +1236,7 @@ namespace CrittercismSDK {
                 switch (e.NotificationType) {
                     case NetworkNotificationType.InterfaceConnected:
                         if (NetworkInterface.GetIsNetworkAvailable()) {
-                            if (MessageQueue!=null&&MessageQueue.Count>0) {
+                            if (MessageQueue != null && MessageQueue.Count > 0) {
                                 readerEvent.Set();
                             }
                         }
@@ -1133,6 +1282,31 @@ namespace CrittercismSDK {
         }
 #endif
 
-        #endregion // Event Handlers
+#if NETFX_CORE || WINDOWS_PHONE
+        private static void Foreground() {
+            Breadcrumbs.LeaveEventBreadcrumb("foregrounded");
+            APM.Foreground();
+            UserflowReporter.Foreground();
+        }
+
+        private static void Background() {
+            try {
+                if (root_UIElement_LostFocus_Time != 0) {
+                    // The minimum sanity check we can do on the slighly risky Root_UIElement_LostFocus
+                    // event handler installation is to check it did record a root_UIElement_LostFocus_Time .
+                    // Automatic "App Background" Userflow
+                    new Userflow("App Background",root_UIElement_LostFocus_Time,window_VisibilityChanged_Time);
+                    isForegrounded = false;
+                }
+            } catch (Exception ie) {
+                LogInternalException(ie);
+            }
+            Breadcrumbs.LeaveEventBreadcrumb("backgrounded");
+            APM.Background();
+            UserflowReporter.Background();
+        }
+#endif
+
+#endregion // Event Handlers
     }
 }

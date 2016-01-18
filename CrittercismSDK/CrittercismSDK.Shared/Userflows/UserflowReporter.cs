@@ -18,163 +18,143 @@ using Microsoft.Phone.Net.NetworkInformation;
 #endif
 
 namespace CrittercismSDK {
-    internal class TransactionReporter {
+    internal class UserflowReporter {
         #region Constants
-        internal const int MSEC_PER_SEC = 1000;
-        internal const int MAX_TRANSACTION_COUNT = 50;
-        private const int ONE_MINUTE = 60 * MSEC_PER_SEC; // milliseconds
-        private const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
+        internal const int MAX_USERFLOW_COUNT = 50;
         #endregion
 
         #region Properties
         private static Object lockObject = new object();
-        private static SynchronizedQueue<Transaction> TransactionsQueue { get; set; }
+        private static SynchronizedQueue<Userflow> UserflowsQueue { get; set; }
         internal static bool enabled = true;
-        // Batch additional network requests for 20 seconds before sending TransactionReport .
+        internal static volatile bool isForegrounded = true;
+        // Batch additional network requests for 20 seconds before sending UserflowReport .
+        private const int MSEC_PER_SEC = 1000;
+        private const int ONE_HOUR = 3600 * MSEC_PER_SEC; // milliseconds
         private static int interval = 20 * MSEC_PER_SEC; // milliseconds
         private static int defaultTimeout = ONE_HOUR; // milliseconds
+        // private const int ONE_MINUTE = 60 * MSEC_PER_SEC; // milliseconds
         // private static int defaultTimeout = ONE_MINUTE; // milliseconds
         private static JObject thresholds = null;
 
         internal static int Interval() {
-            // Transaction batch reporting interval in milliseconds
+            // Userflow batch reporting interval in milliseconds
             return interval;
         }
 
         internal static int DefaultTimeout() {
-            // Transaction default timeout in milliseconds
+            // Userflow default timeout in milliseconds
             return defaultTimeout;
-        }
-
-        internal static bool IsForegrounded() {
-            // TODO: NIY
-            return true;
-        }
-        internal static void Background() {
-            lock (lockObject) {
-                long backgroundTime = DateTime.UtcNow.Ticks;
-                foreach (Transaction transaction in transactionsDictionary.Values) {
-                    transaction.Background(backgroundTime);
-                };
-                RemoveTimer();
-            }
-        }
-        internal static void Resume() {
-            lock (lockObject) {
-                long foregroundTime = DateTime.UtcNow.Ticks;
-                foreach (Transaction transaction in transactionsDictionary.Values) {
-                    transaction.Foreground(foregroundTime);
-                };
-                // TODO: Timer.  Entire Resume method needs more work.
-            }
         }
         #endregion
 
         #region Multithreading Remarks
         ////////////////////////////////////////////////////////////////
-        // MULTITHREADING Transaction AND TransactionReporter REMARKS
+        // MULTITHREADING Userflow AND UserflowReporter REMARKS
         // * lock "Lock Ordering"
         //    The deadlock prevention technique of establishing a global ordering
         //    on resources which may be locked is known as "Lock Ordering"
         //    Lock ordering is a simple yet effective deadlock prevention mechanism.
         //    http://tutorials.jenkov.com/java-concurrency/deadlock-prevention.html#ordering
-        // Transaction code sometimes needs to lock both a transaction and
+        // Userflow code sometimes needs to lock both a userflow and
         // the reporter simultaneously.  Our lock deadlock prevention
-        // policy is to always obtain lock on transaction first and lock
+        // policy is to always obtain lock on userflow first and lock
         // on reporter second whenever this is necessary.  Effectively:
-        //    lock (transaction) {
-        //      lock (TransactionReporter.lockObject) {
+        //    lock (userflow) {
+        //      lock (UserflowReporter.lockObject) {
         //        ...
         //      }
         //    }
         // though possibly spread out on the stack trace, not necessarily
         // all in one function or class.
-        // * Changing properties of transactions is done synchronously.
+        // * Changing properties of userflows is done synchronously.
         ////////////////////////////////////////////////////////////////
         #endregion
 
         #region Life Cycle
         internal static void Init() {
             lock (lockObject) {
-                // Crittercism.Init calling TransactionReporter.Init should effectively make
+                // TODO: Rigorously we should check if app's window is visible just now
+                isForegrounded = true;
+                // Crittercism.Init calling UserflowReporter.Init should effectively make
                 // lock lockObject here pointless, but no real harm doing so.
                 SettingsChange();
-                // Initialize transactionsDictionary and TransactionsQueue
-                transactionsDictionary = new Dictionary<string,Transaction>();
-                TransactionsQueue = new SynchronizedQueue<Transaction>(new Queue<Transaction>());
+                // Initialize userflowsDictionary and UserflowsQueue
+                userflowsDictionary = new Dictionary<string,Userflow>();
+                UserflowsQueue = new SynchronizedQueue<Userflow>(new Queue<Userflow>());
             }
         }
         internal static void Shutdown() {
             lock (lockObject) {
-                // Crittercism.Shutdown calls TransactionReporter.Shutdown
+                // Crittercism.Shutdown calls UserflowReporter.Shutdown
                 Background();
             }
         }
         #endregion
 
         #region Persistence
-        internal static void Save(Transaction transaction) {
-            // Persist transaction to correct directory
+        internal static void Save(Userflow userflow) {
+            // Persist userflow to correct directory
             lock (lockObject) {
-                switch (transaction.State()) {
-                    case TransactionState.CANCELLED:
-                        CancelTransaction(transaction);
+                switch (userflow.State()) {
+                    case UserflowState.CANCELLED:
+                        CancelUserflow(userflow);
                         break;
-                    case TransactionState.CREATED:
+                    case UserflowState.CREATED:
                         // Make visible via persistence API methods.
-                        AddTransaction(transaction);
+                        AddUserflow(userflow);
                         break;
-                    case TransactionState.BEGUN:
+                    case UserflowState.BEGUN:
                         // Nothing extra to do.
                         break;
-                    case TransactionState.CRASHED:
-                        CancelTransaction(transaction);
+                    case UserflowState.CRASHED:
+                        CancelUserflow(userflow);
                         break;
                     default:
                         // Final state
-                        CancelTransaction(transaction);
-                        Enqueue(transaction);
+                        CancelUserflow(userflow);
+                        Enqueue(userflow);
                         break;
                 }
             }
         }
-        private static void AddTransaction(Transaction transaction) {
+        private static void AddUserflow(Userflow userflow) {
             lock (lockObject) {
-                transactionsDictionary[transaction.Name()] = transaction;
+                userflowsDictionary[userflow.Name()] = userflow;
             }
         }
-        private static void CancelTransaction(Transaction transaction) {
+        private static void CancelUserflow(Userflow userflow) {
             lock (lockObject) {
-                transactionsDictionary.Remove(transaction.Name());
+                userflowsDictionary.Remove(userflow.Name());
             }
         }
         #endregion
 
-        #region Transaction Dictionary
-        private static Dictionary<string,Transaction> transactionsDictionary;
-        internal static int TransactionCount() {
+        #region Userflow Dictionary
+        private static Dictionary<string,Userflow> userflowsDictionary;
+        internal static int UserflowCount() {
             int answer = 0;
             lock (lockObject) {
-                answer = transactionsDictionary.Count;
+                answer = userflowsDictionary.Count;
             }
             return answer;
         }
-        internal static Transaction[] AllTransactions() {
-            Transaction[] answer = null;
+        internal static Userflow[] AllUserflows() {
+            Userflow[] answer = null;
             lock (lockObject) {
-                List<Transaction> list = new List<Transaction>();
-                foreach (Transaction transaction in transactionsDictionary.Values) {
-                    list.Add(transaction);
+                List<Userflow> list = new List<Userflow>();
+                foreach (Userflow userflow in userflowsDictionary.Values) {
+                    list.Add(userflow);
                 }
                 answer = list.ToArray();
             }
             return answer;
         }
-        internal static Transaction TransactionForName(string name) {
-            Transaction answer = null;
+        internal static Userflow UserflowForName(string name) {
+            Userflow answer = null;
             lock (lockObject) {
-                if (transactionsDictionary.ContainsKey(name)) {
-                    answer = transactionsDictionary[name];
+                if (userflowsDictionary.ContainsKey(name)) {
+                    answer = userflowsDictionary[name];
                 }
             }
             return answer;
@@ -185,9 +165,9 @@ namespace CrittercismSDK {
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
         private static ThreadPoolTimer timer = null;
-        private static void OnTimerElapsed(ThreadPoolTimer timer) {
+        private static void OnTimerElapsed(ThreadPoolTimer sender) {
             lock (lockObject) {
-                SendTransactionReport();
+                SendUserflowReport();
                 timer = null;
             }
         }
@@ -195,7 +175,7 @@ namespace CrittercismSDK {
         private static Timer timer=null;
         private static void OnTimerElapsed(Object source, ElapsedEventArgs e) {
             lock (lockObject) {
-                SendTransactionReport();
+                SendUserflowReport();
                 timer=null;
             }
         }
@@ -216,14 +196,37 @@ namespace CrittercismSDK {
         }
         #endregion
 
+        #region Background / Foreground
+        internal static void Background() {
+            lock (lockObject) {
+                isForegrounded = false;
+                long backgroundTime = DateTime.UtcNow.Ticks;
+                foreach (Userflow userflow in userflowsDictionary.Values) {
+                    userflow.Background(backgroundTime);
+                };
+                RemoveTimer();
+            }
+        }
+        internal static void Foreground() {
+            lock (lockObject) {
+                isForegrounded = true;
+                SendUserflowReport();
+                long foregroundTime = DateTime.UtcNow.Ticks;
+                foreach (Userflow userflow in userflowsDictionary.Values) {
+                    userflow.Foreground(foregroundTime);
+                };
+            }
+        }
+        #endregion
+
         #region Reporting
-        internal static void Enqueue(Transaction transaction) {
+        internal static void Enqueue(Userflow userflow) {
             lock (lockObject) {
                 if (enabled) {
-                    while (TransactionsQueue.Count >= MAX_TRANSACTION_COUNT) {
-                        TransactionsQueue.Dequeue();
+                    while (UserflowsQueue.Count >= MAX_USERFLOW_COUNT) {
+                        UserflowsQueue.Dequeue();
                     };
-                    TransactionsQueue.Enqueue(transaction);
+                    UserflowsQueue.Enqueue(userflow);
 #if NETFX_CORE || WINDOWS_PHONE
                     if (timer == null) {
                         // Creates a single-use timer.
@@ -246,55 +249,55 @@ namespace CrittercismSDK {
                 }
             }
         }
-        private static long BeginTime(List<Transaction> transactions) {
-            // Earliest BeginTime amongst these transactions
+        private static long BeginTime(List<Userflow> userflows) {
+            // Earliest BeginTime amongst these userflows
             long answer = long.MaxValue;
-            foreach (Transaction transaction in transactions) {
-                answer = Math.Min(answer,transaction.BeginTime());
+            foreach (Userflow userflow in userflows) {
+                answer = Math.Min(answer,userflow.BeginTime());
             }
             return answer;
         }
-        private static long EndTime(List<Transaction> transactions) {
-            // Latest EndTime amongst these transactions
+        private static long EndTime(List<Userflow> userflows) {
+            // Latest EndTime amongst these userflows
             long answer = long.MinValue;
-            foreach (Transaction transaction in transactions) {
-                answer = Math.Max(answer,transaction.EndTime());
+            foreach (Userflow userflow in userflows) {
+                answer = Math.Max(answer,userflow.EndTime());
             }
             return answer;
         }
 
-        private static void SendTransactionReport() {
-            if (TransactionsQueue.Count > 0) {
-                List<Transaction> transactions = TransactionsQueue.ToList();
-                TransactionsQueue.Clear();
-                long beginTime = BeginTime(transactions);
-                long endTime = EndTime(transactions);
+        private static void SendUserflowReport() {
+            if (UserflowsQueue.Count > 0) {
+                List<Userflow> userflows = UserflowsQueue.ToList();
+                UserflowsQueue.Clear();
+                long beginTime = BeginTime(userflows);
+                long endTime = EndTime(userflows);
                 Dictionary<string,object> appState = MessageReport.ComputeAppState();
                 List<UserBreadcrumb> breadcrumbs = Breadcrumbs.ExtractUserBreadcrumbs(beginTime,endTime);
                 List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs(beginTime,endTime);
                 List<Endpoint> endpoints = Breadcrumbs.ExtractEndpoints(beginTime,endTime);
-                TransactionReport transactionReport = new TransactionReport(
+                UserflowReport userflowReport = new UserflowReport(
                     appState,
-                    transactions,
+                    userflows,
                     breadcrumbs,
                     systemBreadcrumbs,
                     endpoints);
-                Crittercism.AddMessageToQueue(transactionReport);
+                Crittercism.AddMessageToQueue(userflowReport);
             }
         }
-        internal static List<Transaction> CrashTransactions() {
-            // Remove BEGUN Transaction's to CRASHED state.
+        internal static List<Userflow> CrashUserflows() {
+            // Remove BEGUN Userflow's to CRASHED state.
             // The code takes care to avoid deadlocks by not locking
-            // the reporter and then locking a Transaction (wrong order).
-            Transaction[] allTransactions = AllTransactions();
-            // Compute crashed Transaction's .
-            List<Transaction> answer = new List<Transaction>();
-            foreach (Transaction transaction in allTransactions) {
-                // Request transaction to Crash.
-                transaction.Crash();
-                if (transaction.State() == TransactionState.CRASHED) {
-                    // The transaction crashed.
-                    answer.Add(transaction);
+            // the reporter and then locking a Userflow (wrong order).
+            Userflow[] allUserflows = AllUserflows();
+            // Compute crashed Userflow's .
+            List<Userflow> answer = new List<Userflow>();
+            foreach (Userflow userflow in allUserflows) {
+                // Request userflow to Crash.
+                userflow.Crash();
+                if (userflow.State() == UserflowState.CRASHED) {
+                    // The userflow crashed.
+                    answer.Add(userflow);
                 };
             };
             return answer;
@@ -303,7 +306,7 @@ namespace CrittercismSDK {
 
         #region Sampling Control
         ////////////////////////////////////////////////////////////////
-        //    EXAMPLE TRANSACTION "config" EXTRACTED FROM PLATFORM AppLoad RESPONSE JSON
+        //    EXAMPLE USERFLOW "config" EXTRACTED FROM PLATFORM AppLoad RESPONSE JSON
         // {"defaultTimeout":3600000,
         //  "interval":10,
         //  "enabled":true,
@@ -311,6 +314,8 @@ namespace CrittercismSDK {
         //                  "Sing Critter Song":{"timeout":90000,"slowness":3600000,"value":1500},
         //                  "Write Critter Poem":{"timeout":60000,"slowness":3600000,"value":2000}}}
         // See example in AppLoad.cs for context.
+        // * OMG.  Platform is sending "defaultTimeout" in milliseconds
+        // and "interval" in seconds.
         ////////////////////////////////////////////////////////////////
         internal static void SettingsChange() {
             try {
@@ -319,7 +324,9 @@ namespace CrittercismSDK {
                     if (config["enabled"] != null) {
                         bool enabled = (bool)((JValue)(config["enabled"])).Value;
                         if (enabled) {
-                            int interval = Convert.ToInt32(((JValue)(config["interval"])).Value);
+                            // NOTE: Platform sends "interval" in seconds, but method Enable wants
+                            // that time converted to milliseconds.
+                            int interval = (int)(Convert.ToDouble(((JValue)(config["interval"])).Value) * MSEC_PER_SEC);
                             int defaultTimeout = Convert.ToInt32(((JValue)(config["defaultTimeout"])).Value);
                             JObject thresholds = config["transactions"] as JObject;
                             Enable(interval,defaultTimeout,thresholds);
@@ -342,9 +349,12 @@ namespace CrittercismSDK {
             ////////////////////////////////////////////////////////////////
             lock (lockObject) {
                 enabled = true;
-                TransactionReporter.interval = interval;
-                TransactionReporter.defaultTimeout = defaultTimeout;
-                TransactionReporter.thresholds = thresholds;
+                if (interval<1000) {
+                    Debug.WriteLine("THIS SHOULDN'T HAPPEN");
+                }
+                UserflowReporter.interval = interval;
+                UserflowReporter.defaultTimeout = defaultTimeout;
+                UserflowReporter.thresholds = thresholds;
             }
         }
         private static void Disable() {
@@ -356,7 +366,7 @@ namespace CrittercismSDK {
             // Clamp newTimeout according to Wire+Protocol doc
             // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
             // details regarding txnConfig defaultTimeout and possible "timeout"
-            // txnConfig transactions thresholds dictionaries.
+            // txnConfig userflows thresholds dictionaries.
             int answer = newTimeout;
             lock (lockObject) {
                 if (thresholds != null) {
@@ -381,11 +391,11 @@ namespace CrittercismSDK {
             return answer;
         }
         internal static int DefaultValue(string name) {
-            // Default value of transaction name (kind of) according to Wire+Protocol doc
+            // Default value of userflow name (kind of) according to Wire+Protocol doc
             // https://crittercism.atlassian.net/wiki/display/DEV/Wire+Protocol
             // details regarding txnConfig thresholds dictionaries specifying "value"s.
 
-            int answer = Transaction.NULL_VALUE;
+            int answer = Userflow.NULL_VALUE;
             lock (lockObject) {
                 if (thresholds != null) {
                     JObject threshold = thresholds[name] as JObject;

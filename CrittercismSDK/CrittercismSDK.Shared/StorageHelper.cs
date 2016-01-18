@@ -77,8 +77,14 @@ namespace CrittercismSDK {
                         {
                             IsolatedStorageFile storage=GetStore();
 #if WINDOWS_PHONE
-                            FieldInfo field=storage.GetType().GetField("m_AppFilesPath",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
-                            PrivateStoragePath=(string)field.GetValue(storage);
+                            try {
+                                FieldInfo field = storage.GetType().GetField("m_AppFilesPath",BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.GetField);
+                                PrivateStoragePath = (string)field.GetValue(storage);
+                            } catch (Exception) {
+                                Debug.WriteLine("Couldn't get PrivateStoragePath for WINDOWS_PHONE");
+                                // PrivateStoragePath is kind of a nice-to-have for WINDOWS_PHONE debugging,
+                                // but not so critical.
+                            }
 #else
                             FieldInfo field=storage.GetType().GetField("m_RootDir",BindingFlags.Instance|BindingFlags.Public|BindingFlags.NonPublic|BindingFlags.GetField);
                             PrivateStoragePath=(string)field.GetValue(storage);
@@ -91,6 +97,7 @@ namespace CrittercismSDK {
                         Debug.WriteLine("STORAGE PATH: " + PrivateStoragePath);
                         Debug.WriteLine("");
 #endif // DEBUG
+                        PrivateStoragePathComputed = true;
                     }
                 }
             };

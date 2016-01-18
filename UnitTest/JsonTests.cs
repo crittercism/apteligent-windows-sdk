@@ -201,7 +201,7 @@ namespace UnitTest {
         }
         [TestMethod]
         public void EndpointJsonTest() {
-            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
+            string timestamp = TimeUtils.ISO8601DateString(DateTime.UtcNow);
             Endpoint endpoint1 = new Endpoint(
                 "POST",
                 "http://www.mrscritter.com?doYouLoveCrittercism=YES",
@@ -229,29 +229,29 @@ namespace UnitTest {
             Assert.AreEqual(json1,json3);
         }
         [TestMethod]
-        public void TransactionJsonTest() {
-            string timestamp = DateUtils.ISO8601DateString(DateTime.UtcNow);
-            Transaction transaction1 = new Transaction(
+        public void UserflowJsonTest() {
+            string timestamp = TimeUtils.ISO8601DateString(DateTime.UtcNow);
+            Userflow userflow1 = new Userflow(
                 "Buy Critter Feed",
-                TransactionState.ENDED,
+                UserflowState.ENDED,
                 3600000,
                 10000,//-2147483648,
                 new Dictionary<string,string>(),
                 635847638748307732L,
                 635847638922943221L,
                 174635489L);
-            // Testing TransactionConverter WriteJson
-            string json1 = JsonConvert.SerializeObject(transaction1);
+            // Testing UserflowConverter WriteJson
+            string json1 = JsonConvert.SerializeObject(userflow1);
             Debug.WriteLine(json1);
             Assert.AreEqual(json1,"[\"Buy Critter Feed\",2,3600.0,10000,{},\"2015-12-03T18:24:34.830Z\",\"2015-12-03T18:24:52.294Z\",17.4635489]");
-            string json2 = JsonConvert.SerializeObject(transaction1,Formatting.None,new TransactionConverter());
+            string json2 = JsonConvert.SerializeObject(userflow1,Formatting.None,new UserflowConverter());
             Debug.WriteLine("json1 == " + json1);
             Debug.WriteLine("json2 == " + json2);
             Assert.AreEqual(json1,json2);
-            // Testing TransactionConverter ReadJson
-            Transaction transaction2 = JsonConvert.DeserializeObject(json1,typeof(Transaction)) as Transaction;
-            Assert.IsNotNull(transaction2);
-            string json3 = JsonConvert.SerializeObject(transaction2);
+            // Testing UserflowConverter ReadJson
+            Userflow userflow2 = JsonConvert.DeserializeObject(json1,typeof(Userflow)) as Userflow;
+            Assert.IsNotNull(userflow2);
+            string json3 = JsonConvert.SerializeObject(userflow2);
             Debug.WriteLine("json3 == " + json3);
             Assert.AreEqual(json1,json3);
         }
@@ -259,17 +259,17 @@ namespace UnitTest {
         public void NetworkBreadcrumbJsonTest() {
             // Network,         // 2 - network breadcrumb    ; [verb,url,...,statusCode,errorCode]
             DateTime now = DateTime.UtcNow;
-            // Yes, DateUtils.ISO8601DateString for Endpoint and DateUtils.GMTDateString for Breadcrumb is odd.
+            // Yes, TimeUtils.ISO8601DateString for Endpoint and TimeUtils.GMTDateString for Breadcrumb is odd.
             Endpoint endpoint1 = new Endpoint(
                 "POST",
                 "http://www.mrscritter.com",
-                DateUtils.ISO8601DateString(now),
+                TimeUtils.ISO8601DateString(now),
                 433,
                 3213,
                 2478,
                 HttpStatusCode.OK,
                 WebExceptionStatus.Success);
-            Breadcrumb breadcrumb1 = new Breadcrumb(DateUtils.GMTDateString(now),BreadcrumbType.Network,endpoint1);
+            Breadcrumb breadcrumb1 = new Breadcrumb(TimeUtils.GMTDateString(now),BreadcrumbType.Network,endpoint1);
             // Testing BreadcrumbConverter WriteJson
             string json1 = JsonConvert.SerializeObject(breadcrumb1);
             // NOTE: VS editor syntax colors embedded URL, but the C# syntax is correct.
@@ -290,11 +290,11 @@ namespace UnitTest {
         public void UserBreadcrumbJsonTest() {
             // Text,            // 1 - user breadcrumb       ; {text:,level:}
             DateTime now = DateTime.UtcNow;
-            // Yes, DateUtils.ISO8601DateString for Endpoint and DateUtils.GMTDateString for Breadcrumb is odd.
+            // Yes, TimeUtils.ISO8601DateString for Endpoint and TimeUtils.GMTDateString for Breadcrumb is odd.
             Dictionary<string,Object> data1 = new Dictionary<string,Object>();
             data1["text"] = "Critter Bowl is Empty!";
             data1["level"] = (int)BreadcrumbTextType.Urgent;
-            Breadcrumb breadcrumb1 = new Breadcrumb(DateUtils.GMTDateString(now),BreadcrumbType.Text,data1);
+            Breadcrumb breadcrumb1 = new Breadcrumb(TimeUtils.GMTDateString(now),BreadcrumbType.Text,data1);
             // Testing BreadcrumbConverter WriteJson
             string json1 = JsonConvert.SerializeObject(breadcrumb1);
             // We don't assume Dictionary key-value pairs appear in any particular order.

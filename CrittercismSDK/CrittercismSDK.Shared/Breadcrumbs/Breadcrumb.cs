@@ -32,7 +32,7 @@ namespace CrittercismSDK
 
         #region Constructor
         internal Breadcrumb(BreadcrumbType breadcrumbType,Object data)
-            : this(DateUtils.GMTDateString(DateTime.UtcNow),breadcrumbType,data) {
+            : this(TimeUtils.GMTDateString(DateTime.UtcNow),breadcrumbType,data) {
         }
         internal Breadcrumb(string timestamp,BreadcrumbType breadcrumbType,Object data) {
             this.timestamp = timestamp;

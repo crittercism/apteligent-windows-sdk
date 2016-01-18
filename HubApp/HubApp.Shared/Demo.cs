@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
+using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -13,8 +16,7 @@ using Windows.UI.Xaml.Navigation;
 using CrittercismSDK;
 using HubApp.Data;
 
-namespace HubApp
-{
+namespace HubApp {
     class Demo {
         private static Random random = new Random();
         internal static void ItemClick(Frame frame,SampleDataItem item) {
@@ -43,20 +45,20 @@ namespace HubApp
                         Crittercism.LogHandledException(ex);
                     }
                 }
-            } else if (itemId.Equals("Begin Transaction")) {
-                TransactionClick(frame,item);
+            } else if (itemId.Equals("Begin Userflow")) {
+                UserflowClick(frame,item);
             } else if (itemId.Equals("Crash")) {
                 ThrowException();
             } else {
-                // We are on "End Transaction" SectionPage .
+                // We are on "End Userflow" SectionPage .
                 if (itemId.Equals("Succeed")) {
-                    Crittercism.EndTransaction(transactionName);
+                    Crittercism.EndUserflow(userflowName);
                 } else if (itemId.Equals("Fail")) {
-                    Crittercism.FailTransaction(transactionName);
+                    Crittercism.FailUserflow(userflowName);
                 } else if (itemId.Equals("Cancel")) {
-                    Crittercism.CancelTransaction(transactionName);
+                    Crittercism.CancelUserflow(userflowName);
                 };
-                transactionItem.Title = beginTransactionLabel;
+                userflowItem.Title = beginUserflowLabel;
                 frame.GoBack();
             }
         }
@@ -109,37 +111,57 @@ namespace HubApp
                 (HttpStatusCode)responseCode,
                 WebExceptionStatus.Success);
         }
-        internal const string beginTransactionLabel = "Begin Transaction";
-        internal const string endTransactionLabel = "End Transaction";
-        private static string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private static string transactionName;
-        private static SampleDataItem transactionItem = null;
-        private static void TransactionClick(Frame frame,SampleDataItem item) {
-            // Conveniently remembering transactionItem so we can change its Title
-            // back to "Begin Transaction" later on.
-            transactionItem = item;
-            if (item.Title == beginTransactionLabel) {
-                // "Begin Transaction"
-                transactionName = transactionNames[random.Next(0,transactionNames.Length)];
-                Crittercism.BeginTransaction(transactionName);
-                item.Title = endTransactionLabel;
+        internal const string beginUserflowLabel = "Begin Userflow";
+        internal const string endUserflowLabel = "End Userflow";
+        private static string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private static string userflowName;
+        private static SampleDataItem userflowItem = null;
+        private static void UserflowClick(Frame frame,SampleDataItem item) {
+            // Conveniently remembering userflowItem so we can change its Title
+            // back to "Begin Userflow" later on.
+            userflowItem = item;
+            if (item.Title == beginUserflowLabel) {
+                // "Begin Userflow"
+                userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                Crittercism.BeginUserflow(userflowName);
+                item.Title = endUserflowLabel;
             } else {
-                // "End Transaction"
-                // This works because "End Transaction" == UniqueId of Groups[1]
+                // "End Userflow"
+                // This works because "End Userflow" == UniqueId of Groups[1]
                 frame.Navigate(typeof(SectionPage),item.Title);
             }
         }
-        private void TransactionTimeOutHandler(object sender,EventArgs e) {
-            Debug.WriteLine("The transaction timed out. " + sender.GetType().FullName);
-            // Execute this Action on the main UI thread.
-#if false
-            // TODO: We haven't figured this out 100% yet.
-            sender.Dispatcher.Invoke(new Action(() => {
-                transactionItem.Title = beginTransactionLabel;
-                // If we find ourselves currently on the "End Transaction" SectionPage ...
-                frame.GoBack();
-            }));
-#endif
+
+        internal static async void UserflowTimeOutHandler(Page page,EventArgs e) {
+            // Userflow timed out.
+            await page.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,async () => {
+                userflowItem.Title = beginUserflowLabel;
+                if (page.Frame.Content == page) {
+                    // This page is being shown.
+                    await UserflowTimeOutShowMessage(e);
+                    if (page is SectionPage) {
+                        SectionPage sectionPage = (SectionPage)page;
+                        string title = sectionPage.Title();
+                        Debug.WriteLine("PageTitle == " + title);
+                        if (title == "End Userflow") {
+                            // If we find ourselves currently on the "End Userflow" SectionPage .
+                            Frame frame = page.Frame;
+                            frame.GoBack();
+                        }
+                    }
+                }
+            });
+        }
+
+        private static async Task UserflowTimeOutShowMessage(EventArgs e) {
+            // Show MessageDialog routine for caller UserflowTimeOutHandler
+            string name = ((CRUserflowEventArgs)e).Name;
+            string message = String.Format("Userflow '{0}'\r\nTimed Out",name);
+            Debug.WriteLine(message);
+            var messageDialog = new MessageDialog(message);
+            messageDialog.Commands.Add(new UICommand("Close"));
+            messageDialog.DefaultCommandIndex = 0;
+            await messageDialog.ShowAsync();
         }
 
         private static void DeepError(int n) {

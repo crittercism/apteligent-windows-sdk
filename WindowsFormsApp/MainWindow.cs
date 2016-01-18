@@ -19,7 +19,7 @@ namespace WindowsFormsApp {
 
         public MainWindow() {
             InitializeComponent();
-            Crittercism.TransactionTimeOut += TransactionTimeOutHandler;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
             ApplicationOpenFormsCount++;
         }
 
@@ -159,45 +159,47 @@ namespace WindowsFormsApp {
             (new MainWindow()).Show();
         }
 
-        private const string beginTransactionLabel = "Begin Transaction";
-        private const string endTransactionLabel = "End Transaction";
-        private string[] transactionNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private string transactionName;
-        private void transactionButton_Click(object sender,EventArgs e) {
+        private const string beginUserflowLabel = "Begin Userflow";
+        private const string endUserflowLabel = "End Userflow";
+        private string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
+        private string userflowName;
+        private void userflowButton_Click(object sender,EventArgs e) {
             Button button = sender as Button;
             if (button != null) {
                 String label = button.Text;
-                if (label == beginTransactionLabel) {
-                    transactionName = transactionNames[random.Next(0,transactionNames.Length)];
-                    Crittercism.BeginTransaction(transactionName);
-                    button.Text = endTransactionLabel;
-                } else if (label == endTransactionLabel) {
-                    EndTransactionDialog dialog = new EndTransactionDialog();
+                if (label == beginUserflowLabel) {
+                    userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(userflowName);
+                    button.Text = endUserflowLabel;
+                } else if (label == endUserflowLabel) {
+                    EndUserflowDialog dialog = new EndUserflowDialog();
                     dialog.Owner = this;
                     dialog.ShowDialog();
                     if (dialog.DialogResult == DialogResult.Yes) {
                         switch (dialog.Answer) {
-                            case "End Transaction":
-                                Crittercism.EndTransaction(transactionName);
+                            case "End Userflow":
+                                Crittercism.EndUserflow(userflowName);
                                 break;
-                            case "Fail Transaction":
-                                Crittercism.FailTransaction(transactionName);
+                            case "Fail Userflow":
+                                Crittercism.FailUserflow(userflowName);
                                 break;
-                            case "Cancel Transaction":
-                                Crittercism.CancelTransaction(transactionName);
+                            case "Cancel Userflow":
+                                Crittercism.CancelUserflow(userflowName);
                                 break;
                         }
-                        button.Text = beginTransactionLabel;
+                        button.Text = beginUserflowLabel;
                     }
                 }
             }
         }
-        private void TransactionTimeOutHandler(object sender,EventArgs e) {
-            Debug.WriteLine("The transaction timed out.");
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Debug.WriteLine("The userflow timed out.");
             // Execute this Action on the main UI thread.
             this.Invoke((MethodInvoker)delegate {
-                transactionButton.Text = beginTransactionLabel;
-                MessageBox.Show(this,"Transaction Timed Out","WindowsFormsApp",MessageBoxButtons.OK);
+                userflowButton.Text = beginUserflowLabel;
+                string name = ((CRUserflowEventArgs)e).Name;
+                string message = String.Format("'{0}' Timed Out",name);
+                MessageBox.Show(this,message,"WindowsFormsApp",MessageBoxButtons.OK);
             });
         }
     }

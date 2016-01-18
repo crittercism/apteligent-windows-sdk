@@ -3,6 +3,7 @@ using HubApp.Data;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -17,6 +18,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using CrittercismSDK;
 
 // The Universal Hub Application project template is documented at http://go.microsoft.com/fwlink/?LinkID=391955
 
@@ -34,10 +36,15 @@ namespace HubApp
         public SectionPage()
         {
             this.InitializeComponent();
-
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
             this.navigationHelper.SaveState += this.NavigationHelper_SaveState;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
+        }
+
+        internal string Title() {
+            // This method must be called on UI main thread.
+            return pageTitle.Text;
         }
 
         /// <summary>
@@ -97,6 +104,10 @@ namespace HubApp
             // Navigate to the appropriate destination page, configuring the new page
             // by passing required information as a navigation parameter
             Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
+        }
+
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserflowTimeOutHandler(this,e);
         }
 
         #region NavigationHelper registration

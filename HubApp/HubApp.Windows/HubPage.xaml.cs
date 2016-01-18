@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using HubApp.Data;
 using HubApp;
-
+using CrittercismSDK;
 
 // The Universal Hub Application project template is documented at http://go.microsoft.com/fwlink/?LinkID=391955
 
@@ -47,6 +47,7 @@ namespace HubApp {
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
         }
 
         /// <summary>
@@ -87,6 +88,10 @@ namespace HubApp {
             // Navigate to the appropriate destination page, configuring the new page
             // by passing required information as a navigation parameter
             Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
+        }
+
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserflowTimeOutHandler(this,e);
         }
 
         #region NavigationHelper registration

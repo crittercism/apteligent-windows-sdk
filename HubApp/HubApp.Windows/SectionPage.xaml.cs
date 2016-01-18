@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using CrittercismSDK;
 
 namespace HubApp {
     /// <summary>
@@ -32,6 +33,12 @@ namespace HubApp {
             this.InitializeComponent();
             this.navigationHelper = new NavigationHelper(this);
             this.navigationHelper.LoadState += this.NavigationHelper_LoadState;
+            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
+        }
+
+        internal string Title() {
+            // This method must be called on UI main thread.
+            return pageTitle.Text;
         }
 
         /// <summary>
@@ -78,6 +85,11 @@ namespace HubApp {
             // by passing required information as a navigation parameter
             Demo.ItemClick(this.Frame,(SampleDataItem)e.ClickedItem);
         }
+
+        private void UserflowTimeOutHandler(object sender,EventArgs e) {
+            Demo.UserflowTimeOutHandler(this,e);
+        }
+
         #region NavigationHelper registration
 
         /// <summary>
