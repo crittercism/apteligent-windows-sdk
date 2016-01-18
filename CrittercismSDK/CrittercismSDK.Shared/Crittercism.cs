@@ -163,7 +163,7 @@ namespace CrittercismSDK {
         // Is OptOut known to be equal to what's persisted on disk?
         internal static volatile bool OptOutLoaded = false;
         // Have we hooked WINDOWS_PHONE Application.Current.RootVisual GotFocus and LostFocus events yet?
-        internal static volatile bool ApplicationCurrentRootVisualHooked = false;
+        internal static volatile bool IsRootUIElementFocusHooked = false;
 
         private static string OptOutStatusPath = "Crittercism\\OptOutStatus.js";
         private static void SaveOptOutStatus(bool optOutStatus) {
@@ -195,33 +195,49 @@ namespace CrittercismSDK {
                     };
                 };
             };
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE_APP || WINDOWS_PHONE
             // NOTE: If we could figure out a way (we can't), we would put a shorter
             // bit of code to be called by Crittercism.Init into WINDOWS_PHONE apps
             // that would get root.GotFocus and root.LostFocus events hooked early
             // on, much more like what are able to do for NETFX_CORE .  However, it
             // turns out root == null is going to be the normal case for Crittercism.Init
             // during a WINDOWS_PHONE app launch.  So, we must use more creative code.
-            if ((!OptOut)&&(!ApplicationCurrentRootVisualHooked)) {
-                 lock (lockObject) {
-                    // Check flag again inside lock in case our thread loses race.
-                    if (!ApplicationCurrentRootVisualHooked) {
-                        UIElement root = Application.Current.RootVisual as UIElement;
-                        if (root != null) {
-                            // NOTE: It is normal that "root" may be null in the early stages of
-                            // the application startup.  We just keep on checking till we get it. 
-                            // This may be assuming our users are accepting and not modifying the
-                            // MS generated "new Frame" just once part of the MS boiler plate code.
-                            root.GotFocus += Root_UIElement_GotFocus;
-                            root.LostFocus += Root_UIElement_LostFocus;
-                            ApplicationCurrentRootVisualHooked = true;
-                        };
-                    };
-                };               
+            if ((!OptOut)&&(!IsRootUIElementFocusHooked)) {
+                HookRootUIElementFocus();              
             };
 #endif
             return OptOut;
         }
+
+#if WINDOWS_PHONE_APP || WINDOWS_PHONE
+        private static void HookRootUIElementFocus() {
+            lock (lockObject) {
+                // Check flag again inside lock in case our thread loses race.
+                if (!IsRootUIElementFocusHooked) {
+                        UIElement root = null;
+#if WINDOWS_PHONE_APP
+                        if (Window.Current != null) {
+                            // If there is a current Window (don't ask us why we're checking this)
+                            root = Window.Current.Content as UIElement;
+                        }
+#elif WINDOWS_PHONE
+                        if (Application.Current != null) {
+                             // We are unaware of any Application.Current == null possibilities,
+                             // but it doesn't cost us much to be paranoid here.
+                             root = Application.Current.RootVisual as UIElement;
+                        }
+#endif
+                        if (root != null) {
+                            // This may be assuming our users are accepting and not modifying the
+                            // MS generated "new Frame" just once part of the MS boiler plate code.
+                            root.GotFocus += Root_UIElement_GotFocus;
+                            root.LostFocus += Root_UIElement_LostFocus;
+                            IsRootUIElementFocusHooked = true;
+                        }
+                };
+            };
+        }
+#endif // WINDOWS_PHONE_APP || WINDOWS_PHONE
 
         public static void SetOptOutStatus(bool optOut) {
             // Set in memory cached value OptOut, persisting if necessary.
@@ -235,9 +251,9 @@ namespace CrittercismSDK {
             }
         }
 
-        #endregion OptOutStatus
+#endregion OptOutStatus
 
-        #region Life Cycle
+#region Life Cycle
         private static string LoadAppVersion() {
             string answer = "UNKNOWN";
             try {
@@ -430,21 +446,13 @@ namespace CrittercismSDK {
                     if (Crittercism.TestNetwork == null) {
 #if NETFX_CORE
 #if WINDOWS_PHONE_APP
-                        if (Window.Current != null) {
-                            // If there is a current Window (don't ask us why we're checking this)
-                            UIElement root = Window.Current.Content as UIElement;
-                            if (root != null) {
-                                // This may be assuming our users are accepting and not modifying the
-                                // MS generated "new Frame" just once part of the MS boiler plate code.
-                                root.GotFocus += Root_UIElement_GotFocus;
-                                root.LostFocus += Root_UIElement_LostFocus;
-                            }
-                        }
+                        HookRootUIElementFocus();
 #endif
                         Window.Current.VisibilityChanged += Window_VisibilityChanged;
                         Application.Current.UnhandledException += Application_UnhandledException;
                         NetworkInformation.NetworkStatusChanged += NetworkInformation_NetworkStatusChanged;
 #elif WINDOWS_PHONE
+                        HookRootUIElementFocus();
                         Application.Current.UnhandledException += new EventHandler<ApplicationUnhandledExceptionEventArgs>(SilverlightApplication_UnhandledException);
                         DeviceNetworkInformation.NetworkAvailabilityChanged += DeviceNetworkInformation_NetworkAvailabilityChanged;
                         try {
@@ -530,9 +538,9 @@ namespace CrittercismSDK {
                 LogInternalException(ie);
             }
         }
-        #endregion Shutdown
+#endregion Shutdown
 
-        #region AppLoads
+#region AppLoads
         /// <summary>
         /// Creates the application load report.
         /// </summary>
@@ -562,9 +570,9 @@ namespace CrittercismSDK {
             Debug.WriteLine("App Load time == " + (1.0E-7) * (endTime - beginTime) + " seconds");
             new Userflow("App Load",beginTime,endTime);
         }
-        #endregion AppLoads
+#endregion AppLoads
 
-        #region Breadcrumbs
+#region Breadcrumbs
         /// <summary>
         /// Leave breadcrumb.
         /// </summary>
@@ -581,9 +589,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion Breadcrumbs
+#endregion Breadcrumbs
 
-        #region Exceptions and Crashes
+#region Exceptions and Crashes
         internal static void LogInternalException(Exception e) {
             Debug.WriteLine("UNEXPECTED ERROR!!! " + e.Message);
             Debug.WriteLine(e.StackTrace);
@@ -673,9 +681,9 @@ namespace CrittercismSDK {
                 // but let the crash go ahead.
             }
         }
-        #endregion Exceptions and Crashes
+#endregion Exceptions and Crashes
 
-        #region Metadata
+#region Metadata
         /// <summary>
         /// Sets "username" metadata value.
         /// </summary>
@@ -744,9 +752,9 @@ namespace CrittercismSDK {
             }
             return answer;
         }
-        #endregion Metadata
+#endregion Metadata
 
-        #region Settings
+#region Settings
         internal static void SetSettings(string json) {
             // Called from AppLoad.DidReceiveResponse
             try {
@@ -812,9 +820,9 @@ namespace CrittercismSDK {
                 Crittercism.LogInternalException(ie);
             }
         }
-        #endregion
+#endregion
 
-        #region Userflows
+#region Userflows
         internal static void OnUserflowTimeOut(EventArgs e) {
             EventHandler handler = UserflowTimeOut;
             if (handler != null) {
@@ -941,9 +949,9 @@ namespace CrittercismSDK {
 #endif
         }
 
-        #endregion
+#endregion
 
-        #region Network Requests
+#region Network Requests
         private static string RemoveQueryString(string uriString) {
             // String obtained by removing query string portion of uriString .
             string answer = uriString;
@@ -996,9 +1004,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion LogNetworkRequest
+#endregion LogNetworkRequest
 
-        #region Configuring Service Monitoring
+#region Configuring Service Monitoring
         public static void AddFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
@@ -1024,9 +1032,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-        #endregion
+#endregion
 
-        #region MessageQueue
+#region MessageQueue
         /// <summary>
         /// Loads the messages from disk into the queue.
         /// </summary>
@@ -1052,9 +1060,9 @@ namespace CrittercismSDK {
             MessageQueue.Enqueue(messageReport);
             readerEvent.Set();
         }
-        #endregion // MessageQueue
+#endregion // MessageQueue
 
-        #region Event Handlers
+#region Event Handlers
 #if NETFX_CORE || WINDOWS_PHONE
         ////////////////////////////////////////////////////////////////
         // NOTE: The value of monitoring (root) Root_UIElement_GotFocus,
@@ -1299,6 +1307,6 @@ namespace CrittercismSDK {
         }
 #endif
 
-        #endregion // Event Handlers
+#endregion // Event Handlers
     }
 }
