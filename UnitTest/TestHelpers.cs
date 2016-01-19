@@ -10,64 +10,78 @@ using System.Threading.Tasks;
 
 namespace UnitTest {
     class TestHelpers {
-        public const string VALID_APPID="50807ba33a47481dd5000002";
-
-        [AssemblyInitialize()]
-        public static void AssemblyInit(TestContext context) {
-            CleanUp();
-        }
-
-        [AssemblyCleanup()]
-        public static void AssemblyCleanup() {
-            Crittercism.Shutdown();
-        }
-
-        public static void CheckCommonJsonFragments(String json) {
-            Platform p = new Platform();
-            string[] jsonStrings = new string[] {
-                "\"app_id\":\"50807ba33a47481dd5000002\"",
-                "\"app_state\":{\"app_version\":\"",
-                "\"platform\":{\"client\":",
-                "\"device_id\":\"" + p.device_id + "\"",
-                "\"device_model\":",
-                "\"os_name\":",
-                "\"os_version\":",
-                "\"locale\":",
+        public const string VALID_APPID = "50807ba33a47481dd5000002";
+        private static MockNetwork mockNetwork = null;
+        internal static MockNetwork TestNetwork() {
+            if (mockNetwork == null) {
+                mockNetwork = new MockNetwork();
             };
+            return mockNetwork;
+        }
+
+        private static void CheckJsonContains(String json,string[] jsonStrings) {
             foreach (string jsonFragment in jsonStrings) {
-                Debug.WriteLine("jsonFragment == "+jsonFragment);
-                Debug.WriteLine("json.Contains == "+json.Contains(jsonFragment));
+                Trace.WriteLine("jsonFragment == " + jsonFragment);
+                Trace.WriteLine("json.Contains == " + json.Contains(jsonFragment));
                 Assert.IsTrue(json.Contains(jsonFragment));
             };
             // Make sure DateTimes are stringified in the canonical way and not in this goofy default way
             Assert.IsFalse(json.Contains("Date("));
         }
-
-        public static void CleanUp() {
-            // This method is for clean all the possible variables that may be will used by another unit test
-            Crittercism.autoRunQueueReader = true;
-            Crittercism.enableSendMessage = false;
-            Crittercism.enableExceptionInSendMessage = false;
-            Crittercism.SetOptOutStatus(false);
-            if (Crittercism.MessageQueue!=null) {
-                Crittercism.MessageQueue.Clear();
-            }
-            // Some unit tests might pollute the message folder.  clean those up
-            try {
-                IsolatedStorageFile storage = IsolatedStorageFile.GetUserStoreForApplication();
-                foreach (string file in storage.GetFileNames("")) {
-                    storage.DeleteFile(file);
-                }
-            } catch (Exception ex) {
-                Console.WriteLine("CleanUp exception: "+ex);
-            }
+        public static void CheckJsonLegacy(String json) {
+            string[] jsonStrings = new string[] {
+                "\"app_id\":\"",
+                "\"app_state\":{\"app_version\":\"",
+                "\"platform\":{\"client\":",
+                "\"device_id\":\"",
+                "\"device_model\":",
+                "\"os_name\":",
+                "\"os_version\":",
+                "\"locale\":",
+            };
+            CheckJsonContains(json,jsonStrings);
+        }
+        public static void CheckJson(String json) {
+            string[] jsonStrings = new string[] {
+                "\"appID\":\"",
+                "\"appVersion\":\"",
+                "\"crPlatform\":\"",
+                "\"crVersion\":\"",
+                "\"deviceID\":\"",
+                "\"deviceModel\":",
+                "\"locale\":",
+                "\"osName\":",
+                "\"osVersion\":"
+            };
+            CheckJsonContains(json,jsonStrings);
         }
 
-        public static void StartApp(string appId) {
-            Crittercism.autoRunQueueReader=false;
-            Crittercism.enableSendMessage=false;
-            Crittercism.enableExceptionInSendMessage=false;
-            Crittercism.Init(appId);
+        public static void Cleanup() {
+            // This method is for clean all the possible variables that may be will used by another unit test
+            TestNetwork().Cleanup();
+            Crittercism.TestNetwork = TestNetwork();
+            // TODO: AppLoadTest3 forcing a few messy cleanup lines here.  Can this better?
+            APM.enabled = true;
+            UserflowReporter.enabled = true;
+            Crittercism.SetOptOutStatus(false);
+            if (Crittercism.MessageQueue != null) {
+                Crittercism.MessageQueue.Clear();
+            }
+            StorageHelper.Cleanup();
+        }
+
+        public static void StartApp(bool optOutStatus) {
+            // Convenient for the OptOutTest which must pass optOutStatus = true
+            if (Crittercism.TestNetwork == null) {
+                // First time being called by the test suite.
+                Cleanup();
+            }
+            Crittercism.SetOptOutStatus(optOutStatus);
+            Crittercism.Init(VALID_APPID);
+        }
+        public static void StartApp() {
+            // The preferred default is optOutStatus = false
+            StartApp(false);
         }
 
         public static void ThrowException() {
@@ -93,16 +107,7 @@ namespace UnitTest {
         }
 
         public static MessageReport DequeueMessageType(Type type) {
-            MessageReport answer=null;
-            while (Crittercism.MessageQueue.Count>0) {
-                MessageReport messageReport=Crittercism.MessageQueue.Dequeue();
-                messageReport.Delete();
-                if ((messageReport.GetType()==type)
-                    ||(messageReport.GetType().IsSubclassOf(type))) {
-                    answer=messageReport;
-                    break;
-                }
-            }
+            MessageReport answer = TestNetwork().DequeueMessageType(type);
             return answer;
         }
     }

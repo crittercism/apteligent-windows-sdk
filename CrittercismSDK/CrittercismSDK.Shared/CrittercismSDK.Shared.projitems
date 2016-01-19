@@ -9,26 +9,46 @@
     <Import_RootNamespace>CrittercismSDK</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)APM.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)APMEndpoint.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AppLocator.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)CRFilter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)APM\APM.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)APM\APMReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)APM\CRFilter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)APM\Endpoint.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)APM\EndpointConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)APM\EndpointIndex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AppLoad\AppLoad.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\Breadcrumb.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\BreadcrumbConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\BreadcrumbIndex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\BreadcrumbReachabilityType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\Breadcrumbs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\BreadcrumbTextType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\BreadcrumbType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\BreadcrumbViewType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\UserBreadcrumb.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\UserBreadcrumbConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Breadcrumbs\UserBreadcrumbs.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Crittercism.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\APMReport.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\AppLoad.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\BreadcrumbMessage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Breadcrumbs.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Crash.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\ExceptionObject.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\HandledException.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\Platform.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\UnifiedAppLoad.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataContracts\MetadataReport.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DateUtils.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MessageReport.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)QueueReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\CrashReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\ExceptionObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\HandledException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\AppLocator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\IMockNetwork.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\MessageReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\QueueReader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Messaging\SynchronizedQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Metadata\MetadataReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Platform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StorageHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SynchronizedQueue.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)UnifiedMessageReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Userflows\CRUserflowEventArgs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Userflows\Userflow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Userflows\UserflowConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Userflows\UserflowIndex.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Userflows\UserflowReport.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Userflows\UserflowReporter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Userflows\UserflowState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\TimeUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\DebugUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\JsonUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\StringUtils.cs" />
   </ItemGroup>
 </Project>

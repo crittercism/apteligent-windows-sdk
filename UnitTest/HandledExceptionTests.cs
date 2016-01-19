@@ -9,11 +9,17 @@ using System.Threading.Tasks;
 namespace UnitTest {
     [TestClass]
     public class HandledExceptionTests {
+        [TestCleanup()]
+        public void TestCleanup() {
+            // Use TestCleanup to run code after each test has run
+            Crittercism.Shutdown();
+            TestHelpers.Cleanup();
+        }
         [TestMethod]
         public void HandledExceptionTest() {
-            TestHelpers.StartApp(TestHelpers.VALID_APPID);
+            TestHelpers.StartApp();
             TestHelpers.LogHandledException();
-            MessageReport messageReport=TestHelpers.DequeueMessageType(typeof(HandledException));
+            MessageReport messageReport = TestHelpers.DequeueMessageType(typeof(HandledException));
             Assert.IsNotNull(messageReport,"Expected a HandledException message");
         }
     }

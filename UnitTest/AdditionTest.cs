@@ -6,8 +6,8 @@ namespace UnitTest {
     public class AdditionTest {
         [TestMethod]
         public void FullAdderCircuitTest() {
-            Assert.AreEqual(1+1,2,"ALU failure #1");
-            Assert.IsTrue(1+1==2,"ALU failure #2");
+            Assert.AreEqual(1 + 1,2,"ALU failure #1");
+            Assert.IsTrue(1 + 1 == 2,"ALU failure #2");
         }
     }
 }
