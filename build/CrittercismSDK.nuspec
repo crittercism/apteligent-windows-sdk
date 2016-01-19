@@ -2,14 +2,14 @@
 <package >
   <metadata>
     <id>Crittercism</id>
-    <version>2.2.4</version>
+    <version>3.0.0</version>
     <authors>Crittercism, Inc.</authors>
     <owners>dshirley</owners>
     <projectUrl>http://www.crittercism.com</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Crittercism SDK for Windows Platforms</description>
-    <releaseNotes>Fix: Deadlock between Crash reporting and Shutdown</releaseNotes>
-    <copyright>Copyright 2012-2015 Crittercism, Inc.</copyright>
+    <releaseNotes>Introducing Crittercism Userflows API!</releaseNotes>
+    <copyright>Copyright 2012-2016 Crittercism, Inc.</copyright>
     <tags>crittercism univesal uwp uap net netcore wpa windowsphone crash exception breadcrumb stacktrace bug</tags>
     <dependencies>
       <dependency id="Newtonsoft.Json" version="6.0.8" />
