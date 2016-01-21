@@ -142,8 +142,19 @@ namespace CrittercismSDK {
         }
 #else
         private bool SendRequest(MessageReport messageReport) {
+            ////////////////////////////////////////////////////////////////
+            // NOTE: sendCompleted is reported as "true" if we get back
+            // an HTTP status code from the platform web server.  It is
+            // independent of whether or not the HTTP status code is an
+            // HTTP status code we like.  Therefore, a 500 internal server
+            // error WILL count as sendCompleted == "true" .  OTOH, if
+            // there is no network connectivity at all (e.g. airplane mode
+            // or out of network coverage), there is no HTTP status code,
+            // only some WebException .  We will report "false" in that case
+            // and schedule a future retry.
+            ////////////////////////////////////////////////////////////////
             //Debug.WriteLine("SendRequest: " + messageReport.GetType().Name);
-            bool sendCompleted=false;
+            bool sendCompleted = true;
             Debug.WriteLine("SendRequest: ENTER");
             try {
                 HttpWebRequest request = messageReport.WebRequest();
@@ -217,6 +228,17 @@ namespace CrittercismSDK {
         }
         #endregion // SendRequest
 
+        ////////////////////////////////////////////////////////////////
+        // The WebRequest and WebResponse classes throw both system exceptions
+        // (such as ArgumentException) and Web-specific exceptions (which are
+        // WebExceptions thrown by the GetResponse method).
+        // Each WebException includes a Status property that contains a value
+        // from the WebExceptionStatus enumeration. You can examine the Status
+        // property to determine the error that occurred and take the proper
+        // steps to resolve the error.
+        // https://msdn.microsoft.com/en-us/library/es54hw8e(v=vs.110).aspx
+        ////////////////////////////////////////////////////////////////
+
         #region DidReceiveResult
         // DidReceiveResult
         // While moving DidReceiveResult into MessageReport.cs is tempting, our judgement is the
@@ -226,24 +248,29 @@ namespace CrittercismSDK {
         // getting a nice simple "string responseText" over to MessageReport.cs .
 #if WINDOWS_PHONE_APP
         private bool DidReceiveResult(MessageReport messageReport,HttpWebResponse response) {
-            bool sendCompleted = false;
+            bool sendCompleted = true;
             try {
-                sendCompleted = DidReceiveResponse(messageReport,response);
+                DidReceiveResponse(messageReport,response);
             } catch (WebException webEx) {
                 DidFailWithError(webEx);
+                sendCompleted = (webEx.Status != WebExceptionStatus.Success);
             } catch (Exception ex) {
                 Debug.WriteLine("SendRequest: ex == " + ex.Message);
+                sendCompleted = false;
             }
             return sendCompleted;
         }
 #else
         private bool DidReceiveResult(MessageReport messageReport,HttpWebRequest request,IAsyncResult asyncResponse) {
-            bool sendCompleted = false;
+            bool sendCompleted = true;
             try {
-                sendCompleted = DidReceiveResponse(messageReport,request,asyncResponse);
+                DidReceiveResponse(messageReport,request,asyncResponse);
             } catch (WebException webEx) {
                 DidFailWithError(webEx);
-            } catch {
+                sendCompleted = (webEx.Status != WebExceptionStatus.Success);
+            } catch (Exception ex) {
+                Debug.WriteLine("SendRequest: ex == " + ex.Message);
+                sendCompleted = false;
             }
             return sendCompleted;
         }
@@ -251,27 +278,22 @@ namespace CrittercismSDK {
 
         // DidReceiveResponse
 #if WINDOWS_PHONE_APP
-        private bool DidReceiveResponse(MessageReport messageReport,HttpWebResponse response) {
-            bool sendCompleted = DidReceiveResponseShared(messageReport,response);
-            return sendCompleted;
+        private void DidReceiveResponse(MessageReport messageReport,HttpWebResponse response) {
+            DidReceiveResponseShared(messageReport,response);
         }
 #else
-        private bool DidReceiveResponse(MessageReport messageReport,HttpWebRequest request,IAsyncResult asyncResponse) {
-            bool sendCompleted = false;
+        private void DidReceiveResponse(MessageReport messageReport,HttpWebRequest request,IAsyncResult asyncResponse) {
             using (HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(asyncResponse)) {
-                sendCompleted = DidReceiveResponseShared(messageReport,response);
+                DidReceiveResponseShared(messageReport,response);
             };
-            return sendCompleted;
         }
 #endif // WINDOWS_PHONE_APP
 
-        internal bool DidReceiveResponseShared(MessageReport messageReport,HttpWebResponse response) {
-            bool sendCompleted = false;
+        internal void DidReceiveResponseShared(MessageReport messageReport,HttpWebResponse response) {
             try {
                 //Debug.WriteLine("DidReceiveResponseShared: response.StatusCode == " + (int)response.StatusCode);
                 if ((((long)response.StatusCode) / 100) == 2) {
                     // 2xx Success
-                    sendCompleted = true;
                     using (StreamReader reader = (new StreamReader(response.GetResponseStream()))) {
                         string responseText = reader.ReadToEnd();
                         messageReport.DidReceiveResponse(responseText);
@@ -280,7 +302,6 @@ namespace CrittercismSDK {
             } catch (Exception ie) {
                 Crittercism.LogInternalException(ie);
             }
-            return sendCompleted;
         }
 
         internal void DidFailWithError(WebException webEx) {
