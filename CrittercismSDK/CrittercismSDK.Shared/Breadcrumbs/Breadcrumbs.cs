@@ -23,6 +23,8 @@ namespace CrittercismSDK {
         private static Breadcrumbs systemBreadcrumbs = null;
         private string name;
         private int maxCount;
+        // For use by HandleReachabilityChange automatic breadcrumbs code.
+        private static string lastReachabilityStatusString = "None";
         // The breadcrumbs of the previous session.
         [DataMember]
         private List<Breadcrumb> previous_session;
@@ -98,6 +100,43 @@ namespace CrittercismSDK {
             previous_session = new List<Breadcrumb>();
             current_session = new List<Breadcrumb>();
             saved = false;
+        }
+        #endregion
+
+        #region Instance Methods
+        internal Breadcrumbs Copy() {
+            Breadcrumbs answer = new Breadcrumbs(name,maxCount);
+            lock (this) {
+                answer.current_session = new List<Breadcrumb>(current_session);
+                answer.previous_session = new List<Breadcrumb>(previous_session);
+            }
+            return answer;
+        }
+
+        /// <summary>
+        /// Saves to disk.
+        /// </summary>
+        /// <returns>   true if it succeeds, false if it fails. </returns>
+        private bool Save() {
+            bool answer = false;
+            try {
+                lock (this) {
+                    if (!saved) {
+                        answer = StorageHelper.Save(this);
+                        saved = true;
+                    }
+                }
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            }
+            return answer;
+        }
+        internal static bool SaveAll() {
+            bool answer = true;
+            answer = answer && UserBreadcrumbs().Save();
+            answer = answer && NetworkBreadcrumbs().Save();
+            answer = answer && SystemBreadcrumbs().Save();
+            return answer;
         }
         #endregion
 
@@ -332,40 +371,74 @@ namespace CrittercismSDK {
         }
         #endregion
 
-        #region Instance Methods
-        internal Breadcrumbs Copy() {
-            Breadcrumbs answer = new Breadcrumbs(name,maxCount);
-            lock (this) {
-                answer.current_session = new List<Breadcrumb>(current_session);
-                answer.previous_session = new List<Breadcrumb>(previous_session);
-            }
-            return answer;
+        #region Reachability Breadcrumbs
+        internal static void HandleReachabilityChange(string newReachabilityStatusString) {
+            // Intelligent auto breadcrumbs for newReachabilityStatusString .
+            ////////////////////////////////////////////////////////////////
+            //    ALGORITHM
+            //
+            // (A) Reporting Up or Down (0 or 1)
+            //     BreadcrumbReachabilityType.Up = 0,   // 0 - internet connection up
+            //     BreadcrumbReachabilityType.Down = 1, // 1 - internet connection down
+            // occurs iff lastReachabilityStatusString and newReachabilityStatusString
+            // disagree about "InternetAccess".
+            // (B) Reporting Gained or Lost (2 or 3)
+            //     BreadcrumbReachabilityType.Gained = 2,   // 2 - connectivity type gained
+            //     BreadcrumbReachabilityType.Lost = 3,     // 3 - connectivity type lost
+            // occurs iff exactly one of lastReachabilityStatusString and
+            // newReachabilityStatusString equals "None"
+            // (C) Reporting Switch (4)
+            //     BreadcrumbReachabilityType.Switch = 4,   // 4 - switch from one connection type to another
+            // occurs iff lastReachabilityStatusString and newReachabilityStatusString
+            // disagree and neither is "None" .
+            // (D) Though (B) & (C) are exclusive, it is allowed to
+            // report an (A) along with either (B) or (C) simultaneously.
+            // Notice that if the two strings are equal (there is no real change)
+            // then none of (A), (B), or (C) apply and no new automatic breadcrumbs
+            // will be added in that case.
+            ////////////////////////////////////////////////////////////////
+            Debug.WriteLine("HandleReachabilityChange: " + newReachabilityStatusString);
+            HandleReachabilityUpDown(newReachabilityStatusString);
+            HandleReachabilitySwitch(newReachabilityStatusString);
         }
 
-        /// <summary>
-        /// Saves to disk.
-        /// </summary>
-        /// <returns>   true if it succeeds, false if it fails. </returns>
-        private bool Save() {
-            bool answer = false;
-            try {
-                lock (this) {
-                    if (!saved) {
-                        answer = StorageHelper.Save(this);
-                        saved = true;
-                    }
-                }
-            } catch (Exception ie) {
-                Crittercism.LogInternalException(ie);
-            }
-            return answer;
+        internal static void HandleReachabilityUpDown(string newReachabilityStatusString) {
+            // Checking IndexOf is zero allows "InternetAccess+WiFi" to also match.
+            bool newInternetAccess = (newReachabilityStatusString.IndexOf("InternetAccess") == 0);
+            bool lastInternetAccess = (lastReachabilityStatusString.IndexOf("InternetAccess") == 0);
+            if (newInternetAccess != lastInternetAccess) {
+                // (A) Reporting Up or Down (0 or 1)
+                if (newInternetAccess) {
+                    Breadcrumbs.LeaveReachabilityBreadcrumb(
+                        BreadcrumbReachabilityType.Up);
+                } else {
+                    Breadcrumbs.LeaveReachabilityBreadcrumb(
+                        BreadcrumbReachabilityType.Down);
+                };
+            };
         }
-        internal static bool SaveAll() {
-            bool answer = true;
-            answer = answer && UserBreadcrumbs().Save();
-            answer = answer && NetworkBreadcrumbs().Save();
-            answer = answer && SystemBreadcrumbs().Save();
-            return answer;
+
+        private static void HandleReachabilitySwitch(string newReachabilityStatusString) {
+            if (newReachabilityStatusString != lastReachabilityStatusString) {
+                if (lastReachabilityStatusString == "None") {
+                    // (B) Reporting Gained (2)
+                    Breadcrumbs.LeaveReachabilityBreadcrumb(
+                        BreadcrumbReachabilityType.Gained,
+                        newReachabilityStatusString);
+                } else if (newReachabilityStatusString == "None") {
+                    // (B) Reporting Lost (3)
+                    Breadcrumbs.LeaveReachabilityBreadcrumb(
+                        BreadcrumbReachabilityType.Lost,
+                        newReachabilityStatusString);
+                } else {
+                    // (C) Reporting Switch (4)
+                    Breadcrumbs.LeaveReachabilityBreadcrumb(
+                        BreadcrumbReachabilityType.Switch,
+                        lastReachabilityStatusString,
+                        newReachabilityStatusString);
+                };
+                lastReachabilityStatusString = newReachabilityStatusString;
+            };
         }
         #endregion
     }

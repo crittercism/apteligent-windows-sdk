@@ -24,8 +24,6 @@ using Windows.Networking.Connectivity;
 using Microsoft.Phone.Info;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Net.NetworkInformation;
-// TODO: We really need this include still?
-using System.Windows.Navigation;
 #else
 using Microsoft.Win32;
 #endif // NETFX_CORE
@@ -202,8 +200,8 @@ namespace CrittercismSDK {
             // on, much more like what are able to do for NETFX_CORE .  However, it
             // turns out root == null is going to be the normal case for Crittercism.Init
             // during a WINDOWS_PHONE app launch.  So, we must use more creative code.
-            if ((!OptOut)&&(!IsRootUIElementFocusHooked)) {
-                HookRootUIElementFocus();              
+            if ((!OptOut) && (!IsRootUIElementFocusHooked)) {
+                HookRootUIElementFocus();
             };
 #endif
             return OptOut;
@@ -214,26 +212,26 @@ namespace CrittercismSDK {
             lock (lockObject) {
                 // Check flag again inside lock in case our thread loses race.
                 if (!IsRootUIElementFocusHooked) {
-                        UIElement root = null;
+                    UIElement root = null;
 #if WINDOWS_PHONE_APP
                         if (Window.Current != null) {
                             // If there is a current Window (don't ask us why we're checking this)
                             root = Window.Current.Content as UIElement;
                         }
 #elif WINDOWS_PHONE
-                        if (Application.Current != null) {
-                             // We are unaware of any Application.Current == null possibilities,
-                             // but it doesn't cost us much to be paranoid here.
-                             root = Application.Current.RootVisual as UIElement;
-                        }
+                    if (Application.Current != null) {
+                        // We are unaware of any Application.Current == null possibilities,
+                        // but it doesn't cost us much to be paranoid here.
+                        root = Application.Current.RootVisual as UIElement;
+                    }
 #endif
-                        if (root != null) {
-                            // This may be assuming our users are accepting and not modifying the
-                            // MS generated "new Frame" just once part of the MS boiler plate code.
-                            root.GotFocus += Root_UIElement_GotFocus;
-                            root.LostFocus += Root_UIElement_LostFocus;
-                            IsRootUIElementFocusHooked = true;
-                        }
+                    if (root != null) {
+                        // This may be assuming our users are accepting and not modifying the
+                        // MS generated "new Frame" just once part of the MS boiler plate code.
+                        root.GotFocus += Root_UIElement_GotFocus;
+                        root.LostFocus += Root_UIElement_LostFocus;
+                        IsRootUIElementFocusHooked = true;
+                    }
                 };
             };
         }
@@ -251,9 +249,9 @@ namespace CrittercismSDK {
             }
         }
 
-#endregion OptOutStatus
+        #endregion OptOutStatus
 
-#region Life Cycle
+        #region Life Cycle
         private static string LoadAppVersion() {
             string answer = "UNKNOWN";
             try {
@@ -444,6 +442,7 @@ namespace CrittercismSDK {
 #endif
                     // Testing for unit test purposes
                     if (Crittercism.TestNetwork == null) {
+                        Breadcrumbs.HandleReachabilityUpDown(ReachabilityStatusString());
 #if NETFX_CORE
 #if WINDOWS_PHONE_APP
                         HookRootUIElementFocus();
@@ -538,9 +537,9 @@ namespace CrittercismSDK {
                 LogInternalException(ie);
             }
         }
-#endregion Shutdown
+        #endregion Shutdown
 
-#region AppLoads
+        #region AppLoads
         /// <summary>
         /// Creates the application load report.
         /// </summary>
@@ -570,9 +569,9 @@ namespace CrittercismSDK {
             Debug.WriteLine("App Load time == " + (1.0E-7) * (endTime - beginTime) + " seconds");
             new Userflow("App Load",beginTime,endTime);
         }
-#endregion AppLoads
+        #endregion AppLoads
 
-#region Breadcrumbs
+        #region Breadcrumbs
         /// <summary>
         /// Leave breadcrumb.
         /// </summary>
@@ -589,9 +588,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-#endregion Breadcrumbs
+        #endregion Breadcrumbs
 
-#region Exceptions and Crashes
+        #region Exceptions and Crashes
         internal static void LogInternalException(Exception e) {
             Debug.WriteLine("UNEXPECTED ERROR!!! " + e.Message);
             Debug.WriteLine(e.StackTrace);
@@ -681,9 +680,9 @@ namespace CrittercismSDK {
                 // but let the crash go ahead.
             }
         }
-#endregion Exceptions and Crashes
+        #endregion Exceptions and Crashes
 
-#region Metadata
+        #region Metadata
         /// <summary>
         /// Sets "username" metadata value.
         /// </summary>
@@ -752,9 +751,9 @@ namespace CrittercismSDK {
             }
             return answer;
         }
-#endregion Metadata
+        #endregion Metadata
 
-#region Settings
+        #region Settings
         internal static void SetSettings(string json) {
             // Called from AppLoad.DidReceiveResponse
             try {
@@ -820,9 +819,9 @@ namespace CrittercismSDK {
                 Crittercism.LogInternalException(ie);
             }
         }
-#endregion
+        #endregion
 
-#region Userflows
+        #region Userflows
         internal static void OnUserflowTimeOut(EventArgs e) {
             EventHandler handler = UserflowTimeOut;
             if (handler != null) {
@@ -949,9 +948,9 @@ namespace CrittercismSDK {
 #endif
         }
 
-#endregion
+        #endregion
 
-#region Network Requests
+        #region Network Requests
         private static string RemoveQueryString(string uriString) {
             // String obtained by removing query string portion of uriString .
             string answer = uriString;
@@ -1004,9 +1003,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-#endregion LogNetworkRequest
+        #endregion LogNetworkRequest
 
-#region Configuring Service Monitoring
+        #region Configuring Service Monitoring
         public static void AddFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
@@ -1032,9 +1031,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-#endregion
+        #endregion
 
-#region MessageQueue
+        #region MessageQueue
         /// <summary>
         /// Loads the messages from disk into the queue.
         /// </summary>
@@ -1060,9 +1059,9 @@ namespace CrittercismSDK {
             MessageQueue.Enqueue(messageReport);
             readerEvent.Set();
         }
-#endregion // MessageQueue
+        #endregion // MessageQueue
 
-#region Event Handlers
+        #region Event Handlers
 #if NETFX_CORE || WINDOWS_PHONE
         ////////////////////////////////////////////////////////////////
         // NOTE: The value of monitoring (root) Root_UIElement_GotFocus,
@@ -1143,10 +1142,10 @@ namespace CrittercismSDK {
             }
             try {
                 Debug.WriteLine("NetworkStatusChanged");
-                ConnectionProfile profile = NetworkInformation.GetInternetConnectionProfile();
-                bool isConnected = (profile != null
-                    && (profile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess));
-                if (isConnected) {
+                string newReachabilityStatusString = ReachabilityStatusString();
+                Breadcrumbs.HandleReachabilityChange(newReachabilityStatusString);
+                // If we are connected to Internet, prod the readerThread .
+                if (newReachabilityStatusString.IndexOf("InternetAccess") == 0) {
                     if (MessageQueue != null && MessageQueue.Count > 0) {
                         readerEvent.Set();
                     }
@@ -1154,6 +1153,28 @@ namespace CrittercismSDK {
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
+        }
+
+        private static string ReachabilityStatusString() {
+            ConnectionProfile connectedProfile = NetworkInformation.GetInternetConnectionProfile();
+            // Compute reachabilityStatusString (e.g. "InternetAccess+WiFi")
+            NetworkConnectivityLevel networkConnectivityLevel = NetworkConnectivityLevel.None;
+            string reachabilityStatusString = networkConnectivityLevel.ToString();
+            if (connectedProfile != null) {
+                networkConnectivityLevel = connectedProfile.GetNetworkConnectivityLevel();
+                reachabilityStatusString = networkConnectivityLevel.ToString();
+                // A non-null connectedSsid means we've got WiFi connectivity.
+                string connectedSsid = null;
+                if (connectedProfile.IsWlanConnectionProfile &&
+                    connectedProfile.WlanConnectionProfileDetails != null) {
+                    connectedSsid = connectedProfile.WlanConnectionProfileDetails.GetConnectedSsid();
+                    if (connectedSsid != null) {
+                        reachabilityStatusString = reachabilityStatusString + "+WiFi";
+                    };
+                };
+            };
+            Debug.WriteLine("ReachabilityStatusString == " + reachabilityStatusString);
+            return reachabilityStatusString;
         }
 #elif WINDOWS_PHONE
         /// <summary>
@@ -1246,6 +1267,11 @@ namespace CrittercismSDK {
                 LogInternalException(ie);
             }
         }
+
+        private static string ReachabilityStatusString() {
+            // TODO: Proper implementation for this .NET framework.
+            return "InternetAccess+WiFi";
+        }
 #else
         static void AppDomain_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
             if (GetOptOutStatus()) {
@@ -1280,6 +1306,11 @@ namespace CrittercismSDK {
                 LogInternalException(e);
             }
         }
+
+        private static string ReachabilityStatusString() {
+            // TODO: Proper implementation for this .NET framework.
+            return "InternetAccess+WiFi";
+        }
 #endif
 
 #if NETFX_CORE || WINDOWS_PHONE
@@ -1307,6 +1338,6 @@ namespace CrittercismSDK {
         }
 #endif
 
-#endregion // Event Handlers
+        #endregion // Event Handlers
     }
 }

@@ -23,7 +23,6 @@ Steps to publish to nuget.org for public release
 4) Check the README_PUBLIC.txt
 5) Commit any changes from the above steps.
 6) Run build.bat
-7) Do last-minute manual testing of the package by publishing locally as above.
+7) Do last-minute manual testing of the *.nupkg by publishing locally as above.
 8) Tag the release in github
-9) ??? FIXME jbley figure the authentiation to nuget.org out
-10) Profit
+9) Upload the *.nupkg to nuget.org
