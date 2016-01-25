@@ -25,7 +25,12 @@ namespace WPFApp {
 
         public MainWindow() {
             InitializeComponent();
-            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
+            App.UserflowEvent += UserflowEventHandler;
+            if (App.userflowName == null) {
+                userflowButton.Content = beginUserflowLabel;
+            } else {
+                userflowButton.Content = endUserflowLabel;
+            }
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -92,16 +97,16 @@ namespace WPFApp {
         private const string beginUserflowLabel = "Begin Userflow";
         private const string endUserflowLabel = "End Userflow";
         private string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private string userflowName;
         private void userflowClick(object sender,RoutedEventArgs e) {
             Button button = sender as Button;
             if (button != null) {
                 Debug.Assert(button == userflowButton);
                 String label = button.Content.ToString();
                 if (label == beginUserflowLabel) {
-                    userflowName = userflowNames[random.Next(0,userflowNames.Length)];
-                    Crittercism.BeginUserflow(userflowName);
-                    button.Content = endUserflowLabel;
+                    App.userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(App.userflowName);
+                    // Broadcast UserflowEvent to all open windows. 
+                    App.OnUserflowEvent(EventArgs.Empty);
                 } else if (label == endUserflowLabel) {
                     EndUserflowDialog dialog = new EndUserflowDialog();
                     dialog.Owner = Window.GetWindow(this);
@@ -110,28 +115,31 @@ namespace WPFApp {
                     if (dialogResult == true) {
                         switch (dialog.Answer) {
                             case "End Userflow":
-                                Crittercism.EndUserflow(userflowName);
+                                Crittercism.EndUserflow(App.userflowName);
                                 break;
                             case "Fail Userflow":
-                                Crittercism.FailUserflow(userflowName);
+                                Crittercism.FailUserflow(App.userflowName);
                                 break;
                             case "Cancel Userflow":
-                                Crittercism.CancelUserflow(userflowName);
+                                Crittercism.CancelUserflow(App.userflowName);
                                 break;
-                        }
-                        button.Content = beginUserflowLabel;
+                        };
+                        App.userflowName = null;
+                        // Broadcast UserflowEvent to all open windows. 
+                        App.OnUserflowEvent(EventArgs.Empty);
                     }
                 }
             }
         }
-        private void UserflowTimeOutHandler(object sender,EventArgs e) {
-            Debug.WriteLine("The userflow timed out.");
+        private void UserflowEventHandler(object sender,EventArgs e) {
+            // Update userflowButton ("Begin Userflow"/"End Userflow") in reaction to UserflowEvent .
             // Execute this Action on the main UI thread.
             userflowButton.Dispatcher.Invoke(new Action(() => {
-                userflowButton.Content = beginUserflowLabel;
-                string name = ((CRUserflowEventArgs)e).Name;
-                string message = String.Format("'{0}' Timed Out", name);
-                MessageBox.Show(this,message,"WPFApp",MessageBoxButton.OK);
+                if (App.userflowName == null) {
+                    userflowButton.Content = beginUserflowLabel;
+                } else {
+                    userflowButton.Content = endUserflowLabel;
+                }
             }));
         }
         private void handledExceptionClick(object sender,RoutedEventArgs e) {
