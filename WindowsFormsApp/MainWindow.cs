@@ -19,7 +19,7 @@ namespace WindowsFormsApp {
 
         public MainWindow() {
             InitializeComponent();
-            Crittercism.UserflowTimeOut += UserflowTimeOutHandler;
+            Program.UserflowEvent += UserflowEventHandler;
             ApplicationOpenFormsCount++;
         }
 
@@ -147,6 +147,7 @@ namespace WindowsFormsApp {
 
         private void MainWindow_FormClosed(object sender,FormClosedEventArgs e) {
             Crittercism.LeaveBreadcrumb("FormClosed");
+            Program.UserflowEvent -= UserflowEventHandler;
             ApplicationOpenFormsCount--;
             if (ApplicationOpenFormsCount==0) {
                 // Last window is closing.
@@ -162,15 +163,15 @@ namespace WindowsFormsApp {
         private const string beginUserflowLabel = "Begin Userflow";
         private const string endUserflowLabel = "End Userflow";
         private string[] userflowNames = new string[] { "Buy Critter Feed","Sing Critter Song","Write Critter Poem" };
-        private string userflowName;
         private void userflowButton_Click(object sender,EventArgs e) {
             Button button = sender as Button;
             if (button != null) {
                 String label = button.Text;
                 if (label == beginUserflowLabel) {
-                    userflowName = userflowNames[random.Next(0,userflowNames.Length)];
-                    Crittercism.BeginUserflow(userflowName);
-                    button.Text = endUserflowLabel;
+                    Program.userflowName = userflowNames[random.Next(0,userflowNames.Length)];
+                    Crittercism.BeginUserflow(Program.userflowName);
+                    // Broadcast UserflowEvent to all open windows. 
+                    Program.OnUserflowEvent(EventArgs.Empty);
                 } else if (label == endUserflowLabel) {
                     EndUserflowDialog dialog = new EndUserflowDialog();
                     dialog.Owner = this;
@@ -178,16 +179,18 @@ namespace WindowsFormsApp {
                     if (dialog.DialogResult == DialogResult.Yes) {
                         switch (dialog.Answer) {
                             case "End Userflow":
-                                Crittercism.EndUserflow(userflowName);
+                                Crittercism.EndUserflow(Program.userflowName);
                                 break;
                             case "Fail Userflow":
-                                Crittercism.FailUserflow(userflowName);
+                                Crittercism.FailUserflow(Program.userflowName);
                                 break;
                             case "Cancel Userflow":
-                                Crittercism.CancelUserflow(userflowName);
+                                Crittercism.CancelUserflow(Program.userflowName);
                                 break;
-                        }
-                        button.Text = beginUserflowLabel;
+                        };
+                        Program.userflowName = null;
+                        // Broadcast UserflowEvent to all open windows. 
+                        Program.OnUserflowEvent(EventArgs.Empty);
                     }
                 }
             }
@@ -200,6 +203,22 @@ namespace WindowsFormsApp {
                 string name = ((CRUserflowEventArgs)e).Name;
                 string message = String.Format("'{0}' Timed Out",name);
                 MessageBox.Show(this,message,"WindowsFormsApp",MessageBoxButtons.OK);
+            });
+        }
+
+        private void MainWindow_Layout(object sender,LayoutEventArgs e) {
+            UserflowEventHandler(this,EventArgs.Empty);
+        }
+
+        private void UserflowEventHandler(object sender,EventArgs e) {
+            // Update userflowButton ("Begin Userflow"/"End Userflow") in reaction to UserflowEvent .
+            // Execute this Action on the main UI thread.
+            this.Invoke((MethodInvoker)delegate {
+                if (Program.userflowName == null) {
+                    userflowButton.Text = beginUserflowLabel;
+                } else {
+                    userflowButton.Text = endUserflowLabel;
+                }
             });
         }
     }

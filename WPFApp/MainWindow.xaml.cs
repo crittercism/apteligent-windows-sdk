@@ -26,11 +26,7 @@ namespace WPFApp {
         public MainWindow() {
             InitializeComponent();
             App.UserflowEvent += UserflowEventHandler;
-            if (App.userflowName == null) {
-                userflowButton.Content = beginUserflowLabel;
-            } else {
-                userflowButton.Content = endUserflowLabel;
-            }
+            UserflowEventHandler(this,EventArgs.Empty);
         }
 
         private void setUsernameClick(object sender,RoutedEventArgs e) {
@@ -209,6 +205,7 @@ namespace WPFApp {
 
         private void Window_Closed(object sender,EventArgs e) {
             Crittercism.LeaveBreadcrumb("Closed");
+            App.UserflowEvent -= UserflowEventHandler;
             if (Application.Current.Windows.Count == 0) {
                 // Last window is closing.
                 Crittercism.Shutdown();
