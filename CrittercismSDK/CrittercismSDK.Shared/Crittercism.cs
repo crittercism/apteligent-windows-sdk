@@ -24,6 +24,7 @@ using Windows.Networking.Connectivity;
 using Microsoft.Phone.Info;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Net.NetworkInformation;
+using Windows.Networking.Connectivity;
 #else
 using Microsoft.Win32;
 #endif // NETFX_CORE
@@ -1089,7 +1090,7 @@ namespace CrittercismSDK {
                     // only get called via the main UI thread.  So, no thread-safety worries here.
                     new Userflow("App Foreground",window_VisibilityChanged_Time,root_UIElement_GotFocus_Time);
                     isForegrounded = true;
-                }
+                };
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
@@ -1262,15 +1263,32 @@ namespace CrittercismSDK {
                             }
                         }
                         break;
-                }
+                };
+                string newReachabilityStatusString = ReachabilityStatusString();
+                Breadcrumbs.HandleReachabilityChange(newReachabilityStatusString);
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
         }
 
         private static string ReachabilityStatusString() {
-            // TODO: Proper implementation for this .NET framework.
-            return "InternetAccess+WiFi";
+            ConnectionProfile connectedProfile = NetworkInformation.GetInternetConnectionProfile();
+            // Compute reachabilityStatusString (e.g. "InternetAccess+WiFi")
+            NetworkConnectivityLevel networkConnectivityLevel = NetworkConnectivityLevel.None;
+            string reachabilityStatusString = networkConnectivityLevel.ToString();
+            if (connectedProfile != null) {
+                networkConnectivityLevel = connectedProfile.GetNetworkConnectivityLevel();
+                reachabilityStatusString = networkConnectivityLevel.ToString();
+                // Compute networkInterfaceType
+                NetworkAdapter networkAdapter = connectedProfile.NetworkAdapter;
+                if (networkAdapter.IanaInterfaceType == 71) {
+                    // 71 == An IEEE 802.11 wireless network interface.
+                    // https://msdn.microsoft.com/en-us/library/windows/apps/windows.networking.connectivity.networkadapter.ianainterfacetype.aspx
+                    reachabilityStatusString = reachabilityStatusString + "+WiFi";
+                };
+            };
+            Debug.WriteLine("ReachabilityStatusString == " + reachabilityStatusString);
+            return reachabilityStatusString;
         }
 #else
         static void AppDomain_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
