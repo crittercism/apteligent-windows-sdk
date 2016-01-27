@@ -20,13 +20,18 @@ using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.Networking.Connectivity;
+using Windows.System.Threading;
 #elif WINDOWS_PHONE
 using Microsoft.Phone.Info;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Net.NetworkInformation;
 using Windows.Networking.Connectivity;
+using Windows.System.Threading;
 #else
 using Microsoft.Win32;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Timers;
 #endif // NETFX_CORE
 
 namespace CrittercismSDK {
@@ -35,9 +40,9 @@ namespace CrittercismSDK {
     /// </summary>
     public class Crittercism {
         #region Constants
-
+        // How often we should check for Internet access.
+        private const int interval = 5000;  // milliseconds
         private const string errorNotInitialized = "Crittercism not initialized yet.";
-
         #endregion Constants
 
         #region Properties
@@ -466,11 +471,15 @@ namespace CrittercismSDK {
 #else
                         AppDomain.CurrentDomain.UnhandledException+=new UnhandledExceptionEventHandler(AppDomain_UnhandledException);
                         System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsFormsApplication_ThreadException);
+                        NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
 #endif
                     };
                     Breadcrumbs.UserBreadcrumbs();
                     MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
                     LoadQueue();
+                    // InstallTimer installs a timer that does occasional chores every
+                    // once in a while, such as check if the app has Internet access .
+                    InstallTimer();
                     // NOTE: Put initialized=true before readerThread.Start() .
                     // Later on, initialized may be reset back to false during shutdown,
                     // and readerThread will see initialized==false as a message to exit.
@@ -539,6 +548,73 @@ namespace CrittercismSDK {
             }
         }
         #endregion Shutdown
+
+        #region Timing
+        // Different .NET frameworks get different timer's
+#if NETFX_CORE || WINDOWS_PHONE
+        private static ThreadPoolTimer timer = null;
+        private static void OnTimerElapsed(ThreadPoolTimer timer) {
+            lock (lockObject) {
+#if WINDOWS_PHONE
+                // This method acts like a NOP if there isn't an actual network change.
+                // We're polling periodically because Microsoft's events aren't reliable.
+                DeviceNetworkInformation_NetworkAvailabilityChanged(null,null);
+#endif
+            }
+        }
+#else
+        private static System.Timers.Timer timer=null;
+        private static void OnTimerElapsed(Object source, ElapsedEventArgs e) {
+            lock (lockObject) {
+                // This method acts like a NOP if there isn't an actual network change.
+                // We're polling periodically because Microsoft's events aren't reliable.
+                NetworkChange_NetworkAvailabilityChanged(null,EventArgs.Empty);
+            }
+        }
+#endif // NETFX_CORE
+        private static void InstallTimer() {
+            Debug.WriteLine("InstallTimer");
+            lock (lockObject) {
+#if NETFX_CORE || WINDOWS_PHONE
+                if (timer == null) {
+                    // Creates a single-use timer.
+                    // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
+                    Debug.WriteLine("InstallTimer ThreadPoolTimer.CreatePeriodicTimer");
+                    timer = ThreadPoolTimer.CreatePeriodicTimer(
+                        OnTimerElapsed,
+                        TimeSpan.FromMilliseconds(interval));
+                }
+#else
+                if (timer==null) {
+                    // Generates an event after a set interval
+                    // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
+                    Debug.WriteLine("InstallTimer new Timer");
+                    timer = new System.Timers.Timer(interval);
+                    timer.Elapsed += OnTimerElapsed;
+                    // the Timer keep raising the Elapsed event (true)
+                    timer.AutoReset = true;         // keep firing
+                    timer.Enabled = true;           // Start the timer
+                }
+#endif // NETFX_CORE
+            }
+        }
+        private static void RemoveTimer() {
+            // Call if we don't need the timer anymore.
+            lock (lockObject) {
+#if NETFX_CORE || WINDOWS_PHONE
+                if (timer != null) {
+                    timer.Cancel();
+                    timer = null;
+                }
+#else
+                if (timer!=null) {
+                    timer.Stop();
+                    timer = null;
+                }
+#endif // NETFX_CORE
+            }
+        }
+        #endregion
 
         #region AppLoads
         /// <summary>
@@ -1325,9 +1401,52 @@ namespace CrittercismSDK {
             }
         }
 
+        private static void NetworkChange_NetworkAvailabilityChanged(object sender, EventArgs e)
+        {
+            // Microsoft documents event NetworkAddressChanged
+            // https://msdn.microsoft.com/en-us/library/system.net.networkinformation.networkchange(v=vs.110).aspx
+            // and this is our handler.  However, [cough] we've never yet seen
+            // this event get triggered.  So, we are also applying the strategy of
+            // calling our own handler via a timer every 5 seconds or so.  If there
+            // isn't really a change in ReachabilityStatusString() then the
+            // Breadcrumbs.HandleReachabilityChange acts like a NOP, so this strategy
+            // works OK.  In discussions on the WWW, others have noticed MS event not
+            // firing, and debates ensue about how or whether it is possible to define
+            // the Interent being UP/DOWN ensue.  Maybe MS just quietly gave up?
+            Debug.WriteLine("NetworkChange_NetworkAvailabilityChanged");
+            Breadcrumbs.HandleReachabilityChange(ReachabilityStatusString());
+        }
+
         private static string ReachabilityStatusString() {
-            // TODO: Proper implementation for this .NET framework.
-            return "InternetAccess+WiFi";
+            string reachabilityStatusString = "None";
+            if (NetworkInterface.GetIsNetworkAvailable()) {
+                // however, this will include all adapters
+                NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (NetworkInterface adapter in adapters) {
+                    // Some filtering of the adapters adapted from
+                    // https://social.msdn.microsoft.com/Forums/vstudio/en-US/a6b3541b-b7de-49e2-a7a6-ba0687761af5/networkavailabilitychanged-event-does-not-fire?forum=csharpgeneral
+                    const int minimumSpeed = 10000000;
+                    if ((adapter.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                        && (adapter.NetworkInterfaceType != NetworkInterfaceType.Tunnel)
+                        && (adapter.Description.IndexOf("virtual", StringComparison.OrdinalIgnoreCase) < 0)
+                        && (adapter.Name.IndexOf("virtual", StringComparison.OrdinalIgnoreCase) < 0)
+                        && (!adapter.Description.Equals("Microsoft Loopback Adapter", StringComparison.OrdinalIgnoreCase))
+                        && (adapter.Speed >= minimumSpeed)) {
+                        // Declare "adapter" to be an Internet adapter.
+                        if (adapter.OperationalStatus == OperationalStatus.Up) {
+                            reachabilityStatusString = "InternetAccess";
+                            if (adapter.NetworkInterfaceType == NetworkInterfaceType.Wireless80211) {
+                                // There are a lot of possibilities for NetworkInterfaceType, but
+                                // in presence of multiple adapters, it's hard to pick out the one
+                                // we should report.  We'll just look for "+WiFi" .
+                                reachabilityStatusString += "+WiFi";
+                                break;
+                            };
+                        };
+                    };
+                };
+            };
+            return reachabilityStatusString;
         }
 #endif
 
@@ -1336,6 +1455,7 @@ namespace CrittercismSDK {
             Breadcrumbs.LeaveEventBreadcrumb("foregrounded");
             APM.Foreground();
             UserflowReporter.Foreground();
+            InstallTimer();
         }
 
         private static void Background() {
@@ -1353,6 +1473,7 @@ namespace CrittercismSDK {
             Breadcrumbs.LeaveEventBreadcrumb("backgrounded");
             APM.Background();
             UserflowReporter.Background();
+            RemoveTimer();
         }
 #endif
 
