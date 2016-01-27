@@ -215,30 +215,38 @@ namespace CrittercismSDK {
 
 #if WINDOWS_PHONE_APP || WINDOWS_PHONE
         private static void HookRootUIElementFocus() {
-            lock (lockObject) {
-                // Check flag again inside lock in case our thread loses race.
-                if (!IsRootUIElementFocusHooked) {
-                    UIElement root = null;
+            try {
+                lock (lockObject) {
+                    // Check flag again inside lock in case our thread loses race.
+                    if (!IsRootUIElementFocusHooked) {
+                        UIElement root = null;
 #if WINDOWS_PHONE_APP
                         if (Window.Current != null) {
                             // If there is a current Window (don't ask us why we're checking this)
                             root = Window.Current.Content as UIElement;
                         }
 #elif WINDOWS_PHONE
-                    if (Application.Current != null) {
-                        // We are unaware of any Application.Current == null possibilities,
-                        // but it doesn't cost us much to be paranoid here.
-                        root = Application.Current.RootVisual as UIElement;
-                    }
+                        if (Application.Current != null) {
+                            // We are unaware of any Application.Current == null possibilities,
+                            // but it doesn't cost us much to be paranoid here.
+                            if (Thread.CurrentThread.ManagedThreadId == 1) {
+                                // Testing we're on the main thread.  OW, we might get a
+                                // System.UnauthorizedAccessException (translation: "you are
+                                // not on the main thread").
+                                root = Application.Current.RootVisual as UIElement;
+                            }
+                        }
 #endif
-                    if (root != null) {
-                        // This may be assuming our users are accepting and not modifying the
-                        // MS generated "new Frame" just once part of the MS boiler plate code.
-                        root.GotFocus += Root_UIElement_GotFocus;
-                        root.LostFocus += Root_UIElement_LostFocus;
-                        IsRootUIElementFocusHooked = true;
-                    }
+                        if (root != null) {
+                            // This may be assuming our users are accepting and not modifying the
+                            // MS generated "new Frame" just once part of the MS boiler plate code.
+                            root.GotFocus += Root_UIElement_GotFocus;
+                            root.LostFocus += Root_UIElement_LostFocus;
+                            IsRootUIElementFocusHooked = true;
+                        }
+                    };
                 };
+            } catch (Exception) {
             };
         }
 #endif // WINDOWS_PHONE_APP || WINDOWS_PHONE
@@ -1331,14 +1339,17 @@ namespace CrittercismSDK {
                 return;
             }
             try {
-                switch (e.NotificationType) {
-                    case NetworkNotificationType.InterfaceConnected:
-                        if (NetworkInterface.GetIsNetworkAvailable()) {
-                            if (MessageQueue != null && MessageQueue.Count > 0) {
-                                readerEvent.Set();
+                if (e != null) {
+                    // Our own OnTimerElapsed is allowedd to send e == null .
+                    switch (e.NotificationType) {
+                        case NetworkNotificationType.InterfaceConnected:
+                            if (NetworkInterface.GetIsNetworkAvailable()) {
+                                if (MessageQueue != null && MessageQueue.Count > 0) {
+                                    readerEvent.Set();
+                                }
                             }
-                        }
-                        break;
+                            break;
+                    };
                 };
                 string newReachabilityStatusString = ReachabilityStatusString();
                 Breadcrumbs.HandleReachabilityChange(newReachabilityStatusString);
