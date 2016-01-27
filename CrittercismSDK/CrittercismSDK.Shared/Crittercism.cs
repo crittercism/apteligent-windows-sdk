@@ -740,9 +740,12 @@ namespace CrittercismSDK {
                         List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                         List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
                         string stacktrace = StackTrace(e);
-                        ExceptionObject exception = new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+                        string exceptionName = e.GetType().FullName;
+                        string exceptionReason = e.Message;
+                        ExceptionObject exception = new ExceptionObject(exceptionName,exceptionReason,stacktrace);
                         HandledException he = new HandledException(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,exception);
                         AddMessageToQueue(he);
+                        Breadcrumbs.LeaveErrorBreadcrumb(exceptionName,exceptionReason);
                     }
                 } catch (Exception ie) {
                     LogInternalException(ie);
