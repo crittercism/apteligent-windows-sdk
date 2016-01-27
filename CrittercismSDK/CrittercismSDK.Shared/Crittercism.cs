@@ -558,12 +558,25 @@ namespace CrittercismSDK {
         #endregion Shutdown
 
         #region Timing
+        ////////////////////////////////////////////////////////////////
+        // OnTimerElapsed checks network connectivity every 5 seconds
+        // when app is in foreground.  We find empirically that we don't
+        // get MS events we expect would correspond to Crittercism's
+        // "Connection DOWN" and "Connectivity LOST: ...".  We can get
+        // these missing network automatic breadcrumbs by using our
+        // OnTimerElapsed mechanism.
+        ////////////////////////////////////////////////////////////////
+
         // Different .NET frameworks get different timer's
 #if NETFX_CORE || WINDOWS_PHONE
         private static ThreadPoolTimer timer = null;
         private static void OnTimerElapsed(ThreadPoolTimer timer) {
             lock (lockObject) {
-#if WINDOWS_PHONE
+#if NETFX_CORE
+                // This method acts like a NOP if there isn't an actual network change.
+                // We're polling periodically because Microsoft's events aren't reliable.
+                NetworkInformation_NetworkStatusChanged(null);
+#elif WINDOWS_PHONE
                 // This method acts like a NOP if there isn't an actual network change.
                 // We're polling periodically because Microsoft's events aren't reliable.
                 DeviceNetworkInformation_NetworkAvailabilityChanged(null,null);
