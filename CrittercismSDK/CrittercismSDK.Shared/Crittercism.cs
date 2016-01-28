@@ -21,6 +21,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.Networking.Connectivity;
 using Windows.System.Threading;
+using Windows.UI.Xaml.Navigation;
 #elif WINDOWS_PHONE
 using Microsoft.Phone.Info;
 using Microsoft.Phone.Shell;
@@ -213,14 +214,14 @@ namespace CrittercismSDK {
             return OptOut;
         }
 
-#if WINDOWS_PHONE_APP || WINDOWS_PHONE
+#if NETFX_CORE || WINDOWS_PHONE
         private static void HookRootUIElementFocus() {
             try {
                 lock (lockObject) {
                     // Check flag again inside lock in case our thread loses race.
                     if (!IsRootUIElementFocusHooked) {
                         UIElement root = null;
-#if WINDOWS_PHONE_APP
+#if NETFX_CORE
                         if (Window.Current != null) {
                             // If there is a current Window (don't ask us why we're checking this)
                             root = Window.Current.Content as UIElement;
@@ -243,6 +244,14 @@ namespace CrittercismSDK {
                             root.GotFocus += Root_UIElement_GotFocus;
                             root.LostFocus += Root_UIElement_LostFocus;
                             IsRootUIElementFocusHooked = true;
+#if NETFX_CORE
+                            if (root is Frame) {
+                                // We monitor Navigated event to record "View" automatic breadcrumbs.
+                                ((Frame)root).Navigated += Root_UIElement_Navigated;
+                                // Artificially get the very first automatic "View" breadcrumb.
+                                Root_UIElement_Navigated(root, null);
+                            }
+#endif
                         }
                     };
                 };
@@ -1202,6 +1211,43 @@ namespace CrittercismSDK {
             // That's all we do in this method:  Record the time we treat
             // as the beginTime of an "App Background" UserFlow .
         }
+#if NETFX_CORE
+        private static string lastViewName = null;
+        private static void Root_UIElement_Navigated(object sender,NavigationEventArgs e) {
+            try {
+                if (sender is Frame) {
+                    // It should be a Frame since we checked for Frame type when we subscribed
+                    // to Navigated event.  The Frame's Content is only known to be "object"
+                    // at this point, since Frame inherits from ContentControl and that is how
+                    // Content is declared.
+                    Object content = ((Frame)sender).Content as Object;
+                    if (content != null) {
+                        // This should normally be the case.  We're only going to leave breadcrumbs
+                        // if we can say something better than "Unknown", which isn't too informative.
+                        string viewName = content.GetType().Name;
+                        // Go for more.
+                        FrameworkElement frameworkElement = content as FrameworkElement;
+                        if (frameworkElement != null) {
+                            string frameworkElementName = frameworkElement.Name;
+                            if ((frameworkElementName != null) && (frameworkElementName != "")) {
+                                viewName = viewName + " " + frameworkElementName;
+                            };
+                        };
+                        // It may be kind of bozo we're sending Deactivated and Activated in pairs
+                        // like this, but it is the Wire+Protocol spec which is the clown, so we do it.
+                        if (lastViewName != null) {
+                            Breadcrumbs.LeaveViewBreadcrumb(BreadcrumbViewType.Deactivated, lastViewName);
+                        };
+                        Breadcrumbs.LeaveViewBreadcrumb(BreadcrumbViewType.Activated, viewName);
+                        lastViewName = viewName;
+                        Debug.WriteLine("Root_UIElement_Navigated: " + viewName);
+                    };
+                };
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            };
+        }
+#endif
         private static long window_VisibilityChanged_Time = 0;  // ticks
 #endif
 
