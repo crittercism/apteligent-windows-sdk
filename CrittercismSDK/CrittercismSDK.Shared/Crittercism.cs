@@ -1225,14 +1225,8 @@ namespace CrittercismSDK {
                         // This should normally be the case.  We're only going to leave breadcrumbs
                         // if we can say something better than "Unknown", which isn't too informative.
                         string viewName = content.GetType().Name;
-                        // Go for more.
-                        FrameworkElement frameworkElement = content as FrameworkElement;
-                        if (frameworkElement != null) {
-                            string frameworkElementName = frameworkElement.Name;
-                            if ((frameworkElementName != null) && (frameworkElementName != "")) {
-                                viewName = viewName + " " + frameworkElementName;
-                            };
-                        };
+                        // We were tempted to add "Name" in case the object is a FrameworkElement
+                        // but we decided against it.  This tends to be constant for any given type.
                         // It may be kind of bozo we're sending Deactivated and Activated in pairs
                         // like this, but it is the Wire+Protocol spec which is the clown, so we do it.
                         if (lastViewName != null) {
