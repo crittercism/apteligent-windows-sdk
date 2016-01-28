@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CrittercismSDK", "CrittercismSDK", "{2AAFFC37-F87E-4566-8254-B9E123564D20}"
 EndProject
@@ -31,6 +31,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{01DE8615-68F1-4585-9FFF-477DAA65A8E4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{23697594-3F8E-4B2C-A7D5-3616C9A57465}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A2438380-CD49-49DE-B2CB-C6A27CC8DBC9}"
+	ProjectSection(SolutionItems) = preProject
+		build\build.bat = build\build.bat
+		build\CrittercismSDK.nuspec = build\CrittercismSDK.nuspec
+		build\README.txt = build\README.txt
+		build\README_PUBLIC.txt = build\README_PUBLIC.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

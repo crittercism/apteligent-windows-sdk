@@ -100,7 +100,7 @@ namespace CrittercismSDK {
 #else
             answer["carrier"] = "UNKNOWN";
 #endif
-            answer["crVersion"] = "3.0.0";
+            answer["crVersion"] = "3.0.1";
             return answer;
         }
 
