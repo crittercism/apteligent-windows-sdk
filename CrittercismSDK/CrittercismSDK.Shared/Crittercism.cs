@@ -200,7 +200,7 @@ namespace CrittercismSDK {
                     };
                 };
             };
-#if WINDOWS_PHONE_APP || WINDOWS_PHONE
+#if NETFX_CORE || WINDOWS_PHONE
             // NOTE: If we could figure out a way (we can't), we would put a shorter
             // bit of code to be called by Crittercism.Init into WINDOWS_PHONE apps
             // that would get root.GotFocus and root.LostFocus events hooked early
