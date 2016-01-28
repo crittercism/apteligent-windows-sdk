@@ -159,6 +159,7 @@ namespace WindowsFormsApp {
             this.Name = "MainWindow";
             this.Text = "WindowsFormsApp";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainWindow_FormClosed);
+            this.Layout += new System.Windows.Forms.LayoutEventHandler(this.MainWindow_Layout);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 

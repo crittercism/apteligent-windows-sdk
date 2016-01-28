@@ -24,7 +24,6 @@ namespace HubApp {
             // by passing required information as a navigation parameter
             string itemId = item.UniqueId;
             Debug.WriteLine("UniqueId == " + itemId);
-            Crittercism.LeaveBreadcrumb("UniqueId == " + itemId);
             if (itemId.Equals("Set Username")) {
                 Random random = new Random();
                 string[] names = { "Blue Jay","Chinchilla","Chipmunk","Gerbil","Hamster","Parrot","Robin","Squirrel","Turtle" };

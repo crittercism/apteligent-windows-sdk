@@ -20,14 +20,19 @@ using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.Networking.Connectivity;
+using Windows.System.Threading;
+using Windows.UI.Xaml.Navigation;
 #elif WINDOWS_PHONE
 using Microsoft.Phone.Info;
 using Microsoft.Phone.Shell;
 using Microsoft.Phone.Net.NetworkInformation;
-// TODO: We really need this include still?
-using System.Windows.Navigation;
+using Windows.Networking.Connectivity;
+using Windows.System.Threading;
 #else
 using Microsoft.Win32;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Timers;
 #endif // NETFX_CORE
 
 namespace CrittercismSDK {
@@ -36,9 +41,9 @@ namespace CrittercismSDK {
     /// </summary>
     public class Crittercism {
         #region Constants
-
+        // How often we should check for Internet access.
+        private const int interval = 5000;  // milliseconds
         private const string errorNotInitialized = "Crittercism not initialized yet.";
-
         #endregion Constants
 
         #region Properties
@@ -195,36 +200,42 @@ namespace CrittercismSDK {
                     };
                 };
             };
-#if WINDOWS_PHONE_APP || WINDOWS_PHONE
+#if NETFX_CORE || WINDOWS_PHONE
             // NOTE: If we could figure out a way (we can't), we would put a shorter
             // bit of code to be called by Crittercism.Init into WINDOWS_PHONE apps
             // that would get root.GotFocus and root.LostFocus events hooked early
             // on, much more like what are able to do for NETFX_CORE .  However, it
             // turns out root == null is going to be the normal case for Crittercism.Init
             // during a WINDOWS_PHONE app launch.  So, we must use more creative code.
-            if ((!OptOut)&&(!IsRootUIElementFocusHooked)) {
-                HookRootUIElementFocus();              
+            if ((!OptOut) && (!IsRootUIElementFocusHooked)) {
+                HookRootUIElementFocus();
             };
 #endif
             return OptOut;
         }
 
-#if WINDOWS_PHONE_APP || WINDOWS_PHONE
+#if NETFX_CORE || WINDOWS_PHONE
         private static void HookRootUIElementFocus() {
-            lock (lockObject) {
-                // Check flag again inside lock in case our thread loses race.
-                if (!IsRootUIElementFocusHooked) {
+            try {
+                lock (lockObject) {
+                    // Check flag again inside lock in case our thread loses race.
+                    if (!IsRootUIElementFocusHooked) {
                         UIElement root = null;
-#if WINDOWS_PHONE_APP
+#if NETFX_CORE
                         if (Window.Current != null) {
                             // If there is a current Window (don't ask us why we're checking this)
                             root = Window.Current.Content as UIElement;
                         }
 #elif WINDOWS_PHONE
                         if (Application.Current != null) {
-                             // We are unaware of any Application.Current == null possibilities,
-                             // but it doesn't cost us much to be paranoid here.
-                             root = Application.Current.RootVisual as UIElement;
+                            // We are unaware of any Application.Current == null possibilities,
+                            // but it doesn't cost us much to be paranoid here.
+                            if (Thread.CurrentThread.ManagedThreadId == 1) {
+                                // Testing we're on the main thread.  OW, we might get a
+                                // System.UnauthorizedAccessException (translation: "you are
+                                // not on the main thread").
+                                root = Application.Current.RootVisual as UIElement;
+                            }
                         }
 #endif
                         if (root != null) {
@@ -233,8 +244,18 @@ namespace CrittercismSDK {
                             root.GotFocus += Root_UIElement_GotFocus;
                             root.LostFocus += Root_UIElement_LostFocus;
                             IsRootUIElementFocusHooked = true;
+#if NETFX_CORE
+                            if (root is Frame) {
+                                // We monitor Navigated event to record "View" automatic breadcrumbs.
+                                ((Frame)root).Navigated += Root_UIElement_Navigated;
+                                // Artificially get the very first automatic "View" breadcrumb.
+                                Root_UIElement_Navigated(root, null);
+                            }
+#endif
                         }
+                    };
                 };
+            } catch (Exception) {
             };
         }
 #endif // WINDOWS_PHONE_APP || WINDOWS_PHONE
@@ -251,9 +272,9 @@ namespace CrittercismSDK {
             }
         }
 
-#endregion OptOutStatus
+        #endregion OptOutStatus
 
-#region Life Cycle
+        #region Life Cycle
         private static string LoadAppVersion() {
             string answer = "UNKNOWN";
             try {
@@ -444,6 +465,7 @@ namespace CrittercismSDK {
 #endif
                     // Testing for unit test purposes
                     if (Crittercism.TestNetwork == null) {
+                        Breadcrumbs.HandleReachabilityUpDown(ReachabilityStatusString());
 #if NETFX_CORE
 #if WINDOWS_PHONE_APP
                         HookRootUIElementFocus();
@@ -466,11 +488,15 @@ namespace CrittercismSDK {
 #else
                         AppDomain.CurrentDomain.UnhandledException+=new UnhandledExceptionEventHandler(AppDomain_UnhandledException);
                         System.Windows.Forms.Application.ThreadException+=new ThreadExceptionEventHandler(WindowsFormsApplication_ThreadException);
+                        NetworkChange.NetworkAvailabilityChanged += new NetworkAvailabilityChangedEventHandler(NetworkChange_NetworkAvailabilityChanged);
 #endif
                     };
                     Breadcrumbs.UserBreadcrumbs();
                     MessageQueue = new SynchronizedQueue<MessageReport>(new Queue<MessageReport>());
                     LoadQueue();
+                    // InstallTimer installs a timer that does occasional chores every
+                    // once in a while, such as check if the app has Internet access .
+                    InstallTimer();
                     // NOTE: Put initialized=true before readerThread.Start() .
                     // Later on, initialized may be reset back to false during shutdown,
                     // and readerThread will see initialized==false as a message to exit.
@@ -538,9 +564,89 @@ namespace CrittercismSDK {
                 LogInternalException(ie);
             }
         }
-#endregion Shutdown
+        #endregion Shutdown
 
-#region AppLoads
+        #region Timing
+        ////////////////////////////////////////////////////////////////
+        // OnTimerElapsed checks network connectivity every 5 seconds
+        // when app is in foreground.  We find empirically that we don't
+        // get MS events we expect would correspond to Crittercism's
+        // "Connection DOWN" and "Connectivity LOST: ...".  We can get
+        // these missing network automatic breadcrumbs by using our
+        // OnTimerElapsed mechanism.
+        ////////////////////////////////////////////////////////////////
+
+        // Different .NET frameworks get different timer's
+#if NETFX_CORE || WINDOWS_PHONE
+        private static ThreadPoolTimer timer = null;
+        private static void OnTimerElapsed(ThreadPoolTimer timer) {
+            lock (lockObject) {
+#if NETFX_CORE
+                // This method acts like a NOP if there isn't an actual network change.
+                // We're polling periodically because Microsoft's events aren't reliable.
+                NetworkInformation_NetworkStatusChanged(null);
+#elif WINDOWS_PHONE
+                // This method acts like a NOP if there isn't an actual network change.
+                // We're polling periodically because Microsoft's events aren't reliable.
+                DeviceNetworkInformation_NetworkAvailabilityChanged(null,null);
+#endif
+            }
+        }
+#else
+        private static System.Timers.Timer timer=null;
+        private static void OnTimerElapsed(Object source, ElapsedEventArgs e) {
+            lock (lockObject) {
+                // This method acts like a NOP if there isn't an actual network change.
+                // We're polling periodically because Microsoft's events aren't reliable.
+                NetworkChange_NetworkAvailabilityChanged(null,EventArgs.Empty);
+            }
+        }
+#endif // NETFX_CORE
+        private static void InstallTimer() {
+            Debug.WriteLine("InstallTimer");
+            lock (lockObject) {
+#if NETFX_CORE || WINDOWS_PHONE
+                if (timer == null) {
+                    // Creates a single-use timer.
+                    // https://msdn.microsoft.com/en-US/library/windows/apps/windows.system.threading.threadpooltimer.aspx
+                    Debug.WriteLine("InstallTimer ThreadPoolTimer.CreatePeriodicTimer");
+                    timer = ThreadPoolTimer.CreatePeriodicTimer(
+                        OnTimerElapsed,
+                        TimeSpan.FromMilliseconds(interval));
+                }
+#else
+                if (timer==null) {
+                    // Generates an event after a set interval
+                    // https://msdn.microsoft.com/en-us/library/system.timers.timer(v=vs.110).aspx
+                    Debug.WriteLine("InstallTimer new Timer");
+                    timer = new System.Timers.Timer(interval);
+                    timer.Elapsed += OnTimerElapsed;
+                    // the Timer keep raising the Elapsed event (true)
+                    timer.AutoReset = true;         // keep firing
+                    timer.Enabled = true;           // Start the timer
+                }
+#endif // NETFX_CORE
+            }
+        }
+        private static void RemoveTimer() {
+            // Call if we don't need the timer anymore.
+            lock (lockObject) {
+#if NETFX_CORE || WINDOWS_PHONE
+                if (timer != null) {
+                    timer.Cancel();
+                    timer = null;
+                }
+#else
+                if (timer!=null) {
+                    timer.Stop();
+                    timer = null;
+                }
+#endif // NETFX_CORE
+            }
+        }
+        #endregion
+
+        #region AppLoads
         /// <summary>
         /// Creates the application load report.
         /// </summary>
@@ -570,9 +676,9 @@ namespace CrittercismSDK {
             Debug.WriteLine("App Load time == " + (1.0E-7) * (endTime - beginTime) + " seconds");
             new Userflow("App Load",beginTime,endTime);
         }
-#endregion AppLoads
+        #endregion AppLoads
 
-#region Breadcrumbs
+        #region Breadcrumbs
         /// <summary>
         /// Leave breadcrumb.
         /// </summary>
@@ -589,9 +695,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-#endregion Breadcrumbs
+        #endregion Breadcrumbs
 
-#region Exceptions and Crashes
+        #region Exceptions and Crashes
         internal static void LogInternalException(Exception e) {
             Debug.WriteLine("UNEXPECTED ERROR!!! " + e.Message);
             Debug.WriteLine(e.StackTrace);
@@ -643,9 +749,12 @@ namespace CrittercismSDK {
                         List<Endpoint> endpoints = Breadcrumbs.ExtractAllEndpoints();
                         List<Breadcrumb> systemBreadcrumbs = Breadcrumbs.SystemBreadcrumbs().RecentBreadcrumbs();
                         string stacktrace = StackTrace(e);
-                        ExceptionObject exception = new ExceptionObject(e.GetType().FullName,e.Message,stacktrace);
+                        string exceptionName = e.GetType().FullName;
+                        string exceptionReason = e.Message;
+                        ExceptionObject exception = new ExceptionObject(exceptionName,exceptionReason,stacktrace);
                         HandledException he = new HandledException(AppID,metadata,breadcrumbs,endpoints,systemBreadcrumbs,exception);
                         AddMessageToQueue(he);
+                        Breadcrumbs.LeaveErrorBreadcrumb(exceptionName,exceptionReason);
                     }
                 } catch (Exception ie) {
                     LogInternalException(ie);
@@ -681,9 +790,9 @@ namespace CrittercismSDK {
                 // but let the crash go ahead.
             }
         }
-#endregion Exceptions and Crashes
+        #endregion Exceptions and Crashes
 
-#region Metadata
+        #region Metadata
         /// <summary>
         /// Sets "username" metadata value.
         /// </summary>
@@ -752,9 +861,9 @@ namespace CrittercismSDK {
             }
             return answer;
         }
-#endregion Metadata
+        #endregion Metadata
 
-#region Settings
+        #region Settings
         internal static void SetSettings(string json) {
             // Called from AppLoad.DidReceiveResponse
             try {
@@ -820,9 +929,9 @@ namespace CrittercismSDK {
                 Crittercism.LogInternalException(ie);
             }
         }
-#endregion
+        #endregion
 
-#region Userflows
+        #region Userflows
         internal static void OnUserflowTimeOut(EventArgs e) {
             EventHandler handler = UserflowTimeOut;
             if (handler != null) {
@@ -949,9 +1058,9 @@ namespace CrittercismSDK {
 #endif
         }
 
-#endregion
+        #endregion
 
-#region Network Requests
+        #region Network Requests
         private static string RemoveQueryString(string uriString) {
             // String obtained by removing query string portion of uriString .
             string answer = uriString;
@@ -1004,9 +1113,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-#endregion LogNetworkRequest
+        #endregion LogNetworkRequest
 
-#region Configuring Service Monitoring
+        #region Configuring Service Monitoring
         public static void AddFilter(CRFilter filter) {
             if (GetOptOutStatus()) {
             } else if (!initialized) {
@@ -1032,9 +1141,9 @@ namespace CrittercismSDK {
                 }
             }
         }
-#endregion
+        #endregion
 
-#region MessageQueue
+        #region MessageQueue
         /// <summary>
         /// Loads the messages from disk into the queue.
         /// </summary>
@@ -1060,9 +1169,9 @@ namespace CrittercismSDK {
             MessageQueue.Enqueue(messageReport);
             readerEvent.Set();
         }
-#endregion // MessageQueue
+        #endregion // MessageQueue
 
-#region Event Handlers
+        #region Event Handlers
 #if NETFX_CORE || WINDOWS_PHONE
         ////////////////////////////////////////////////////////////////
         // NOTE: The value of monitoring (root) Root_UIElement_GotFocus,
@@ -1090,7 +1199,7 @@ namespace CrittercismSDK {
                     // only get called via the main UI thread.  So, no thread-safety worries here.
                     new Userflow("App Foreground",window_VisibilityChanged_Time,root_UIElement_GotFocus_Time);
                     isForegrounded = true;
-                }
+                };
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
@@ -1102,6 +1211,37 @@ namespace CrittercismSDK {
             // That's all we do in this method:  Record the time we treat
             // as the beginTime of an "App Background" UserFlow .
         }
+#if NETFX_CORE
+        private static string lastViewName = null;
+        private static void Root_UIElement_Navigated(object sender,NavigationEventArgs e) {
+            try {
+                if (sender is Frame) {
+                    // It should be a Frame since we checked for Frame type when we subscribed
+                    // to Navigated event.  The Frame's Content is only known to be "object"
+                    // at this point, since Frame inherits from ContentControl and that is how
+                    // Content is declared.
+                    Object content = ((Frame)sender).Content as Object;
+                    if (content != null) {
+                        // This should normally be the case.  We're only going to leave breadcrumbs
+                        // if we can say something better than "Unknown", which isn't too informative.
+                        string viewName = content.GetType().Name;
+                        // We were tempted to add "Name" in case the object is a FrameworkElement
+                        // but we decided against it.  This tends to be constant for any given type.
+                        // It may be kind of bozo we're sending Deactivated and Activated in pairs
+                        // like this, but it is the Wire+Protocol spec which is the clown, so we do it.
+                        if (lastViewName != null) {
+                            Breadcrumbs.LeaveViewBreadcrumb(BreadcrumbViewType.Deactivated, lastViewName);
+                        };
+                        Breadcrumbs.LeaveViewBreadcrumb(BreadcrumbViewType.Activated, viewName);
+                        lastViewName = viewName;
+                        Debug.WriteLine("Root_UIElement_Navigated: " + viewName);
+                    };
+                };
+            } catch (Exception ie) {
+                Crittercism.LogInternalException(ie);
+            };
+        }
+#endif
         private static long window_VisibilityChanged_Time = 0;  // ticks
 #endif
 
@@ -1143,10 +1283,10 @@ namespace CrittercismSDK {
             }
             try {
                 Debug.WriteLine("NetworkStatusChanged");
-                ConnectionProfile profile = NetworkInformation.GetInternetConnectionProfile();
-                bool isConnected = (profile != null
-                    && (profile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess));
-                if (isConnected) {
+                string newReachabilityStatusString = ReachabilityStatusString();
+                Breadcrumbs.HandleReachabilityChange(newReachabilityStatusString);
+                // If we are connected to Internet, prod the readerThread .
+                if (newReachabilityStatusString.IndexOf("InternetAccess") == 0) {
                     if (MessageQueue != null && MessageQueue.Count > 0) {
                         readerEvent.Set();
                     }
@@ -1154,6 +1294,28 @@ namespace CrittercismSDK {
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
+        }
+
+        private static string ReachabilityStatusString() {
+            ConnectionProfile connectedProfile = NetworkInformation.GetInternetConnectionProfile();
+            // Compute reachabilityStatusString (e.g. "InternetAccess+WiFi")
+            NetworkConnectivityLevel networkConnectivityLevel = NetworkConnectivityLevel.None;
+            string reachabilityStatusString = networkConnectivityLevel.ToString();
+            if (connectedProfile != null) {
+                networkConnectivityLevel = connectedProfile.GetNetworkConnectivityLevel();
+                reachabilityStatusString = networkConnectivityLevel.ToString();
+                // A non-null connectedSsid means we've got WiFi connectivity.
+                string connectedSsid = null;
+                if (connectedProfile.IsWlanConnectionProfile &&
+                    connectedProfile.WlanConnectionProfileDetails != null) {
+                    connectedSsid = connectedProfile.WlanConnectionProfileDetails.GetConnectedSsid();
+                    if (connectedSsid != null) {
+                        reachabilityStatusString = reachabilityStatusString + "+WiFi";
+                    };
+                };
+            };
+            Debug.WriteLine("ReachabilityStatusString == " + reachabilityStatusString);
+            return reachabilityStatusString;
         }
 #elif WINDOWS_PHONE
         /// <summary>
@@ -1233,18 +1395,43 @@ namespace CrittercismSDK {
                 return;
             }
             try {
-                switch (e.NotificationType) {
-                    case NetworkNotificationType.InterfaceConnected:
-                        if (NetworkInterface.GetIsNetworkAvailable()) {
-                            if (MessageQueue != null && MessageQueue.Count > 0) {
-                                readerEvent.Set();
+                if (e != null) {
+                    // Our own OnTimerElapsed is allowedd to send e == null .
+                    switch (e.NotificationType) {
+                        case NetworkNotificationType.InterfaceConnected:
+                            if (NetworkInterface.GetIsNetworkAvailable()) {
+                                if (MessageQueue != null && MessageQueue.Count > 0) {
+                                    readerEvent.Set();
+                                }
                             }
-                        }
-                        break;
-                }
+                            break;
+                    };
+                };
+                string newReachabilityStatusString = ReachabilityStatusString();
+                Breadcrumbs.HandleReachabilityChange(newReachabilityStatusString);
             } catch (Exception ie) {
                 LogInternalException(ie);
             }
+        }
+
+        private static string ReachabilityStatusString() {
+            ConnectionProfile connectedProfile = NetworkInformation.GetInternetConnectionProfile();
+            // Compute reachabilityStatusString (e.g. "InternetAccess+WiFi")
+            NetworkConnectivityLevel networkConnectivityLevel = NetworkConnectivityLevel.None;
+            string reachabilityStatusString = networkConnectivityLevel.ToString();
+            if (connectedProfile != null) {
+                networkConnectivityLevel = connectedProfile.GetNetworkConnectivityLevel();
+                reachabilityStatusString = networkConnectivityLevel.ToString();
+                // Compute networkInterfaceType
+                NetworkAdapter networkAdapter = connectedProfile.NetworkAdapter;
+                if (networkAdapter.IanaInterfaceType == 71) {
+                    // 71 == An IEEE 802.11 wireless network interface.
+                    // https://msdn.microsoft.com/en-us/library/windows/apps/windows.networking.connectivity.networkadapter.ianainterfacetype.aspx
+                    reachabilityStatusString = reachabilityStatusString + "+WiFi";
+                };
+            };
+            Debug.WriteLine("ReachabilityStatusString == " + reachabilityStatusString);
+            return reachabilityStatusString;
         }
 #else
         static void AppDomain_UnhandledException(object sender,UnhandledExceptionEventArgs args) {
@@ -1280,6 +1467,54 @@ namespace CrittercismSDK {
                 LogInternalException(e);
             }
         }
+
+        private static void NetworkChange_NetworkAvailabilityChanged(object sender, EventArgs e)
+        {
+            // Microsoft documents event NetworkAddressChanged
+            // https://msdn.microsoft.com/en-us/library/system.net.networkinformation.networkchange(v=vs.110).aspx
+            // and this is our handler.  However, [cough] we've never yet seen
+            // this event get triggered.  So, we are also applying the strategy of
+            // calling our own handler via a timer every 5 seconds or so.  If there
+            // isn't really a change in ReachabilityStatusString() then the
+            // Breadcrumbs.HandleReachabilityChange acts like a NOP, so this strategy
+            // works OK.  In discussions on the WWW, others have noticed MS event not
+            // firing, and debates ensue about how or whether it is possible to define
+            // the Interent being UP/DOWN ensue.  Maybe MS just quietly gave up?
+            Debug.WriteLine("NetworkChange_NetworkAvailabilityChanged");
+            Breadcrumbs.HandleReachabilityChange(ReachabilityStatusString());
+        }
+
+        private static string ReachabilityStatusString() {
+            string reachabilityStatusString = "None";
+            if (NetworkInterface.GetIsNetworkAvailable()) {
+                // however, this will include all adapters
+                NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (NetworkInterface adapter in adapters) {
+                    // Some filtering of the adapters adapted from
+                    // https://social.msdn.microsoft.com/Forums/vstudio/en-US/a6b3541b-b7de-49e2-a7a6-ba0687761af5/networkavailabilitychanged-event-does-not-fire?forum=csharpgeneral
+                    const int minimumSpeed = 10000000;
+                    if ((adapter.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                        && (adapter.NetworkInterfaceType != NetworkInterfaceType.Tunnel)
+                        && (adapter.Description.IndexOf("virtual", StringComparison.OrdinalIgnoreCase) < 0)
+                        && (adapter.Name.IndexOf("virtual", StringComparison.OrdinalIgnoreCase) < 0)
+                        && (!adapter.Description.Equals("Microsoft Loopback Adapter", StringComparison.OrdinalIgnoreCase))
+                        && (adapter.Speed >= minimumSpeed)) {
+                        // Declare "adapter" to be an Internet adapter.
+                        if (adapter.OperationalStatus == OperationalStatus.Up) {
+                            reachabilityStatusString = "InternetAccess";
+                            if (adapter.NetworkInterfaceType == NetworkInterfaceType.Wireless80211) {
+                                // There are a lot of possibilities for NetworkInterfaceType, but
+                                // in presence of multiple adapters, it's hard to pick out the one
+                                // we should report.  We'll just look for "+WiFi" .
+                                reachabilityStatusString += "+WiFi";
+                                break;
+                            };
+                        };
+                    };
+                };
+            };
+            return reachabilityStatusString;
+        }
 #endif
 
 #if NETFX_CORE || WINDOWS_PHONE
@@ -1287,6 +1522,7 @@ namespace CrittercismSDK {
             Breadcrumbs.LeaveEventBreadcrumb("foregrounded");
             APM.Foreground();
             UserflowReporter.Foreground();
+            InstallTimer();
         }
 
         private static void Background() {
@@ -1304,9 +1540,10 @@ namespace CrittercismSDK {
             Breadcrumbs.LeaveEventBreadcrumb("backgrounded");
             APM.Background();
             UserflowReporter.Background();
+            RemoveTimer();
         }
 #endif
 
-#endregion // Event Handlers
+        #endregion // Event Handlers
     }
 }
