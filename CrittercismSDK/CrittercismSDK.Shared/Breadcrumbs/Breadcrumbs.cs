@@ -205,7 +205,7 @@ namespace CrittercismSDK {
             Debug.Assert(((change == BreadcrumbReachabilityType.Up) || (change == BreadcrumbReachabilityType.Down)),
               "Illegal change arg for LeaveReachabilityBreadcrumb");
             Dictionary<string,Object> data = new Dictionary<string,Object>();
-            data["change"] = change;
+            data["change"] = (int)change;
             SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.Reachability,data);
         }
         internal static void LeaveReachabilityBreadcrumb(BreadcrumbReachabilityType change,string reachabilityType) {
@@ -231,7 +231,7 @@ namespace CrittercismSDK {
             Debug.Assert(((change == BreadcrumbReachabilityType.Gained) || (change == BreadcrumbReachabilityType.Lost)),
               "Illegal change arg for LeaveReachabilityBreadcrumb");
             Dictionary<string,Object> data = new Dictionary<string,Object>();
-            data["change"] = change;
+            data["change"] = (int)change;
             data["type"] = reachabilityType;
             SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.Reachability,data);
         }
@@ -252,7 +252,7 @@ namespace CrittercismSDK {
             Debug.Assert((change == BreadcrumbReachabilityType.Switch),
               "Illegal change arg for LeaveReachabilityBreadcrumb");
             Dictionary<string,Object> data = new Dictionary<string,Object>();
-            data["change"] = change;
+            data["change"] = (int)change;
             data["oldType"] = oldType;
             data["newType"] = newType;
             SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.Reachability,data);
@@ -270,7 +270,7 @@ namespace CrittercismSDK {
             // viewName - string, name of view or activity
             ////////////////////////////////////////////////////////////////
             Dictionary<string,Object> data = new Dictionary<string,Object>();
-            data["event"] = eventType;
+            data["event"] = (int)eventType;
             data["viewName"] = viewName;
             SystemBreadcrumbs().AddBreadcrumb(BreadcrumbType.View,data);
         }
