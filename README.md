@@ -1,9 +1,9 @@
-Crittercism for Windows Phone 8
+Apteligent (formerly Crittercism) for Windows Phone
 =========================
 
-Getting started with Crittercism for Windows takes just three easy steps:
+Getting started with Apteligent for Windows takes just three easy steps:
 
-1. **Create the app**. Log in to [Crittercism](https://www.crittercism.com/developers/login) and create a new Windows Phone 8 application. You'll need a Crittercism account to create the app listing; don't worry, it's free to sign up and we don't send spam.
+1. **Create the app**. Log in to [Apteligent](https://app.crittercism.com/developers/login) and create a new Windows application. You'll need a Crittercism account to create the app listing; don't worry, it's free to sign up and we don't send spam.
 
 2. **Download the library from NuGet**. The package is called **Crittercism**, and is downloadable using the [standard procedure](http://nuget.org/packages/Crittercism). Note: installing Windows 8 NuGet packages requires a recent version of NuGet; you might have to upgrade. NuGet 2.2.31210 worked for us.
 
